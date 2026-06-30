@@ -1,0 +1,98 @@
+# AGENTS.md — human_treg_arthritis
+
+**Created:** 2026-06-29 · **Type:** analysis · **Species:** Mus musculus (mm10)
+
+This file is the single source of truth for AI agent behavior in this project.
+`CLAUDE.md` imports it via `@AGENTS.md`. Edit here, not there.
+
+---
+
+## Project context
+
+The canonical scientific framing — question, datasets, hypotheses, goals — lives in
+`docs/_internal/scientific-context.md`. Read it before acting. Session handoffs are written
+to `docs/_internal/sessions/YYYY-MM-DD_<slug>.md`.
+
+## Active role
+
+_No role activated yet. Run `sciagent activate <role>` to populate this section._
+
+Run `sciagent status` to see the current stack, effective skills, agents, and commands.
+
+## Critical rules
+
+1. **Config, not hardcoding.** Paths and parameters come from
+   `02_analysis/config/analysis_config.yaml`. Never inline file paths or thresholds.
+2. **Normalize, then visualize.** Compute scores/embeddings and checkpoint them under
+   `03_results/objects/` before any visualization step.
+3. **Read-only input data.** `00_data/` is read-only. Outputs go to `03_results/`.
+4. **Cache expensive operations.** Anything over a minute goes through a checkpoint object.
+
+## Directory structure
+
+```
+human_treg_arthritis/
+├── 00_data/{raw,processed,references}   # READ-ONLY input data
+├── 01_modules/                          # toolkits (submodules)
+├── 02_analysis/{config,helpers,scripts,notebooks}
+├── 03_results/
+│   ├── objects/                         # checkpoint state (.h5ad, .rds) — NOT a deliverable
+│   ├── 01_qc/{tables,figures}/          # QC-phase deliverables
+│   ├── 02_eda/{tables,figures}/         # EDA-phase deliverables
+│   ├── master/                          # cross-stage accumulator tables
+│   ├── interactive/                     # standalone HTML dashboards
+│   └── _scratch/                        # throwaway plots/tables
+├── docs/                                # public-facing: plan, guides
+└── logs/
+```
+
+Each `NN_<slug>/` stage holds the tables **and** figures for that phase. Stage ids are declared
+in `analysis_config.yaml:stages` (two-digit prefix, lowercase snake_case); append a stage there
+before writing to it. Checkpoints live in `objects/`, cross-stage tables in `master/`.
+
+## Artifact captions
+
+Every file in `03_results/<stage>/` needs a caption entry in that stage's `README.md`, written
+as the artifact is produced: `## <filename>`, a one-sentence scientific **finding** (what it
+shows, not what it is), then a `Script | Function | Config | Input` table. Function is the exact
+name read from the script (never guessed); Config is the active `key = value`. Never cite
+`docs/_internal/` in these READMEs.
+
+## Figures
+
+Viz scripts source `02_analysis/helpers/figure_style.{R,py}` (the project shim, which loads the
+toolkit-symlinked `figure-style` lib) and save figures via `save_overview()` or
+`save_figure()` — never inline `ggsave`/`plt.savefig` or `theme()`. See the
+`figure-style` skill for the full contract (one legible tier, dual-format PDF + PNG from one plot object, font floors, captioning).
+
+## Craft conventions
+
+Standing craft conventions for this repo are toolkit-managed in the `<!-- SCIAGENT:CRAFT -->`
+block rendered by `sciagent activate`. That block is authoritative — do not hand-edit it.
+
+---
+
+## Documentation namespace
+
+`docs/_internal/` is agent-facing (not the published deliverable). Route every output here:
+
+| Output kind | Directory |
+|-------------|-----------|
+| session handoff | `docs/_internal/sessions/` |
+| research note | `docs/_internal/research/` |
+| decision log | `docs/_internal/reasoning/` |
+| scientific framing | `docs/_internal/scientific-context.md` |
+| public phased plan | `docs/_internal/plans/{date-slug}/` |
+
+Naming conventions: see `docs/_internal/README.md`.
+
+**One-way reference rule:** public `docs/` must NOT reference `_internal/` paths.
+
+**Never-grow-this-file rule:** if `AGENTS.md` exceeds ~150 lines, split content into
+referenced files under `docs/_internal/`.
+
+---
+
+## Notes
+
+[Caveats, known issues, or interpretation notes relevant to all agents on this project]
