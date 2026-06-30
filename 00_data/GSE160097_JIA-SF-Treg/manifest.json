@@ -1,0 +1,88 @@
+{
+  "dataset_id": "GSE160097",
+  "subproject": "human_treg_arthritis",
+  "dataset_dir": "datasets/GSE160097_JIA-SF-Treg",
+  "hosting": "GEO",
+  "downloadable_now": true,
+  "auth_required": false,
+  "auth_note": "Public GEO series (Public on Nov 27 2020). No authentication needed; standard anonymous HTTPS/FTP from ncbi.nlm.nih.gov. No dbGaP-controlled access required for the processed per-GSM matrices and TCR contigs (those are the count-level data; raw FASTQs live in SRA but are NOT needed).",
+  "is_superseries": false,
+  "already_on_disk": "",
+  "modalities": {
+    "gex": true,
+    "tcr": true,
+    "bcr": false,
+    "adt": false
+  },
+  "recommended_ingestion": {
+    "format": "10x_filtered_h5",
+    "reprocessing_needed": false,
+    "rationale": "No author-provided integrated/processed Seurat or h5ad object exists in GEO suppl (only the _RAW.tar of per-GSM 10x outputs). Each of the 40 GSMs ships a CellRanger filtered 10x H5 carrying RAW integer UMI counts: 33 GSMs use *_filtered_gene_bc_matrices_h5.h5 (older CellRanger v2 layout) and 7 use *_filtered_feature_bc_matrix.h5 (v3 layout). Both load directly via sc.read_10x_h5(path) -> AnnData with raw integer counts (VERIFIED in scdock-r-dev:v0.5.5 on GSM4859852 -> 3426x32738, float32 storage but all-integer values, max 1339.0). TCR is paired per-GSM via *_filtered_contig_annotations.csv.gz (10x VDJ annotations) for scirpy/Dandelion ingestion. No normalization-only artifacts. reprocessing_needed=false: ingest per-GSM H5 + concatenate, attaching donor/tissue/population from the sample table.",
+    "loader": "import scanpy as sc; ad = sc.read_10x_h5('GSM4859852_PM2_Treg_SF_p5_filtered_gene_bc_matrices_h5.h5')  # or *_filtered_feature_bc_matrix.h5 for the v3 GSMs; TCR: pandas.read_csv('GSM4859852_..._filtered_contig_annotations.csv.gz')"
+  },
+  "artifacts": [
+    {
+      "kind": "counts",
+      "format": "10x_filtered_h5",
+      "ingestible_directly": true,
+      "n_files": 40,
+      "size": "~10 MB each; ~330 MB total across 40 GSMs",
+      "url_or_recipe": "Per-GSM filtered 10x H5 (raw integer UMI counts). 33 GSMs: *_filtered_gene_bc_matrices_h5.h5 (CellRanger v2). 7 GSMs (v3 set): *_filtered_feature_bc_matrix.h5 (CellRanger v3). Bundled in GSE160097_RAW.tar. CORRECTED per-GSM URL (the GSM dir token drops the LAST THREE digits, so GSM4859852 -> GSM4859nnn, NOT GSM485nnn): https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4859nnn/<GSM>/suppl/<GSM>_<title>_filtered_gene_bc_matrices_h5.h5 (or _filtered_feature_bc_matrix.h5). Loader: sc.read_10x_h5(path). VERIFIED: GSM4859852 file (https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4859nnn/GSM4859852/suppl/GSM4859852_PM2_Treg_SF_p5_filtered_gene_bc_matrices_h5.h5, 507325 bytes) downloaded and loaded.",
+      "notes": "RAW integer counts CONFIRMED in scdock-r-dev:v0.5.5 (GSM4859852: 3426x32738, float32 dtype but X.data all integer, max 1339.0; one UserWarning about non-unique var_names -> call .var_names_make_unique on ingest). The v3-layout subset uses *_filtered_feature_bc_matrix.h5; the rest use *_filtered_gene_bc_matrices_h5.h5 -- detect by filename, both work with sc.read_10x_h5."
+    },
+    {
+      "kind": "tcr",
+      "format": "10x_vdj_contig_annotations_csv",
+      "ingestible_directly": true,
+      "n_files": 40,
+      "size": "~115 KB-330 KB each; ~8.5 MB total (one tiny outlier GSM4859852=2.6KB)",
+      "url_or_recipe": "Per-GSM *_filtered_contig_annotations.csv.gz (10x Genomics VDJ filtered contig annotations, paired TCR alpha/beta). Bundled in GSE160097_RAW.tar. Loader: scirpy.io.read_10x_vdj(csv) or pandas.read_csv(gz). Pair to GEX by cell barcode within the same GSM."
+    },
+    {
+      "kind": "tcr",
+      "format": "fasta_gz",
+      "ingestible_directly": false,
+      "n_files": 40,
+      "size": "~6.5 KB-1.1 MB each; ~23 MB total",
+      "url_or_recipe": "Per-GSM *_filtered_contig.fasta.gz (raw filtered contig nucleotide sequences). Companion to the contig annotations CSV; only needed for sequence-level TCR analysis (Dandelion/IgBLAST). NOT required for clonotype-level analysis -- the CSV carries CDR3/V/J calls."
+    },
+    {
+      "kind": "metadata",
+      "format": "geo_soft_text",
+      "ingestible_directly": true,
+      "n_files": 1,
+      "size": "~220 KB",
+      "url_or_recipe": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE160097&targ=gsm&form=text&view=brief -- source of truth for gsm->title/tissue/patient mapping used to build sample_table_csv."
+    },
+    {
+      "kind": "counts",
+      "format": "raw_tar_bundle",
+      "ingestible_directly": false,
+      "n_files": 1,
+      "size": "377845760 bytes (~360 MB)",
+      "url_or_recipe": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160097/suppl/GSE160097_RAW.tar -- single tarball bundling all 120 per-GSM files (40 H5 + 40 contig CSV + 40 contig FASTA). Convenient one-shot download; must untar before ingestion. md5/sizes per filelist.txt."
+    }
+  ],
+  "sample_summary": "40 GSM = 6 sorted T-cell populations x 7 JIA patients (paired SF + blood), minus 2 missing samples (patient 3 absent for PB CD4 Tcon and PB CD8). By tissue x population: Synovial Fluid / CD4+ Tcon (CD4+CD45RO+CD25-): 7 (p1-7); Synovial Fluid / CD4+ Treg (CD4+CD45RO+CD127loCD25+): 7 (p1-7); Synovial Fluid / CD8+CD45RO+: 7 (p1-7); Peripheral Blood / CD4+ Tcon: 6 (p1,2,4,5,6,7 -- no p3); Peripheral Blood / CD4+ Treg: 7 (p1-7); Peripheral Blood / CD8+CD45RO+: 6 (p1,2,4,5,6,7 -- no p3). All donors are JIA (juvenile idiopathic arthritis) patients; no healthy controls in this series. Condition = JIA throughout. Treg = 14 GSMs (7 SF + 7 blood); Tcon = 13; CD8 = 13.",
+  "sample_table_csv": "gsm,title,donor,condition,tissue,population\nGSM4859835,SF CD4+ Tcon 1,JIA_patient_1,JIA,synovial_fluid,CD4_Tcon\nGSM4859836,SF CD4+ Tcon 2,JIA_patient_2,JIA,synovial_fluid,CD4_Tcon\nGSM4859837,SF CD4+ Tcon 3,JIA_patient_3,JIA,synovial_fluid,CD4_Tcon\nGSM4859838,SF CD4+ Tcon 4,JIA_patient_4,JIA,synovial_fluid,CD4_Tcon\nGSM4859839,SF CD4+ Tcon 5,JIA_patient_5,JIA,synovial_fluid,CD4_Tcon\nGSM4859840,SF CD4+ Tcon 6,JIA_patient_6,JIA,synovial_fluid,CD4_Tcon\nGSM4859841,SF CD4+ Tcon 7,JIA_patient_7,JIA,synovial_fluid,CD4_Tcon\nGSM4859842,PB CD4+ Tcon 1,JIA_patient_1,JIA,peripheral_blood,CD4_Tcon\nGSM4859843,PB CD4+ Tcon 2,JIA_patient_2,JIA,peripheral_blood,CD4_Tcon\nGSM4859844,PB CD4+ Tcon 4,JIA_patient_4,JIA,peripheral_blood,CD4_Tcon\nGSM4859845,PB CD4+ Tcon 5,JIA_patient_5,JIA,peripheral_blood,CD4_Tcon\nGSM4859846,PB CD4+ Tcon 6,JIA_patient_6,JIA,peripheral_blood,CD4_Tcon\nGSM4859847,PB CD4+ Tcon 7,JIA_patient_7,JIA,peripheral_blood,CD4_Tcon\nGSM4859848,SF CD4+ Treg 1,JIA_patient_1,JIA,synovial_fluid,CD4_Treg\nGSM4859849,SF CD4+ Treg 2,JIA_patient_2,JIA,synovial_fluid,CD4_Treg\nGSM4859850,SF CD4+ Treg 3,JIA_patient_3,JIA,synovial_fluid,CD4_Treg\nGSM4859851,SF CD4+ Treg 4,JIA_patient_4,JIA,synovial_fluid,CD4_Treg\nGSM4859852,SF CD4+ Treg 5,JIA_patient_5,JIA,synovial_fluid,CD4_Treg\nGSM4859853,SF CD4+ Treg 6,JIA_patient_6,JIA,synovial_fluid,CD4_Treg\nGSM4859854,SF CD4+ Treg 7,JIA_patient_7,JIA,synovial_fluid,CD4_Treg\nGSM4859855,PB CD4+ Treg 1,JIA_patient_1,JIA,peripheral_blood,CD4_Treg\nGSM4859856,PB CD4+ Treg 2,JIA_patient_2,JIA,peripheral_blood,CD4_Treg\nGSM4859857,PB CD4+ Treg 3,JIA_patient_3,JIA,peripheral_blood,CD4_Treg\nGSM4859858,PB CD4+ Treg 4,JIA_patient_4,JIA,peripheral_blood,CD4_Treg\nGSM4859859,PB CD4+ Treg 5,JIA_patient_5,JIA,peripheral_blood,CD4_Treg\nGSM4859860,PB CD4+ Treg 6,JIA_patient_6,JIA,peripheral_blood,CD4_Treg\nGSM4859861,PB CD4+ Treg 7,JIA_patient_7,JIA,peripheral_blood,CD4_Treg\nGSM4859862,SF CD8+CD45RO+ T cell 1,JIA_patient_1,JIA,synovial_fluid,CD8\nGSM4859863,SF CD8+CD45RO+ T cell 2,JIA_patient_2,JIA,synovial_fluid,CD8\nGSM4859864,SF CD8+CD45RO+ T cell 3,JIA_patient_3,JIA,synovial_fluid,CD8\nGSM4859865,SF CD8+CD45RO+ T cell 4,JIA_patient_4,JIA,synovial_fluid,CD8\nGSM4859866,SF CD8+CD45RO+ T cell 5,JIA_patient_5,JIA,synovial_fluid,CD8\nGSM4859867,SF CD8+CD45RO+ T cell 6,JIA_patient_6,JIA,synovial_fluid,CD8\nGSM4859868,SF CD8+CD45RO+ T cell 7,JIA_patient_7,JIA,synovial_fluid,CD8\nGSM4859869,PB CD8+CD45RO+ T cell 1,JIA_patient_1,JIA,peripheral_blood,CD8\nGSM4859870,PB CD8+CD45RO+ T cell 2,JIA_patient_2,JIA,peripheral_blood,CD8\nGSM4859871,PB CD8+CD45RO+ T cell 4,JIA_patient_4,JIA,peripheral_blood,CD8\nGSM4859872,PB CD8+CD45RO+ T cell 5,JIA_patient_5,JIA,peripheral_blood,CD8\nGSM4859873,PB CD8+CD45RO+ T cell 6,JIA_patient_6,JIA,peripheral_blood,CD8\nGSM4859874,PB CD8+CD45RO+ T cell 7,JIA_patient_7,JIA,peripheral_blood,CD8",
+  "total_estimated_size": "~360 MB (GSE160097_RAW.tar = 377,845,760 bytes). Per-component if pulled individually: ~330 MB of filtered 10x H5 (40 files) + ~8.5 MB contig_annotations CSVs + ~23 MB contig FASTAs.",
+  "download_recipe": "## OPTION A (recommended, single shot): pull the _RAW.tar and untar into the staging dir\nDEST=/data2/users/JCRLab/STING-JR/human_treg_arthritis/GSE160097_JIA-SF-Treg\nmkdir -p \"$DEST\"\ncurl -L --fail --max-time 1800 -o \"$DEST/GSE160097_RAW.tar\" \\\n  \"https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160097/suppl/GSE160097_RAW.tar\"\n# verify size = 377845760 bytes, then:\ntar -xvf \"$DEST/GSE160097_RAW.tar\" -C \"$DEST\"\n# Result: 120 files = 40x *_filtered_*.h5 (raw counts) + 40x *_filtered_contig_annotations.csv.gz (TCR) + 40x *_filtered_contig.fasta.gz\n\n## OPTION B (per-GSM FTP, if you want only H5 + TCR CSV and skip the FASTAs):\n## NOTE (CORRECTED): the GSM directory token drops the LAST THREE digits of the accession, so GSM4859852 -> GSM4859nnn (NOT GSM485nnn). Earlier recipe used GSM485nnn which 404s.\nDEST=/data2/users/JCRLab/STING-JR/human_treg_arthritis/GSE160097_JIA-SF-Treg\nmkdir -p \"$DEST\"\n# Files are listed in filelist.txt with their exact <GSM>_<title>_ prefixes (https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160097/suppl/filelist.txt).\nfor GSM in $(seq 4859835 4859874); do\n  GSM=\"GSM$GSM\"\n  BASE=\"https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4859nnn/$GSM/suppl/\"\n  for f in $(curl -s --max-time 30 \"https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160097/suppl/filelist.txt\" | grep -oE \"$GSM[^[:space:]]*(_filtered_gene_bc_matrices_h5\\.h5|_filtered_feature_bc_matrix\\.h5|_filtered_contig_annotations\\.csv\\.gz)\"); do\n    curl -L --fail --max-time 600 -o \"$DEST/$f\" \"$BASE$f\"\n  done\ndone\n# (drop the contig_annotations pattern from the grep if you want H5 only)\n\n## Authoritative reference for sizes/md5/exact filenames: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE160nnn/GSE160097/suppl/filelist.txt\n## VERIFIED single-file download used for test_verification:\n## curl -s --max-time 600 -o /data2/users/JCRLab/STING-JR/_provenance/GSE160097/GSM4859852_PM2_Treg_SF_p5_filtered_gene_bc_matrices_h5.h5 \"https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4859nnn/GSM4859852/suppl/GSM4859852_PM2_Treg_SF_p5_filtered_gene_bc_matrices_h5.h5\"",
+  "open_questions": [
+    "No author-provided integrated/processed object (Seurat .rds or .h5ad with cluster/cell-type labels) is present in GEO suppl -- only per-GSM CellRanger outputs. If the publication's annotated object is needed (e.g. Treg subset labels, UMAP), it would have to be requested from authors or reconstructed by reprocessing from the per-GSM H5 + TCR.",
+    "Two samples are intentionally absent (patient 3 has no PB CD4 Tcon and no PB CD8 -- GSM numbering skips p3 in the GSM4859844 and GSM4859871 groups). Confirm this is a biological/sampling dropout, not a missing upload.",
+    "Mixed CellRanger output versions: 33 GSMs use *_filtered_gene_bc_matrices_h5.h5 (v2) and 7 use *_filtered_feature_bc_matrix.h5 (v3). Both load via sc.read_10x_h5 but gene/feature ID conventions and matrix dims differ across versions -- the verified v2 file (GSM4859852) has 32738 genes; verify var_names harmonize on concatenation and run .var_names_make_unique (non-unique var_names warning observed on load).",
+    "GSM4859852 (SF Treg p5) H5 is tiny (507325 bytes, 3426 cells) and its contig files are minimal (FASTA 6538 bytes / CSV 2582 bytes) -- low-input sample; flag for QC but counts load fine (VERIFIED).",
+    "CORRECTION (PATH): the per-GSM FTP directory token is GSM4859nnn (last 3 digits dropped from GSM4859852), NOT GSM485nnn as written in the original recipe. The original GSM485nnn path returns HTTP 404. Recipe/artifact URLs updated accordingly.",
+    "filelist.txt was regenerated 2024-02-01 (RAW.tar timestamp) while per-file timestamps are 2020 (the verified H5 Last-Modified is 2020-10-07) -- no content change implied, but confirm md5s in filelist.txt match downloaded files."
+  ],
+  "test_verification": {
+    "attempted": true,
+    "file": "GSM4859852_PM2_Treg_SF_p5_filtered_gene_bc_matrices_h5.h5",
+    "format": "10x_filtered_h5",
+    "loaded_ok": true,
+    "shape": "3426x32738",
+    "integer_counts": true,
+    "tool": "scanpy.read_10x_h5 in scdock-r-dev:v0.5.5",
+    "notes": "VERIFIED. Smallest representative 10x_filtered_h5 (CellRanger v2 layout, 507325 bytes) downloaded to /data2/users/JCRLab/STING-JR/_provenance/GSE160097/ and loaded with sc.read_10x_h5 in scdock-r-dev:v0.5.5. Result: AnnData (3426 cells x 32738 genes), X dtype float32 but all values integer (np.all(X.data==floor)=True), max 1339.0 -> raw UMI counts confirmed, matching the manifest's claimed 3426x32738. Recommended format 10x_filtered_h5 is CORRECT; reprocessing_needed=false stands. Minor: anndata emits a 'Variable names are not unique' UserWarning -> apply .var_names_make_unique() on ingest. PATH CORRECTION discovered during verification: the per-GSM FTP path uses GSM4859nnn (drop last 3 digits), not GSM485nnn -- the original recipe path 404'd; recipe and artifact url_or_recipe fields updated. File kept (under 200MB, 507 KB)."
+  }
+}

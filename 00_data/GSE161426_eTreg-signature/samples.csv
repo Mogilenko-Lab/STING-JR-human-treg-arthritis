@@ -1,0 +1,27 @@
+gsm,title,donor,condition,tissue,population
+GSM4906863,adultPBTeff1,patient1,healthy adult,peripheral blood,CD4 effector T cell
+GSM4906864,adultPBTeff2,patient2,healthy adult,peripheral blood,CD4 effector T cell
+GSM4906865,adultPBTeff3,patient3,healthy adult,peripheral blood,CD4 effector T cell
+GSM4906866,adultPBTeff4,patient4,healthy adult,peripheral blood,CD4 effector T cell
+GSM4906867,adultPBTreg1,patient1,healthy adult,peripheral blood,CD4 regulatory T cell
+GSM4906868,adultPBTreg2,patient2,healthy adult,peripheral blood,CD4 regulatory T cell
+GSM4906869,adultPBTreg3,patient3,healthy adult,peripheral blood,CD4 regulatory T cell
+GSM4906870,adultPBTreg4,patient4,healthy adult,peripheral blood,CD4 regulatory T cell
+GSM4906871,aJIAPBTreg1,patient5,active JIA child,peripheral blood,CD4 regulatory T cell
+GSM4906872,aJIAPBTreg2,patient6,active JIA child,peripheral blood,CD4 regulatory T cell
+GSM4906873,aJIAPBTregp,patient7,active JIA child,peripheral blood,CD4 regulatory T cell
+GSM4906874,childPBTreg1,patient8,healthy child,peripheral blood,CD4 regulatory T cell
+GSM4906875,childPBTreg2,patient9,healthy child,peripheral blood,CD4 regulatory T cell
+GSM4906876,childPBTregp,patient10,healthy child,peripheral blood,CD4 regulatory T cell
+GSM4906877,JIASFTeff1,patient11,JIA child,synovial fluid,CD4 effector T cell
+GSM4906878,JIASFTeff2,patient12,JIA child,synovial fluid,CD4 effector T cell
+GSM4906879,JIASFTeff3,patient13,JIA child,synovial fluid,CD4 effector T cell
+GSM4906880,JIASFTeff4,patient14,JIA child,synovial fluid,CD4 effector T cell
+GSM4906881,JIASFTreg1,patient11,JIA child,synovial fluid,CD4 regulatory T cell
+GSM4906882,JIASFTreg2,patient12,JIA child,synovial fluid,CD4 regulatory T cell
+GSM4906883,JIASFTreg3,patient13,JIA child,synovial fluid,CD4 regulatory T cell
+GSM4906884,JIASFTreg4,patient14,JIA child,synovial fluid,CD4 regulatory T cell
+GSM4906885,rJIAPBTreg1,patient15,remission JIA child,peripheral blood,CD4 regulatory T cell
+GSM4906886,rJIAPBTreg2,patient16,remission JIA child,peripheral blood,CD4 regulatory T cell
+GSM4906887,rJIAPBTreg3,patient17,remission JIA child,peripheral blood,CD4 regulatory T cell
+GSM4906888,rJIAPBTregp,patient18,remission JIA child,peripheral blood,CD4 regulatory T cell

@@ -1,0 +1,41 @@
+gsm,title,donor,condition,tissue,population
+GSM4859835,SF CD4+ Tcon 1,JIA_patient_1,JIA,synovial_fluid,CD4_Tcon
+GSM4859836,SF CD4+ Tcon 2,JIA_patient_2,JIA,synovial_fluid,CD4_Tcon
+GSM4859837,SF CD4+ Tcon 3,JIA_patient_3,JIA,synovial_fluid,CD4_Tcon
+GSM4859838,SF CD4+ Tcon 4,JIA_patient_4,JIA,synovial_fluid,CD4_Tcon
+GSM4859839,SF CD4+ Tcon 5,JIA_patient_5,JIA,synovial_fluid,CD4_Tcon
+GSM4859840,SF CD4+ Tcon 6,JIA_patient_6,JIA,synovial_fluid,CD4_Tcon
+GSM4859841,SF CD4+ Tcon 7,JIA_patient_7,JIA,synovial_fluid,CD4_Tcon
+GSM4859842,PB CD4+ Tcon 1,JIA_patient_1,JIA,peripheral_blood,CD4_Tcon
+GSM4859843,PB CD4+ Tcon 2,JIA_patient_2,JIA,peripheral_blood,CD4_Tcon
+GSM4859844,PB CD4+ Tcon 4,JIA_patient_4,JIA,peripheral_blood,CD4_Tcon
+GSM4859845,PB CD4+ Tcon 5,JIA_patient_5,JIA,peripheral_blood,CD4_Tcon
+GSM4859846,PB CD4+ Tcon 6,JIA_patient_6,JIA,peripheral_blood,CD4_Tcon
+GSM4859847,PB CD4+ Tcon 7,JIA_patient_7,JIA,peripheral_blood,CD4_Tcon
+GSM4859848,SF CD4+ Treg 1,JIA_patient_1,JIA,synovial_fluid,CD4_Treg
+GSM4859849,SF CD4+ Treg 2,JIA_patient_2,JIA,synovial_fluid,CD4_Treg
+GSM4859850,SF CD4+ Treg 3,JIA_patient_3,JIA,synovial_fluid,CD4_Treg
+GSM4859851,SF CD4+ Treg 4,JIA_patient_4,JIA,synovial_fluid,CD4_Treg
+GSM4859852,SF CD4+ Treg 5,JIA_patient_5,JIA,synovial_fluid,CD4_Treg
+GSM4859853,SF CD4+ Treg 6,JIA_patient_6,JIA,synovial_fluid,CD4_Treg
+GSM4859854,SF CD4+ Treg 7,JIA_patient_7,JIA,synovial_fluid,CD4_Treg
+GSM4859855,PB CD4+ Treg 1,JIA_patient_1,JIA,peripheral_blood,CD4_Treg
+GSM4859856,PB CD4+ Treg 2,JIA_patient_2,JIA,peripheral_blood,CD4_Treg
+GSM4859857,PB CD4+ Treg 3,JIA_patient_3,JIA,peripheral_blood,CD4_Treg
+GSM4859858,PB CD4+ Treg 4,JIA_patient_4,JIA,peripheral_blood,CD4_Treg
+GSM4859859,PB CD4+ Treg 5,JIA_patient_5,JIA,peripheral_blood,CD4_Treg
+GSM4859860,PB CD4+ Treg 6,JIA_patient_6,JIA,peripheral_blood,CD4_Treg
+GSM4859861,PB CD4+ Treg 7,JIA_patient_7,JIA,peripheral_blood,CD4_Treg
+GSM4859862,SF CD8+CD45RO+ T cell 1,JIA_patient_1,JIA,synovial_fluid,CD8
+GSM4859863,SF CD8+CD45RO+ T cell 2,JIA_patient_2,JIA,synovial_fluid,CD8
+GSM4859864,SF CD8+CD45RO+ T cell 3,JIA_patient_3,JIA,synovial_fluid,CD8
+GSM4859865,SF CD8+CD45RO+ T cell 4,JIA_patient_4,JIA,synovial_fluid,CD8
+GSM4859866,SF CD8+CD45RO+ T cell 5,JIA_patient_5,JIA,synovial_fluid,CD8
+GSM4859867,SF CD8+CD45RO+ T cell 6,JIA_patient_6,JIA,synovial_fluid,CD8
+GSM4859868,SF CD8+CD45RO+ T cell 7,JIA_patient_7,JIA,synovial_fluid,CD8
+GSM4859869,PB CD8+CD45RO+ T cell 1,JIA_patient_1,JIA,peripheral_blood,CD8
+GSM4859870,PB CD8+CD45RO+ T cell 2,JIA_patient_2,JIA,peripheral_blood,CD8
+GSM4859871,PB CD8+CD45RO+ T cell 4,JIA_patient_4,JIA,peripheral_blood,CD8
+GSM4859872,PB CD8+CD45RO+ T cell 5,JIA_patient_5,JIA,peripheral_blood,CD8
+GSM4859873,PB CD8+CD45RO+ T cell 6,JIA_patient_6,JIA,peripheral_blood,CD8
+GSM4859874,PB CD8+CD45RO+ T cell 7,JIA_patient_7,JIA,peripheral_blood,CD8
