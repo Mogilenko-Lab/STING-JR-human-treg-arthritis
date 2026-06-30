@@ -1,0 +1,7 @@
+[submodule "01_modules/RNAseq-toolkit"]
+	path = 01_modules/RNAseq-toolkit
+	url = git@github.com:tony-zhelonkin/RNAseq-toolkit.git
+	branch = dev
+[submodule "01_modules/SciAgent-toolkit"]
+	path = 01_modules/SciAgent-toolkit
+	url = git@github.com:tony-zhelonkin/SciAgent-toolkit.git
