@@ -1,6 +1,6 @@
 # AGENTS.md — human_treg_arthritis
 
-**Created:** 2026-06-29 · **Type:** analysis · **Species:** Mus musculus (mm10)
+**Created:** 2026-06-29 · **Type:** analysis · **Species:** Homo sapiens (GRCh38)
 
 This file is the single source of truth for AI agent behavior in this project.
 `CLAUDE.md` imports it via `@AGENTS.md`. Edit here, not there.
