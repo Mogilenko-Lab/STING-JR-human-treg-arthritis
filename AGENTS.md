@@ -1,3 +1,5 @@
+> **Submodule of the STING-JR super-repo.** For cross-project context and shared conventions, read the umbrella `../AGENTS.md` first.
+
 # AGENTS.md — human_treg_arthritis
 
 **Created:** 2026-06-29 · **Type:** analysis · **Species:** Homo sapiens (GRCh38)
