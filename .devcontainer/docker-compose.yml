@@ -16,8 +16,9 @@ services:
       # CoReSh shared reference cache (chunks under coresh/current/preprocessed_chunks/{hsa,mmu}); read-only, same path in/out
       - /data2/users/shared/refcache:/data2/users/shared/refcache:ro
       - /tmp/ssh-XXXXXXG5CpIH/agent.11801:/ssh-agent:ro
-      # Add your data mounts here:
-      # - /path/to/data:/workspaces/human_treg_arthritis/00_data/raw:ro
+      # Data mounts — staged + verified on /data2/users/JCRLab/STING-JR/human_treg_arthritis/<accession>/raw
+      - /data2/users/JCRLab/STING-JR/human_treg_arthritis/GSE160097_JIA-SF-Treg/raw:/workspaces/human_treg_arthritis/00_data/GSE160097_JIA-SF-Treg/raw:ro
+      - /data2/users/JCRLab/STING-JR/human_treg_arthritis/GSE161426_eTreg-signature/raw:/workspaces/human_treg_arthritis/00_data/GSE161426_eTreg-signature/raw:ro
     stdin_open: true
     tty: true
     tmpfs:
@@ -65,8 +66,9 @@ services:
       # CoReSh shared reference cache (chunks under coresh/current/preprocessed_chunks/{hsa,mmu}); read-only, same path in/out
       - /data2/users/shared/refcache:/data2/users/shared/refcache:ro
       - /tmp/ssh-XXXXXXG5CpIH/agent.11801:/ssh-agent:ro
-      # Add your data mounts here:
-      # - /path/to/data:/workspaces/human_treg_arthritis/00_data/raw:ro
+      # Data mounts — staged + verified on /data2/users/JCRLab/STING-JR/human_treg_arthritis/<accession>/raw
+      - /data2/users/JCRLab/STING-JR/human_treg_arthritis/GSE160097_JIA-SF-Treg/raw:/workspaces/human_treg_arthritis/00_data/GSE160097_JIA-SF-Treg/raw:ro
+      - /data2/users/JCRLab/STING-JR/human_treg_arthritis/GSE161426_eTreg-signature/raw:/workspaces/human_treg_arthritis/00_data/GSE161426_eTreg-signature/raw:ro
     stdin_open: true
     tty: true
     tmpfs:
