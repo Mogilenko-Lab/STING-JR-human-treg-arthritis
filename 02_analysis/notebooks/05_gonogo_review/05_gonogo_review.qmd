@@ -1,0 +1,208 @@
+---
+title: "BREAKPOINT 03 — the project go/no-go: story or null?"
+subtitle: "Stage 05_scoring · mouse WT_heat (39 °C Treg) signature in JIA SF-vs-PB"
+format:
+  html:
+    toc: true
+    toc-location: left
+    df-print: paged
+    embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", dpi = 150, out.width = "95%")
+.find_root <- function(sentinel = "02_analysis/config/analysis_config.yaml", start = getwd()) {
+  d <- normalizePath(start)
+  while (!file.exists(file.path(d, sentinel))) {
+    parent <- dirname(d); if (identical(parent, d)) stop("root not found"); d <- parent
+  }
+  d
+}
+knitr::opts_knit$set(root.dir = .find_root())
+```
+
+```{r libs}
+suppressPackageStartupMessages({ library(dplyr); library(knitr) })
+here <- function(...) file.path(getwd(), ...)
+# Reusable interactive running-sum widget (carved out of the inline chunk below so
+# any chunk / any qmd can call it): defines build_runsum_widget().
+source("02_analysis/helpers/runsum_widget.R")
+```
+
+*Notebook run `r format(Sys.time(), '%Y-%m-%d %H:%M UTC', tz='UTC')`.*
+
+## Where I am — the project pivot
+
+This is the whole-project go/no-go. The
+question: does the mouse 39 °C Treg signature show interpretable enrichment in JIA SF Tregs vs
+paired blood? What I'm settling here — the one-sentence claim this result licenses (enriched,
+with NES/FDR, or a null; both are publishable), whether it's Treg-preferential vs Tcon/CD8 or
+just pan-T (a weaker, different claim), which single figure shows it, and what each of go /
+pivot / stop actually costs. And if it's null: niche story (keep myeloid/fibroblast scoring
+downstream), or "axis invisible in human arthritis" (SAVI stays the positive control)?
+
+> **This is the whole-project go/no-go.** A clean null is a *reported result* the same
+> figures carry on equal footing, because the analysis rests on donor-level effect sizes
+> with CIs.
+
+## Primary evidence — `WT_heat` NES on donor-pseudobulk SF-vs-PB ranked lists
+
+```{r load-gsea}
+tdir <- here("03_results/05_scoring/tables")
+tag  <- c(Treg = "treg", Tcon = "tcon", CD8 = "cd8")
+gsea <- do.call(rbind, lapply(names(tag), function(pop) {
+  f <- file.path(tdir, sprintf("gsea_pseudobulk_%s.csv", tag[[pop]]))
+  if (!file.exists(f)) return(NULL)
+  df <- read.csv(f); df$cell_state <- pop; df
+}))
+gsea %>%
+  transmute(cell_state, signature = pathway_id, NES = round(nes, 3),
+            pvalue = signif(pvalue, 3), padj = signif(padj, 3), set_size) %>%
+  arrange(signature, factor(cell_state, c("Treg", "Tcon", "CD8"))) %>%
+  kable(caption = "Pre-ranked fgsea of mouse WT_heat up/down vs SF-vs-PB pseudobulk (signed Wald stat).")
+```
+
+**Money number:** `WT_heat_up` NES in **Treg** vs Tcon vs CD8 — is the Treg NES the
+largest and does its FDR clear significance?
+
+```{r money}
+up <- gsea %>% filter(grepl("_up$", pathway_id))
+if (nrow(up)) {
+  treg_nes <- up$nes[up$cell_state == "Treg"]
+  cat(sprintf("WT_heat_up NES — Treg: %.2f (padj %.3g) | Tcon: %.2f | CD8: %.2f\n",
+              treg_nes,
+              up$padj[up$cell_state == "Treg"],
+              ifelse(any(up$cell_state=="Tcon"), up$nes[up$cell_state=="Tcon"], NA),
+              ifelse(any(up$cell_state=="CD8"),  up$nes[up$cell_state=="CD8"],  NA)))
+  cat(sprintf("Treg-preferential? %s\n",
+              ifelse(length(treg_nes) && treg_nes >= max(up$nes[up$cell_state!="Treg"], -Inf),
+                     "YES — Treg NES is the largest", "NO — not Treg-max (pan-T or elsewhere)")))
+}
+```
+
+## Secondary (corroborative) — per-cell donor-mean score, SF vs PB
+
+*Never pooled with the NES: the per-cell score and the pseudobulk NES are different scales.*
+
+```{r percell}
+eff <- read.csv(here("03_results/master/effect_sizes_treg_arthritis.csv"))
+eff %>%
+  filter(effect_metric == "percell_auc_smd") %>%
+  transmute(cell_state, signature, SMD = round(estimate, 3),
+            ci = sprintf("[%.2f, %.2f]", ci_low, ci_high),
+            pvalue = signif(pvalue, 3), n_donors) %>%
+  kable(caption = "Per-cell WT_heat_updown SF-vs-PB donor-level SMD (secondary tier).")
+```
+
+## The effect-size row that goes to Phase 5
+
+```{r effrow}
+eff %>%
+  filter(evidence_tier == "primary_pseudobulk") %>%
+  transmute(dataset, signature, cell_state, contrast, effect_metric,
+            estimate = round(estimate, 3), direction, pvalue = signif(pvalue, 3),
+            padj = signif(padj, 3), n_donors, n_cells) %>%
+  kable(caption = "primary_pseudobulk rows -> master/effect_sizes_treg_arthritis.csv (Phase-5 forest input).")
+```
+
+## Figures (rendered by `05_score_signatures_viz.{py,R}`)
+
+*NES forest + per-cell `WT_heat_up` violins from the `.py` viz; per-population
+running-sum panels (Treg / Tcon / CD8) from the `.R` viz. The violin shows the
+`WT_heat_up` arm only — up and down shift together in SF, so the combined
+up−down metric is uninformative (see the stage README caption); the pseudobulk
+NES is the primary evidence.*
+
+```{r figs, results='asis'}
+ov <- here("03_results/05_scoring/figures/_overview")
+for (f in c("wt_heat_nes_forest.png",
+            "wt_heat_running_sum_treg.png", "wt_heat_running_sum_tcon.png", "wt_heat_running_sum_cd8.png",
+            "score_violins.png")) {
+  p <- file.path(ov, f)
+  if (file.exists(p)) cat(sprintf("\n![%s](%s)\n\n", f, p))
+}
+```
+
+### Interactive running-sums — core gene-set distribution across Treg / Tcon / CD8
+
+*This panel shows the running sums **interactively**: where the mouse-anchor
+core gene-set genes fall in each cell type's SF-vs-PB ranked list. One running-ES line per
+population (same palette as the forest); the rug ticks below the curves are the mouse
+`WT_heat` core signature genes — **hover a tick** for its symbol, its SF-vs-PB signed-Wald
+statistic, and whether it sits in the leading edge. Use the drop-down (top-right) to switch
+the **up** vs **down** set; **click a population in the legend** to toggle its line + rug.
+Reading it: for the up set the Treg curve should climb highest with its core genes packed at
+the top ranks (leading edge), and that concentration should look weaker in Tcon / CD8 if the
+enrichment is Treg-preferential rather than pan-T.*
+
+```{r runsum-interactive}
+# Interactive running-sum, rendered by the reusable helper sourced in `libs`
+# (02_analysis/helpers/runsum_widget.R). Same data logic and same fixed,
+# non-overlapping layout (dropdown top-left, legend bottom) as the integration
+# report's parallel copy — see the helper header.
+build_runsum_widget(here("03_results/05_scoring/tables"))
+```
+
+**How to read the per-cell violins (secondary tier) vs the forest (primary).** The
+per-cell `WT_heat_up` scores sit **negative** even where the biology is positive
+(Treg SF > Treg PB) — this is the expected behaviour of the scoring method: `scanpy score_genes` centres each
+cell's signature score against a size- and expression-matched **random reference gene
+set**, so the absolute level is arbitrary and only the **relative** SF-vs-PB shift within
+a population is interpretable (here Treg SF sits clearly above Treg PB). This is a
+**different estimand and scale** from the forest. The forest NES is computed at the
+backend by **fgsea** (`clusterProfiler::GSEA(by = "fgsea")`) on the **donor-pseudobulk
+SF-vs-PB signed-Wald ranked list** — i.e. it asks whether the whole `WT_heat` set
+concentrates at the top of the ranked list, then normalises to a NES on its own positive
+scale. The two are never pooled: the violins are corroborative
+per-cell colour, the pseudobulk NES is the primary evidence and the number the decision
+rests on.
+
+### The drafted subset — from what's on the map to what I end up with
+
+*The review walks the drafted-subset
+design in canonical order — (1) the annotation overview (what is on the map), (2) the
+quad marker-context patch (what I draft against), (3) the candidate signatures I draft
+for, and (4) the drafted subset I end up with. Every panel is a **design preview /
+visualization**, **not a committed cohort and not statistical evidence**; the mouse
+anchor heat score is annotation only and is **never a selection gate**. The pseudobulk
+NES above remains the evidence the decision rests on. Correlative.*
+
+```{r drafted-flow, results='asis'}
+ov <- here("03_results/07_embedding/figures/_overview")
+flow <- list(
+  list(f = "umap_annotation_treg.png",
+       cap = "**(1/4) Annotation overview — what is on the map.** Frozen cell-type annotation (coarse_label: Treg/Tcon/CD8) + tissue (SF/PB) companion. Visualisation only."),
+  list(f = "umap_quadmarkers_treg.png",
+       cap = "**(2/4) Quad marker context — what we draft against.** %mt + FOXP3 / CTLA4 / IKZF2 (core Treg identity/activation: master lineage TF, suppressive effector, stable-Treg/Helios). Visualisation only."),
+  list(f = "umap_signatures_treg.png",
+       cap = "**(3/4) Signatures we draft for.** WT_heat (anchor annotation), effector (eTreg) and stress scores landing individually on the sorted T-cell UMAP — the WT_heat overlay is broad (pan-T), not Treg-restricted. Visualisation only."),
+  list(f = "umap_drafted_treg.png",
+       cap = "**(4/4) The subset we end up with.** Cells the multi-hook OR-union rules would draft (`hook_or_union == TRUE`, ~33% of the compartment) highlighted vs background, with a facet by which hook drafted them. Design preview, not a committed cohort; anchor heat score never a selection gate.")
+)
+for (it in flow) {
+  p <- file.path(ov, it$f)
+  if (file.exists(p)) {
+    cat(sprintf("\n%s\n\n![%s](%s)\n\n", it$cap, it$f, p))
+  } else {
+    cat(sprintf("\n*`%s` not found — run `07_embedding_viz.py` to generate it.*\n\n", it$f))
+  }
+}
+```
+
+## Decision — `decisions.go_no_go`
+
+> **Claim (one sentence):** *(fill at review)* — e.g. "The mouse 39 °C Treg up-program is
+> [enriched / not enriched] in JIA SF Tregs vs paired blood (NES = X, FDR = Y), and the
+> enrichment is [Treg-preferential / pan-T / absent]."
+>
+> **Branch:** *(fill at review)* —
+> **GO** → proceed to comparators (KO_heat/Interaction), eTreg correlation, TCR/decoupleR,
+>   and the other compartments; this row anchors Phase-5 Fig 5A.
+> **PIVOT (null in Treg)** → niche story: carry myeloid/fibroblast scoring downstream; or
+>   "axis invisible in human arthritis" → SAVI remains the positive control.
+> **STOP** → report the null as the primary Phase-1 result.
+
+```{r decisions-echo, echo=TRUE}
+str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$go_no_go)
+```
