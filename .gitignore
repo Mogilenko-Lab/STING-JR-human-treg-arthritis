@@ -6,6 +6,12 @@
 00_data/references/*
 !00_data/references/.gitkeep
 
+# Per-accession raw mounts (00_data/<accession>/raw/) — heavy RO bytes; keep the
+# committed provenance (PROVENANCE.md/manifest.json/samples.csv/download.sh) in the
+# accession dir, never the raw payload (known-issue #3). Keep-dir via .gitkeep.
+00_data/**/raw/**
+!00_data/**/raw/.gitkeep
+
 # Results — track the directory skeleton (.gitkeep) and caption READMEs, never artifacts.
 # Hard-ignore checkpoint state objects at any depth (large + recomputable).
 03_results/objects/*.h5ad
@@ -20,6 +26,13 @@
 #03_results/**/figures/**/*.svg
 #03_results/**/tables/**/*.csv
 #03_results/**/tables/**/*.tsv
+
+# Interactive-explorer tables (regenerable from scripts/export_explorers.py; binary).
+03_results/interactive/*.parquet
+
+# Notebook EDA scratch (lasso saves, snapshots) — exploratory, regenerable. Force-add a
+# specific file with `git add -f` if you want to keep it as a record.
+02_analysis/notebooks/**/eda/
 
 # Scratch: throwaway artifacts, never committed
 03_results/_scratch/*

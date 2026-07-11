@@ -15,38 +15,66 @@
 project:
   id: "human_treg_arthritis"
   title: "Human Treg / arthritis T-cell compartment — sorted JIA SF Tregs + eTreg signatures (A2,B4)"
-  species: "Mus musculus"              # e.g. "Mus musculus" / "Homo sapiens"
-  species_db: "MM"        # e.g. "MM" / "HS"
-  genome_build: "mm10"    # e.g. "mm10", "mm39", "hg38"
+  species: "Homo sapiens"              # this compartment is human (known-issue #5 fix)
+  species_db: "HS"        # drives MT/RP annotation + MSigDB species
+  genome_build: "GRCh38"  # 10x CellRanger reference for GSE160097
 
 # =============================================================================
 # EXPERIMENTAL DESIGN
 # =============================================================================
 
 design:
-  groups:
-    - "Control"                       # rename to your conditions
-    - "Treatment"
+  # GSE160097: FACS-sorted memory T-cell populations from PAIRED synovial fluid (SF)
+  # and peripheral blood (PB) of 7 JIA donors. The contrast is tissue (SF vs PB),
+  # blocked on donor; run independently within each sorted population.
+  tissue_key: "tissue"                 # obs column carrying SF / PB
+  tissue_levels:
+    synovial_fluid: "synovial_fluid"   # numerator (inflamed joint)
+    peripheral_blood: "peripheral_blood"  # denominator (paired blood)
+  donor_key: "donor"                   # blocking factor (paired design)
+  population_key: "population"          # sorted identity: CD4_Treg / CD4_Tcon / CD8
+  populations:
+    - "CD4_Treg"                       # primary — the go/no-go compartment
+    - "CD4_Tcon"                       # Treg-specificity control
+    - "CD8"                            # Treg-specificity control
   contrasts:
-    - name: "Treatment_vs_Control"
-      numerator: "Treatment"
-      denominator: "Control"
-  samples_per_group: null             # e.g. 5
+    - name: "SF_vs_PB"
+      numerator: "synovial_fluid"
+      denominator: "peripheral_blood"
+      model: "~ donor + tissue"        # paired; p3 absent for PB Tcon/CD8 -> effectively unpaired there
+  n_donors: 7
 
 # =============================================================================
 # ANALYSIS THRESHOLDS
 # =============================================================================
 
 thresholds:
-  # Differential Expression
+  # --- scRNA QC (MAD-based adaptive, computed PER GSM; single-cell-rna-qc) ---
+  qc_n_mads: 5                        # outlier = median +/- n_mads*MAD on log1p count/gene metrics
+  qc_n_mads_mt: null                  # MAD multiplier for %mt SPECIFICALLY; null = ceiling-only
+                                      #   (no per-GSM MAD on %mt) so thermally-stressed high-mito
+                                      #   cells are retained — the mito gate is then just the ceiling.
+  qc_pct_mt_max: 40.0                 # hard ceiling on mitochondrial % (stress-permissive)
+  qc_min_genes: 200                   # hard floor: genes/cell
+  qc_min_cells_per_gene: 3            # gene kept if detected in >= this many cells
+  scrublet_expected_doublet_rate: 0.06
+
+  # --- embedding (annotation/viz only, never biology) ---
+  hvg_n_top: 3000
+  n_pcs: 30
+  leiden_resolution: 1.0
+
+  # --- pseudobulk DE (donor x tissue x label; pseudobulk_utils) ---
+  pseudobulk_min_cells: 20           # drop a donor x tissue x label stratum below this
+  pseudobulk_min_donors: 3           # min donors per tissue arm to run a DE contrast
   de_fdr: 0.05                        # FDR cutoff for significance
   de_logfc: 1.0                       # absolute log2FC cutoff (optional)
 
   # GSEA
   gsea_fdr: 0.05                      # FDR cutoff for pathway significance
-  gsea_nperm: 100000                  # number of permutations
+  gsea_nperm: 100000                  # number of permutations (fgsea uses eps/adaptive)
   gsea_seed: 123                      # random seed for reproducibility
-  gsea_min_size: 15                   # minimum gene set size
+  gsea_min_size: 5                    # min gene set size (WT_heat_down maps to 94 genes; small sets kept)
   gsea_max_size: 500                  # maximum gene set size
 
 # =============================================================================
@@ -144,12 +172,24 @@ databases:
 # Append a new entry here BEFORE any script writes artifacts to that stage.
 
 stages:
+  - id: "00_build"
+    title: "Ingest & assemble"
+    purpose: "Per-GSM 10x H5 -> gene-union AnnData with donor/tissue/population provenance + raw counts layer."
   - id: "01_qc"
     title: "Quality control"
-    purpose: "Filter cells/samples, flag doublets, gate on QC metrics."
-  - id: "02_eda"
-    title: "Exploratory analysis"
-    purpose: "Embeddings, clustering, first-pass structure of the data."
+    purpose: "MAD adaptive QC per GSM, doublet flagging, first unsupervised embedding (usability review only)."
+  - id: "02_annotation"
+    title: "Sort-identity & frozen labels"
+    purpose: "Confirm sorted Treg/Tcon/CD8 identity by markers on the unsupervised embedding; freeze coarse labels (sorting-primary). scANVI sub-states deferred until go = yes."
+  - id: "03_pseudobulk"
+    title: "Donor pseudobulk DE"
+    purpose: "Aggregate raw counts to donor x tissue x label; SF-vs-PB DE per population; sign-preserving ranked lists."
+  - id: "05_scoring"
+    title: "Signature scoring"
+    purpose: "Pre-ranked fgsea of the mouse WT_heat signature on pseudobulk ranked lists + per-cell scores. The go/no-go readout."
+  - id: "07_embedding"
+    title: "Treg embedding atlas (harvest-design preview)"
+    purpose: "SUPPLEMENTARY/VISUALISATION only (embeddings are never the statistical readout). Previews the multi-hook bounded-OR harvest design (DESIGN §2.3): where each candidate signature lands on the UMAP alone and under the OR-union of anchor-orthogonal hooks (lineage OR effector OR mt-hi-viable). The mouse WT_heat anchor score is an annotation overlay, never a selection gate; no cells are lassoed/subset here."
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)
@@ -158,6 +198,11 @@ stages:
 paths:
   # Input
   references: "00_data/references/"
+  raw_gse160097: "00_data/GSE160097_JIA-SF-Treg/raw/"
+  samples_gse160097: "00_data/GSE160097_JIA-SF-Treg/samples.csv"
+
+  # Frozen Phase-0 mouse->human signature contract (read-only; scored, never re-derived).
+  signature_contract: "../mouse_anchor/03_results/human_projection/"
 
   # Output roots — phase-based layout. Checkpoint state is separate from deliverables.
   results: "03_results/"              # results root
@@ -201,3 +246,57 @@ schemas:
       - contrast
       - significant
       - direction
+  # Cross-phase effect-size contract (_conventions.md §8). Phase 5 meta-analyses these;
+  # NEVER pool across effect_metric, and padj (not fdr) is canonical.
+  common_effectsizes:
+    required_columns:
+      - dataset
+      - signature
+      - cell_state
+      - contrast
+      - effect_metric      # pseudobulk_nes | pseudobulk_logfc | percell_auc_smd
+      - evidence_tier      # primary_pseudobulk | secondary_percell
+      - estimate
+      - se
+      - ci_low
+      - ci_high
+      - direction          # up | down | ns
+      - pvalue
+      - padj
+      - n_donors
+      - n_cells
+
+# =============================================================================
+# HUMAN-REVIEW DECISIONS (recorded at breakpoints so re-runs replay them)
+# =============================================================================
+# Each breakpoint notebook terminates in a recorded decision here. `status: PENDING`
+# means the gate has not been answered yet; downstream stages that depend on a gate
+# must not proceed past it until status flips.
+
+decisions:
+  qc:
+    status: PENDING          # BREAKPOINT 01 — is the data usable? (approve QC thresholds / GSM drops)
+    drop_gsms:
+      - "GSM4859852"         # SF CD4_Treg p5: near-empty library (median ~14 UMIs / 9 genes/cell);
+                             #   a UMI+gene outlier, not a real profile. Documented + hard-excluded.
+  treg_gate:
+    status: PENDING          # BREAKPOINT 02 — approve frozen Treg/Tcon/CD8 gate + min-cell floor
+    basis: "sorting"         # sorting-primary, refined by FOXP3/IL2RA/CTLA4/IKZF2
+    # --- POPULATION FRAMING (ratified in PI discussion; go/no-go call itself stays PENDING) ---
+    # Verbatim from docs/_internal/plans/2026-07-11-cross-species-poi-integration/DESIGN.md §6
+    # (§6.2 wording), grounded in the mt-hi retention note
+    # human_treg_arthritis/docs/_internal/reasoning/2026-07-11-mthi-treg-solidification.md.
+    coarse_treg_includes_mthi: true
+      # The mt-hi / effector-like Treg subset stays INSIDE the frozen coarse `Treg`
+      # label. Coarse `Treg` is the single frozen statistical stratum for the go/no-go.
+    mthi_effector_treg: "descriptive_substratum"
+      # Shown/described on embeddings only; NOT a separate DE/GSEA stratum. It also fails
+      # the donor floor (pseudobulk_min_donors=3) when split out, so it is never tested
+      # as its own pseudobulk contrast.
+    heat_hi_tcon: "embedding_narrative_only"
+      # A population defined BY the WT_heat score is never a statistical stratum — testing
+      # WT_heat within it is circular (selection on outcome). UMAP/narrative use only;
+      # never enters pseudobulk, GSEA, or an effect-size row.
+  go_no_go:
+    status: PENDING          # BREAKPOINT 03 — does the mouse 39C Treg signature enrich in JIA SF Tregs?
+    primary_signature: "WT_heat"
