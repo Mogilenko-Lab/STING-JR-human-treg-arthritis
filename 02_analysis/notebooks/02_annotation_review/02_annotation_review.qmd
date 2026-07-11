@@ -1,0 +1,95 @@
+---
+title: "BREAKPOINT 02 — do the labels the story rests on hold up?"
+subtitle: "Stage 02_annotation · frozen Treg/Tcon/CD8 (scANVI deferred)"
+format:
+  html:
+    toc: true
+    toc-location: left
+    df-print: paged
+    embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", dpi = 150, out.width = "95%")
+.find_root <- function(sentinel = "02_analysis/config/analysis_config.yaml", start = getwd()) {
+  d <- normalizePath(start)
+  while (!file.exists(file.path(d, sentinel))) {
+    parent <- dirname(d); if (identical(parent, d)) stop("root not found"); d <- parent
+  }
+  d
+}
+knitr::opts_knit$set(root.dir = .find_root())
+```
+
+```{r libs}
+suppressPackageStartupMessages({ library(dplyr); library(knitr) })
+here <- function(...) file.path(getwd(), ...)
+```
+
+*Notebook run `r format(Sys.time(), '%Y-%m-%d %H:%M UTC', tz='UTC')`.*
+
+## Where I am
+
+Labels are frozen from the sort gate; this is the static check that they hold before I build
+the story on them. Do the labels hold up? Three things I'm reading: does
+sort identity agree with the transcriptome (the confusion table below), am I resisting the
+"activated Treg = Treg collapse" trap — IFN/CXCR3-high Tregs are still Tregs, a mis-sort is
+CD8/Tcon marker dominance, not activation — and do I even need sub-states for the go/no-go, or
+freeze at Treg/Tcon/CD8 and defer scANVI (the P1 critical-path call)?
+
+## Sort vs marker-module prediction (fidelity)
+
+```{r load}
+tdir <- here("03_results/02_annotation/tables")
+conf  <- read.csv(file.path(tdir, "confusion_sort_vs_predicted.csv"), row.names = 1)
+counts <- read.csv(file.path(tdir, "counts_donor_by_label_tissue.csv"))
+cfg   <- yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))
+floor_cells <- cfg$thresholds$pseudobulk_min_cells
+```
+
+```{r conf-tab}
+kable(conf, caption = "Confusion: sort label (rows) vs marker-module argmax identity (cols). Off-diagonal = candidate mis-sorts (NOT activation).")
+diag_frac <- sum(diag(as.matrix(conf))) / sum(as.matrix(conf))
+cat(sprintf("Overall marker-consistent fraction (diagonal): %.1f%%\n", 100 * diag_frac))
+```
+
+> **Note on the method:** this confusion is a **marker-module argmax** stand-in for the
+> deferred scANVI transfer. It answers "does the sort gate agree with lineage markers?",
+> which is all the go/no-go needs. scANVI sub-state resolution (activated / IFN-induced /
+> Th1-like Treg) is deferred until `decisions.go_no_go` is positive.
+
+## Donor power per frozen label
+
+```{r power}
+short_ct <- counts %>%
+  mutate(tissue_s = c(synovial_fluid = "SF", peripheral_blood = "PB")[tissue]) %>%
+  group_by(coarse_label, tissue_s) %>%
+  summarise(n_donors_over_floor = sum(n_cells >= floor_cells), .groups = "drop")
+kable(short_ct, caption = sprintf("Donors clearing the %d-cell pseudobulk floor, per label x tissue.", floor_cells))
+```
+
+## Figures (rendered by `02_annotate_states_viz.py`)
+
+```{r figs, results='asis'}
+ov <- here("03_results/02_annotation/figures/_overview")
+for (f in c("umap_sort_identity.png", "marker_dotplot.png", "counts_grid.png")) {
+  p <- file.path(ov, f)
+  if (file.exists(p)) cat(sprintf("\n![%s](%s)\n\n", f, p))
+}
+```
+
+## Decision — `decisions.treg_gate`
+
+> **Claim:** *(fill at review)* — e.g. "Sort labels agree with lineage markers
+> (diagonal ~X%); FOXP3/IL2RA/CTLA4/IKZF2 are Treg-restricted → the frozen
+> Treg/Tcon/CD8 gate is sound and sub-states are unnecessary for the go/no-go."
+>
+> **Branch:** *(fill at review)* — approve the frozen gate (basis = sorting, refined by
+> FOXP3/IL2RA/CTLA4/IKZF2), set the mis-sort exclusion policy, confirm the
+> `pseudobulk_min_cells` floor, and proceed to donor pseudobulk (stage 03). Keep scANVI
+> sub-states deferred.
+
+```{r decisions-echo, echo=TRUE}
+str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$treg_gate)
+```

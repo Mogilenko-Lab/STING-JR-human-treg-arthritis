@@ -1,0 +1,91 @@
+---
+title: "Go/no-go explorer — where does the 39 °C score live? (BREAKPOINT 03)"
+subtitle: "jscatter · per-cell WT_heat score · 03_results/interactive/05_gonogo_explore.parquet"
+format: html
+jupyter: python3
+---
+
+> Live tool — needs a running kernel (VS Code + Jupyter, or JupyterLab, on the
+> **Python (STING base)** kernel). Rebuild the data with
+> `python 02_analysis/scripts/export_explorers.py`.
+
+## Where I am
+
+This is the project pivot, and the headline number lives elsewhere — the
+go/no-go rests on the donor-pseudobulk `WT_heat` NES in the static `05_gonogo_review` notebook
+(`wt_heat_nes_forest`). Here I just do the per-cell corroboration: where does the mouse 39 °C
+score actually sit on the cells? I'm asking whether any high-score region is Treg-preferential
+or whether it's pan-T (the NES says pan-T: Treg 2.53 ≈ Tcon 2.59 > CD8 2.07), and whether the
+score shifts SF vs PB within a population. Brush the bright cells and read their label and
+tissue.
+
+```{python}
+#| label: setup
+import sys, os
+from pathlib import Path
+d = Path.cwd().resolve()
+while not (d / "02_analysis/config/analysis_config.yaml").exists():
+    d = d.parent
+os.chdir(d); sys.path.insert(0, str(d / "02_analysis"))
+from helpers.interactive_utils import load_explorer, color_key
+import jscatter
+
+df = load_explorer("05_gonogo")
+print(df.shape, "cells")
+df.head(3)
+```
+
+## The grid
+
+Three linked panels — the WT_heat score, the cell state, and the tissue. Brush the brightest
+(high-score) cells in panel 1 and read what they are in panels 2 and 3.
+
+```{python}
+#| label: score-triptych
+opts = dict(x="x", y="y", height=360)
+s_score = jscatter.Scatter(data=df, **opts); s_score.color(by="WT_heat_updown", map="magma"); s_score.legend(True)
+s_lab   = jscatter.Scatter(data=df, **opts); s_lab.color(by="coarse_label", map=color_key(df, "coarse_label")); s_lab.legend(True)
+s_tis   = jscatter.Scatter(data=df, **opts)
+s_tis.color(by="tissue", map={"synovial_fluid": "#D55E00", "peripheral_blood": "#0072B2"}); s_tis.legend(True)
+# brush the brightest WT_heat cells here -> read their label + tissue in 2 & 3
+jscatter.compose(
+    [(s_score, "WT_heat (up−down)"), (s_lab, "cell state"), (s_tis, "tissue")],
+    sync_view=True, sync_selection=True, sync_hover=True, rows=1,
+)
+```
+
+If lags, close panels
+```{python}
+# close panels from a previous run (ipywidgets keeps every widget alive until closed)
+for _s in globals().get("PANELS", []):
+    try: _s.widget.close()
+    except Exception: pass
+```
+
+The high-score cells spread across both Treg and Tcon — the
+per-cell view echoes the pan-T NES. Nothing jumps out as a Treg-only pocket, but per-cell
+scoring is noisy so I hold this loosely.
+
+## Channels
+
+Same score, but with the full tooltip — hover a cell to read its up-set, down-set, and net
+(`_updown` = up − down). Useful when a bright cell looks borderline and I want to see whether
+the up-genes carry it or the down-genes just dropped.
+
+```{python}
+#| label: score-tooltip
+s = jscatter.Scatter(data=df, x="x", y="y", height=650)
+s.color(by="WT_heat_updown", map="magma")
+s.legend(True)
+s.tooltip(True, properties=["coarse_label", "tissue", "donor",
+                            "WT_heat_up", "WT_heat_down", "WT_heat_updown"])
+s.show()
+```
+
+## Decision — `decisions.go_no_go`
+
+The headline is the pseudobulk NES, not this per-cell view — per-cell scoring is noisier, so
+the effect-size contract keeps it a secondary tier and never pools it with the NES. This view
+is only the sanity check on *where* the signal lives: pan-T (as the NES says) or a Treg-specific
+pocket standing out. The R `05_gonogo_review` sibling records the one-line claim and branch in
+`analysis_config.yaml::decisions.go_no_go`.

@@ -1,0 +1,97 @@
+---
+title: "BREAKPOINT 01 — is the tissue usable for the go/no-go?"
+subtitle: "Stage 01_qc · GSE160097 JIA sorted Treg/Tcon/CD8"
+format:
+  html:
+    toc: true
+    toc-location: left
+    df-print: paged
+    embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", dpi = 150, out.width = "95%")
+.find_root <- function(sentinel = "02_analysis/config/analysis_config.yaml", start = getwd()) {
+  d <- normalizePath(start)
+  while (!file.exists(file.path(d, sentinel))) {
+    parent <- dirname(d); if (identical(parent, d)) stop("root not found"); d <- parent
+  }
+  d
+}
+knitr::opts_knit$set(root.dir = .find_root())
+```
+
+```{r libs}
+suppressPackageStartupMessages({ library(dplyr); library(knitr) })
+here <- function(...) file.path(getwd(), ...)
+```
+
+*Notebook run `r format(Sys.time(), '%Y-%m-%d %H:%M UTC', tz='UTC')`.*
+
+## Where I am
+
+QC has run; this is the static read before I sign off. One question really:
+is the tissue usable for the go/no-go? Two things settle it — do enough donors survive with
+paired SF+PB Tregs for pseudobulk (it's the donor count, not the cell count, that gives the
+forest its power), and do the sorted Treg/Tcon/CD8 separate on their own transcriptomes with no
+obvious cross-population bleed? This is a lens, not an analysis; it ends in a recorded
+`decisions.qc` call.
+
+## Per-stratum QC yield
+
+```{r load}
+tdir <- here("03_results/01_qc/tables")
+kept <- read.csv(file.path(tdir, "cells_kept_dropped.csv"))
+thr  <- read.csv(file.path(tdir, "qc_thresholds_per_gsm.csv"))
+cfg  <- yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))
+floor_cells <- cfg$thresholds$pseudobulk_min_cells
+short <- c(CD4_Treg = "Treg", CD4_Tcon = "Tcon", CD8 = "CD8")
+kept$pop <- short[kept$population]
+kept$tissue_s <- c(synovial_fluid = "SF", peripheral_blood = "PB")[kept$tissue]
+```
+
+```{r yield-tab}
+kept %>%
+  transmute(pop, tissue = tissue_s,
+            donor = sub("JIA_patient_", "p", donor),
+            n_cells, n_kept, frac_kept = round(frac_kept, 3),
+            clears_floor = n_kept >= floor_cells) %>%
+  arrange(pop, tissue, donor) %>%
+  kable(caption = sprintf("Cells kept per stratum. clears_floor = n_kept >= %d (pseudobulk min).", floor_cells))
+```
+
+**Paired-Treg power — the number that matters:**
+
+```{r treg-power}
+treg <- kept %>% filter(pop == "Treg", n_kept >= floor_cells)
+paired_treg <- treg %>% count(donor, name = "n_tissue") %>% filter(n_tissue == 2)
+cat(sprintf("Donors with BOTH SF and PB Treg strata clearing the %d-cell floor: %d / 7\n",
+            floor_cells, nrow(paired_treg)))
+cat(sprintf("SF-Treg strata retained: %d ; PB-Treg strata retained: %d\n",
+            sum(treg$tissue_s == "SF"), sum(treg$tissue_s == "PB")))
+```
+
+## Figures (rendered by `01_qc_filter_viz.py`)
+
+```{r figs, results='asis'}
+ov <- here("03_results/01_qc/figures/_overview")
+for (f in c("qc_violins_per_gsm.png", "cells_kept_dropped.png", "unsupervised_umap.png")) {
+  p <- file.path(ov, f)
+  if (file.exists(p)) cat(sprintf("\n![%s](%s)\n\n", f, p))
+}
+```
+
+## Decision — `decisions.qc`
+
+> **Claim:** *(fill at review)* — e.g. "N/7 donors retain paired SF+PB Tregs above the
+> cell floor; sorted populations separate cleanly on the unsupervised UMAP with Treg
+> markers concentrated in the Treg gate → the tissue is usable for the go/no-go."
+>
+> **Branch:** *(fill at review)* — approve QC thresholds and proceed to freeze
+> Treg/Tcon/CD8 labels (stage 02); list any GSM to drop in `decisions.qc.drop_gsms`;
+> if paired-Treg donor count is too low, flag the forest as underpowered before pseudobulk.
+
+```{r decisions-echo, echo=TRUE}
+str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$qc)
+```

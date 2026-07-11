@@ -1,0 +1,139 @@
+---
+title: "QC explorer — looking at the cells before I sign off (BREAKPOINT 01)"
+subtitle: "jscatter · unsupervised UMAP · 03_results/interactive/01_qc_explore.parquet"
+format: html
+jupyter: python3
+---
+
+> Live tool — needs a running kernel (VS Code + Jupyter, or JupyterLab, on the
+> **Python (STING base)** kernel). Rebuild the data with
+> `python 02_analysis/scripts/export_explorers.py`.
+
+## Where I am
+
+QC kept ~100k sorted Treg / Tcon / CD8 from paired synovial fluid and blood. The static
+`01_qc_review` notebook has the kept/dropped numbers; here I just look at the cells before I
+sign off
+
+```{python}
+#| label: setup
+import sys, os
+from pathlib import Path
+d = Path.cwd().resolve()
+while not (d / "02_analysis/config/analysis_config.yaml").exists():
+    d = d.parent
+os.chdir(d); sys.path.insert(0, str(d / "02_analysis"))
+from helpers.interactive_utils import (load_explorer, color_key, first_selection,
+                                        save_selection, snapshot)
+import jscatter
+
+df = load_explorer("01_qc")
+print(df.shape, "cells")
+df.head(3)
+```
+
+## The grid
+
+Define function
+```{python}
+def _mk(c):
+    s = jscatter.Scatter(data=df, x="x", y="y", height=340)
+    if c in CAT:
+        s.color(by=c, map=color_key(df, c))
+    else:
+        lo, hi = float(df[c].min()), float(df[c].max())
+        s.color(by=c, map="magma", norm=[lo, hi if hi > lo else lo + 1e-9])
+    s.legend(True)
+    return s
+```
+
+Four linked panels — brush any one, the rest highlight the same cells. Colour by whatever,
+edit `CHANNELS`, re-run.
+
+```{python}
+CAT = ["population_short", "tissue", "donor", "leiden_unsupervised"]
+
+PANELS = [_mk(c) for c in CAT]
+jscatter.compose([(s, c) for s, c in zip(PANELS, CAT)],
+                 sync_view=True, sync_selection=True, sync_hover=True, rows=2)
+```
+
+```{python}
+#| label: grid
+CHANNELS = ["FOXP3", "pct_counts_mt", "score_eTreg", "CTLA4"]
+
+PANELS = [_mk(c) for c in CHANNELS]
+jscatter.compose([(s, c) for s, c in zip(PANELS, CHANNELS)],
+                 sync_view=True, sync_selection=True, sync_hover=True, rows=2)
+```
+
+If lags, close panels 
+```{python}
+# close panels from a previous run (ipywidgets keeps every widget alive until closed)
+for _s in globals().get("PANELS", []):
+    try: _s.widget.close()
+    except Exception: pass
+```
+
+
+I see high-mito effector like cluster of Tregs
+
+
+## Characterise the selection
+
+Save selection
+```{python}
+#| label: characterize
+import pandas as pd
+sel = first_selection(PANELS)
+sub = df.iloc[sel]
+print(sub)
+```
+
+```{python}
+if len(sub) == 0:
+    print("Lasso a cluster in the grid above, then re-run.")
+else:
+    print(f"{len(sub)} cells | SF {(sub.tissue=='synovial_fluid').mean():.0%} | "
+          f"top donor {sub.donor.value_counts().idxmax()} ({sub.donor.value_counts(normalize=True).max():.0%})")
+    cols = ["FOXP3", "CTLA4", "IL2RA", "pct_counts_mt", "n_genes_by_counts",
+            "score_eTreg", "score_HSP", "score_apoptosis", "WT_heat_up"]
+    display(pd.DataFrame({"selected": sub[cols].mean(),
+                          "all_Treg": df[df.population_short == "Treg"][cols].mean()}).round(3))
+```
+
+Brushed tight, the FOXP3-hi / mt-hi pocket comes out ~99 % SF, CTLA4 high, FOXP3 a touch low, and high on the eTreg score. It seems to be an effector-Treg pocket — activated Tregs in the joint. Mostly
+one donor (p6), so I hold it loosely.
+
+## Channels
+
+- `score_eTreg` — human effector-Treg signature (GSE161426, SF vs PB Treg; top genes CXCL13, CXCR6, EMP1, RCAN2). This is the one that tracks the pocket.
+- `WT_heat_up` — the mouse 39 °C program. `score_KO_heat_up` and `score_Interaction_z` are the cGAS-KO and cGAS-dependent comparators, plus the 7 Interaction genes individually (IFI16, IRF7, MX1, …). The heat channels are quiet — nothing much stands out per cell.
+- `score_HSP`, `score_apoptosis` — the stressed-vs-dying check; both flat in the pocket.
+
+(`_up`/`_down`/`_updown`: each signature has an up- and down-set; `_up` scores the up-genes, `_updown` = up − down. `_up` is usually enough.)
+
+## Save
+
+jscatter's own save only grabs the points — no legend or labels. `save_selection` writes the barcodes (re-loadable later); `snapshot` writes a labelled figure. Both go to `eda/`.
+
+```{python}
+#| label: save
+LABEL = "ctla4_pocket"                 # <- name it
+sel = first_selection(PANELS)
+save_selection(df, sel, label=LABEL)
+snapshot(df, "score_eTreg", name=f"{LABEL}_eTreg", indices=sel)
+```
+
+```{python}
+#| label: reload
+import pandas as pd
+saved = pd.read_csv("02_analysis/notebooks/01_qc_explore/eda/selection_sf_ctla4_pocket.csv", index_col=0)
+sel_reloaded = df.index.get_indexer(saved.index)
+sel_reloaded = sel_reloaded[sel_reloaded >= 0]
+print(f"reloaded {len(sel_reloaded)} of {len(saved)} barcodes")
+```
+
+## Decision — `decisions.qc`
+
+Sort holds, no stratum decimated, data's usable — approve and freeze labels (stage 02). The eTreg pocket is a side note to revisit after the go/no-go.

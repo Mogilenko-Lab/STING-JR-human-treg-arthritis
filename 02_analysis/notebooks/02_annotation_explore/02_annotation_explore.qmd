@@ -1,0 +1,96 @@
+---
+title: "Annotation explorer — do the frozen labels hold? (BREAKPOINT 02)"
+subtitle: "jscatter · frozen labels vs marker prediction · 03_results/interactive/02_annotation_explore.parquet"
+format: html
+jupyter: python3
+---
+
+> Live tool — needs a running kernel (VS Code + Jupyter, or JupyterLab, on the
+> **Python (STING base)** kernel). Rebuild the data with
+> `python 02_analysis/scripts/export_explorers.py`.
+
+## Where I am
+
+Labels are frozen from the sort gate; now I check they hold before I build the story on
+them. I'm really asking one thing: where does the transcriptome disagree
+with the sort label (`sort_consistent = False`), and when it does, is it the "activated Treg =
+collapse" trap — still FOXP3⁺, just inflamed — or a genuine CD8/Tcon mis-sort? Brush the
+disagreements and read the markers. If the disagreements are all activation, I freeze at
+Treg/Tcon/CD8 and defer scANVI; if they're real mis-sorts, they go on the exclusion list.
+
+```{python}
+#| label: setup
+import sys, os
+from pathlib import Path
+d = Path.cwd().resolve()
+while not (d / "02_analysis/config/analysis_config.yaml").exists():
+    d = d.parent
+os.chdir(d); sys.path.insert(0, str(d / "02_analysis"))
+from helpers.interactive_utils import load_explorer, color_key
+import jscatter
+
+df = load_explorer("02_annotation")
+print(df.shape, "cells")
+df.head(3)
+```
+
+## The grid
+
+Three linked panels — sort label, marker-module prediction, and where the two disagree. Brush
+the red (inconsistent) cells in panel 3 and watch where they land in the first two.
+
+```{python}
+#| label: label-triptych
+opts = dict(x="x", y="y", height=360)
+lab_key = color_key(df, "coarse_label")
+s_sort = jscatter.Scatter(data=df, **opts); s_sort.color(by="coarse_label", map=lab_key); s_sort.legend(True)
+s_pred = jscatter.Scatter(data=df, **opts); s_pred.color(by="predicted_identity", map=lab_key); s_pred.legend(True)
+s_cons = jscatter.Scatter(data=df, **opts)
+s_cons.color(by="sort_consistent", map={"True": "#4477AA", "False": "#EE6677"}); s_cons.legend(True)
+# red = sort label and marker prediction disagree; brush it and see where it sits
+jscatter.compose(
+    [(s_sort, "frozen sort label"), (s_pred, "marker prediction"), (s_cons, "sort-consistent")],
+    sync_view=True, sync_selection=True, sync_hover=True, rows=1,
+)
+```
+
+If lags, close panels
+```{python}
+# close panels from a previous run (ipywidgets keeps every widget alive until closed)
+for _s in globals().get("PANELS", []):
+    try: _s.widget.close()
+    except Exception: pass
+```
+
+Most of the red sits inside the Treg gate, not off in the CD8 corner — reads more like
+activation than mis-sort, but I want the markers before I trust that.
+
+## Channels
+
+The collapse-trap check: an activated Treg is still FOXP3⁺/CTLA4⁺, a real mis-sort is CD8A- or
+IL7R-driven. Colour the disagreements by each marker — if the red cells stay FOXP3/CTLA4 high
+they're activated Tregs, if they light up CD8A they're the genuine mis-sorts to exclude.
+
+```{python}
+#| label: foxp3-vs-cd8
+opts = dict(x="x", y="y", height=360)
+s_foxp3 = jscatter.Scatter(data=df, **opts); s_foxp3.color(by="FOXP3", map="viridis")
+s_ctla4 = jscatter.Scatter(data=df, **opts); s_ctla4.color(by="CTLA4", map="viridis")
+s_cd8   = jscatter.Scatter(data=df, **opts); s_cd8.color(by="CD8A", map="viridis")
+s_il7r  = jscatter.Scatter(data=df, **opts); s_il7r.color(by="IL7R", map="viridis")
+jscatter.compose(
+    [(s_foxp3, "FOXP3"), (s_ctla4, "CTLA4"), (s_cd8, "CD8A"), (s_il7r, "IL7R")],
+    sync_view=True, sync_selection=True, sync_hover=True, rows=2,
+)
+```
+
+The inconsistent Treg-gate cells hold FOXP3/CTLA4 and stay off CD8A — the collapse trap, not a
+mis-sort. Only the scattered CD8A-high cells look like true mislabels.
+
+## Decision — `decisions.treg_gate`
+
+If the inconsistent Treg-gate cells stay FOXP3⁺/CTLA4⁺ (activated, not collapsed) and only the
+genuine CD8A-high cells are true mis-sorts, the frozen sort-primary gate holds — approve it
+with the mis-sort exclusion policy and go to pseudobulk (stage 03). Sub-states can wait for
+scANVI after the go/no-go. The R `02_annotation_review` sibling records the call in
+`analysis_config.yaml::decisions.treg_gate`.

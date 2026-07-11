@@ -1,6 +1,6 @@
 ---
-title: "BREAKPOINT 03 — the project go/no-go: story or null?"
-subtitle: "Stage 05_scoring · mouse WT_heat (39 °C Treg) signature in JIA SF-vs-PB"
+title: "Does the mouse 39 °C Treg stress signature appear in JIA synovial-fluid T cells?"
+subtitle: "Mouse WT_heat (39 °C Treg) signature scored in JIA synovial-fluid vs paired-blood sorted T cells (GSE160097)"
 format:
   html:
     toc: true
@@ -32,19 +32,20 @@ source("02_analysis/helpers/runsum_widget.R")
 
 *Notebook run `r format(Sys.time(), '%Y-%m-%d %H:%M UTC', tz='UTC')`.*
 
-## Where I am — the project pivot
+## The question this dataset answers
 
-This is the whole-project go/no-go. The
-question: does the mouse 39 °C Treg signature show interpretable enrichment in JIA SF Tregs vs
-paired blood? What I'm settling here — the one-sentence claim this result licenses (enriched,
-with NES/FDR, or a null; both are publishable), whether it's Treg-preferential vs Tcon/CD8 or
-just pan-T (a weaker, different claim), which single figure shows it, and what each of go /
-pivot / stop actually costs. And if it's null: niche story (keep myeloid/fibroblast scoring
-downstream), or "axis invisible in human arthritis" (SAVI stays the positive control)?
+Does the mouse 39 °C Treg signature show interpretable enrichment in JIA synovial-fluid
+(SF) Tregs relative to paired peripheral blood? This review settles the one-sentence claim
+the result licenses — enriched, with NES/FDR, or a clean null (both are reportable) — and
+whether any enrichment is Treg-preferential relative to Tcon/CD8 or instead pan-T (a weaker,
+different claim). It also names which single figure carries the result. If the signal is
+null, two narratives remain open: a niche account that keeps myeloid/fibroblast scoring in
+view for the tissue datasets, or "the axis stays undetectable in human arthritis T cells", in
+which case the SAVI dataset remains the positive control.
 
-> **This is the whole-project go/no-go.** A clean null is a *reported result* the same
-> figures carry on equal footing, because the analysis rests on donor-level effect sizes
-> with CIs.
+> A clean null is a *reported result* these same figures carry on equal footing, because the
+> analysis rests on donor-level effect sizes with confidence intervals read on their own
+> scale, not on a significance threshold.
 
 ## Primary evidence — `WT_heat` NES on donor-pseudobulk SF-vs-PB ranked lists
 
@@ -63,8 +64,8 @@ gsea %>%
   kable(caption = "Pre-ranked fgsea of mouse WT_heat up/down vs SF-vs-PB pseudobulk (signed Wald stat).")
 ```
 
-**Money number:** `WT_heat_up` NES in **Treg** vs Tcon vs CD8 — is the Treg NES the
-largest and does its FDR clear significance?
+**The number that settles it:** `WT_heat_up` NES in **Treg** vs Tcon vs CD8 — is the Treg
+NES the largest, and does its FDR clear significance?
 
 ```{r money}
 up <- gsea %>% filter(grepl("_up$", pathway_id))
@@ -95,7 +96,7 @@ eff %>%
   kable(caption = "Per-cell WT_heat_updown SF-vs-PB donor-level SMD (secondary tier).")
 ```
 
-## The effect-size row that goes to Phase 5
+## The effect-size row carried forward to cross-dataset synthesis
 
 ```{r effrow}
 eff %>%
@@ -103,7 +104,7 @@ eff %>%
   transmute(dataset, signature, cell_state, contrast, effect_metric,
             estimate = round(estimate, 3), direction, pvalue = signif(pvalue, 3),
             padj = signif(padj, 3), n_donors, n_cells) %>%
-  kable(caption = "primary_pseudobulk rows -> master/effect_sizes_treg_arthritis.csv (Phase-5 forest input).")
+  kable(caption = "primary_pseudobulk rows -> master/effect_sizes_treg_arthritis.csv (cross-dataset forest input).")
 ```
 
 ## Figures (rendered by `05_score_signatures_viz.{py,R}`)
@@ -134,7 +135,7 @@ statistic, and whether it sits in the leading edge. Use the drop-down (top-right
 the **up** vs **down** set; **click a population in the legend** to toggle its line + rug.
 Reading it: for the up set the Treg curve should climb highest with its core genes packed at
 the top ranks (leading edge), and that concentration should look weaker in Tcon / CD8 if the
-enrichment is Treg-preferential rather than pan-T.*
+enrichment is Treg-preferential; a pan-T signal would climb alike across all three.*
 
 ```{r runsum-interactive}
 # Interactive running-sum, rendered by the reusable helper sourced in `libs`
@@ -178,7 +179,7 @@ flow <- list(
   list(f = "umap_signatures_treg.png",
        cap = "**(3/4) Signatures we draft for.** WT_heat (anchor annotation), effector (eTreg) and stress scores landing individually on the sorted T-cell UMAP — the WT_heat overlay is broad (pan-T), not Treg-restricted. Visualisation only."),
   list(f = "umap_drafted_treg.png",
-       cap = "**(4/4) The subset we end up with.** Cells the multi-hook OR-union rules would draft (`hook_or_union == TRUE`, ~33% of the compartment) highlighted vs background, with a facet by which hook drafted them. Design preview, not a committed cohort; anchor heat score never a selection gate.")
+       cap = "**(4/4)** The subset we end up with. Cells the multi-hook OR-union rules would draft (hook_or_union == TRUE, ~33% of the compartment) highlighted vs background, with a facet by which hook drafted them. Design preview, not a committed cohort; anchor heat score never a selection gate.")
 )
 for (it in flow) {
   p <- file.path(ov, it$f)
@@ -190,18 +191,20 @@ for (it in flow) {
 }
 ```
 
-## Decision — `decisions.go_no_go`
+## Decision
 
 > **Claim (one sentence):** *(fill at review)* — e.g. "The mouse 39 °C Treg up-program is
 > [enriched / not enriched] in JIA SF Tregs vs paired blood (NES = X, FDR = Y), and the
 > enrichment is [Treg-preferential / pan-T / absent]."
 >
-> **Branch:** *(fill at review)* —
-> **GO** → proceed to comparators (KO_heat/Interaction), eTreg correlation, TCR/decoupleR,
->   and the other compartments; this row anchors Phase-5 Fig 5A.
-> **PIVOT (null in Treg)** → niche story: carry myeloid/fibroblast scoring downstream; or
->   "axis invisible in human arthritis" → SAVI remains the positive control.
-> **STOP** → report the null as the primary Phase-1 result.
+> **Where the analysis goes next:** *(fill at review)* —
+> **Continue** → proceed to the comparators (KO_heat / Interaction), eTreg correlation,
+>   TCR/decoupleR, and the other disease datasets; this effect-size row anchors the
+>   cross-dataset synthesis forest.
+> **Re-frame (null in Treg)** → a niche account that carries myeloid/fibroblast scoring into
+>   the tissue datasets; or "the axis stays undetectable in human arthritis", in which case
+>   SAVI remains the positive control.
+> **Report the null** → present the null as the primary result for this dataset.
 
 ```{r decisions-echo, echo=TRUE}
 str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$go_no_go)
