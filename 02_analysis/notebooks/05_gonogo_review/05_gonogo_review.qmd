@@ -127,15 +127,13 @@ for (f in c("wt_heat_nes_forest.png",
 
 ### Interactive running-sums — core gene-set distribution across Treg / Tcon / CD8
 
-*This panel shows the running sums **interactively**: where the mouse-anchor
-core gene-set genes fall in each cell type's SF-vs-PB ranked list. One running-ES line per
-population (same palette as the forest). The rug ticks below the curves are the mouse
-`WT_heat` core signature genes — **hover a tick** for its symbol, its SF-vs-PB signed-Wald
-statistic, and whether it sits in the leading edge. Use the drop-down (top-right) to switch
-the **up** vs **down** set. **Click a population in the legend** to toggle its line + rug.
-Reading it: for the up set the Treg curve should climb highest with its core genes packed at
-the top ranks (leading edge), and that concentration should look weaker in Tcon / CD8 if the
-enrichment is Treg-preferential. A pan-T signal would climb alike across all three.*
+*The running sums, **interactively**: where the mouse-anchor `WT_heat` core genes fall in
+each cell type's SF-vs-PB ranked list. One running-ES line per population (forest palette),
+with a rug of the core genes below. **Hover a tick** for its symbol, SF-vs-PB signed-Wald
+statistic, and leading-edge status. The drop-down (top-right) switches the **up** / **down**
+set. A legend **click** toggles a population's line and rug. Reading it: a Treg-preferential
+signal climbs highest in Treg with its core genes packed at the top ranks. A pan-T signal
+climbs alike across all three.*
 
 ```{r runsum-interactive}
 # Interactive running-sum, rendered by the reusable helper sourced in `libs`
@@ -147,17 +145,13 @@ build_runsum_widget(here("03_results/05_scoring/tables"))
 
 **How to read the per-cell violins (secondary tier) vs the forest (primary).** The
 per-cell `WT_heat_up` scores sit **negative** even where the biology is positive
-(Treg SF > Treg PB) — this is the expected behaviour of the scoring method: `scanpy score_genes` centres each
-cell's signature score against a size- and expression-matched **random reference gene
-set**, so the absolute level is arbitrary and only the **relative** SF-vs-PB shift within
-a population is interpretable (here Treg SF sits clearly above Treg PB). This is a
-**different estimand and scale** from the forest. The forest NES is computed at the
-backend by **fgsea** (`clusterProfiler::GSEA(by = "fgsea")`) on the **donor-pseudobulk
-SF-vs-PB signed-Wald ranked list** — i.e. it asks whether the whole `WT_heat` set
-concentrates at the top of the ranked list, then normalises to a NES on its own positive
-scale. The two are never pooled: the violins are corroborative
-per-cell colour, the pseudobulk NES is the primary evidence and the number the decision
-rests on.
+(Treg SF > Treg PB). That is expected: `scanpy score_genes` centres each cell against a
+size- and expression-matched **random reference set**, so the absolute level is arbitrary
+and only the **relative** SF-vs-PB shift reads. The forest is a **different estimand**:
+fgsea (`clusterProfiler::GSEA(by = "fgsea")`) on the donor-pseudobulk signed-Wald ranked
+list, asking whether the whole `WT_heat` set packs at the top, normalised to a NES on its
+own positive scale. The two stay separate. The violins are corroborative colour. The
+pseudobulk NES is the primary evidence the decision rests on.
 
 ### The drafted subset — from what's on the map to what I end up with
 

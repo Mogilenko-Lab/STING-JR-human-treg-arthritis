@@ -80,8 +80,8 @@ population. **Hover any point** for its GSM, donor (JIA patient), tissue (synovi
 fluid / peripheral blood), sorted population, cell count, kept fraction, and median
 counts/genes/%mt, with a kept/EXCLUDED flag. The single hard-excluded library,
 **GSM4859852**, sits at far-left low-median-genes and is marked with a black cross and
-a pinned label — it is a near-empty library (ambient/empty droplets), a UMI/gene
-outlier rather than a real T-cell profile.*
+a pinned label — it is a near-empty library of ambient/empty droplets, a UMI/gene
+artifact.*
 
 ::: {.content-visible when-format="html"}
 ```{r qc-explorer, eval=knitr::is_html_output()}
