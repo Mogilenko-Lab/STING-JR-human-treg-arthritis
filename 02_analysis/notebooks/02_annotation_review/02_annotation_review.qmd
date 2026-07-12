@@ -1,6 +1,6 @@
 ---
-title: "BREAKPOINT 02 — do the labels the story rests on hold up?"
-subtitle: "Stage 02_annotation · frozen Treg/Tcon/CD8 (scANVI deferred)"
+title: "Do the sorted Treg/Tcon/CD8 labels hold up?"
+subtitle: "GSE160097 — frozen sort-based Treg/Tcon/CD8 labels (scANVI deferred)"
 format:
   html:
     toc: true
@@ -35,8 +35,8 @@ Labels are frozen from the sort gate; this is the static check that they hold be
 the story on them. Do the labels hold up? Three things I'm reading: does
 sort identity agree with the transcriptome (the confusion table below), am I resisting the
 "activated Treg = Treg collapse" trap — IFN/CXCR3-high Tregs are still Tregs, a mis-sort is
-CD8/Tcon marker dominance, not activation — and do I even need sub-states for the go/no-go, or
-freeze at Treg/Tcon/CD8 and defer scANVI (the P1 critical-path call)?
+CD8/Tcon marker dominance, not activation — and do I even need sub-states for the primary
+comparison, or freeze at Treg/Tcon/CD8 and defer scANVI (the critical-path call)?
 
 ## Sort vs marker-module prediction (fidelity)
 
@@ -56,7 +56,7 @@ cat(sprintf("Overall marker-consistent fraction (diagonal): %.1f%%\n", 100 * dia
 
 > **Note on the method:** this confusion is a **marker-module argmax** stand-in for the
 > deferred scANVI transfer. It answers "does the sort gate agree with lineage markers?",
-> which is all the go/no-go needs. scANVI sub-state resolution (activated / IFN-induced /
+> which is all the primary comparison needs. scANVI sub-state resolution (activated / IFN-induced /
 > Th1-like Treg) is deferred until `decisions.go_no_go` is positive.
 
 ## Donor power per frozen label
@@ -81,14 +81,21 @@ for (f in c("umap_sort_identity.png", "marker_dotplot.png", "counts_grid.png")) 
 
 ## Decision — `decisions.treg_gate`
 
-> **Claim:** *(fill at review)* — e.g. "Sort labels agree with lineage markers
-> (diagonal ~X%); FOXP3/IL2RA/CTLA4/IKZF2 are Treg-restricted → the frozen
-> Treg/Tcon/CD8 gate is sound and sub-states are unnecessary for the go/no-go."
+> **Status: APPROVED.** The frozen sort-based coarse Treg/Tcon/CD8 gate holds. The
+> canonical lineage markers land on exactly the clusters the FACS sort assigns them to —
+> FOXP3/IL2RA/CTLA4/IKZF2 concentrate on the Treg gate, CD8A on the CD8 gate, and
+> IL7R/CD4 on the Tcon gate. Because the markers correspond to the annotated clusters,
+> the sort-based labels are corroborated by expression, and I can largely believe the
+> annotations. I therefore approve the gate and freeze the labels.
 >
-> **Branch:** *(fill at review)* — approve the frozen gate (basis = sorting, refined by
-> FOXP3/IL2RA/CTLA4/IKZF2), set the mis-sort exclusion policy, confirm the
-> `pseudobulk_min_cells` floor, and proceed to donor pseudobulk (stage 03). Keep scANVI
-> sub-states deferred.
+> I keep the population framing already recorded: the mt-high, effector-like Treg subset
+> stays **inside** the single frozen coarse Treg stratum (`coarse_treg_includes_mthi`);
+> the mt-high effector Treg is a **descriptive substratum** shown on embeddings only, not
+> its own statistical stratum (it also fails the donor floor when split out); and any
+> population defined by the mouse heat score itself is **embedding narrative only**, never
+> a tested stratum, since testing that score within a set selected on it would be circular.
+> The `pseudobulk_min_cells` floor stands, and scANVI sub-state resolution stays deferred —
+> the labels the analysis rests on are sound as they are, and I move on to donor pseudobulk.
 
 ```{r decisions-echo, echo=TRUE}
 str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$treg_gate)

@@ -193,18 +193,20 @@ for (it in flow) {
 
 ## Decision
 
-> **Claim (one sentence):** *(fill at review)* — e.g. "The mouse 39 °C Treg up-program is
-> [enriched / not enriched] in JIA SF Tregs vs paired blood (NES = X, FDR = Y), and the
-> enrichment is [Treg-preferential / pan-T / absent]."
+> **Claim (one sentence):** The mouse 39 °C Treg up-program is **enriched** in JIA
+> synovial-fluid T cells relative to paired peripheral blood, and the enrichment is
+> **broad across the sorted populations (pan-T), not Treg-preferential**: the running-sum
+> concentrates the core gene set at the top of every ranked list, with NES ≈ 2.52 in Treg,
+> 2.57 in Tcon, and 2.05 in CD8, all clearing significance at FDR < 1e-6.
 >
-> **Where the analysis goes next:** *(fill at review)* —
-> **Continue** → proceed to the comparators (KO_heat / Interaction), eTreg correlation,
->   TCR/decoupleR, and the other disease datasets; this effect-size row anchors the
->   cross-dataset synthesis forest.
-> **Re-frame (null in Treg)** → a niche account that carries myeloid/fibroblast scoring into
->   the tissue datasets; or "the axis stays undetectable in human arthritis", in which case
->   SAVI remains the positive control.
-> **Report the null** → present the null as the primary result for this dataset.
+> **Where the analysis goes next: continue.** This is a positive, reproducible signal
+> worth carrying into the cross-dataset comparison, so I proceed to the comparator
+> signatures, the effector-Treg correlation, the TCR/activity-inference reads, and the
+> other disease datasets; this pseudobulk effect-size row anchors the cross-dataset
+> synthesis forest. I read the signal as **consistent with** the mouse stress axis, a
+> correlative observation and not evidence of causation, and I state plainly that it is
+> **not Treg-specific** — the up-program rises across Treg, Tcon, and CD8 alike. I do not
+> overclaim beyond what the synovial-fluid-vs-blood contrast supports.
 
 ```{r decisions-echo, echo=TRUE}
 str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$go_no_go)

@@ -275,14 +275,14 @@ schemas:
 
 decisions:
   qc:
-    status: PENDING          # BREAKPOINT 01 — is the data usable? (approve QC thresholds / GSM drops)
+    status: APPROVED         # QC thresholds sound; libraries retain high yield; only GSM4859852 (near-empty) dropped
     drop_gsms:
       - "GSM4859852"         # SF CD4_Treg p5: near-empty library (median ~14 UMIs / 9 genes/cell);
                              #   a UMI+gene outlier, not a real profile. Documented + hard-excluded.
   treg_gate:
-    status: PENDING          # BREAKPOINT 02 — approve frozen Treg/Tcon/CD8 gate + min-cell floor
+    status: APPROVED         # frozen Treg/Tcon/CD8 gate holds; markers match clusters; labels frozen
     basis: "sorting"         # sorting-primary, refined by FOXP3/IL2RA/CTLA4/IKZF2
-    # --- POPULATION FRAMING (ratified in PI discussion; go/no-go call itself stays PENDING) ---
+    # --- POPULATION FRAMING (labels frozen; corroborated by lineage-marker expression) ---
     # Verbatim from docs/_internal/plans/2026-07-11-cross-species-poi-integration/DESIGN.md §6
     # (§6.2 wording), grounded in the mt-hi retention note
     # human_treg_arthritis/docs/_internal/reasoning/2026-07-11-mthi-treg-solidification.md.
@@ -298,5 +298,5 @@ decisions:
       # WT_heat within it is circular (selection on outcome). UMAP/narrative use only;
       # never enters pseudobulk, GSEA, or an effect-size row.
   go_no_go:
-    status: PENDING          # BREAKPOINT 03 — does the mouse 39C Treg signature enrich in JIA SF Tregs?
+    status: GO               # mouse 39C Treg up-program enriched in JIA SF T cells; broad/pan-T, not Treg-preferential; continue
     primary_signature: "WT_heat"
