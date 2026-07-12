@@ -31,11 +31,11 @@ here <- function(...) file.path(getwd(), ...)
 
 ## Where I am
 
-QC has run; this is the static read before I sign off. One question really:
+QC has run. This is the static read before I sign off. One question really:
 is the data usable? Two things settle it — do enough donors survive with
 paired SF+PB Tregs for pseudobulk (it's the donor count, not the cell count, that gives the
 forest its power), and do the sorted Treg/Tcon/CD8 separate on their own transcriptomes with no
-obvious cross-population bleed? This is a lens, not an analysis; it ends in a recorded
+obvious cross-population bleed? This is a lens, not an analysis. It ends in a recorded
 `decisions.qc` call.
 
 ## Per-stratum QC yield
@@ -114,11 +114,11 @@ for (f in c("cells_kept_dropped.png", "unsupervised_umap.png")) {
 
 ## Decision — `decisions.qc`
 
-> **Status: APPROVED.** Yield is high across all strata; one library is hard-excluded.
+> **Status: APPROVED.** Yield is high across all strata. One library is hard-excluded.
 >
 > **GSM4859852** (JIA patient 5, SF CD4 Treg) is a failed near-empty library — ~3,426
-> barcodes at ~12–30 UMIs / 3–14 genes each (ambient droplets, not cells; TCR file a
-> 2.6 KB outlier). Dropped. Disease (JIA) sample; no healthy controls — the contrast is
+> barcodes at ~12–30 UMIs / 3–14 genes each (ambient droplets, not cells). The TCR file is
+> a 2.6 KB outlier. Dropped. Disease (JIA) sample. No healthy controls — the contrast is
 > SF vs each patient's paired blood. Low criticality: only p5's SF-Treg arm is lost, so
 > the Treg SF-vs-blood comparison rests on 6 paired donors. `drop_gsms` keeps it. Data
 > usable → freeze the sorted Treg/Tcon/CD8 labels.

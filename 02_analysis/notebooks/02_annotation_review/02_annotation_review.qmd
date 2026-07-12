@@ -31,7 +31,7 @@ here <- function(...) file.path(getwd(), ...)
 
 ## Where I am
 
-Labels are frozen from the sort gate; this is the static check that they hold before I build
+Labels are frozen from the sort gate. This is the static check that they hold before I build
 the story on them. Do the labels hold up? Three things I'm reading: does
 sort identity agree with the transcriptome (the confusion table below), am I resisting the
 "activated Treg = Treg collapse" trap — IFN/CXCR3-high Tregs are still Tregs, a mis-sort is
@@ -89,9 +89,9 @@ for (f in c("umap_sort_identity.png", "marker_dotplot.png", "counts_grid.png")) 
 > annotations. I therefore approve the gate and freeze the labels.
 >
 > I keep the population framing already recorded: the mt-high, effector-like Treg subset
-> stays **inside** the single frozen coarse Treg stratum (`coarse_treg_includes_mthi`);
-> the mt-high effector Treg is a **descriptive substratum** shown on embeddings only, not
-> its own statistical stratum (it also fails the donor floor when split out); and any
+> stays **inside** the single frozen coarse Treg stratum (`coarse_treg_includes_mthi`).
+> The mt-high effector Treg is a **descriptive substratum** shown on embeddings only, not
+> its own statistical stratum (it also fails the donor floor when split out). Any
 > population defined by the mouse heat score itself is **embedding narrative only**, never
 > a tested stratum, since testing that score within a set selected on it would be circular.
 > The `pseudobulk_min_cells` floor stands, and scANVI sub-state resolution stays deferred —

@@ -109,10 +109,10 @@ eff %>%
 
 ## Figures (rendered by `05_score_signatures_viz.{py,R}`)
 
-*NES forest + per-cell `WT_heat_up` violins from the `.py` viz; per-population
+*NES forest + per-cell `WT_heat_up` violins from the `.py` viz. Per-population
 running-sum panels (Treg / Tcon / CD8) from the `.R` viz. The violin shows the
 `WT_heat_up` arm only — up and down shift together in SF, so the combined
-up−down metric is uninformative (see the stage README caption); the pseudobulk
+up−down metric is uninformative (see the stage README caption). The pseudobulk
 NES is the primary evidence.*
 
 ```{r figs, results='asis'}
@@ -129,13 +129,13 @@ for (f in c("wt_heat_nes_forest.png",
 
 *This panel shows the running sums **interactively**: where the mouse-anchor
 core gene-set genes fall in each cell type's SF-vs-PB ranked list. One running-ES line per
-population (same palette as the forest); the rug ticks below the curves are the mouse
+population (same palette as the forest). The rug ticks below the curves are the mouse
 `WT_heat` core signature genes — **hover a tick** for its symbol, its SF-vs-PB signed-Wald
 statistic, and whether it sits in the leading edge. Use the drop-down (top-right) to switch
-the **up** vs **down** set; **click a population in the legend** to toggle its line + rug.
+the **up** vs **down** set. **Click a population in the legend** to toggle its line + rug.
 Reading it: for the up set the Treg curve should climb highest with its core genes packed at
 the top ranks (leading edge), and that concentration should look weaker in Tcon / CD8 if the
-enrichment is Treg-preferential; a pan-T signal would climb alike across all three.*
+enrichment is Treg-preferential. A pan-T signal would climb alike across all three.*
 
 ```{r runsum-interactive}
 # Interactive running-sum, rendered by the reusable helper sourced in `libs`
@@ -165,7 +165,7 @@ rests on.
 design in canonical order — (1) the annotation overview (what is on the map), (2) the
 quad marker-context patch (what I draft against), (3) the candidate signatures I draft
 for, and (4) the drafted subset I end up with. Every panel is a **design preview /
-visualization**, **not a committed cohort and not statistical evidence**; the mouse
+visualization**, **not a committed cohort and not statistical evidence**. The mouse
 anchor heat score is annotation only and is **never a selection gate**. The pseudobulk
 NES above remains the evidence the decision rests on. Correlative.*
 
@@ -202,7 +202,7 @@ for (it in flow) {
 > **Where the analysis goes next: continue.** This is a positive, reproducible signal
 > worth carrying into the cross-dataset comparison, so I proceed to the comparator
 > signatures, the effector-Treg correlation, the TCR/activity-inference reads, and the
-> other disease datasets; this pseudobulk effect-size row anchors the cross-dataset
+> other disease datasets. This pseudobulk effect-size row anchors the cross-dataset
 > synthesis forest. I read the signal as **consistent with** the mouse stress axis, a
 > correlative observation and not evidence of causation, and I state plainly that it is
 > **not Treg-specific** — the up-program rises across Treg, Tcon, and CD8 alike. I do not
