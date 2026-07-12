@@ -1,6 +1,6 @@
 ---
-title: "BREAKPOINT 01 — is the tissue usable for the go/no-go?"
-subtitle: "Stage 01_qc · GSE160097 JIA sorted Treg/Tcon/CD8"
+title: "Is the JIA sorted-T-cell data usable?"
+subtitle: "GSE160097 — JIA synovial-fluid vs paired-blood sorted Treg/Tcon/CD8"
 format:
   html:
     toc: true
@@ -32,7 +32,7 @@ here <- function(...) file.path(getwd(), ...)
 ## Where I am
 
 QC has run; this is the static read before I sign off. One question really:
-is the tissue usable for the go/no-go? Two things settle it — do enough donors survive with
+is the data usable? Two things settle it — do enough donors survive with
 paired SF+PB Tregs for pseudobulk (it's the donor count, not the cell count, that gives the
 forest its power), and do the sorted Treg/Tcon/CD8 separate on their own transcriptomes with no
 obvious cross-population bleed? This is a lens, not an analysis; it ends in a recorded
@@ -72,11 +72,41 @@ cat(sprintf("SF-Treg strata retained: %d ; PB-Treg strata retained: %d\n",
             sum(treg$tissue_s == "SF"), sum(treg$tissue_s == "PB")))
 ```
 
+## Per-sample QC explorer — what is each of the 40 libraries?
+
+*One point per GSM (40 sorted Treg/Tcon/CD8 libraries). x = median genes/cell (log),
+y = median mitochondrial %, point size = library size (n_cells), colour = sorted
+population. **Hover any point** for its GSM, donor (JIA patient), tissue (synovial
+fluid / peripheral blood), sorted population, cell count, kept fraction, and median
+counts/genes/%mt, with a kept/EXCLUDED flag. The single hard-excluded library,
+**GSM4859852**, sits at far-left low-median-genes and is marked with a black cross and
+a pinned label — it is a near-empty library (ambient/empty droplets), a UMI/gene
+outlier rather than a real T-cell profile.*
+
+::: {.content-visible when-format="html"}
+```{r qc-explorer, eval=knitr::is_html_output()}
+# Interactive per-sample QC explorer, rendered by the reusable helper
+# (02_analysis/helpers/qc_sample_explorer.R): aggregates the per-cell QC table to
+# one point per GSM. Same separate-regions layout (legend bottom strip) as
+# runsum_widget.R so no control overlaps the legend.
+source("02_analysis/helpers/qc_sample_explorer.R")
+build_qc_sample_explorer(here("03_results/01_qc/tables/qc_metrics_per_cell.csv"))
+```
+:::
+
+::: {.content-visible when-format="pdf"}
+```{r qc-static-pdf, eval=!knitr::is_html_output(), results='asis'}
+# Static per-GSM QC violins for the non-interactive (PDF) surface.
+p <- here("03_results/01_qc/figures/_overview/qc_violins_per_gsm.png")
+if (file.exists(p)) cat(sprintf("\n![qc_violins_per_gsm.png](%s)\n\n", p))
+```
+:::
+
 ## Figures (rendered by `01_qc_filter_viz.py`)
 
 ```{r figs, results='asis'}
 ov <- here("03_results/01_qc/figures/_overview")
-for (f in c("qc_violins_per_gsm.png", "cells_kept_dropped.png", "unsupervised_umap.png")) {
+for (f in c("cells_kept_dropped.png", "unsupervised_umap.png")) {
   p <- file.path(ov, f)
   if (file.exists(p)) cat(sprintf("\n![%s](%s)\n\n", f, p))
 }
@@ -84,13 +114,25 @@ for (f in c("qc_violins_per_gsm.png", "cells_kept_dropped.png", "unsupervised_um
 
 ## Decision — `decisions.qc`
 
-> **Claim:** *(fill at review)* — e.g. "N/7 donors retain paired SF+PB Tregs above the
-> cell floor; sorted populations separate cleanly on the unsupervised UMAP with Treg
-> markers concentrated in the Treg gate → the tissue is usable for the go/no-go."
+> **Status: APPROVED.** The QC thresholds are sound. The sorted JIA T-cell libraries
+> retain high yield across every stratum, and the only library I hard-exclude is
+> **GSM4859852**.
 >
-> **Branch:** *(fill at review)* — approve QC thresholds and proceed to freeze
-> Treg/Tcon/CD8 labels (stage 02); list any GSM to drop in `decisions.qc.drop_gsms`;
-> if paired-Treg donor count is too low, flag the forest as underpowered before pseudobulk.
+> **What GSM4859852 is, and why it is non-critical.** GSM4859852 is the synovial-fluid
+> CD4 Treg library of **JIA patient 5** — and it is a **failed, near-empty library**.
+> It carries ~3,426 barcodes, but each holds only ~12–30 UMIs and ~3–14 genes, the
+> unmistakable signature of ambient/empty droplets rather than intact cells; its paired
+> TCR file is a 2.6 KB outlier, far below its siblings. So this is a UMI/gene outlier,
+> not a real T-cell profile, and it is right to drop it. It is a **disease (JIA)** sample:
+> this cohort has no healthy controls, and the contrast throughout is synovial fluid
+> against each patient's own paired peripheral blood. Its criticality is **low** —
+> excluding it removes only patient 5's synovial-fluid Treg arm, which is why the Treg
+> synovial-fluid-vs-blood comparison downstream rests on **6 paired donors**; the
+> enrichment result does not hinge on this one sample. `drop_gsms` already records
+> GSM4859852, and it stays there. The interactive explorer above places it exactly where
+> its numbers put it — far left, near-empty, marked and labelled apart from the healthy
+> mass of the cohort. With that single exclusion, the tissue is usable and I proceed to
+> freeze the sorted Treg/Tcon/CD8 labels.
 
 ```{r decisions-echo, echo=TRUE}
 str(yaml::read_yaml(here("02_analysis/config/analysis_config.yaml"))$decisions$qc)
