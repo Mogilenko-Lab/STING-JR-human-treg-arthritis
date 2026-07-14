@@ -172,9 +172,14 @@ def main() -> None:
     def _join_scores(df):
         if scores is None:
             return
-        for c in ["WT_heat_up", "WT_heat_down", "WT_heat_updown"]:
-            if c in scores.columns:
-                df[c] = scores[c].reindex(df.index).to_numpy()
+        # The per-cell WT_heat lens is now AUCell (stage 05, rank-based [0,1]); expose it to
+        # the QC/07 maps under the historical overlay names so the map pathway stays coherent.
+        auc = {"WT_heat_up": "WT_heat_up_AUCell", "WT_heat_down": "WT_heat_down_AUCell"}
+        for name, col in auc.items():
+            if col in scores.columns:
+                df[name] = scores[col].reindex(df.index).to_numpy()
+        if {"WT_heat_up", "WT_heat_down"} <= set(df.columns):
+            df["WT_heat_updown"] = df["WT_heat_up"] - df["WT_heat_down"]
 
     # --- 01_qc explorer (QC + markers + mouse-stress score in one table) ---
     a1 = _slim(sc.read_h5ad(PATHS.object("01_qc")))

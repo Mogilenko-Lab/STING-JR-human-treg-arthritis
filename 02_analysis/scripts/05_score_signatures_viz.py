@@ -5,7 +5,7 @@
 Reads the fgsea tables + score tables from 05_score_signatures.py and renders:
   - the WT_heat NES forest across Treg / Tcon / CD8 (the Treg-preference check —
     the money panel for the cross-species comparison);
-  - per-cell WT_heat_up score violins SF-Treg vs PB-Treg vs SF-Tcon vs SF-CD8
+  - per-cell WT_heat_up AUCell score violins SF-Treg vs PB-Treg vs SF-Tcon vs SF-CD8
     (running-sum figure moved to 05_score_signatures_viz.R).
 """
 from __future__ import annotations
@@ -90,7 +90,7 @@ def main() -> None:
     save_overview(fig, STAGE, "wt_heat_nes_forest",
                   table=gsea[["cell_state", "pathway_id", "nes", "pvalue", "padj", "set_size"]]
                   if not gsea.empty else pd.DataFrame(),
-                  finding=("The go/no-go readout: whether the mouse 39 °C Treg up-program enriches "
+                  finding=("The primary readout: whether the mouse 39 °C Treg up-program enriches "
                            "in JIA SF-vs-PB Tregs, and whether that enrichment is Treg-preferential "
                            "over Tcon/CD8."),
                   script=SCRIPT, fn="main",
@@ -110,7 +110,7 @@ def main() -> None:
     fig3, ax = plt.subplots(figsize=(9, 6))
     data, positions, colors = [], [], []
     for i, grp in enumerate(groups):
-        vals = dm.loc[dm["group"] == grp, "WT_heat_up"].values
+        vals = dm.loc[dm["group"] == grp, "WT_heat_up_AUCell"].values
         if len(vals):
             data.append(vals); positions.append(i)
             colors.append(POP_COL[grp.split()[0]])
@@ -118,29 +118,27 @@ def main() -> None:
     for b, c in zip(parts["bodies"], colors):
         b.set_facecolor(c); b.set_alpha(0.65)
     for i, grp in zip(positions, [groups[p] for p in positions]):
-        vals = dm.loc[dm["group"] == grp, "WT_heat_up"].values
+        vals = dm.loc[dm["group"] == grp, "WT_heat_up_AUCell"].values
         ax.scatter(np.full(len(vals), i), vals, s=18, c="black", zorder=3)
-    ax.axhline(0, ls="--", c="grey", lw=0.8)
     ax.set_xticks(range(len(groups))); ax.set_xticklabels(groups, rotation=30, ha="right")
-    ax.set_ylabel("donor-mean WT_heat_up score")
-    ax.set_title("Per-cell WT_heat_up score, donor means by state × tissue")
+    ax.set_ylabel("donor-mean WT_heat_up AUCell score")
+    ax.set_title("Per-cell WT_heat_up AUCell score, donor means by state × tissue")
     fig3.tight_layout()
     save_overview(fig3, STAGE, "score_violins", table=dm,
-                  finding=("Corroborative per-cell view: donor-mean WT_heat score in SF vs PB across "
-                           "Treg/Tcon/CD8 — is the SF-vs-PB shift Treg-preferential?"),
+                  finding=("Corroborative per-cell view: donor-mean WT_heat_up AUCell score in SF vs PB "
+                           "across Treg/Tcon/CD8 — is the SF-vs-PB shift Treg-preferential?"),
                   script=SCRIPT, fn="main",
-                  config_kv="signature = WT_heat_up/down (scanpy score_genes)",
+                  config_kv="signature = WT_heat_up (AUCell, rank-based [0,1])",
                   input="03_results/05_scoring/tables/donor_label_score_means.csv",
-                  how_to_read=("Each dot = one donor's mean WT_heat_up score for that state×tissue; "
-                               "violins summarise across donors. Scores sit near/below zero because "
-                               "scanpy score_genes centres each cell against a random reference gene set "
-                               "— the absolute level is arbitrary; only the RELATIVE SF-vs-PB shift is "
-                               "read (e.g. Treg SF > Treg PB). This is a different estimand from the "
-                               "forest: that NES is fgsea on the donor-pseudobulk SF-vs-PB signed-Wald "
-                               "ranking, asking whether the WT_heat set concentrates at the top of the "
-                               "whole ranked list — a normalised statistic on its own scale, positive "
-                               "here. Secondary tier (percell) — NEVER pooled with the pseudobulk NES. "
-                               "Down arm omitted (up and down co-shift in SF). Correlative."),
+                  how_to_read=("Each dot is one donor's mean WT_heat_up AUCell score for that "
+                               "state×tissue, and the violins summarise across donors. AUCell is a "
+                               "rank-based score in [0,1], the area under each cell's gene-recovery "
+                               "curve for the up-set, robust to library size and composition. Read the "
+                               "RELATIVE SF-vs-PB shift within each population (Treg SF vs Treg PB), "
+                               "not the absolute level. This is a different estimand from the forest "
+                               "NES (fgsea on the donor-pseudobulk ranked list). Secondary tier "
+                               "(percell), NEVER pooled with the pseudobulk NES. Down arm omitted "
+                               "because up and down co-shift in SF. Correlative."),
                   config=FIG_CFG)
     print("[05_scoring_viz] wrote 2 overviews (NES forest + score violins)")
 

@@ -19,24 +19,22 @@ Correlative (consistent-with), not causal.
 
 ## figures/_overview/score_violins.png
 
-Corroborative per-cell view: donor-mean WT_heat score in SF vs PB
-across Treg/Tcon/CD8 — is the SF-vs-PB shift Treg-preferential?
+Corroborative per-cell view: donor-mean WT_heat_up AUCell score in SF
+vs PB across Treg/Tcon/CD8 — is the SF-vs-PB shift Treg-preferential?
 
-**How to read:** Each dot = one donor's mean WT_heat_up score for that state×tissue;
-violins summarise across donors. Scores sit near/below zero because
-scanpy score_genes centres each cell against a random reference gene
-set — the absolute level is arbitrary; only the RELATIVE SF-vs-PB
-shift is read (e.g. Treg SF > Treg PB). This is a different estimand
-from the forest: that NES is fgsea on the donor-pseudobulk SF-vs-PB
-signed-Wald ranking, asking whether the WT_heat set concentrates at
-the top of the whole ranked list — a normalised statistic on its own
-scale, positive here. Secondary tier (percell) — NEVER pooled with the
-pseudobulk NES. Down arm omitted (up and down co-shift in SF).
-Correlative.
+**How to read:** Each dot is one donor's mean WT_heat_up AUCell score for that
+state×tissue, and the violins summarise across donors. AUCell is a
+rank-based score in [0,1], the area under each cell's gene-recovery
+curve for the up-set, robust to library size and composition. Read the
+RELATIVE SF-vs-PB shift within each population (Treg SF vs Treg PB),
+not the absolute level. This is a different estimand from the forest
+NES (fgsea on the donor-pseudobulk ranked list). Secondary tier
+(percell), NEVER pooled with the pseudobulk NES. Down arm omitted
+because up and down co-shift in SF. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/05_score_signatures_viz.py` | `main` | `signature = WT_heat_up/down (scanpy score_genes)` | `03_results/05_scoring/tables/donor_label_score_means.csv` |
+| `02_analysis/scripts/05_score_signatures_viz.py` | `main` | `signature = WT_heat_up (AUCell, rank-based [0,1])` | `03_results/05_scoring/tables/donor_label_score_means.csv` |
 
 ## figures/_overview/wt_heat_running_sum_treg.png
 
@@ -128,4 +126,3 @@ The NES / p-value summarising each curve live in the sibling `gsea_pseudobulk_{t
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/helpers/fgsea_prerank.R` | (top-level) | `gsea_min_size=5; gsea_max_size=500; gsea_seed=123; gsea_nperm=100000; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv` + frozen `WT_heat_{up,down}.txt` |
-

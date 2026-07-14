@@ -6,10 +6,11 @@ Primary evidence: pre-ranked fgsea of the frozen mouse `WT_heat` up/down sets
 against the donor-pseudobulk SF-vs-PB ranked lists (stage 03), per population ->
 NES + FDR. Treg is the money number; Tcon + CD8 are the Treg-specificity control.
 
-Secondary (corroborative) evidence: per-cell scanpy score_genes of the same sets,
-summarised to donor x label means, with an SF-vs-PB standardized mean difference
-(SMD) at the donor level. Per the effect-size contract, the
-NES (primary_pseudobulk) and the SMD (secondary_percell) are NEVER pooled.
+Secondary (corroborative) evidence: per-cell AUCell + UCell (rank-based,
+composition/depth-robust) of the same sets, summarised to donor x label means, with
+an SF-vs-PB standardized mean difference (SMD) at the donor level on the AUCell
+`WT_heat_up` score. Per the effect-size contract, the NES (primary_pseudobulk) and
+the SMD (secondary_percell) are NEVER pooled.
 
 Deferred (until go = yes): comparators KO_heat/Interaction, Tier-1 MSigDB battery,
 eTreg correlation, CoReSh, pathway-explorer.
@@ -45,7 +46,8 @@ os.chdir(ROOT)
 
 from config import (PATHS, PARAMS, TISSUE_KEY, DONOR_KEY, TISSUE_NUM, TISSUE_DEN,  # noqa: E402
                     COARSE_LABEL)
-from helpers.geneset_utils import load_signature, score_cells  # noqa: E402
+from helpers.geneset_utils import (load_signature, score_cells_aucell_ucell,  # noqa: E402
+                                   _symbol_to_varname)
 from helpers.figure_style import append_master_table, FIG_CFG  # noqa: E402
 
 STAGE = "05_scoring"
@@ -88,20 +90,31 @@ def main() -> None:
     sig = load_signature(PATHS.signature_contract, PRIMARY)
     print(f"[05_scoring] {PRIMARY}: {len(sig['up'])} up / {len(sig['down'])} down genes")
 
-    # --- per-cell scores (secondary tier) on lognorm X ---
-    score_cells(adata, sig, layer=None, prefix=PRIMARY, seed=int(PARAMS.gsea_seed))
-    cov = adata.uns[f"{PRIMARY}_score_coverage"]
-    print(f"[05_scoring] per-cell coverage: up {cov['n_up_in_data']}/{cov['n_up_total']}, "
-          f"down {cov['n_down_in_data']}/{cov['n_down_total']}")
+    # --- per-cell scores (secondary tier): AUCell + UCell on lognorm X ---
+    # Rank-based, composition/depth-robust; replaces the mean-centred scanpy score_genes.
+    # Up/down sets are scored SEPARATELY (AUCell/UCell are unsigned single-list scorers).
+    # AUCell is canonical for the secondary SMD; UCell rides alongside as a cross-check.
+    AUC_UP = f"{PRIMARY}_up_AUCell"
+    gene_sets = {f"{PRIMARY}_up": list(sig["up"]), f"{PRIMARY}_down": list(sig["down"])}
+    scores = score_cells_aucell_ucell(
+        adata, gene_sets, layer=None, symbol_col="gene_symbol",
+        n_cores=int(PARAMS.get("percell_score_ncores", 4)))
+    score_cols = list(scores.columns)   # WT_heat_{up,down}_{AUCell,UCell}
+    for c in score_cols:
+        adata.obs[c] = scores[c].to_numpy()
+
+    sym_to_var = _symbol_to_varname(adata, "gene_symbol")
+    n_up = int(sum(s in sym_to_var for s in sig["up"]))
+    n_down = int(sum(s in sym_to_var for s in sig["down"]))
+    print(f"[05_scoring] per-cell coverage: up {n_up}/{len(sig['up'])}, "
+          f"down {n_down}/{len(sig['down'])}")
 
     tdir = PATHS.tables(STAGE)
-    per_cell = adata.obs[[DONOR_KEY, TISSUE_KEY, "coarse_label",
-                          f"{PRIMARY}_up", f"{PRIMARY}_down", f"{PRIMARY}_updown"]].copy()
+    per_cell = adata.obs[[DONOR_KEY, TISSUE_KEY, "coarse_label"] + score_cols].copy()
     per_cell.to_csv(tdir / "per_cell_scores.csv")
 
     donor_means = (per_cell.groupby([DONOR_KEY, TISSUE_KEY, "coarse_label"], observed=True)
-                   [[f"{PRIMARY}_up", f"{PRIMARY}_down", f"{PRIMARY}_updown"]]
-                   .mean().reset_index())
+                   [score_cols].mean().reset_index())
     donor_means["n_cells"] = (per_cell.groupby([DONOR_KEY, TISSUE_KEY, "coarse_label"], observed=True)
                               .size().values)
     donor_means.to_csv(tdir / "donor_label_score_means.csv", index=False)
@@ -137,13 +150,13 @@ def main() -> None:
         else:
             print(f"[05_scoring] {pop}: no ranked list (DE skipped) — no primary NES")
 
-        # ---- SECONDARY: per-cell SMD (SF vs PB) on WT_heat_updown ----
+        # ---- SECONDARY: per-cell AUCell SMD (SF vs PB) on WT_heat_up ----
         dm = donor_means[donor_means["coarse_label"] == pop]
-        sf = dm[dm[TISSUE_KEY] == TISSUE_NUM][f"{PRIMARY}_updown"].values
-        pb = dm[dm[TISSUE_KEY] == TISSUE_DEN][f"{PRIMARY}_updown"].values
+        sf = dm[dm[TISSUE_KEY] == TISSUE_NUM][AUC_UP].values
+        pb = dm[dm[TISSUE_KEY] == TISSUE_DEN][AUC_UP].values
         st = smd(sf, pb)
         eff_rows.append(dict(
-            dataset=DATASET, signature=f"{PRIMARY}_updown", cell_state=pop,
+            dataset=DATASET, signature=f"{PRIMARY}_up", cell_state=pop,
             contrast="SF_vs_PB", effect_metric="percell_auc_smd",
             evidence_tier="secondary_percell", estimate=st["estimate"], se=st["se"],
             ci_low=st["ci_low"], ci_high=st["ci_high"],
