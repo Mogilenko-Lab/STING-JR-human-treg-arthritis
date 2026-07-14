@@ -34,6 +34,10 @@
 # specific file with `git add -f` if you want to keep it as a record.
 02_analysis/notebooks/**/eda/
 
+# marimo app cache + exported static renders — regenerable from the .py app.
+02_analysis/notebooks/**/__marimo__/
+02_analysis/notebooks/**/*.html
+
 # Scratch: throwaway artifacts, never committed
 03_results/_scratch/*
 !03_results/_scratch/.gitkeep
