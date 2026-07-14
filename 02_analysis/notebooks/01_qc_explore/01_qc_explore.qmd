@@ -12,7 +12,7 @@ jupyter: python3
 ## Where I am
 
 QC kept ~100k sorted Treg / Tcon / CD8 from paired synovial fluid and blood. The static
-`01_qc_review` notebook has the kept/dropped numbers; here I just look at the cells before I
+`01_qc_review` notebook has the kept/dropped numbers. Here I just look at the cells before I
 sign off
 
 ```{python}
@@ -107,15 +107,15 @@ one donor (p6), so I hold it loosely.
 
 ## Channels
 
-- `score_eTreg` — human effector-Treg signature (GSE161426, SF vs PB Treg; top genes CXCL13, CXCR6, EMP1, RCAN2). This is the one that tracks the pocket.
+- `score_eTreg` — human effector-Treg signature (GSE161426, SF vs PB Treg — top genes CXCL13, CXCR6, EMP1, RCAN2). This is the one that tracks the pocket.
 - `WT_heat_up` — the mouse 39 °C program. `score_KO_heat_up` and `score_Interaction_z` are the cGAS-KO and cGAS-dependent comparators, plus the 7 Interaction genes individually (IFI16, IRF7, MX1, …). The heat channels are quiet — nothing much stands out per cell.
-- `score_HSP`, `score_apoptosis` — the stressed-vs-dying check; both flat in the pocket.
+- `score_HSP`, `score_apoptosis` — the stressed-vs-dying check. Both flat in the pocket.
 
-(`_up`/`_down`/`_updown`: each signature has an up- and down-set; `_up` scores the up-genes, `_updown` = up − down. `_up` is usually enough.)
+(`_up`/`_down`/`_updown`: each signature has an up- and down-set. `_up` scores the up-genes, `_updown` = up − down. `_up` is usually enough.)
 
 ## Save
 
-jscatter's own save only grabs the points — no legend or labels. `save_selection` writes the barcodes (re-loadable later); `snapshot` writes a labelled figure. Both go to `eda/`.
+jscatter's own save only grabs the points — no legend or labels. `save_selection` writes the barcodes (re-loadable later). `snapshot` writes a labelled figure. Both go to `eda/`.
 
 ```{python}
 #| label: save

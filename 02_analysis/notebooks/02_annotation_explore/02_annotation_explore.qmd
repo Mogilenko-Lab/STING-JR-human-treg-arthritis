@@ -11,12 +11,12 @@ jupyter: python3
 
 ## Where I am
 
-Labels are frozen from the sort gate; now I check they hold before I build the story on
+Labels are frozen from the sort gate. Now I check they hold before I build the story on
 them. I'm really asking one thing: where does the transcriptome disagree
 with the sort label (`sort_consistent = False`), and when it does, is it the "activated Treg =
 collapse" trap — still FOXP3⁺, just inflamed — or a genuine CD8/Tcon mis-sort? Brush the
 disagreements and read the markers. If the disagreements are all activation, I freeze at
-Treg/Tcon/CD8 and defer scANVI; if they're real mis-sorts, they go on the exclusion list.
+Treg/Tcon/CD8 and defer scANVI. If they're real mis-sorts, they go on the exclusion list.
 
 ```{python}
 #| label: setup

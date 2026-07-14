@@ -82,9 +82,10 @@ if (nrow(up)) {
 }
 ```
 
-## Secondary (corroborative) — per-cell donor-mean score, SF vs PB
+## Secondary (corroborative) — per-cell AUCell score, donor-mean SF vs PB
 
-*Never pooled with the NES: the per-cell score and the pseudobulk NES are different scales.*
+*The per-cell lens is real AUCell (rank-based, bounded in [0,1], robust to library size and
+composition). It stays on its own footing and is never pooled with the pseudobulk NES.*
 
 ```{r percell}
 eff <- read.csv(here("03_results/master/effect_sizes_treg_arthritis.csv"))
@@ -93,7 +94,7 @@ eff %>%
   transmute(cell_state, signature, SMD = round(estimate, 3),
             ci = sprintf("[%.2f, %.2f]", ci_low, ci_high),
             pvalue = signif(pvalue, 3), n_donors) %>%
-  kable(caption = "Per-cell WT_heat_updown SF-vs-PB donor-level SMD (secondary tier).")
+  kable(caption = "Per-cell WT_heat_up AUCell SF-vs-PB donor-level SMD (secondary tier).")
 ```
 
 ## The effect-size row carried forward to cross-dataset synthesis
@@ -109,11 +110,10 @@ eff %>%
 
 ## Figures (rendered by `05_score_signatures_viz.{py,R}`)
 
-*NES forest + per-cell `WT_heat_up` violins from the `.py` viz. Per-population
+*NES forest + per-cell `WT_heat_up` AUCell violins from the `.py` viz. Per-population
 running-sum panels (Treg / Tcon / CD8) from the `.R` viz. The violin shows the
-`WT_heat_up` arm only — up and down shift together in SF, so the combined
-up−down metric is uninformative (see the stage README caption). The pseudobulk
-NES is the primary evidence.*
+`WT_heat_up` arm only, since up and down shift together in SF and AUCell scores each
+list unsigned (see the stage README caption). The pseudobulk NES is the primary evidence.*
 
 ```{r figs, results='asis'}
 ov <- here("03_results/05_scoring/figures/_overview")
@@ -143,15 +143,14 @@ climbs alike across all three.*
 build_runsum_widget(here("03_results/05_scoring/tables"))
 ```
 
-**How to read the per-cell violins (secondary tier) vs the forest (primary).** The
-per-cell `WT_heat_up` scores sit **negative** even where the biology is positive
-(Treg SF > Treg PB). That is expected: `scanpy score_genes` centres each cell against a
-size- and expression-matched **random reference set**, so the absolute level is arbitrary
-and only the **relative** SF-vs-PB shift reads. The forest is a **different estimand**:
-fgsea (`clusterProfiler::GSEA(by = "fgsea")`) on the donor-pseudobulk signed-Wald ranked
-list, asking whether the whole `WT_heat` set packs at the top, normalised to a NES on its
-own positive scale. The two stay separate. The violins are corroborative colour. The
-pseudobulk NES is the primary evidence the decision rests on.
+**How to read the per-cell violins vs the forest.** The per-cell `WT_heat_up` scores are
+**AUCell** values — area under each cell's gene-recovery curve for the up-set, bounded in
+**[0, 1]** and rank-based, so robust to library size and normalisation. Their absolute level
+reflects set size and background detection, so I read the **relative** SF-vs-PB shift within
+each population (Treg SF vs Treg PB), not the height. The forest is a **different estimand**:
+fgsea on the donor-pseudobulk signed-Wald ranked list, asking whether the whole `WT_heat` set
+packs at the top as a NES on its own scale. The two stay separate. Here every population
+shifts SF-high in the same direction as the NES — the pseudobulk NES is the primary evidence.
 
 ### The drafted subset — from what's on the map to what I end up with
 
@@ -169,11 +168,11 @@ flow <- list(
   list(f = "umap_annotation_treg.png",
        cap = "**(1/4) Annotation overview — what is on the map.** Frozen cell-type annotation (coarse_label: Treg/Tcon/CD8) + tissue (SF/PB) companion. Visualisation only."),
   list(f = "umap_quadmarkers_treg.png",
-       cap = "**(2/4) Quad marker context — what we draft against.** %mt + FOXP3 / CTLA4 / IKZF2 (core Treg identity/activation: master lineage TF, suppressive effector, stable-Treg/Helios). Visualisation only."),
+       cap = "**(2/4) Quad marker context — what I draft against.** %mt + FOXP3 / CTLA4 / IKZF2 (core Treg identity/activation: master lineage TF, suppressive effector, stable-Treg/Helios). Visualisation only."),
   list(f = "umap_signatures_treg.png",
-       cap = "**(3/4) Signatures we draft for.** WT_heat (anchor annotation), effector (eTreg) and stress scores landing individually on the sorted T-cell UMAP — the WT_heat overlay is broad (pan-T), not Treg-restricted. Visualisation only."),
+       cap = "**(3/4) Signatures I draft for.** WT_heat (anchor annotation), effector (eTreg) and stress scores landing individually on the sorted T-cell UMAP — the WT_heat overlay is broad (pan-T), not Treg-restricted. Visualisation only."),
   list(f = "umap_drafted_treg.png",
-       cap = "**(4/4)** The subset we end up with. Cells the multi-hook OR-union rules would draft (hook_or_union == TRUE, ~33% of the compartment) highlighted vs background, with a facet by which hook drafted them. Design preview, not a committed cohort; anchor heat score never a selection gate.")
+       cap = "**(4/4)** The subset I end up with. Cells the multi-hook OR-union rules would draft (hook_or_union == TRUE, ~33% of the compartment) highlighted vs background, with a facet by which hook drafted them. Design preview, not a committed cohort; anchor heat score never a selection gate.")
 )
 for (it in flow) {
   p <- file.path(ov, it$f)
