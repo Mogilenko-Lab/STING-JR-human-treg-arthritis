@@ -1,0 +1,15 @@
+# 08_harvest_readout — artifact captions
+
+_**Abbreviations:** SF = synovial fluid (inflamed joint), PB = peripheral blood. The SF-vs-PB comparison is within the paired JIA donors of GSE160097. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory, Tcon = CD4⁺CD25⁻ conventional, CD8 = CD8⁺CD45RO⁺ memory._
+
+I added two MSigDB Hallmark per-cell readouts — HALLMARK_HYPOXIA and HALLMARK_UNFOLDED_PROTEIN_RESPONSE — to the frozen JIA SF/PB annotation, scored with the same rank-based AUCell+UCell engine the SAVI STING-reference compartment uses, so the two compartments read on one scale. Hypoxia here is a **readout** consistent with a low-oxygen, metabolically stressed state, and makes no HIF-causality claim. These per-cell scores are a **secondary, annotation-tier** view. They are never pooled with the confirmatory donor-pseudobulk enrichment, and they carry alongside the compartment's already-derived score_HSP, score_eTreg and WT_heat_updown readouts for one tidy comparison. The per-cell feed for the reactive review lives at `03_results/interactive/08_harvest_readout.parquet` (regenerable, not committed).
+
+## tables/harvest_readout_summary.csv
+
+Across JIA synovial T cells the hypoxia readout rises over paired blood in every sorted state and is strongest in Treg (per-cell d ≈ 1.7), with a synovial-Treg high-pocket where ~30% of SF Tregs exceed the whole-dataset 90th percentile against ~1.7% in blood, while the UPR readout stays broadly flat (weak SF uptick in Treg, slightly lower in SF Tcon and CD8) — a hypoxia-over-UPR pattern consistent with a low-oxygen joint niche rather than a dominant proteostatic-stress response.
+
+**How to read:** One row per (`coarse_label` × `tissue` × `readout`). The five readouts are the two Hallmark AUCell scores (`HALLMARK_HYPOXIA`, `HALLMARK_UNFOLDED_PROTEIN_RESPONSE`), the heat-shock module `score_HSP`, the effector-Treg module `score_eTreg`, and the mouse 39 °C anchor `WT_heat_updown` (AUCell scores are rank-based in [0,1]). `mean`/`sd`/`median` summarise the stratum, `n_cells` its size, `mean_pct_counts_mt` its mean mitochondrial fraction as a viability cross-check. `frac_above_p90` is the fraction above the readout's whole-dataset 90th percentile (`global_p90`), flagging a high-expressing pocket rather than a whole-distribution shift. `sf_minus_pb_mean` and `sf_minus_pb_smd` give the per-cell SF-minus-PB shift for that cell-state as a raw mean difference and a standardized Cohen's d, where positive means higher in synovial fluid. Counts are large, so read the `smd` magnitude as an effect size rather than significance. Correlative and hypothesis-generating, secondary tier — claims are re-derived in the donor-pseudobulk analysis first. Claim tier L3 per-cell statistic.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/08_harvest_readout.py` | `main` → `summarise` | `percell_score_ncores=8` | `03_results/objects/02_annotation.h5ad`, `00_data/references/msigdb_hallmark/{HALLMARK_HYPOXIA,HALLMARK_UNFOLDED_PROTEIN_RESPONSE}.txt`, `03_results/interactive/{05_gonogo_explore,01_qc_explore}.parquet` |

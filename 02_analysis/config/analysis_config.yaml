@@ -193,6 +193,9 @@ stages:
   - id: "07_embedding"
     title: "Treg embedding atlas (harvest-design preview)"
     purpose: "SUPPLEMENTARY/VISUALISATION only (embeddings are never the statistical readout). Previews the multi-hook bounded-OR harvest design (DESIGN §2.3): where each candidate signature lands on the UMAP alone and under the OR-union of anchor-orthogonal hooks (lineage OR effector OR mt-hi-viable). The mouse WT_heat anchor score is an annotation overlay, never a selection gate; no cells are lassoed/subset here."
+  - id: "08_harvest_readout"
+    title: "Hallmark hypoxia/UPR per-cell readouts (harvest)"
+    purpose: "SECONDARY/annotation tier only (never pooled with the pseudobulk NES spine or the 07 POI harvest). Per-cell AUCell+UCell of MSigDB Hallmark HYPOXIA and UNFOLDED_PROTEIN_RESPONSE on the frozen annotation, aligned with the sting compartment, carried alongside the already-derived score_HSP/score_eTreg/WT_heat_updown readouts. Hypoxia is a READOUT (consistent-with a low-O2/stressed state), NOT a HIF-causality claim; feeds the reactive review and the cross-species harvest question."
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)
