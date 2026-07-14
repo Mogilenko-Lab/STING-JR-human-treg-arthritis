@@ -11,6 +11,9 @@ Used by 05_score_signatures.py.
 """
 from __future__ import annotations
 
+import os
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Dict, List
 
@@ -43,12 +46,16 @@ def load_manifest(contract_dir: Path) -> pd.DataFrame:
 def score_cells(adata, sig: Dict[str, object], layer: str | None = None,
                 symbol_col: str = "gene_symbol", seed: int = 0,
                 prefix: str | None = None) -> List[str]:
-    """Add per-cell up/down module scores (scanpy score_genes) on human symbols.
+    """DEPRECATED per-cell scorer (scanpy score_genes module score).
 
-    Scores on `adata.X` (assumed log-normalized) unless a `layer` is given. Genes
-    are matched against `adata.var[symbol_col]`; only present genes are scored.
-    Adds obs columns `<prefix>_up`, `<prefix>_down`, `<prefix>_updown`.
-    Returns the list of obs columns written.
+    Superseded by `score_cells_aucell_ucell` (rank-based AUCell + UCell, the
+    rigorous composition-robust secondary lens). Kept intact so nothing breaks
+    until the pipeline scripts switch over; do not use in new code.
+
+    Adds per-cell up/down module scores on human symbols. Scores on `adata.X`
+    (assumed log-normalized) unless a `layer` is given. Genes are matched against
+    `adata.var[symbol_col]`; only present genes are scored. Adds obs columns
+    `<prefix>_up`, `<prefix>_down`, `<prefix>_updown`. Returns the columns written.
     """
     import numpy as np
     import scanpy as sc
@@ -75,6 +82,93 @@ def score_cells(adata, sig: Dict[str, object], layer: str | None = None,
         "n_down_total": len(sig["down"]),                                # type: ignore[arg-type]
     }
     return written
+
+
+def score_cells_aucell_ucell(adata, gene_sets: Dict[str, List[str]],
+                             layer: str | None = None, symbol_col: str = "gene_symbol",
+                             n_cores: int = 4, tmp_dir: str | Path | None = None,
+                             keep_tmp: bool = False) -> pd.DataFrame:
+    """Per-cell AUCell + UCell scores — the rigorous, composition-robust secondary lens.
+
+    Rank-based scoring (AUCell AUC over the per-cell gene ranking; UCell Mann-Whitney
+    U statistic). Both are invariant to per-cell library size and to the exact
+    normalization, unlike the mean-centred scanpy `score_genes` module score this
+    replaces. This is the SECONDARY tier; donor-pseudobulk fgsea NES stays primary.
+
+    Interop mirrors `fgsea_prerank.R`: the expression matrix and gene sets are
+    written to a scratch dir, `percell_score.R` (same helpers/ dir) is called via
+    subprocess, and the per-cell CSV is read back.
+
+    Parameters
+    ----------
+    adata : AnnData with HGNC symbols in `var[symbol_col]`.
+    gene_sets : {set_name: [HGNC symbols]}. Set names are preserved verbatim as
+        column prefixes. Score up/down sets separately (e.g. "WT_heat_up",
+        "WT_heat_down") — AUCell/UCell are unsigned, single-list scorers.
+    layer : expression layer to score; None -> `adata.X` (must be LOG-NORMALIZED,
+        NOT raw counts). Rank-based scores are monotone-invariant, but stage-05
+        scores on log-normalized X for consistency.
+    n_cores : parallel workers (AUCell block BPPARAM + UCell ncores).
+
+    Returns
+    -------
+    DataFrame indexed by `adata.obs_names`, with columns `<set>_AUCell` and
+    `<set>_UCell` for each gene set (float in [0, 1]). AUCell is the canonical
+    source for `effect_metric=percell_auc_smd`; UCell rides alongside as a
+    cross-check. Coverage (n genes matched per set) is logged to stderr.
+    """
+    import numpy as np
+    import scipy.io as sio
+    import scipy.sparse as sp
+
+    helper_dir = Path(__file__).resolve().parent
+    r_script = helper_dir / "percell_score.R"
+    if not r_script.exists():
+        raise FileNotFoundError(f"percell_score.R not found at {r_script}")
+
+    sym_to_var = _symbol_to_varname(adata, symbol_col)
+    # Restrict to genes carrying a unique HGNC symbol (first occurrence wins),
+    # relabelling matrix rows by symbol so the R side matches gene sets directly.
+    symbols = list(sym_to_var.keys())
+    var_order = [sym_to_var[s] for s in symbols]
+    sub = adata[:, var_order]
+    X = sub.layers[layer] if layer is not None else sub.X
+    # genes x cells (AUCell/UCell convention), sparse CSC
+    Xt = sp.csc_matrix(X.T if sp.issparse(X) else np.asarray(X).T)
+
+    ctx = tempfile.TemporaryDirectory(dir=str(tmp_dir) if tmp_dir else None,
+                                      prefix="percell_score_")
+    work = Path(ctx.name)
+    try:
+        sio.mmwrite(str(work / "expr.mtx"), Xt, field="real")
+        (work / "genes.txt").write_text("\n".join(symbols) + "\n")
+        (work / "barcodes.txt").write_text("\n".join(map(str, adata.obs_names)) + "\n")
+        set_specs = []
+        for name, genes in gene_sets.items():
+            present = [g for g in genes if g in sym_to_var]
+            sp_path = work / f"set__{name}.txt"
+            sp_path.write_text("\n".join(present) + ("\n" if present else ""))
+            set_specs.append(f"{name}={sp_path}")
+        out_csv = work / "percell_scores.csv"
+        rscript = os.environ.get("RSCRIPT", "Rscript")
+        cmd = [rscript, str(r_script), str(work / "expr.mtx"), str(work / "genes.txt"),
+               str(work / "barcodes.txt"), str(out_csv), str(int(n_cores)), *set_specs]
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"percell_score.R failed (rc={proc.returncode}):\n{proc.stdout}\n{proc.stderr}")
+        if proc.stderr.strip():
+            print(proc.stderr.strip())
+        df = pd.read_csv(out_csv).set_index("cell")
+        df.index = df.index.astype(str)
+        df = df.reindex(adata.obs_names.astype(str))
+        df.index.name = adata.obs_names.name
+        return df
+    finally:
+        if keep_tmp:
+            print(f"[score_cells_aucell_ucell] kept scratch at {work}")
+        else:
+            ctx.cleanup()
 
 
 def derive_etreg_from_xlsx(xlsx_path, min_l2fc: float = 1.0, max_p: float = 0.05,

@@ -77,6 +77,9 @@ thresholds:
   gsea_min_size: 5                    # min gene set size (WT_heat_down maps to 94 genes; small sets kept)
   gsea_max_size: 500                  # maximum gene set size
 
+  # --- per-cell secondary scoring (AUCell/UCell; geneset_utils.score_cells_aucell_ucell) ---
+  percell_score_ncores: 8             # parallel workers for AUCell rankings + UCell chunks
+
 # =============================================================================
 # COLOR PALETTES (colorblind-safe)
 # =============================================================================
