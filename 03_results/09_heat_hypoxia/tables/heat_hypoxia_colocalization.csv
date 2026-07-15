@@ -1,0 +1,13 @@
+population,level,method,r,pvalue,n,evidence_tier
+Treg,cell,spearman,0.19704174360515436,7.139270451629209e-119,13572,secondary_percell
+Treg,cell,pearson,0.2217665792306918,7.67119929868028e-151,13572,secondary_percell
+Treg,donor_sf_mean,spearman,-0.4285714285714286,0.3965014577259474,6,secondary_percell
+Treg,donor_sf_mean,pearson,-0.37010750547726706,0.4701873244488497,6,secondary_percell
+Tcon,cell,spearman,0.16400237915828292,1.2320616617103657e-117,19502,secondary_percell
+Tcon,cell,pearson,0.16959667767014194,8.86115627557979e-126,19502,secondary_percell
+Tcon,donor_sf_mean,spearman,-0.3214285714285715,0.4820720382996776,7,secondary_percell
+Tcon,donor_sf_mean,pearson,-0.2518842887519172,0.5858229318892462,7,secondary_percell
+CD8,cell,spearman,0.07570357035851685,1.4335113302395921e-25,19010,secondary_percell
+CD8,cell,pearson,0.08430252850695187,2.481490032496507e-31,19010,secondary_percell
+CD8,donor_sf_mean,spearman,-0.3571428571428572,0.4316113520383278,7,secondary_percell
+CD8,donor_sf_mean,pearson,-0.35658278452137576,0.4323864427282957,7,secondary_percell

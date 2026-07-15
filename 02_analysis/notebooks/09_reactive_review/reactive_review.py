@@ -87,6 +87,17 @@ def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
         RESULTS / "08_harvest_readout" / "tables" / "harvest_readout_summary.csv"
     )
 
+    heat_hypoxia_dir = RESULTS / "09_heat_hypoxia" / "tables"
+    heat_hypoxia_purge = pd.read_csv(
+        heat_hypoxia_dir / "gene_purge_nes_comparison.csv"
+    )
+    heat_hypoxia_coloc = pd.read_csv(
+        heat_hypoxia_dir / "heat_hypoxia_colocalization.csv"
+    )
+    heat_hypoxia_leadingedge = pd.read_csv(
+        heat_hypoxia_dir / "leadingedge_composition.csv"
+    )
+
     # The current OR-gated drafted subset context, open to revision.
     or_union = pd.read_csv(
         RESULTS / "07_embedding" / "tables" / "or_union_membership.csv"
@@ -94,7 +105,18 @@ def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
     hook_lineage = pd.read_csv(
         RESULTS / "07_embedding" / "tables" / "hook_per_lineage_summary.csv"
     )
-    return cells, eff, gsea, hook_lineage, or_union, readout, smd
+    return (
+        cells,
+        eff,
+        gsea,
+        heat_hypoxia_coloc,
+        heat_hypoxia_leadingedge,
+        heat_hypoxia_purge,
+        hook_lineage,
+        or_union,
+        readout,
+        smd,
+    )
 
 
 @app.cell
@@ -239,6 +261,103 @@ def _(go, gsea, mo):
         "sits near zero and non-significant, consistent with the up-limb carrying the "
         "signal. This donor-pseudobulk NES is the primary evidence the review rests "
         "on.\n\n" + _tbl
+    )
+    mo.vstack([mo.ui.plotly(_fig), _cap])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Heat-vs-hypoxia check inside JIA SF
+
+        Synovial fluid is a hypoxic tissue niche, so the SF-vs-PB `WT_heat` enrichment
+        could reflect the hypoxic microenvironment rather than a heat program. I ask
+        that here three ways, all within JIA. Does the enrichment survive removing the
+        genes `WT_heat_up` shares with `HALLMARK_HYPOXIA` (primary donor-pseudobulk
+        tier)? Do per-cell heat and hypoxia scores co-localize in SF cells, and which
+        biological programs do the enriching leading-edge genes actually represent
+        (both secondary annotation)? These do not fully deconfound tissue context —
+        heat and hypoxia separate cleanly only where an elevated temperature occurs
+        without a hypoxic niche — but they do separate a hypoxia-overlap signal from
+        the rest.
+        """
+    )
+    return
+
+
+@app.cell
+def _(go, heat_hypoxia_coloc, heat_hypoxia_leadingedge, heat_hypoxia_purge, mo):
+    _order = ["Treg", "Tcon", "CD8"]
+    _p = heat_hypoxia_purge.set_index("population").loc[_order].reset_index()
+    _c = heat_hypoxia_coloc[
+        (heat_hypoxia_coloc["level"] == "cell")
+        & (heat_hypoxia_coloc["method"] == "spearman")
+    ].set_index("population").loc[_order].reset_index()
+    _l = heat_hypoxia_leadingedge.set_index("population").loc[_order].reset_index()
+
+    _fig = go.Figure()
+    _fig.add_trace(
+        go.Bar(
+            x=_p["population"],
+            y=_p["NES_full"],
+            name="full WT_heat_up",
+            marker_color="#B35806",
+        )
+    )
+    _fig.add_trace(
+        go.Bar(
+            x=_p["population"],
+            y=_p["NES_purged"],
+            name="hypoxia-overlap purged",
+            marker_color="#0072B2",
+        )
+    )
+    _fig.update_layout(
+        barmode="group",
+        height=360,
+        template="plotly_white",
+        title=dict(text="WT_heat_up NES before and after hypoxia-gene purge", x=0.5),
+        yaxis_title="NES",
+        xaxis_title="",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0.5, xanchor="center"),
+        margin=dict(l=20, r=20, t=80, b=30),
+    )
+
+    _rows = []
+    for _, _r in _p.iterrows():
+        _pop = _r["population"]
+        _cc = _c[_c["population"] == _pop].iloc[0]
+        _ll = _l[_l["population"] == _pop].iloc[0]
+        _act = float(_ll["frac_effector_activation"]) + float(_ll["frac_immediate_early_stress"])
+        _rows.append(
+            f"| {_pop} | {float(_r['NES_full']):+.2f} | "
+            f"{float(_r['NES_purged']):+.2f} | {float(_r['padj_purged']):.2g} | "
+            f"{float(_cc['r']):+.2f} | {int(_cc['n']):,} | "
+            f"{100 * _act:.0f}% | "
+            f"{100 * float(_ll['frac_hypoxia_HIF']):.0f}% | "
+            f"{100 * float(_ll['frac_heat_shock_proteostasis']):.0f}% |"
+        )
+    _tbl = (
+        "| population | full NES | purged NES | purged FDR | SF cell Spearman r | SF cells | activation + immediate-early | hypoxia | heat-shock |\n"
+        "|---|---|---|---|---|---|---|---|---|\n"
+        + "\n".join(_rows)
+    )
+    _cap = mo.md(
+        "The `WT_heat_up` enrichment is hypoxia-independent but not thermal-specific. "
+        "Removing the 18 genes it shares with `HALLMARK_HYPOXIA` barely dents the NES — "
+        "Treg +2.38, Tcon +2.39, CD8 +1.90, all at FDR < 5e-5 — so the SF-vs-PB signal "
+        "is not carried by the hypoxia-overlap genes. Within SF the per-cell heat and "
+        "hypoxia scores correlate only weakly (Spearman 0.08 to 0.20), so heat-high and "
+        "hypoxia-high are largely different cells. But the leading edge that drives the "
+        "enrichment is mostly generic T-cell activation and immediate-early genes "
+        "(about two-thirds together), with a hypoxia minority and only a trace of "
+        "classic heat-shock or proteostasis genes (HSPA1A, HSPH1, CLU). I read this "
+        "honestly: the mouse `WT_heat` overlap with inflamed-joint T cells is real and "
+        "is not a hypoxia artefact, but at gene resolution it reads as an activation "
+        "and immediate-early program more than a thermal-specific one, so heat is a "
+        "loose label here for what is largely in-vivo T-cell activation.\n\n" + _tbl
     )
     mo.vstack([mo.ui.plotly(_fig), _cap])
     return
@@ -523,13 +642,14 @@ def _(
         f"drawn count sits below the filtered total, the view is a random sample at the "
         f"visible cap above."
     )
-    # Caption ABOVE the two maps, then the maps. The lasso cluster-characteristics
-    # summary renders in the cell directly below with nothing between it and the
-    # embeddings, so lassoing a region needs no scroll to read its makeup.
+    # The controls sit directly above these maps (previous cell), so the maps render
+    # first here — nothing separates a control from the figure it drives. The
+    # how-to-read narrative folds into a collapsed panel just below the maps, and the
+    # lasso cluster-characteristics summary still renders in the cell directly below.
     mo.vstack(
         [
-            _caption,
             mo.hstack([embed_l, embed_r], widths="equal", gap=1),
+            mo.accordion({"How to read these two maps": _caption}),
         ]
     )
     return curve_map_l, curve_map_r, drawn, embed_l, embed_r

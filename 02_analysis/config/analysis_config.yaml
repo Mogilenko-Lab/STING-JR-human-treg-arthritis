@@ -196,6 +196,9 @@ stages:
   - id: "08_harvest_readout"
     title: "Hallmark hypoxia/UPR per-cell readouts (harvest)"
     purpose: "SECONDARY/annotation tier only (never pooled with the pseudobulk NES spine or the 07 POI harvest). Per-cell AUCell+UCell of MSigDB Hallmark HYPOXIA and UNFOLDED_PROTEIN_RESPONSE on the frozen annotation, aligned with the sting compartment, carried alongside the already-derived score_HSP/score_eTreg/WT_heat_updown readouts. Hypoxia is a READOUT (consistent-with a low-O2/stressed state), NOT a HIF-causality claim; feeds the reactive review and the cross-species harvest question."
+  - id: "09_heat_hypoxia"
+    title: "Heat versus hypoxia readout"
+    purpose: "Correlative, tier-aware check of whether the JIA SF-vs-PB WT_heat enrichment survives removing HALLMARK_HYPOXIA-overlapping genes in the primary donor-pseudobulk tier, with secondary per-cell heat-hypoxia co-localization and exploratory leading-edge composition readouts kept separate from the pseudobulk NES."
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)
