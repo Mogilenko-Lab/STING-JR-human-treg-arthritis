@@ -199,6 +199,9 @@ stages:
   - id: "09_heat_hypoxia"
     title: "Heat versus hypoxia readout"
     purpose: "Correlative, tier-aware check of whether the JIA SF-vs-PB WT_heat enrichment survives removing HALLMARK_HYPOXIA-overlapping genes in the primary donor-pseudobulk tier, with secondary per-cell heat-hypoxia co-localization and exploratory leading-edge composition readouts kept separate from the pseudobulk NES."
+  - id: "10_hsr_lens"
+    title: "Curated heat-shock-response second lens"
+    purpose: "ANNOTATION/secondary tier only (firewalled from the confirmatory WT_heat pseudobulk claim). Carries the curated, activation-free HSR proteostasis lens (HSR_core 56 / HSR_sensitivity 176, frozen from the mouse anchor's human-ortholog union) alongside the empirical WT_heat_up: per-cell AUCell+UCell of HSR on the frozen annotation, SF-vs-PB fgsea NES of HSR on the donor-pseudobulk ranked lists, within-SF per-cell WT_heat_up-vs-HSR 'same cells?' correlation, and the WT_heat_up-vs-HSR gene overlap. Asks how much of the JIA WT_heat separation is genuine thermal proteostasis versus activation; the HSR core is proteotoxic-stress-general, not fever-specific, so language stays correlative."
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)

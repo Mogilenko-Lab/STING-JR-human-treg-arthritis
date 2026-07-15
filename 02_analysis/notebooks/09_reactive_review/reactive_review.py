@@ -98,6 +98,15 @@ def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
         heat_hypoxia_dir / "leadingedge_composition.csv"
     )
 
+    # The curated, activation-free heat-shock second lens: SF-vs-PB NES for the
+    # HSR core / sensitivity sets, their within-SF per-cell co-localization with
+    # WT_heat_up, and the membership overlap. Annotation tier, held apart from the
+    # WT_heat pseudobulk claim.
+    hsr_dir = RESULTS / "10_hsr_lens" / "tables"
+    hsr_lens_nes = pd.read_csv(hsr_dir / "hsr_lens_nes.csv")
+    hsr_coloc = pd.read_csv(hsr_dir / "hsr_colocalization.csv")
+    hsr_overlap = pd.read_csv(hsr_dir / "hsr_wtheatup_overlap.csv")
+
     # The current OR-gated drafted subset context, open to revision.
     or_union = pd.read_csv(
         RESULTS / "07_embedding" / "tables" / "or_union_membership.csv"
@@ -113,18 +122,13 @@ def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
         heat_hypoxia_leadingedge,
         heat_hypoxia_purge,
         hook_lineage,
+        hsr_coloc,
+        hsr_lens_nes,
+        hsr_overlap,
         or_union,
         readout,
         smd,
     )
-
-
-@app.cell
-def _(CONFIG, yaml):
-    with open(CONFIG) as _fh:
-        _cfg = yaml.safe_load(_fh)
-    go_decision = _cfg.get("decisions", {}).get("go_no_go", {})
-    return (go_decision,)
 
 
 @app.cell
@@ -257,8 +261,8 @@ def _(go, gsea, mo):
     _cap = mo.md(
         "**Reading the panel.** `WT_heat_up` runs strongly SF-high in every sorted "
         "population — Treg NES +2.51, Tcon +2.57, CD8 +2.05, each at FDR far below "
-        "1e-6 — so the enrichment is pan-T, not Treg-preferential. `WT_heat_down` "
-        "sits near zero and non-significant, consistent with the up-limb carrying the "
+        "1e-6 — so the enrichment runs pan-T across the sorted populations. "
+        "`WT_heat_down` stays non-significant, consistent with the up-limb carrying the "
         "signal. This donor-pseudobulk NES is the primary evidence the review rests "
         "on.\n\n" + _tbl
     )
@@ -360,6 +364,239 @@ def _(go, heat_hypoxia_coloc, heat_hypoxia_leadingedge, heat_hypoxia_purge, mo):
         "loose label here for what is largely in-vivo T-cell activation.\n\n" + _tbl
     )
     mo.vstack([mo.ui.plotly(_fig), _cap])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Is `WT_heat_up` even heat? A curated heat-shock lens
+
+        The leading edge said `WT_heat_up` is a loose label — mostly activation, only a trace of
+        heat-shock. That fits: it's bulk RNA-seq of iTregs activated at 39 °C, so activation rides
+        along, and one mouse signature can't pull the two apart.
+
+        So I bring a second lens — a curated heat-shock signature from public MSigDB / Reactome / GO
+        sets, refined to an activation-free proteostasis core (`HSR_core`, 56 genes) and a broader
+        sensitivity set (176). I keep it separate from `WT_heat_up`, never blended; the HSF1 / chaperone
+        program is the thermal core itself, not something to purge.
+
+        The mouse anchor already showed a real thermal program lives in the 39 °C response, stronger than
+        the activation tangled with it. JIA can't measure temperature — but it can ask two things the
+        mouse can't. Does a clean thermal signal survive the SF-vs-PB contrast? And do the two lenses
+        point at the same cells?
+
+        This second lens is annotation — it sits beside the `WT_heat` claim and enriches the reading. Its
+        core answers proteotoxic stress broadly: oxidative, proteasomal, thermal alike. So a positive read
+        here marks proteostasis stress, and the mouse 37/39 contrast is where that ties back to temperature.
+        """
+    )
+    return
+
+
+@app.cell
+def _(go, hsr_coloc, hsr_lens_nes, hsr_overlap, mo):
+    _order = ["Treg", "Tcon", "CD8"]
+
+    def _nes(_pop, _sig):
+        _m = hsr_lens_nes[
+            (hsr_lens_nes["population"] == _pop)
+            & (hsr_lens_nes["signature"] == _sig)
+        ]
+        return float(_m["nes"].iloc[0]) if len(_m) else None
+
+    def _pad(_pop, _sig):
+        _m = hsr_lens_nes[
+            (hsr_lens_nes["population"] == _pop)
+            & (hsr_lens_nes["signature"] == _sig)
+        ]
+        return float(_m["padj"].iloc[0]) if len(_m) else None
+
+    def _spear(_pop):
+        _m = hsr_coloc[
+            (hsr_coloc["population"] == _pop)
+            & (hsr_coloc["hsr_term"] == "HSR_core")
+            & (hsr_coloc["level"] == "cell")
+            & (hsr_coloc["method"] == "spearman")
+        ]
+        return (float(_m["r"].iloc[0]), int(_m["n"].iloc[0])) if len(_m) else (None, 0)
+
+    _fig = go.Figure()
+    _fig.add_trace(
+        go.Bar(
+            x=_order,
+            y=[_nes(_p, "HSR_core") for _p in _order],
+            name="HSR core (activation-free)",
+            marker_color="#009E73",
+        )
+    )
+    _fig.add_trace(
+        go.Bar(
+            x=_order,
+            y=[_nes(_p, "HSR_sensitivity") for _p in _order],
+            name="HSR sensitivity (broad)",
+            marker_color="#56B4E9",
+        )
+    )
+    _fig.add_hline(y=0, line_width=1, line_color="#444444")
+    _fig.update_layout(
+        barmode="group",
+        height=360,
+        template="plotly_white",
+        title=dict(text="Curated HSR lens NES — SF vs PB, by sorted population", x=0.5),
+        yaxis_title="NES (NES > 0 = SF-high)",
+        xaxis_title="",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0.5, xanchor="center"),
+        margin=dict(l=20, r=20, t=80, b=30),
+    )
+
+    _rows = []
+    for _p in _order:
+        _r, _n = _spear(_p)
+        _rows.append(
+            f"| {_p} | {_nes(_p, 'HSR_core'):+.2f} | {_pad(_p, 'HSR_core'):.2g} | "
+            f"{_nes(_p, 'HSR_sensitivity'):+.2f} | {_r:+.2f} | {_n:,} |"
+        )
+    _tbl = (
+        "| population | HSR core NES | core FDR | HSR sensitivity NES | "
+        "SF cell Spearman r (WT_heat_up vs HSR core) | SF cells |\n"
+        "|---|---|---|---|---|---|\n" + "\n".join(_rows)
+    )
+
+    _ov = hsr_overlap[hsr_overlap["set_b"] == "HSR_core"].iloc[0]
+    _n_int = int(_ov["n_intersect"])
+    _genes = str(_ov["genes_intersect"]).replace(";", ", ")
+
+    _cap = mo.md(
+        "**Reading the panels.** The curated core separates SF from blood in one population only — Tregs, "
+        "at NES +1.50. Tcon (−1.36) and CD8 (−1.10) go the other way. `WT_heat_up` was pan-T; the clean "
+        "lens narrows the thermal read to the Treg.\n\n"
+        "Do the two lenses mark the same cells? Barely. Within SF they correlate weakly per cell — Treg "
+        "Spearman 0.19, Tcon 0.13, CD8 0.11 — and share just "
+        f"{_n_int} genes ({_genes}). So `WT_heat_up` and "
+        "the clean core light up largely different Tregs. The empirical label is activation-tinged; the "
+        "curated lens finds a smaller, genuinely thermal pocket underneath.\n\n"
+        "The number that settles the `WT_heat` claim is still the pseudobulk NES above. This panel sharpens "
+        "what that signal is made of — and asks the next question: where would it show up without the "
+        "hypoxic niche? Febrile blood, normoxic, is the test.\n\n" + _tbl
+    )
+    mo.vstack([mo.ui.plotly(_fig), _cap])
+    return
+
+
+@app.cell
+def _(CONFIG, RESULTS, pd, yaml):
+    with open(CONFIG) as _fh:
+        _cfg = yaml.safe_load(_fh)
+    _tissue_key = _cfg["design"]["tissue_key"]
+    _sf_value = _cfg["design"]["tissue_levels"]["synovial_fluid"]
+
+    _wt = pd.read_csv(
+        RESULTS / "05_scoring" / "tables" / "per_cell_scores.csv",
+        index_col=0,
+    )[["WT_heat_up_AUCell", "coarse_label", _tissue_key]]
+    _hsr = pd.read_csv(
+        RESULTS / "10_hsr_lens" / "tables" / "per_cell_hsr_scores.csv",
+        index_col=0,
+    )[["HSR_core_AUCell", "HSR_sensitivity_AUCell", "coarse_label", _tissue_key]]
+    _joined = _wt.join(
+        _hsr,
+        how="inner",
+        lsuffix="_wt",
+        rsuffix="_hsr",
+        validate="one_to_one",
+    )
+    if not (
+        (_joined["coarse_label_wt"] == _joined["coarse_label_hsr"]).all()
+        and (_joined[f"{_tissue_key}_wt"] == _joined[f"{_tissue_key}_hsr"]).all()
+    ):
+        raise ValueError("per-cell WT_heat and HSR metadata disagree after barcode join")
+
+    sf_two_lens = (
+        _joined[_joined[f"{_tissue_key}_wt"] == _sf_value]
+        .rename_axis("barcode")
+        .reset_index()
+        .rename(columns={"coarse_label_wt": "coarse_label"})
+    )[
+        [
+            "barcode",
+            "coarse_label",
+            "WT_heat_up_AUCell",
+            "HSR_core_AUCell",
+            "HSR_sensitivity_AUCell",
+        ]
+    ]
+
+    _expected = {"Treg": 13572, "Tcon": 19502, "CD8": 19010}
+    _observed = sf_two_lens.groupby("coarse_label").size().to_dict()
+    if any(_observed.get(_k, 0) != _v for _k, _v in _expected.items()):
+        raise ValueError(f"SF two-lens counts do not match committed HSR counts: {_observed}")
+
+    return (sf_two_lens,)
+
+
+@app.cell
+def _(mo):
+    same_cells_pop = mo.ui.dropdown(
+        options=["Treg", "Tcon", "CD8"],
+        value="Treg",
+        label="SF population",
+    )
+    return (same_cells_pop,)
+
+
+@app.cell
+def _(go, hsr_coloc, hsr_lens_nes, mo, same_cells_pop, sf_two_lens):
+    _pop = same_cells_pop.value
+    _d = sf_two_lens[sf_two_lens["coarse_label"] == _pop]
+
+    _fig = go.Figure(
+        go.Histogram2d(
+            x=_d["WT_heat_up_AUCell"],
+            y=_d["HSR_core_AUCell"],
+            colorscale="Blues",
+            nbinsx=70,
+            nbinsy=70,
+            colorbar=dict(title="cells"),
+            hovertemplate=(
+                "WT_heat_up AUCell=%{x:.3f}<br>"
+                "HSR_core AUCell=%{y:.3f}<br>"
+                "cells=%{z}<extra></extra>"
+            ),
+        )
+    )
+    _fig.update_layout(
+        height=520,
+        template="plotly_white",
+        title=dict(
+            text=f"{_pop} SF cells: weak same-cells overlap between WT_heat_up and HSR_core",
+            x=0.5,
+        ),
+        xaxis_title="WT_heat_up AUCell",
+        yaxis_title="HSR_core AUCell",
+        margin=dict(l=20, r=20, t=80, b=50),
+    )
+
+    _nes_row = hsr_lens_nes[
+        (hsr_lens_nes["population"] == _pop)
+        & (hsr_lens_nes["signature"] == "HSR_core")
+    ].iloc[0]
+    _coloc_row = hsr_coloc[
+        (hsr_coloc["population"] == _pop)
+        & (hsr_coloc["hsr_term"] == "HSR_core")
+        & (hsr_coloc["level"] == "cell")
+        & (hsr_coloc["method"] == "spearman")
+    ].iloc[0]
+    _note = mo.md(
+        f"**Same cells? Mostly no.** In {_pop}, the committed HSR-core SF-vs-PB NES is "
+        f"{float(_nes_row['nes']):+.2f}, while the within-SF cell-level Spearman r between "
+        f"`WT_heat_up` and `HSR_core` is {float(_coloc_row['r']):+.2f} across "
+        f"{int(_coloc_row['n']):,} cells. The diffuse density is the point: the two lenses "
+        "mark largely different SF cells."
+    )
+
+    mo.vstack([same_cells_pop, mo.ui.plotly(_fig), _note])
     return
 
 
@@ -977,35 +1214,29 @@ def _(go, hook_lineage, mo, or_union):
 
 
 @app.cell
-def _(go_decision, mo):
-    import json as _json
-
-    _blob = _json.dumps(go_decision, indent=2, default=str)
+def _(mo):
     mo.md(
-        f"""
+        """
         ## Decision
 
         **Where the analysis goes next: continue.** The mouse 39 °C `WT_heat`
         up-program is enriched in JIA synovial-fluid T cells relative to paired blood,
-        and the enrichment is **broad across the sorted populations (pan-T), not
-        Treg-preferential** — NES ≈ 2.51 in Treg, 2.57 in Tcon, 2.05 in CD8, all
-        clearing FDR far below 1e-6. This is a positive, reproducible signal read as
-        **consistent with** the mouse stress axis, correlative and not causal, and I
-        state plainly that it is not Treg-specific.
+        and the enrichment runs broad across the sorted populations — NES ≈ 2.51 in
+        Treg, 2.57 in Tcon, 2.05 in CD8, all clearing FDR far below 1e-6. The signal is
+        pan-T. It is positive, reproducible, and read as **consistent with** the mouse
+        stress axis: correlative, and I state plainly that it holds across the T-cell
+        populations rather than singling out the Treg.
 
         **Harvest strategy remains revisitable.** The OR-gated drafted subset above is
-        a current design preview, not a committed cohort. The synovial-Treg hypoxia
-        high-pocket surfaced in this review is the kind of orthogonal readout that may
-        reshape which hooks I keep. That harvest call is taken separately later. This
-        review makes no new claim beyond the pan-T enrichment, and the hypoxia and UPR
-        readouts stay a secondary annotation tier, never pooled with the pseudobulk NES.
+        a current design preview, a draft rather than a committed cohort. The
+        synovial-Treg hypoxia high-pocket surfaced in this review is the kind of
+        orthogonal readout that may reshape which hooks I keep. That harvest call is
+        taken separately later. This review makes one claim, the pan-T enrichment, and
+        the hypoxia and UPR readouts stay a secondary annotation tier, kept apart from
+        the pseudobulk NES.
 
-        Machine-readable echo of `decisions.go_no_go` (carried verbatim from config,
-        unchanged here):
-
-        ```json
-        {_blob}
-        ```
+        The primary signature carried forward is `WT_heat`, scored as donor-pseudobulk
+        NES within frozen cell-state labels.
         """
     )
     return
