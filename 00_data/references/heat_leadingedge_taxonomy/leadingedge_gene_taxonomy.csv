@@ -1,0 +1,67 @@
+gene,category,evidence,source
+ADAM8,effector_activation,Metalloproteinase upregulated during T-cell activation and inflammation to cleavage-process cell-surface receptors.,agy_gemini_3.1_pro_2026-07-14
+ADORA2A,effector_activation,GPCR adenosine A2A receptor upregulated by TCR signaling (NFAT/AP-1) as a key negative-feedback inhibitory pathway.,agy_gemini_3.1_pro_2026-07-14
+AK4,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); adenylate kinase 4 is a transcriptionally direct HIF-1α target.,agy_gemini_3.1_pro_2026-07-14
+ANXA2,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); annexin A2 is a phospholipid-binding protein upregulated by HIF-1α.,agy_gemini_3.1_pro_2026-07-14
+ASB2,effector_activation,E3 ubiquitin ligase induced by TCR/activation (GATA3) that targets filamin for degradation to facilitate cell migration.,agy_gemini_3.1_pro_2026-07-14
+ATF3,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); biologically an immediate-early stress TF (ATF/AP-1 family).,agy_gemini_3.1_pro_2026-07-14
+ATP2B4,effector_activation,Plasma membrane calcium ATPase 4 upregulated upon TCR stimulation to regulate cytosolic calcium and calcineurin-NFAT.,agy_gemini_3.1_pro_2026-07-14
+B3GNT5,effector_activation,Glycosyltransferase upregulated during T-cell activation to remodel cell-surface glycosphingolipid profiles.,agy_gemini_3.1_pro_2026-07-14
+BATF3,effector_activation,AP-1 family transcription factor induced by TCR/IL-2 activation that regulates effector T-cell differentiation.,agy_gemini_3.1_pro_2026-07-14
+C15orf48,effector_activation,Inflammatory response gene (MOCCI) transcribed downstream of NF-κB to regulate mitochondrial respiration during activation.,agy_gemini_3.1_pro_2026-07-14
+CAMK2N1,effector_activation,CaMKII inhibitor upregulated downstream of TCR-calcium signaling to feed-back regulate calcium/calmodulin events.,agy_gemini_3.1_pro_2026-07-14
+CASZ1,effector_activation,Zinc-finger transcription factor induced by TCR/cytokine signaling that drives Th17 effector differentiation.,agy_gemini_3.1_pro_2026-07-14
+CCL20,effector_activation,Inflammatory chemokine (MIP-3α) that acts as a direct TCR/NF-κB-induced effector target.,agy_gemini_3.1_pro_2026-07-14
+CCL3,effector_activation,Cardinal effector chemokine (MIP-1α) rapidly transcribed in activated T cells downstream of TCR signaling (AP-1/NF-κB).,agy_gemini_3.1_pro_2026-07-14
+CCL4,effector_activation,Effector chemokine (MIP-1β) co-expressed with CCL3 and driven by TCR-activated AP-1/NF-κB.,agy_gemini_3.1_pro_2026-07-14
+CD40LG,effector_activation,"Helper T-cell effector ligand CD40L, transcriptionally driven by TCR-induced NFAT signaling.",agy_gemini_3.1_pro_2026-07-14
+CD53,effector_activation,Tetraspanin upregulated upon TCR engagement to promote immunological synapse assembly and costimulatory signaling.,agy_gemini_3.1_pro_2026-07-14
+CD70,effector_activation,Costimulatory TNF ligand (TNFSF7) induced on T cells downstream of TCR/NF-κB activation.,agy_gemini_3.1_pro_2026-07-14
+CD80,effector_activation,B7-1 costimulatory ligand upregulated on activated human T cells downstream of TCR/NF-κB.,agy_gemini_3.1_pro_2026-07-14
+CD83,effector_activation,Glycoprotein activation marker rapidly induced on T cells upon TCR engagement via NF-κB.,agy_gemini_3.1_pro_2026-07-14
+CDKN1A,hypoxia_HIF,"Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); biologically p21, mediating cell-cycle arrest in response to p53/stress.",agy_gemini_3.1_pro_2026-07-14
+CLU,heat_shock_proteostasis,"Extracellular chaperone that prevents protein aggregation, transcriptionally regulated by HSF1 during proteotoxic stress.",agy_gemini_3.1_pro_2026-07-14
+CSF2,effector_activation,Effector cytokine (GM-CSF) highly transcribed in activated T cells downstream of TCR stimulation (NFAT/AP-1).,agy_gemini_3.1_pro_2026-07-14
+CYSTM1,immediate_early_stress,Cysteine-rich transmembrane module 1 is a general stress-response gene activated by stress-induced MAPK signaling.,agy_gemini_3.1_pro_2026-07-14
+DENND3,effector_activation,Rab12-GEF upregulated during TCR activation to facilitate autophagy and endosomal receptor recycling.,agy_gemini_3.1_pro_2026-07-14
+EGR1,immediate_early_stress,Canonical immediate-early zinc-finger transcription factor induced rapidly by TCR activation via Ras/MAPK/ERK.,agy_gemini_3.1_pro_2026-07-14
+EGR2,immediate_early_stress,Immediate-early TF downstream of TCR/NFAT signaling that feedback-regulates T-cell activation and anergy.,agy_gemini_3.1_pro_2026-07-14
+EGR3,immediate_early_stress,Immediate-early transcription factor rapidly induced by TCR stimulation to control T-cell activation and effector programs.,agy_gemini_3.1_pro_2026-07-14
+EMILIN2,other,Extracellular matrix glycoprotein involved in cell adhesion; represents structural ECM machinery.,agy_gemini_3.1_pro_2026-07-14
+EOMES,effector_activation,Master effector transcription factor driving IFN-γ and cytolytic effector programs in CD8+ T cells.,agy_gemini_3.1_pro_2026-07-14
+EPN2,effector_activation,Epsin-2 adaptor protein upregulated upon activation to mediate clathrin-dependent endocytosis of TCR complexes.,agy_gemini_3.1_pro_2026-07-14
+FAH,other,Fumarylacetoacetate hydrolase is a tyrosine catabolic enzyme representing basic cell metabolic housekeeping.,agy_gemini_3.1_pro_2026-07-14
+FAM110C,other,Centrosomal protein regulating cell cycle progression and microtubule dynamics; representing general cell cycle machinery.,agy_gemini_3.1_pro_2026-07-14
+FAM83G,effector_activation,PAWS1 protein induced upon T-cell activation that interacts with SMADs/MAPK to modulate TGF-β signaling.,agy_gemini_3.1_pro_2026-07-14
+FASLG,effector_activation,Fas ligand (CD178) cytolytic T-cell effector molecule induced downstream of TCR signaling by NFAT/AP-1.,agy_gemini_3.1_pro_2026-07-14
+FOSL2,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); biologically an AP-1 family immediate-early transcription factor.,agy_gemini_3.1_pro_2026-07-14
+GFI1,effector_activation,Transcriptional repressor induced downstream of TCR and IL-2/IL-7 signaling that regulates effector lineage choices.,agy_gemini_3.1_pro_2026-07-14
+HBEGF,effector_activation,Heparin-binding EGF-like growth factor cytokine induced by TCR activation and NF-κB.,agy_gemini_3.1_pro_2026-07-14
+HSPA1A,heat_shock_proteostasis,Heat shock 70kDa protein 1A (Hsp70) chaperone transcriptionally activated by HSF1.,agy_gemini_3.1_pro_2026-07-14
+HSPH1,heat_shock_proteostasis,Heat shock 105kDa/110kDa protein 1 nucleotide exchange factor and canonical HSF1 target.,agy_gemini_3.1_pro_2026-07-14
+IL1RN,effector_activation,Interleukin-1 receptor antagonist cytokine upregulated during TCR/NF-κB-driven activation.,agy_gemini_3.1_pro_2026-07-14
+ITGA3,effector_activation,Integrin subunit alpha 3 adhesion receptor upregulated on T cells during activation to facilitate tissue homing.,agy_gemini_3.1_pro_2026-07-14
+LTA,effector_activation,Lymphotoxin-alpha (TNF-β) effector cytokine induced downstream of TCR activation and NF-κB.,agy_gemini_3.1_pro_2026-07-14
+NAB2,immediate_early_stress,Immediate-early EGR-feedback corepressor induced rapidly by TCR/EGR1 activation.,agy_gemini_3.1_pro_2026-07-14
+NR4A1,immediate_early_stress,Nur77 transcription factor rapidly induced downstream of TCR activation via calcium-NFAT signaling.,agy_gemini_3.1_pro_2026-07-14
+NR4A3,immediate_early_stress,Nor1 orphan nuclear receptor transcription factor induced rapidly downstream of TCR/calcium signaling.,agy_gemini_3.1_pro_2026-07-14
+OAS3,effector_activation,2'-5'-oligoadenylate synthetase 3 interferon-stimulated antiviral effector enzyme induced during activation.,agy_gemini_3.1_pro_2026-07-14
+P4HA2,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); collagen hydroxylase transcriptionally regulated by HIF-1α.,agy_gemini_3.1_pro_2026-07-14
+PAK1,effector_activation,p21-activated kinase 1 recruited downstream of TCR to orchestrate immunological synapse actin remodeling.,agy_gemini_3.1_pro_2026-07-14
+PLAUR,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); urokinase plasminogen activator receptor (uPAR) regulated by HIF-1α.,agy_gemini_3.1_pro_2026-07-14
+PLK3,immediate_early_stress,"Polo-like kinase 3 stress kinase rapidly induced by DNA damage, hypoxia, and checkpoint signals.",agy_gemini_3.1_pro_2026-07-14
+PLXNB2,effector_activation,Semaphorin receptor Plexin B2 upregulated during T-cell activation to regulate migration.,agy_gemini_3.1_pro_2026-07-14
+RAB34,effector_activation,Small GTPase Rab34 upregulated upon T-cell activation to control secretory vesicle export.,agy_gemini_3.1_pro_2026-07-14
+RGS16,immediate_early_stress,Regulator of G-protein signaling 16 immediate-early gene induced by TCR activation (NFAT) to feedback-regulate GPCRs.,agy_gemini_3.1_pro_2026-07-14
+SDC4,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); syndecan-4 cell-surface proteoglycan regulated by HIF-1α.,agy_gemini_3.1_pro_2026-07-14
+SEMA4A,effector_activation,Semaphorin 4A costimulatory ligand/receptor upregulated on activated T cells to play roles in lineage choice.,agy_gemini_3.1_pro_2026-07-14
+SERPINE1,hypoxia_HIF,Defaulted to hypoxia (MSigDB HALLMARK_HYPOXIA); plasminogen activator inhibitor-1 (PAI-1) direct HIF-1α target.,agy_gemini_3.1_pro_2026-07-14
+SLC4A11,other,Solute carrier family 4 member 11 is a membrane transport protein involved in basic physiological transport.,agy_gemini_3.1_pro_2026-07-14
+SPINT1,other,Kunitz-type serine protease inhibitor regulating membrane homeostasis and tissue integrity.,agy_gemini_3.1_pro_2026-07-14
+TIMP1,effector_activation,TIMP-1 metalloproteinase inhibitor strongly upregulated via AP-1/NF-κB to license T-cell tissue infiltration.,agy_gemini_3.1_pro_2026-07-14
+TMEM205,other,Transmembrane protein 205 associated with secretory vesicle transport and cellular drug resistance.,agy_gemini_3.1_pro_2026-07-14
+TNFSF14,effector_activation,LIGHT costimulatory ligand and effector cytokine transcriptionally induced upon TCR engagement.,agy_gemini_3.1_pro_2026-07-14
+TNFSF9,effector_activation,4-1BBL costimulatory ligand induced on T cells downstream of TCR/NF-κB activation.,agy_gemini_3.1_pro_2026-07-14
+TP73,immediate_early_stress,p53-related stress-responsive transcription factor induced by DNA damage and general cellular stress.,agy_gemini_3.1_pro_2026-07-14
+UPP1,other,Uridine phosphorylase 1 metabolic enzyme in the pyrimidine salvage pathway supporting pyrimidine salvaging.,agy_gemini_3.1_pro_2026-07-14
+ZBTB32,immediate_early_stress,Zinc finger BTB domain transcription factor acting as a rapid feedback repressor of activation.,agy_gemini_3.1_pro_2026-07-14

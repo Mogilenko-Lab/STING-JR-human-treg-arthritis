@@ -5,6 +5,11 @@
 !00_data/processed/.gitkeep
 00_data/references/*
 !00_data/references/.gitkeep
+# Committed reference: the heat leading-edge gene taxonomy is an external-model
+# classification (not deterministically regenerable by a prep script), so it is
+# tracked as a frozen input with its provenance rather than ignored.
+!00_data/references/heat_leadingedge_taxonomy/
+!00_data/references/heat_leadingedge_taxonomy/**
 
 # Per-accession raw mounts (00_data/<accession>/raw/) — heavy RO bytes; keep the
 # committed provenance (PROVENANCE.md/manifest.json/samples.csv/download.sh) in the
