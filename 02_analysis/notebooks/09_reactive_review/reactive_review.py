@@ -1,13 +1,6 @@
 import marimo
 
-# JIA synovial-Treg reactive review.
-# Reads frozen tables under 03_results (compute is done upstream by the scoring,
-# embedding, and harvest-readout scripts). This app only visualizes and narrates.
-# The mouse WT_heat overlap in JIA synovial-fluid T cells reads as consistent with
-# the mouse 39 C stress axis, correlative only. The hypoxia surface is a readout,
-# never a claim that HIF or fever drives the human state. The per-cell scores are a
-# secondary annotation tier, held apart from the donor-level pseudobulk NES.
-
+__generated_with = "0.23.14"
 app = marimo.App(width="full")
 
 
@@ -29,10 +22,10 @@ def _():
     import yaml
     from plotly.subplots import make_subplots
 
-    return Path, go, make_subplots, np, pd, px, yaml
+    return Path, go, pd, px, yaml
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(Path):
     # Resolve the project root by walking up until 03_results/interactive appears,
     # so the app loads its tables whether launched from the repo root, the app dir,
@@ -59,8 +52,8 @@ def _(Path):
     return CONFIG, INTERACTIVE, RESULTS
 
 
-@app.cell
-def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
+@app.cell(hide_code=True)
+def _(INTERACTIVE, RESULTS, pd):
     # The per-cell embedding + readout substrate: one row per cell, x / y UMAP,
     # frozen cell-state label, tissue, donor, mitochondrial fraction, and the AUCell
     # hypoxia / UPR surfaces alongside the WT_heat, eTreg, and HSP per-cell scores.
@@ -116,7 +109,6 @@ def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
     )
     return (
         cells,
-        eff,
         gsea,
         heat_hypoxia_coloc,
         heat_hypoxia_leadingedge,
@@ -131,66 +123,74 @@ def _(CONFIG, INTERACTIVE, RESULTS, pd, yaml):
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        # The mouse 39 °C Treg stress axis in JIA synovial-fluid T cells
+    mo.md(r"""
+    # The mouse 39 °C Treg stress axis in JIA synovial-fluid T cells
 
-        I built this one reactive review to re-read the JIA synovial-Treg result
-        end to end: does the mouse 39 °C fever program (`WT_heat`, derived from the
-        internal mouse iTreg experiment) show interpretable enrichment in sorted
-        synovial-fluid (SF) T cells relative to paired peripheral blood (PB) in
-        GSE160097, and does that enrichment concentrate in Tregs or read across the
-        whole T compartment?
+    Here I ask the question:
+    > does the mouse 39 °C fever program (`WT_heat`, derived from the internal mouse iTreg experiment)
+    > show interpretable enrichment in sorted synovial-fluid (SF) T cells
+    > relative to paired peripheral blood (PB) in GSE160097, and does that enrichment
+    > concentrate in Tregs or read across the whole T compartment?
 
-        **The headline read.** The mouse `WT_heat` up-program is **enriched** in JIA
-        synovial-fluid T cells versus paired blood, and the enrichment is **broad
-        across the sorted populations — pan-T, not Treg-preferential**. The running
-        sum packs the core set at the top of every ranked list: NES ≈ 2.5 in Treg,
-        2.6 in Tcon, and 2.1 in CD8, all clearing FDR far below 1e-6. This is a
-        positive, reproducible signal read as **consistent with** the mouse stress
-        axis, a correlative observation and not evidence that fever or HIF drives the
-        human state.
+    **The finding.**
+    The mouse `WT_heat` up-program is **enriched** in JIA synovial-fluid T cells
+    versus paired blood.
+    The enrichment is **broad across the sorted populations — pan-T, not Treg-preferential**.
 
-        **What this review adds.** Beyond the primary enrichment I surface two
-        per-cell readouts harvested from the same frozen labels — the MSigDB Hallmark
-        **hypoxia** and **unfolded-protein-response (UPR)** AUCell surfaces — as
-        exploratory annotation. The hypoxia surface carries a synovial-Treg-leading
-        high pocket. The UPR surface reads flat. Both are readouts of the tissue
-        state, correlative, and carry no HIF-causality claim.
+    The running sum packs the core set at the top of every ranked list:
+    * NES ≈ 2.5 in Treg,
+    * NES ≈ 2.6 in Tcon,
+    * and 2.1 in CD8,
+    ... all clearing FDR far below 1e-6.
 
-        **How to read the evidence tiers.** The donor-pseudobulk NES table is the
-        primary tier. The per-cell AUCell scores in the embedding explorer and the
-        hypoxia / UPR readouts are a secondary, corroborative annotation tier. I keep
-        the two tiers on separate scales and never pool them into one ranking. The
-        UMAP below is a map of the cells for visualization, read as annotation and
-        never as the evidence for a claim.
-        """
-    )
+    This is a signal read from the WT_heat mouse axis.
+
+    It cannot be read though as pure temperature effect if we look at the DE set.
+    """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Primary evidence — `WT_heat` NES on donor-pseudobulk SF-vs-PB ranked lists
+    mo.md(r"""
+    To dig deeper into the signal I surface two per-cell readouts harvested
+    from the same frozen labels, specifically, the MSigDB Hallmark
+    **hypoxia** and **unfolded-protein-response (UPR)**
 
-        Pre-ranked fgsea of the mouse `WT_heat` up / down sets against the
-        SF-vs-PB donor-pseudobulk signed-Wald ranked list, one column per sorted
-        population. Positive NES (red) means the set packs toward the SF-high end.
-        The `WT_heat_up` row is the number that settles the claim: it is strongly
-        positive and significant in Treg, Tcon, and CD8 alike, so the signal is
-        pan-T rather than Treg-restricted. Stars mark BH-FDR (`***` < 0.001,
-        `**` < 0.01, `*` < 0.05).
-        """
-    )
+    AUCell surfaces as exploratory annotation.
+    The hypoxia surface carries a synovial-Treg-leading high pocket.
+    The UPR surface reads flat. Both are readouts of the tissue state, correlative, and carry no HIF-causality claim.
+
+    **How to read the evidence tiers.** The donor-pseudobulk NES table is the
+    primary tier. The per-cell AUCell scores in the embedding explorer and the
+    hypoxia / UPR readouts are a secondary, corroborative annotation tier. I keep
+    the two tiers on separate scales and never pool them into one ranking. The
+    UMAP below is a map of the cells for visualization, read as annotation and
+    never as the evidence for a claim.
+    """)
     return
 
 
-@app.cell
-def _(go, gsea, mo):
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Primary evidence — `WT_heat` NES on donor-pseudobulk SF-vs-PB ranked lists
+
+    Pre-ranked fgsea of the mouse `WT_heat` up / down sets against the
+    SF-vs-PB donor-pseudobulk signed-Wald ranked list, one column per sorted
+    population. Positive NES (red) means the set packs toward the SF-high end.
+    The `WT_heat_up` row is the number that settles the claim: it is strongly
+    positive and significant in Treg, Tcon, and CD8 alike, so the signal is
+    pan-T rather than Treg-restricted. Stars mark BH-FDR (`***` < 0.001,
+    `**` < 0.01, `*` < 0.05).
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def pseudo_bulk(go, gsea, mo):
     def _stars(p):
         if p < 0.001:
             return "***"
@@ -270,29 +270,33 @@ def _(go, gsea, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Heat-vs-hypoxia check inside JIA SF
+    mo.md(r"""
+    ## Heat-vs-hypoxia check inside JIA SF
 
-        Synovial fluid is a hypoxic tissue niche, so the SF-vs-PB `WT_heat` enrichment
-        could reflect the hypoxic microenvironment rather than a heat program. I ask
-        that here three ways, all within JIA. Does the enrichment survive removing the
-        genes `WT_heat_up` shares with `HALLMARK_HYPOXIA` (primary donor-pseudobulk
-        tier)? Do per-cell heat and hypoxia scores co-localize in SF cells, and which
-        biological programs do the enriching leading-edge genes actually represent
-        (both secondary annotation)? These do not fully deconfound tissue context —
-        heat and hypoxia separate cleanly only where an elevated temperature occurs
-        without a hypoxic niche — but they do separate a hypoxia-overlap signal from
-        the rest.
-        """
-    )
+    Synovial fluid is a hypoxic tissue niche, so the SF-vs-PB `WT_heat` enrichment
+    could reflect the hypoxic microenvironment rather than a heat program. I ask
+    that here three ways, all within JIA. Does the enrichment survive removing the
+    genes `WT_heat_up` shares with `HALLMARK_HYPOXIA` (primary donor-pseudobulk
+    tier)? Do per-cell heat and hypoxia scores co-localize in SF cells, and which
+    biological programs do the enriching leading-edge genes actually represent
+    (both secondary annotation)? These do not fully deconfound tissue context —
+    heat and hypoxia separate cleanly only where an elevated temperature occurs
+    without a hypoxic niche — but they do separate a hypoxia-overlap signal from
+    the rest.
+    """)
     return
 
 
-@app.cell
-def _(go, heat_hypoxia_coloc, heat_hypoxia_leadingedge, heat_hypoxia_purge, mo):
+@app.cell(hide_code=True)
+def _(
+    go,
+    heat_hypoxia_coloc,
+    heat_hypoxia_leadingedge,
+    heat_hypoxia_purge,
+    mo,
+):
     _order = ["Treg", "Tcon", "CD8"]
     _p = heat_hypoxia_purge.set_index("population").loc[_order].reset_index()
     _c = heat_hypoxia_coloc[
@@ -367,35 +371,33 @@ def _(go, heat_hypoxia_coloc, heat_hypoxia_leadingedge, heat_hypoxia_purge, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Is `WT_heat_up` even heat? A curated heat-shock lens
+    mo.md(r"""
+    ## Is `WT_heat_up` even heat? A curated heat-shock lens
 
-        The leading edge said `WT_heat_up` is a loose label — mostly activation, only a trace of
-        heat-shock. That fits: it's bulk RNA-seq of iTregs activated at 39 °C, so activation rides
-        along, and one mouse signature can't pull the two apart.
+    The leading edge said `WT_heat_up` is a loose label — mostly activation, only a trace of
+    heat-shock. That fits: it's bulk RNA-seq of iTregs activated at 39 °C, so activation rides
+    along, and one mouse signature can't pull the two apart.
 
-        So I bring a second lens — a curated heat-shock signature from public MSigDB / Reactome / GO
-        sets, refined to an activation-free proteostasis core (`HSR_core`, 56 genes) and a broader
-        sensitivity set (176). I keep it separate from `WT_heat_up`, never blended; the HSF1 / chaperone
-        program is the thermal core itself, not something to purge.
+    So I bring a second lens — a curated heat-shock signature from public MSigDB / Reactome / GO
+    sets, refined to an activation-free proteostasis core (`HSR_core`, 56 genes) and a broader
+    sensitivity set (176). I keep it separate from `WT_heat_up`, never blended; the HSF1 / chaperone
+    program is the thermal core itself, not something to purge.
 
-        The mouse anchor already showed a real thermal program lives in the 39 °C response, stronger than
-        the activation tangled with it. JIA can't measure temperature — but it can ask two things the
-        mouse can't. Does a clean thermal signal survive the SF-vs-PB contrast? And do the two lenses
-        point at the same cells?
+    The mouse anchor already showed a real thermal program lives in the 39 °C response, stronger than
+    the activation tangled with it. JIA can't measure temperature — but it can ask two things the
+    mouse can't. Does a clean thermal signal survive the SF-vs-PB contrast? And do the two lenses
+    point at the same cells?
 
-        This second lens is annotation — it sits beside the `WT_heat` claim and enriches the reading. Its
-        core answers proteotoxic stress broadly: oxidative, proteasomal, thermal alike. So a positive read
-        here marks proteostasis stress, and the mouse 37/39 contrast is where that ties back to temperature.
-        """
-    )
+    This second lens is annotation — it sits beside the `WT_heat` claim and enriches the reading. Its
+    core answers proteotoxic stress broadly: oxidative, proteasomal, thermal alike. So a positive read
+    here marks proteostasis stress, and the mouse 37/39 contrast is where that ties back to temperature.
+    """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(go, hsr_coloc, hsr_lens_nes, hsr_overlap, mo):
     _order = ["Treg", "Tcon", "CD8"]
 
@@ -485,7 +487,7 @@ def _(go, hsr_coloc, hsr_lens_nes, hsr_overlap, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(CONFIG, RESULTS, pd, yaml):
     with open(CONFIG) as _fh:
         _cfg = yaml.safe_load(_fh)
@@ -532,11 +534,10 @@ def _(CONFIG, RESULTS, pd, yaml):
     _observed = sf_two_lens.groupby("coarse_label").size().to_dict()
     if any(_observed.get(_k, 0) != _v for _k, _v in _expected.items()):
         raise ValueError(f"SF two-lens counts do not match committed HSR counts: {_observed}")
-
     return (sf_two_lens,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     same_cells_pop = mo.ui.dropdown(
         options=["Treg", "Tcon", "CD8"],
@@ -546,7 +547,7 @@ def _(mo):
     return (same_cells_pop,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(go, hsr_coloc, hsr_lens_nes, mo, same_cells_pop, sf_two_lens):
     _pop = same_cells_pop.value
     _d = sf_two_lens[sf_two_lens["coarse_label"] == _pop]
@@ -600,24 +601,22 @@ def _(go, hsr_coloc, hsr_lens_nes, mo, same_cells_pop, sf_two_lens):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Secondary (corroborative) — per-cell `WT_heat_up` AUCell SF-vs-PB SMD
+    mo.md(r"""
+    ## Secondary (corroborative) — per-cell `WT_heat_up` AUCell SF-vs-PB SMD
 
-        The per-cell lens is AUCell — area under each cell's gene-recovery curve for
-        the up-set, rank-based and bounded in [0, 1], robust to library size and
-        composition. I summarize it as a donor-level standardized mean difference
-        (SMD) of SF versus PB per population, with a 95% confidence interval. It
-        stays on its own footing and is never pooled with the pseudobulk NES above.
-        """
-    )
+    The per-cell lens is AUCell — area under each cell's gene-recovery curve for
+    the up-set, rank-based and bounded in [0, 1], robust to library size and
+    composition. I summarize it as a donor-level standardized mean difference
+    (SMD) of SF versus PB per population, with a 95% confidence interval. It
+    stays on its own footing and is never pooled with the pseudobulk NES above.
+    """)
     return
 
 
-@app.cell
-def _(mo, smd):
+@app.cell(hide_code=True)
+def _(smd):
     _order = {"Treg": 0, "Tcon": 1, "CD8": 2}
     _s = smd.copy()
     _s["_k"] = _s["cell_state"].map(_order).fillna(9)
@@ -631,27 +630,36 @@ def _(mo, smd):
             f"{float(_r['pvalue']):.2g} | {int(_r['n_donors'])} | "
             f"{int(_r['n_cells']):,} |"
         )
-    _tbl = (
+    smd_tbl = (
         "| population | signature | SMD | 95% CI | p | donors | cells |\n"
         "|---|---|---|---|---|---|---|\n" + "\n".join(_rows)
     )
-    mo.md(
-        "Per-cell `WT_heat_up` AUCell SF-vs-PB donor-level SMD, the corroborative "
-        "tier. Every population shifts SF-high in the same direction as the primary "
-        "NES, and the effect is largest in Treg (SMD +5.53) yet clearly present in "
-        "Tcon and CD8, echoing the pan-T reading. This annotates the primary result "
-        "and does not stand as independent evidence.\n\n" + _tbl
-    )
+    return (smd_tbl,)
+
+
+@app.cell(hide_code=True)
+def _(mo, smd_tbl):
+    mo.md(rf"""
+    Per-cell `WT_heat_up` AUCell SF-vs-PB donor-level SMD, the corroborative tier.
+    Every population shifts SF-high in the same direction as the primary NES, and
+    the effect is largest in Treg (SMD +5.53) yet clearly present in Tcon and CD8,
+    echoing the pan-T reading. This annotates the primary result and does not stand
+    as independent evidence.
+
+    {smd_tbl}
+    """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""## Reactive embedding explorer""")
+    mo.md(r"""
+    ## Reactive embedding explorer
+    """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(cells, mo):
     # I expose one curated, AUCell-only signature surface on the right panel rather
     # than every scored column. The hypoxia / UPR UCell twins are dropped so the two
@@ -659,7 +667,8 @@ def _(cells, mo):
     # HSP per-cell scores with the two Hallmark AUCell readouts and the mitochondrial
     # fraction as an annotation channel.
     _curated = [
-        ("mouse anchor — WT_heat (updown)", "WT_heat_updown"),
+        ("mouse anchor — WT_heat (up)", "WT_heat_up"),
+        ("mouse anchor — WT_heat (down)", "WT_heat_down"),
         ("effector — eTreg", "score_eTreg"),
         ("stress — HSP", "score_HSP"),
         ("readout — HALLMARK_HYPOXIA (AUCell)", "HALLMARK_HYPOXIA_AUCell"),
@@ -719,8 +728,8 @@ def _(cells, mo):
     return cap_slider, color_by, ct_filter, left_color_by, tissue_filter
 
 
-@app.cell
-def _(
+@app.cell(hide_code=True)
+def umap(
     cap_slider,
     cells,
     color_by,
@@ -892,7 +901,51 @@ def _(
     return curve_map_l, curve_map_r, drawn, embed_l, embed_r
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Start with this
+
+    * cGAS-STING pathway
+    * Hypoxia pathway
+
+    In Rachaels dataset - just Temperature, do you see Hypoxia, cGAS-STING signature
+
+    Rachaels activats cGAS via cGAMP.
+    Premise: threw cGAMp activating cGAS -> saw the story about the Tregs. Artifical actiavation. Tests the Hypoxia with HIF inhibitor.
+
+    cGAS and Hypoxia in disease.
+
+
+
+
+
+    Start already T cells from disease context, show how they are hypoxia-hi or effector-hi
+
+
+
+
+
+    cGAS in the dataset -> go to mouse
+
+
+    cGAS dependent signature. What happens
+
+
+
+
+    ### cGAS dependent pathways
+    - cGAS pathways, JIA, RA -  there`s a hypoxia signature, a list in the Tregs.
+    - Let`s test what happens in the Tregs.
+    - Now let`s test what happens.
+    - SAVI, JIA
+
+    Independent of
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _(curve_map_l, curve_map_r, drawn, embed_l, embed_r, go, mo):
     # Lasso either embedding above -> this cell describes the lassoed cells. It reads
     # each plotly selection back to rows of the shown frame through the trace maps,
@@ -922,7 +975,8 @@ def _(curve_map_l, curve_map_r, drawn, embed_l, embed_r, go, mo):
     # fraction stays on the color-by control only, kept off this bar because it is a
     # percentage rather than a bounded score and would flatten the other bars.
     _score_cols = {
-        "WT_heat (updown)": "WT_heat_updown",
+        "WT_heat (up)": "WT_heat_up",
+        "WT_heat (down)": "WT_heat_down",
         "eTreg": "score_eTreg",
         "HSP": "score_HSP",
         "HALLMARK_HYPOXIA": "HALLMARK_HYPOXIA_AUCell",
@@ -1024,25 +1078,23 @@ def _(curve_map_l, curve_map_r, drawn, embed_l, embed_r, go, mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Hypoxia and UPR readouts — SF vs PB by cell state
+    mo.md(r"""
+    ## Hypoxia and UPR readouts — SF vs PB by cell state
 
-        With labels frozen I harvested two Hallmark AUCell readouts on the same cells
-        and summarized each as a SF-vs-PB standardized mean difference per sorted
-        population. The bars below give that SMD. A positive value means the SF cells
-        carry the higher readout. This is a secondary annotation-tier read, correlative
-        throughout, and the hypoxia surface is a readout of the tissue state — not a
-        claim that HIF or fever drives it.
-        """
-    )
+    With labels frozen I harvested two Hallmark AUCell readouts on the same cells
+    and summarized each as a SF-vs-PB standardized mean difference per sorted
+    population. The bars below give that SMD. A positive value means the SF cells
+    carry the higher readout. This is a secondary annotation-tier read, correlative
+    throughout, and the hypoxia surface is a readout of the tissue state — not a
+    claim that HIF or fever drives it.
+    """)
     return
 
 
-@app.cell
-def _(go, mo, readout):
+@app.cell(hide_code=True)
+def hypoxia_cell(go, mo, readout):
     _states = ["Treg", "Tcon", "CD8"]
     _reads = {
         "HALLMARK_HYPOXIA": ("hypoxia", "#c0392b"),
@@ -1102,43 +1154,50 @@ def _(go, mo, readout):
         "|---|---|---|\n" + "\n".join(_prows)
     )
 
-    _cap = mo.md(
-        "**The plain reading.** Hypoxia runs SF-high in every population and **leads "
-        "in Treg** (SF−PB SMD +1.67, versus +1.37 in Tcon and +0.83 in CD8). The "
-        "high-pocket table sharpens it: **29.8%** of synovial-fluid Tregs sit in the "
-        "top-decile hypoxia pocket against **1.7%** of blood Tregs, the widest "
-        "SF-over-PB pocket enrichment of the three populations. The UPR readout is "
-        "**flat**: near zero in Treg (+0.16) and mildly negative in Tcon (−0.22) and "
-        "CD8 (−0.56), so it carries no coherent SF-vs-PB shift. Read correlatively, a "
-        "synovial-Treg hypoxia pocket is the one readout worth carrying forward, and "
-        "the hypoxia surface remains a readout of the tissue state, not a HIF-causality "
-        "claim. Anything worth claiming from it is re-derived in the donor-level "
-        "pseudobulk first.\n\n" + _ptbl
-    )
-    mo.vstack([mo.ui.plotly(_fig), _cap])
+    mo.vstack([mo.ui.plotly(_fig)])
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Harvest context — the current, revisable OR-gated drafted subset
+    mo.md(r"""
+    **The plain reading.** Hypoxia runs SF-high in every population and **leads
+    in Treg** (SF−PB SMD +1.67, versus +1.37 in Tcon and +0.83 in CD8).
+    The high-pocket table sharpens it:
+    * **29.8%** of synovial-fluid Tregs sit in the top-decile hypoxia pocket against **1.7%** of blood Tregs,
+    * the widest SF-over-PB pocket enrichment of the three populations.
 
-        Alongside the primary claim I draft a bounded populations-of-interest subset
-        off the same frozen labels, for later cross-dataset and cross-species
-        questions. Membership is an OR-union of anchor-orthogonal hooks — a lineage
-        hook, an effector hook, and a viable mitochondrial-high hook — under a
-        viability gate. The mouse `WT_heat` score is carried as annotation only and
-        is **never a selection predicate**. Everything here is a **current, revisable
-        harvest**, open to revision in light of the hypoxia readout above, and the
-        latent maps it feeds are maps, never evidence.
-        """
-    )
+    The UPR readout is **flat**:
+    - near zero in Treg (+0.16) and mildly negative in Tcon (−0.22) and CD8 (−0.56),
+    - so it carries no coherent SF-vs-PB shift.
+
+    Synovial-Treg hypoxia pocket is the a readout worth carrying forward,
+    and the hypoxia surface remains a readout of the tissue state.
+    """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Harvest cells by context: current gating union 'OR' strategy
+
+    Alongside I draft a bounded populations-of-interest subset off the same frozen labels,
+    for later cross-dataset and cross-species questions.
+
+    Membership is an OR-union of anchor-orthogonal hooks
+    * a lineage hook,
+    * an effector hook,
+    * and a viable mitochondrial-high hook
+    ...under a viability gate.
+
+    The mouse `WT_heat` score is carried as annotation only and is **never a selection predicate**.
+    Everything here is a **current, revisable harvest**, open to revision in light of the hypoxia readout above
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _(go, hook_lineage, mo, or_union):
     # OR-union membership breakdown across the whole compartment.
     _cat_order = [
@@ -1158,7 +1217,7 @@ def _(go, hook_lineage, mo, or_union):
     _um = or_union.set_index("membership_category")
     _labels = [c for c in _cat_order if c in _um.index]
     _vals = [float(_um.loc[c, "frac_all_cells"]) * 100 for c in _labels]
-    _union_pct = float(or_union["union_frac_all_cells"].iloc[0]) * 100
+    union_pct = float(or_union["union_frac_all_cells"].iloc[0]) * 100
 
     _fig = go.Figure(
         go.Bar(
@@ -1174,7 +1233,7 @@ def _(go, hook_lineage, mo, or_union):
         height=420,
         template="plotly_white",
         title=dict(
-            text=f"OR-union membership (drafted subset ≈ {_union_pct:.0f}% of compartment)",
+            text=f"OR-union membership (drafted subset ≈ {union_pct:.0f}% of compartment)",
             x=0.5,
         ),
         yaxis_title="% of all cells",
@@ -1198,47 +1257,55 @@ def _(go, hook_lineage, mo, or_union):
         "OR-union |\n|---|---|---|---|---|---|\n" + "\n".join(_hrows)
     )
 
-    _cap = mo.md(
-        f"**Reading the harvest.** The current OR-gated draft takes about "
-        f"**{_union_pct:.0f}%** of the compartment. The lineage hook carries the bulk "
-        f"of it (all Tregs by construction), the effector hook adds an eTreg-high "
-        f"minority across all three populations, and the viable mitochondrial-high "
-        f"hook is a small bounded pocket. Each hi arm keeps its matched-lo baseline so "
-        f"downstream contrasts stay factorial. This draft is a **current, revisable** "
-        f"design preview, not a committed cohort and not statistical evidence — the "
-        f"hypoxia readout above is exactly the kind of signal that may reshape which "
-        f"hooks I keep.\n\n" + _htbl
-    )
-    mo.vstack([mo.ui.plotly(_fig), _cap])
+    mo.vstack([mo.ui.plotly(_fig)])
+    return (union_pct,)
+
+
+@app.cell(hide_code=True)
+def _(mo, union_pct):
+    mo.md(rf"""
+    **The harvest stats.** The current OR-gated draft takes about
+    **{union_pct:.0f}%** of the compartment. The lineage hook carries the bulk
+    of it (all Tregs by construction), the effector hook adds an eTreg-high
+    minority across all three populations, and the viable mitochondrial-high
+    hook is a small bounded pocket. Each hi arm keeps its matched-lo baseline so
+    downstream contrasts stay factorial. This draft is a **current, revisable**
+    design preview, not a committed cohort and not statistical evidence — the
+    hypoxia readout above is exactly the kind of signal that may reshape which
+    hooks I keep.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    ## Decision
+
+    **Where the analysis goes next: continue.** The mouse 39 °C `WT_heat`
+    up-program is enriched in JIA synovial-fluid T cells relative to paired blood,
+    and the enrichment runs broad across the sorted populations — NES ≈ 2.51 in
+    Treg, 2.57 in Tcon, 2.05 in CD8, all clearing FDR far below 1e-6. The signal is
+    pan-T. It is positive, reproducible, and read as **consistent with** the mouse
+    stress axis: correlative, and I state plainly that it holds across the T-cell
+    populations rather than singling out the Treg.
+
+    **Harvest strategy remains revisitable.** The OR-gated drafted subset above is
+    a current design preview, a draft rather than a committed cohort. The
+    synovial-Treg hypoxia high-pocket surfaced in this review is the kind of
+    orthogonal readout that may reshape which hooks I keep. That harvest call is
+    taken separately later. This review makes one claim, the pan-T enrichment, and
+    the hypoxia and UPR readouts stay a secondary annotation tier, kept apart from
+    the pseudobulk NES.
+
+    The primary signature carried forward is `WT_heat`, scored as donor-pseudobulk
+    NES within frozen cell-state labels.
+    """)
     return
 
 
 @app.cell
-def _(mo):
-    mo.md(
-        """
-        ## Decision
-
-        **Where the analysis goes next: continue.** The mouse 39 °C `WT_heat`
-        up-program is enriched in JIA synovial-fluid T cells relative to paired blood,
-        and the enrichment runs broad across the sorted populations — NES ≈ 2.51 in
-        Treg, 2.57 in Tcon, 2.05 in CD8, all clearing FDR far below 1e-6. The signal is
-        pan-T. It is positive, reproducible, and read as **consistent with** the mouse
-        stress axis: correlative, and I state plainly that it holds across the T-cell
-        populations rather than singling out the Treg.
-
-        **Harvest strategy remains revisitable.** The OR-gated drafted subset above is
-        a current design preview, a draft rather than a committed cohort. The
-        synovial-Treg hypoxia high-pocket surfaced in this review is the kind of
-        orthogonal readout that may reshape which hooks I keep. That harvest call is
-        taken separately later. This review makes one claim, the pan-T enrichment, and
-        the hypoxia and UPR readouts stay a secondary annotation tier, kept apart from
-        the pseudobulk NES.
-
-        The primary signature carried forward is `WT_heat`, scored as donor-pseudobulk
-        NES within frozen cell-state labels.
-        """
-    )
+def _():
     return
 
 

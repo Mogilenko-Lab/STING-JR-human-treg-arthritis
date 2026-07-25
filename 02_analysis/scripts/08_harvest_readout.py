@@ -87,7 +87,7 @@ def carry_frozen_readouts(index: pd.Index) -> pd.DataFrame:
 
     gonogo = pd.read_parquet(idir / "05_gonogo_explore.parquet")
     gonogo.index = gonogo.index.astype(str)
-    for col in ("WT_heat_updown", "score_eTreg"):
+    for col in ("WT_heat_updown", "WT_heat_up", "WT_heat_down", "score_eTreg"):
         out[col] = gonogo[col].reindex(index).to_numpy() if col in gonogo else np.nan
 
     qc = pd.read_parquet(idir / "01_qc_explore.parquet")
