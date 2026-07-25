@@ -24,13 +24,29 @@
 03_results/objects/*.rdata
 03_results/objects/*.parquet
 
-# Ignore data artifacts within phase dirs at any depth, keep the skeleton.
-# Decided to leave for now
-#03_results/**/figures/**/*.pdf
-#03_results/**/figures/**/*.png
-#03_results/**/figures/**/*.svg
-#03_results/**/tables/**/*.csv
-#03_results/**/tables/**/*.tsv
+# Data artifacts within phase dirs. The tracked surface of 03_results/ is the
+# narrative (stage README.md captions), the master/ accumulators, and the compact
+# per-stage summary + figure-source tables. Rendered figures and bulk payload stay
+# out: each is reproducible from a committed 02_analysis/scripts/NN_* plus its
+# same-stem source table, and the payload runs to ~200 MB per full pipeline pass.
+# Force-add an individual artifact with `git add -f` when it must be a record.
+
+# Rendered figures — PDF+PNG twins; a single vector UMAP of ~50k cells is >10 MB.
+03_results/**/figures/**/*.pdf
+03_results/**/figures/**/*.png
+03_results/**/figures/**/*.svg
+
+# Bulk / binary tables — fgsea result objects, hook substrate, per-cell score
+# matrices, full DE tables, transcriptome-length ranked lists, running-sum exports.
+03_results/**/tables/**/*.rds
+03_results/**/tables/**/*.parquet
+03_results/**/tables/**/*.tsv
+03_results/**/tables/**/per_cell_*.csv
+03_results/**/tables/**/runsum_interactive_*.csv
+03_results/**/tables/**/de_SFvsPB_*.csv
+03_results/**/tables/**/pseudobulk_counts.csv
+03_results/**/tables/**/qc_metrics_per_cell.csv
+03_results/**/tables/**/mthi_treg_membership.csv
 
 # Interactive-explorer tables (regenerable from scripts/export_explorers.py; binary).
 03_results/interactive/*.parquet
@@ -40,8 +56,12 @@
 02_analysis/notebooks/**/eda/
 
 # marimo app cache + exported static renders — regenerable from the .py app.
+__marimo__/
 02_analysis/notebooks/**/__marimo__/
 02_analysis/notebooks/**/*.html
+
+# Timestamped pre-change backups written by `sciagent provision` / vscode-sync-settings.
+*.provc.*
 
 # Scratch: throwaway artifacts, never committed
 03_results/_scratch/*

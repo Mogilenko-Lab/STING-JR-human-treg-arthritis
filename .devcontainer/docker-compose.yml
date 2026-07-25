@@ -1,6 +1,6 @@
 services:
   dev-core:
-    image: scdock-r-dev:v0.5.7
+    image: scdock-r-dev:v0.5.10
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     working_dir: /workspaces/human_treg_arthritis
     env_file: .env
@@ -13,6 +13,7 @@ services:
     #   - "8787:8787"
     volumes:
       - ${WORKSPACE_FOLDER:-.}:/workspaces/human_treg_arthritis
+      - /data1/users/antonz/pipeline/dev-env:/opt/dev-env:ro
       # CoReSh shared reference cache (chunks under coresh/current/preprocessed_chunks/{hsa,mmu}); read-only, same path in/out
       - /data2/users/shared/refcache:/data2/users/shared/refcache:ro
       - /tmp/ssh-XXXXXXG5CpIH/agent.11801:/ssh-agent:ro
@@ -63,6 +64,7 @@ services:
     #   - "8787:8787"
     volumes:
       - ${WORKSPACE_FOLDER:-.}:/workspaces/human_treg_arthritis
+      - /data1/users/antonz/pipeline/dev-env:/opt/dev-env:ro
       # CoReSh shared reference cache (chunks under coresh/current/preprocessed_chunks/{hsa,mmu}); read-only, same path in/out
       - /data2/users/shared/refcache:/data2/users/shared/refcache:ro
       - /tmp/ssh-XXXXXXG5CpIH/agent.11801:/ssh-agent:ro
