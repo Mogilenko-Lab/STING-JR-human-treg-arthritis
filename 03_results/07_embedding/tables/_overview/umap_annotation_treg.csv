@@ -1,0 +1,7 @@
+coarse_label,tissue,n_cells,frac_of_total
+CD8,peripheral_blood,15817.0,0.158304559
+CD8,synovial_fluid,19010.0,0.190261722
+Tcon,peripheral_blood,18411.0,0.184266627
+Tcon,synovial_fluid,19502.0,0.195185908
+Treg,peripheral_blood,13603.0,0.136145724
+Treg,synovial_fluid,13572.0,0.13583546

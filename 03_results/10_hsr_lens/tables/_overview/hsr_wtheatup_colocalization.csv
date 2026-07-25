@@ -1,0 +1,4 @@
+population,hsr_term,level,method,r,pvalue,n,evidence_tier
+Treg,HSR_core,cell,spearman,0.191240261,5.81257507e-112,13572.0,secondary_percell
+Tcon,HSR_core,cell,spearman,0.129772437,5.30383111e-74,19502.0,secondary_percell
+CD8,HSR_core,cell,spearman,0.109715659,5.41464551e-52,19010.0,secondary_percell

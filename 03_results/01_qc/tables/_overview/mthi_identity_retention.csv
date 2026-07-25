@@ -1,0 +1,6 @@
+gene,median_mthi_eff,median_mthi_noneff,median_normal,frac_expr_mthi_eff,frac_expr_mthi_noneff,frac_expr_normal,mannwhitney_u,rank_biserial,pvalue,fdr,comparison,evidence_tier
+FOXP3,1.43071151,0.0,1.85452402,0.553264605,0.268518519,0.804372281,2925281.5,-0.246099164,3.86298382e-13,6.43830636e-13,mt_hi_effector_vs_normal_Treg,secondary_percell
+IKZF2,2.11809587,2.11649394,0.65436244,0.76975945,0.708333333,0.523098845,6191830.0,0.595752687,1.36007936e-76,6.80039682e-76,mt_hi_effector_vs_normal_Treg,secondary_percell
+CTLA4,1.82240534,0.0,1.08610392,0.735395189,0.365740741,0.653367332,5311827.0,0.368959129,1.68620443e-28,4.21551109e-28,mt_hi_effector_vs_normal_Treg,secondary_percell
+IL2RA,1.52094281,0.0,1.14061081,0.567010309,0.305555556,0.672453877,4047056.5,0.0430036488,0.198178226,0.247722782,mt_hi_effector_vs_normal_Treg,secondary_percell
+TIGIT,1.51787555,0.0,1.2799778,0.591065292,0.25462963,0.702789861,3912067.0,0.00821428001,0.806723722,0.806723722,mt_hi_effector_vs_normal_Treg,secondary_percell

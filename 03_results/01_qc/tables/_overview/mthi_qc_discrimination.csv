@@ -1,0 +1,5 @@
+metric,metric_tier,median_mthi_eff,median_mthi_noneff,median_normal,mannwhitney_u,rank_biserial,pvalue,elevated_in_pocket,fdr,comparison,evidence_tier,doublet_score_n_nonnull,qc_min_genes_floor
+n_genes_by_counts,objective_qc,1338.0,877.0,2105.0,951646.5,-0.754742546,5.48286493e-109,False,1.09657299e-108,mt_hi_effector_vs_normal_Treg,secondary_percell,27175.0,200.0
+total_counts,objective_qc,2651.0,1604.0,5878.0,396141.5,-0.89790678,1.98357871e-153,False,7.93431484e-153,mt_hi_effector_vs_normal_Treg,secondary_percell,27175.0,200.0
+score_apoptosis,tier3_handmarker_descriptive,0.0458284283,0.0381497478,0.0926427905,3341226.0,-0.138902333,4.46885749e-05,False,4.46885749e-05,mt_hi_effector_vs_normal_Treg,secondary_percell,27175.0,200.0
+score_HSP,tier3_handmarker_descriptive,-0.0284650998,-0.154495459,0.0454981795,3011777.0,-0.223807624,4.80563556e-11,False,6.40751408e-11,mt_hi_effector_vs_normal_Treg,secondary_percell,27175.0,200.0

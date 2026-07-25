@@ -1,0 +1,10 @@
+donor,tissue,n_cells,frac_of_pocket,meets_min_cells,evidence_tier,pseudobulk_min_cells,pseudobulk_min_donors,sf_donors_meeting_floor,pb_donors_meeting_floor,supports_own_de_stratum
+JIA_patient_6,peripheral_blood,4,0.013745704467353952,False,secondary_percell,20,3,3,0,False
+JIA_patient_7,peripheral_blood,2,0.006872852233676976,False,secondary_percell,20,3,3,0,False
+JIA_patient_3,peripheral_blood,1,0.003436426116838488,False,secondary_percell,20,3,3,0,False
+JIA_patient_6,synovial_fluid,198,0.6804123711340206,True,secondary_percell,20,3,3,0,False
+JIA_patient_2,synovial_fluid,30,0.10309278350515463,True,secondary_percell,20,3,3,0,False
+JIA_patient_3,synovial_fluid,27,0.09278350515463918,True,secondary_percell,20,3,3,0,False
+JIA_patient_1,synovial_fluid,14,0.048109965635738834,False,secondary_percell,20,3,3,0,False
+JIA_patient_4,synovial_fluid,14,0.048109965635738834,False,secondary_percell,20,3,3,0,False
+JIA_patient_7,synovial_fluid,1,0.003436426116838488,False,secondary_percell,20,3,3,0,False

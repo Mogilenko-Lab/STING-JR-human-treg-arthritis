@@ -1,0 +1,4 @@
+population,n_sf,n_pb,model,n_sig_de,n_ranked
+Treg,6.0,7.0,~ donor + tissue,1584.0,14714.0
+Tcon,7.0,6.0,~ donor + tissue,1560.0,15229.0
+CD8,7.0,6.0,~ donor + tissue,1795.0,15070.0

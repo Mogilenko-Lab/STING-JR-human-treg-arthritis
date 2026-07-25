@@ -126,3 +126,51 @@ The NES / p-value summarising each curve live in the sibling `gsea_pseudobulk_{t
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/helpers/fgsea_prerank.R` | (top-level) | `gsea_min_size=5; gsea_max_size=500; gsea_seed=123; gsea_nperm=100000; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv` + frozen `WT_heat_{up,down}.txt` |
+
+## tables/gsea_pseudobulk_{treg,tcon,cd8}.csv
+
+The mouse 39 °C `WT_heat_up` program enriches toward the SF end of every
+population's donor-pseudobulk ranked list — NES 2.5146 in Treg (padj 9.65e-14, 105
+members matched), 2.5717 in Tcon (padj 4.47e-15, 111), 2.0503 in CD8 (padj
+8.42e-07, 115) — while `WT_heat_down` reaches significance nowhere (Treg NES 1.011,
+padj 0.435; Tcon 1.337, padj 0.074; CD8 1.224, padj 0.148). The axis is up-arm only,
+and it is pan-T rather than Treg-exclusive, with Treg and Tcon carrying it more
+strongly than CD8.
+
+**How to read:** One CSV per sorted population, one row per gene set (`WT_heat_up`,
+`WT_heat_down`). `nes` is the normalized enrichment score of that set against the
+population's signed-Wald SF-vs-PB ranked list: positive = enriched toward the SF-up
+end of the list, negative = toward PB-up. `set_size` counts set members actually
+present in that ranked list, so it varies by population; `padj` is BH FDR across the
+sets in the file; `core_enrichment` is the `/`-delimited leading edge;
+`database=mouse_projection` marks the set's provenance. These are the PRIMARY,
+confirmatory numbers — they become the `primary_pseudobulk` rows of
+`03_results/master/effect_sizes_treg_arthritis.csv`. Never pool them with the
+per-cell AUCell score means, which estimate a different quantity on a secondary
+tier. Correlative (consistent-with), not causal.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/05_score_signatures.py` | `run_fgsea` | `gsea_min_size=5; gsea_max_size=500; gsea_seed=123; gsea_nperm=100000; gsea_fdr=0.05; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv` + frozen `WT_heat_{up,down}.txt` |
+
+## tables/donor_label_score_means.csv
+
+Donor-mean `WT_heat_up` AUCell sits higher in SF than in paired PB in all three
+populations — Treg 0.0193 vs 0.0112, Tcon 0.0178 vs 0.0114, CD8 0.0178 vs 0.0137 —
+the largest relative lift (~1.7x) being Treg, so the per-cell view shadows the
+pseudobulk NES without independently confirming it.
+
+**How to read:** 39 rows, one per donor x tissue x frozen label; three strata are
+absent because those donors lack that population. Four score columns hold the AUCell
+and UCell donor means of `WT_heat_up` and `WT_heat_down`. Both scorers are unsigned
+and rank-based (robust to depth and composition), so only the SF-vs-PB contrast
+*within* a population is interpretable — absolute levels do not compare across gene
+sets of different size, and neither score carries a direction of its own. `n_cells`
+is the number of cells averaged into the row. SECONDARY annotation tier: this table
+is the substrate for the donor-level AUCell standardized mean difference, a
+different estimand from the fgsea NES that must never be pooled with it.
+Correlative.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/05_score_signatures.py` | `main` | `percell_score_ncores=8; signature=WT_heat_{up,down} (AUCell + UCell, rank-based [0,1])` | `03_results/objects/02_annotation.h5ad`, `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |

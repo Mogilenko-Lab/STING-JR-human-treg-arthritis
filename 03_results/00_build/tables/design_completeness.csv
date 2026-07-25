@@ -1,0 +1,7 @@
+population,tissue,n_donors
+CD4_Tcon,peripheral_blood,6
+CD4_Tcon,synovial_fluid,7
+CD4_Treg,peripheral_blood,7
+CD4_Treg,synovial_fluid,7
+CD8,peripheral_blood,6
+CD8,synovial_fluid,7

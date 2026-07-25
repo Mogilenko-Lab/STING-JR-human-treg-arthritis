@@ -1,0 +1,5 @@
+rule,definition,n_cells,jaccard_vs_A_effector,frac_saved_recovered,mt_pctile,mt_threshold,global_etreg_median,evidence_tier
+A_cluster_effector,"Treg in leiden cluster(s) ['3'] (Fisher-enriched for saved lasso, FDR<0.05, median %mt>2x global, median score_eTreg>global median)",291,,0.7672131147540984,97.5,10.033219003677349,-0.0030571864878962823,secondary_percell
+A_cluster_all_mthi,"Treg in leiden cluster(s) ['3', '16'] (all mt-hi enriched clusters; includes the eTreg-LOW non-effector cluster)",507,0.5739644970414202,1.0,97.5,10.033219003677349,-0.0030571864878962823,secondary_percell
+B_threshold,Treg with pct_counts_mt>=P97.5(10.03) AND score_eTreg>=median(-0.0031),340,0.6262886597938144,0.6459016393442623,97.5,10.033219003677349,-0.0030571864878962823,secondary_percell
+saved_lasso_335_Treg,Treg subset of the interactively saved 335-cell lasso (selection_sf_ctla4_pocket.csv),305,0.6464088397790055,1.0,97.5,10.033219003677349,-0.0030571864878962823,secondary_percell
