@@ -15,13 +15,30 @@ review and the cross-species harvest question only.
 Engine: `score_cells_aucell_ucell` (helpers/geneset_utils.py → percell_score.R), the
 same AUCell+UCell rank-based scorer stage 05 and the sting compartment use. AUCell is
 the canonical readout; UCell rides alongside as a cross-check. The already-derived
-per-cell readouts of THIS compartment — score_HSP, score_eTreg, WT_heat_updown — are
-NOT re-derived here; they are carried in verbatim from the frozen explorer parquets so
-the review has one tidy table.
+per-cell readouts of THIS compartment — score_HSP, score_eTreg, and the mouse-anchor
+WT_heat up / down / up-minus-down channels — are NOT re-derived here; they are carried
+in verbatim from the frozen explorer parquets so the review has one tidy table.
+
+The mouse anchor enters as THREE readouts, not one. `WT_heat_updown` is the balanced
+up-minus-down composite, so a coordinated rise in both arms cancels inside it and the
+composite reads flat whatever the arms do. Carrying `WT_heat_up` and `WT_heat_down`
+as their own readouts alongside it makes each arm visible, which is what the pseudobulk
+ranked-list enrichment actually scores (the up and down sets are scored separately
+there too — AUCell/UCell are unsigned single-list scorers).
+
+Two levels of SF-vs-PB contrast are emitted, and they answer different questions:
+  * per-cell (`harvest_readout_summary.csv`) — pooled over all cells, so it is
+    pseudoreplicated: the unit of replication is the cell, not the donor.
+  * per-donor (`harvest_readout_donor_contrast.csv`) — each donor contributes one
+    mean per (label × tissue), and the contrast is taken ACROSS donors, paired within
+    donor. This is the level the donor-pseudobulk spine works at, so it is the one to
+    read next to it. It is still annotation tier and never becomes an effect-size row.
 
 Outputs:
   03_results/interactive/08_harvest_readout.parquet          (per-cell; gitignored/regenerable)
   03_results/08_harvest_readout/tables/harvest_readout_summary.csv
+  03_results/08_harvest_readout/tables/harvest_readout_donor_means.csv
+  03_results/08_harvest_readout/tables/harvest_readout_donor_contrast.csv
   03_results/08_harvest_readout/README.md                    (caption; written by hand, not here)
 
 Run in-container from the compartment root (or anywhere, via `from config import`):
@@ -36,6 +53,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import scanpy as sc
+from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -56,7 +74,9 @@ HALLMARK_SETS = ["HALLMARK_HYPOXIA", "HALLMARK_UNFOLDED_PROTEIN_RESPONSE"]
 # Readout name → source column in the assembled per-cell table. AUCell is canonical
 # for the two new Hallmark sets (aligned with the sting compartment).
 READOUTS = {
-    "WT_heat_updown": "WT_heat_updown",                       # mouse 39C anchor (annotation only)
+    "WT_heat_up": "WT_heat_up",                               # mouse 39C anchor, up arm (annotation only)
+    "WT_heat_down": "WT_heat_down",                           # mouse 39C anchor, down arm (annotation only)
+    "WT_heat_updown": "WT_heat_updown",                       # balanced composite (arms can cancel)
     "score_eTreg": "score_eTreg",                             # effector-Treg (GSE161426)
     "score_HSP": "score_HSP",                                 # heat-shock / proteostasis
     "HALLMARK_HYPOXIA": "HALLMARK_HYPOXIA_AUCell",
@@ -79,9 +99,10 @@ def load_hallmark_sets() -> dict[str, list[str]]:
 
 
 def carry_frozen_readouts(index: pd.Index) -> pd.DataFrame:
-    """Join already-derived per-cell readouts (score_HSP, score_eTreg, WT_heat_updown)
-    from the frozen explorer parquets — reindexed to the annotation object's barcodes.
-    These are carried verbatim, NEVER re-derived (guardrail)."""
+    """Join already-derived per-cell readouts (score_HSP, score_eTreg, and the
+    WT_heat up / down / up-minus-down channels) from the frozen explorer parquets —
+    reindexed to the annotation object's barcodes. These are carried verbatim,
+    NEVER re-derived here (guardrail)."""
     idir = PATHS.interactive_dir()
     out = pd.DataFrame(index=index)
 
@@ -98,7 +119,7 @@ def carry_frozen_readouts(index: pd.Index) -> pd.DataFrame:
 
 def build_parquet(adata, scored: pd.DataFrame, carried: pd.DataFrame) -> pd.DataFrame:
     """One row per cell: barcode + UMAP + coarse_label/tissue/donor + %mt + the two
-    new Hallmark AUCell/UCell scores + the three carried readouts."""
+    new Hallmark AUCell/UCell scores + the carried readouts."""
     idx = adata.obs_names.astype(str)
     df = pd.DataFrame(index=idx)
     df["barcode"] = idx
@@ -111,7 +132,7 @@ def build_parquet(adata, scored: pd.DataFrame, carried: pd.DataFrame) -> pd.Data
     df["pct_counts_mt"] = adata.obs["pct_counts_mt"].to_numpy()
     for col in scored.columns:                       # HALLMARK_*_{AUCell,UCell}
         df[col] = scored[col].reindex(idx).to_numpy()
-    for col in carried.columns:                      # WT_heat_updown, score_eTreg, score_HSP
+    for col in carried.columns:                      # WT_heat_{up,down,updown}, score_eTreg, score_HSP
         df[col] = carried[col].reindex(idx).to_numpy()
     return df.reset_index(drop=True)
 
@@ -120,7 +141,12 @@ def summarise(df: pd.DataFrame) -> pd.DataFrame:
     """Per (coarse_label × tissue × readout): mean/spread + mean %mt + n, plus a compact
     verdict — fraction above the readout's global P90 (high-pocket signal), and the
     per-cell SF-vs-PB shift (mean difference + standardized d), attached per cell-state.
-    Long/tidy, mirroring the sting Phase-1 summary. Descriptive, correlative only."""
+    Long/tidy, mirroring the sting Phase-1 summary. Descriptive, correlative only.
+
+    The `sf_minus_pb_*` columns here pool cells across donors, so their unit of
+    replication is the cell and they are pseudoreplicated relative to the donor-level
+    spine. `donor_contrast()` is the donor-level companion; read that one alongside
+    donor-pseudobulk results."""
     # Global P90 per readout (across all cells) → the high-pocket threshold.
     p90 = {name: np.nanpercentile(df[col].to_numpy(dtype=float), 90)
            for name, col in READOUTS.items()}
@@ -171,6 +197,103 @@ def summarise(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def donor_means(df: pd.DataFrame, min_cells: int) -> pd.DataFrame:
+    """One row per (donor × tissue × coarse_label): the mean of every readout over that
+    donor's cells, plus `n_cells`. Strata thinner than `min_cells` are dropped, reusing
+    the same donor-stratum floor the donor-pseudobulk aggregation applies, so the two
+    levels see the same donors."""
+    keys = [DONOR_KEY, TISSUE_KEY, COARSE]
+    cols = list(READOUTS.values())
+    g = df.groupby(keys, observed=True)
+    out = g[cols].mean()
+    out["n_cells"] = g.size()
+    out = out.reset_index().rename(columns={v: k for k, v in READOUTS.items() if v != k})
+    dropped = out[out["n_cells"] < min_cells]
+    if len(dropped):
+        print(f"[08_harvest] donor strata below min_cells={min_cells}, dropped: "
+              + ", ".join(f"{r[DONOR_KEY]}/{r[TISSUE_KEY]}/{r[COARSE]}(n={r['n_cells']})"
+                          for _, r in dropped.iterrows()))
+    out = out[out["n_cells"] >= min_cells].reset_index(drop=True)
+    order = {"Treg": 0, "Tcon": 1, "CD8": 2}
+    return out.sort_values(
+        by=[COARSE, DONOR_KEY, TISSUE_KEY],
+        key=lambda s: s.map(order) if s.name == COARSE else s).reset_index(drop=True)
+
+
+def paired_effect(diff: np.ndarray) -> dict:
+    """Paired standardized mean difference (Cohen's dz) on the within-donor SF-minus-PB
+    differences, with a 95% CI and a paired-t p-value. dz = mean(diff)/sd(diff); its
+    approximate SE is sqrt(1/n + dz^2/(2n)). Mirrors the unpaired donor-level SMD used
+    for the secondary per-cell effect sizes, but keeps the donor pairing."""
+    diff = diff[np.isfinite(diff)]
+    n = len(diff)
+    nan = dict(estimate=np.nan, se=np.nan, ci_low=np.nan, ci_high=np.nan, pvalue=np.nan)
+    if n < 2:
+        return nan
+    sd = float(diff.std(ddof=1))
+    if not np.isfinite(sd) or sd == 0.0:
+        return nan
+    dz = float(diff.mean()) / sd
+    se = float(np.sqrt(1.0 / n + dz ** 2 / (2.0 * n)))
+    t = dz * np.sqrt(n)
+    p = float(2 * stats.t.sf(abs(t), df=n - 1))
+    return dict(estimate=dz, se=se, ci_low=dz - 1.96 * se, ci_high=dz + 1.96 * se,
+                pvalue=p)
+
+
+def unpaired_smd(sf: np.ndarray, pb: np.ndarray) -> float:
+    """Donor-level Cohen's d ignoring the pairing — the same formula the secondary
+    per-cell effect sizes use, kept here only so the paired estimate can be read against
+    an unpaired one on the same donor means."""
+    sf, pb = sf[np.isfinite(sf)], pb[np.isfinite(pb)]
+    n1, n2 = len(sf), len(pb)
+    if n1 < 2 or n2 < 2:
+        return np.nan
+    pooled = np.sqrt(((n1 - 1) * sf.std(ddof=1) ** 2
+                      + (n2 - 1) * pb.std(ddof=1) ** 2) / (n1 + n2 - 2))
+    return float((sf.mean() - pb.mean()) / (pooled + 1e-12))
+
+
+def donor_contrast(dm: pd.DataFrame) -> pd.DataFrame:
+    """Per (coarse_label × readout): the SF-minus-PB contrast taken ACROSS DONORS, on
+    the per-donor means from `donor_means()`. Donors carrying both tissues are paired
+    within donor (GSE160097 is a paired SF/PB design); `n_donors_paired` records how
+    many actually pair, alongside the per-arm donor counts. Positive = higher in
+    synovial fluid. Annotation tier — never an effect-size row."""
+    rows = []
+    order = {"Treg": 0, "Tcon": 1, "CD8": 2}
+    for label, gl in dm.groupby(COARSE, observed=True):
+        sf_arm = gl[gl[TISSUE_KEY] == TISSUE_NUM].set_index(DONOR_KEY)
+        pb_arm = gl[gl[TISSUE_KEY] == TISSUE_DEN].set_index(DONOR_KEY)
+        both = sorted(set(sf_arm.index) & set(pb_arm.index))
+        for name in READOUTS:
+            sf = sf_arm[name].to_numpy(dtype=float)
+            pb = pb_arm[name].to_numpy(dtype=float)
+            diff = (sf_arm.loc[both, name].to_numpy(dtype=float)
+                    - pb_arm.loc[both, name].to_numpy(dtype=float)) if both else np.array([])
+            eff = paired_effect(diff)
+            finite = diff[np.isfinite(diff)]
+            rows.append(dict(
+                coarse_label=label, readout=name,
+                n_donors_paired=int(len(finite)),
+                n_donors_sf=int(np.isfinite(sf).sum()),
+                n_donors_pb=int(np.isfinite(pb).sum()),
+                donor_mean_sf=float(np.nanmean(sf)) if len(sf) else np.nan,
+                donor_mean_pb=float(np.nanmean(pb)) if len(pb) else np.nan,
+                sf_minus_pb_mean=float(finite.mean()) if len(finite) else np.nan,
+                sf_minus_pb_sd=float(finite.std(ddof=1)) if len(finite) > 1 else np.nan,
+                sf_minus_pb_dz=eff["estimate"], dz_se=eff["se"],
+                dz_ci_low=eff["ci_low"], dz_ci_high=eff["ci_high"],
+                dz_pvalue=eff["pvalue"],
+                sf_minus_pb_smd_unpaired=unpaired_smd(sf, pb),
+                min_cells_per_donor_stratum=int(gl["n_cells"].min())))
+    out = pd.DataFrame(rows)
+    return out.sort_values(
+        by=["coarse_label", "readout"],
+        key=lambda s: s.map(order) if s.name == "coarse_label" else s
+    ).reset_index(drop=True)
+
+
 def main() -> None:
     n_cores = int(PARAMS.get("percell_score_ncores", 4))
     hallmark = load_hallmark_sets()
@@ -216,6 +339,24 @@ def main() -> None:
           summary[["coarse_label", "tissue", "readout", "n_cells", "mean",
                    "frac_above_p90", "sf_minus_pb_mean", "sf_minus_pb_smd"]]
           .to_string(index=False))
+
+    # --- donor-level companion (per-donor means, then SF-vs-PB across donors) ---
+    # The per-cell shift above pools cells and is pseudoreplicated; this is the level
+    # the donor-pseudobulk spine works at, so it is the comparable one. Still
+    # annotation tier: nothing here is written to master/ or to an effect-size row.
+    dm = donor_means(df, min_cells=int(PARAMS.get("pseudobulk_min_cells", 20)))
+    dm.to_csv(sdir / "harvest_readout_donor_means.csv", index=False)
+    print(f"[08_harvest] wrote harvest_readout_donor_means.csv ({dm.shape[0]} rows, "
+          f"{dm[DONOR_KEY].nunique()} donors)")
+
+    contrast = donor_contrast(dm)
+    contrast.to_csv(sdir / "harvest_readout_donor_contrast.csv", index=False)
+    print(f"[08_harvest] wrote harvest_readout_donor_contrast.csv ({contrast.shape[0]} rows)")
+    print("\n[08_harvest] donor-level SF-vs-PB (paired within donor):\n",
+          contrast[["coarse_label", "readout", "n_donors_paired", "sf_minus_pb_mean",
+                    "sf_minus_pb_dz", "dz_ci_low", "dz_ci_high", "dz_pvalue"]]
+          .to_string(index=False))
+
     print("\n[08_harvest] DONE. Exploratory / annotation tier — never pooled with the "
           "pseudobulk NES spine.")
 
