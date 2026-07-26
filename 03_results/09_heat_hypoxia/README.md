@@ -16,7 +16,7 @@ Removing 18 `HALLMARK_HYPOXIA` overlap genes reduces the `WT_heat_up` NES modest
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `gene_purge_nes` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, mouse `WT_heat_up/down.txt`, `00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt` |
 
-**How to read:** One row per sorted population. Positive NES means the set is enriched toward the SF-high end of the SF-vs-PB ranked list. `NES_full` is the original `WT_heat_up` score, while `NES_purged` is the same fgsea engine after removing hypoxia-overlap genes. This is the primary donor-pseudobulk tier. I read a positive, significant purged NES as evidence that a hypoxia-overlap removal does not erase the correlative heat-axis signal.
+**How to read:** One row per sorted population. Positive NES means the set is enriched toward the SF-high end of the SF-vs-PB ranked list. `NES_full` is the original `WT_heat_up` score, while `NES_purged` is the same fgsea engine after removing hypoxia-overlap genes. This is the primary donor-pseudobulk tier. I read a positive, significant purged NES as evidence that the `WT_heat_up` enrichment is not reducible to its HALLMARK_HYPOXIA-overlap gene content. It says nothing about temperature, and nothing about whether hypoxia is a confound or a co-exposure — those are not separable in cross-sectional human data.
 
 ## heat_hypoxia_colocalization.csv
 
@@ -26,7 +26,7 @@ Within SF cells, `WT_heat_up_AUCell` and `HALLMARK_HYPOXIA_AUCell` show weak pos
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `heat_hypoxia_colocalization` | `tissue_levels.synovial_fluid=synovial_fluid`, `donor_key=donor` | `03_results/interactive/08_harvest_readout.parquet`, `03_results/05_scoring/tables/per_cell_scores.csv` |
 
-**How to read:** Rows are stratified by population, level, and correlation method. `level=cell` uses SF cells directly. `level=donor_sf_mean` correlates per-donor SF mean heat and hypoxia scores. Positive `r` means higher heat score tends to sit with higher hypoxia score. This is an L3 secondary per-cell read and is not pooled with the pseudobulk NES. The cell-level correlation is weak (Spearman 0.08 to 0.20), so heat-high and hypoxia-high are largely different cells. The donor-level correlation rests on only 6 to 7 donors and is effectively unpowered, so its sign is not interpretable and must not be read as heat and hypoxia being anti-correlated.
+**How to read:** Rows are stratified by population, level, and correlation method. `level=cell` uses SF cells directly. `level=donor_sf_mean` correlates per-donor SF mean heat and hypoxia scores. Positive `r` means a higher `WT_heat_up` score tends to sit with a higher HALLMARK_HYPOXIA score. This is an L3 secondary per-cell read and is not pooled with the pseudobulk NES. The cell-level correlation is weak (Spearman 0.08 to 0.20), so `WT_heat_up`-high and HALLMARK_HYPOXIA-high cells are largely distinct by this measure. The donor-level correlation rests on only 6 to 7 donors and is effectively unpowered, so its sign is not interpretable and must not be read as the two scores being anti-correlated.
 
 ## leadingedge_composition.csv
 
@@ -56,7 +56,7 @@ Removing the 18 `HALLMARK_HYPOXIA` overlap genes leaves `WT_heat_up` SF-high in 
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `run_fgsea` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, `03_results/09_heat_hypoxia/tables/_signatures_purged/WT_heat_{up,down}.txt` |
 
-**How to read:** Same schema and sign convention as the full run above -- positive `nes` is SF-high, `padj` is BH within the run -- with the `contrast` column tagged `SF_vs_PB_<population>_hypoxia_purged` so the two families never get confused. `set_size` drops to 95/100/103 for `WT_heat_up` as the hypoxia genes leave, and `core_enrichment` correspondingly loses CDKN1A, ANXA2, SDC4, ATF3, PLAUR and friends. Primary donor-pseudobulk tier; these files are the per-population source rows behind `gene_purge_nes_comparison.csv`, which is where the paired comparison should be read. A still-positive, still-significant NES here means the correlative heat-axis signal is not merely a hypoxia program wearing a heat label -- it does not, on its own, make it thermal-specific.
+**How to read:** Same schema and sign convention as the full run above -- positive `nes` is SF-high, `padj` is BH within the run -- with the `contrast` column tagged `SF_vs_PB_<population>_hypoxia_purged` so the two families never get confused. `set_size` drops to 95/100/103 for `WT_heat_up` as the hypoxia genes leave, and `core_enrichment` correspondingly loses CDKN1A, ANXA2, SDC4, ATF3, PLAUR and friends. Primary donor-pseudobulk tier; these files are the per-population source rows behind `gene_purge_nes_comparison.csv`, which is where the paired comparison should be read. A still-positive, still-significant NES here means the `WT_heat_up` enrichment is not reducible to its HALLMARK_HYPOXIA-overlap gene content -- it does not, on its own, say anything about temperature.
 
 ## tables/_signatures_full/WT_heat_{up,down}.txt
 
@@ -130,10 +130,11 @@ The 103 testable mouse up-arm genes together with every testable member of the t
 
 ## figures/_overview/heat_purge_nes_paired.png
 
-Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C up-set costs
-only 0.14 to 0.19 NES and leaves the synovial-fluid enrichment strong
-and significant in all three sorted populations, so hypoxia does not
-explain it.
+Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C-derived
+up-set costs only 0.14 to 0.19 NES and leaves the synovial-fluid
+enrichment strong and significant in all three sorted populations, so
+the enrichment is not reducible to HALLMARK_HYPOXIA-overlap gene
+content.
 
 **How to read:** One row per population and mouse arm. x is fgsea NES, positive =
 enriched toward the synovial-fluid end of the paired ranking. Each row
@@ -152,10 +153,10 @@ purged FDR. Primary donor-pseudobulk tier, correlative.
 
 ## figures/_overview/heat_hypoxia_colocalization.png
 
-Within synovial-fluid cells the mouse heat score and the hypoxia score
-correlate only weakly (Spearman 0.08 to 0.20), so the niche's thermal
-and hypoxic readouts are carried by largely different cells rather
-than one shared stress state.
+Within synovial-fluid cells the mouse 39 °C-derived WT_heat_up score
+and the HALLMARK_HYPOXIA score correlate only weakly (Spearman 0.08 to
+0.20), so the two readouts are carried by largely different cells
+rather than one shared state.
 
 **How to read:** Bars are the within-SF, cell-level correlation between the per-cell
 WT_heat_up and HALLMARK_HYPOXIA AUCell scores, Spearman (dark) beside
