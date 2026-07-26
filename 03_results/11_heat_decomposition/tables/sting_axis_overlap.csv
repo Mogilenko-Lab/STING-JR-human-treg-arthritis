@@ -1,0 +1,3 @@
+signature_a,signature_b,n_a,n_b,n_intersect,genes_intersect,n_intersect_also_in_hypoxia,genes_intersect_also_in_hypoxia,gsea_min_size,testable_as_gsea_arm,evidence_tier
+WT_heat_up,de_Cevins_sting_specific_up,199,21,2,PLAUR;PTGS2,1,PLAUR,5,False,secondary_annotation
+WT_heat_down,de_Cevins_sting_specific_up,94,21,0,,0,,5,False,secondary_annotation

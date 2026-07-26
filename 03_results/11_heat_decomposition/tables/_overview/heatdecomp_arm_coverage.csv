@@ -1,0 +1,17 @@
+mouse_arm,arm,subcomponent,curated_set,n_curated_set,n_mouse_arm,n_intersect,frac_of_mouse_arm,set_size_in_ranked_min,set_size_in_ranked_max,n_populations_testable,n_populations,gsea_min_size,evidence_tier
+WT_heat_up,up,unassigned,(none),nan,199.0,137.0,0.688442211,66.0,71.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,200.0,199.0,35.0,0.175879397,24.0,27.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,200.0,199.0,21.0,0.105527638,11.0,12.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,hypoxia,HALLMARK_HYPOXIA,200.0,199.0,18.0,0.0904522613,10.0,12.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,199.0,199.0,14.0,0.0703517588,7.0,10.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,thermal_proteostasis,HSR_core,56.0,199.0,2.0,0.0100502513,2.0,2.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,113.0,199.0,1.0,0.00502512563,1.0,1.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,97.0,199.0,1.0,0.00502512563,1.0,1.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,unassigned,(none),nan,94.0,83.0,0.882978723,47.0,52.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,t_activation,HALLMARK_IL2_STAT5_SIGNALING,199.0,94.0,6.0,0.0638297872,5.0,5.0,3.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,97.0,94.0,3.0,0.0319148936,3.0,3.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,200.0,94.0,2.0,0.0212765957,2.0,2.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,200.0,94.0,2.0,0.0212765957,2.0,2.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,thermal_proteostasis,HSR_core,56.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,113.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,hypoxia,HALLMARK_HYPOXIA,200.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation

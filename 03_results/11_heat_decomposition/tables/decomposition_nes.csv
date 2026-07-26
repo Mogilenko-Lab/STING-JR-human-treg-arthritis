@@ -1,0 +1,49 @@
+population,mouse_arm,subcomponent,curated_set,contrast,n_genes,set_size_in_ranked,gsea_min_size,testable,untestable_reason,nes,pvalue,padj,leading_edge,evidence_tier
+Treg,WT_heat_up,thermal_proteostasis,HSR_core,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Treg,WT_heat_up,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,SF_vs_PB,1,1,5,False,"1 of 1 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Treg,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18,10,5,True,,1.93850075697518,0.000169868618826,0.0003963601105941,CDKN1A;SDC4;FOSL2;ANXA2;PLAUR;AK4;ATF3,secondary_annotation
+Treg,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35,24,5,True,,2.06033487942692,5.10372735896355e-05,0.0001786304575637,CDKN1A;SDC4;CCL4;FOSL2;CD80;NR4A1;CCL20;EGR3;PLAUR;HBEGF;ATF3;EGR2;EGR1;NR4A3,secondary_annotation
+Treg,WT_heat_up,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,SF_vs_PB,1,1,5,False,"1 of 1 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Treg,WT_heat_up,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,SF_vs_PB,21,12,5,True,,1.90000130781758,0.0008132635898194,0.0014232112821839,CDKN1A;TIMP1;CD70;RGS16;LTA;CCL20;PLAUR;HBEGF,secondary_annotation
+Treg,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14,7,5,True,,1.12413252463117,0.338461831406973,0.394872136641469,FAH;RGS16;BATF3;HK2,secondary_annotation
+Treg,WT_heat_up,unassigned,(none),SF_vs_PB,137,66,5,True,,2.1466161797194,3.5235858361512e-07,2.46651008530584e-06,IL1RN;CYSTM1;SPINT1;FASLG;OAS3;CLU;C15orf48;NAB2;SEMA4A;DENND3;TMEM205;CD53;UPP1;ATP2B4;PLXNB2;TP73;ITGA3;CAMK2N1;FAM83G;FAM110C;EMILIN2;ZBTB32;GFI1;CD40LG;ADAM8;ADORA2A;SLC41A1;MST1R;PLA2G4C;PAK1;ASB2,secondary_annotation
+Treg,WT_heat_down,thermal_proteostasis,HSR_core,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+Treg,WT_heat_down,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+Treg,WT_heat_down,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+Treg,WT_heat_down,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Treg,WT_heat_down,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,SF_vs_PB,3,3,5,False,"3 of 3 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Treg,WT_heat_down,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Treg,WT_heat_down,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,6,5,5,True,,1.24031122303793,0.233816499912914,0.327343099878079,RHOB;ITGAE;AHR,secondary_annotation
+Treg,WT_heat_down,unassigned,(none),SF_vs_PB,83,47,5,True,,0.945766920051857,0.548397360752922,0.548397360752922,HLA-DRB1;HLA-DRB5;ENTPD1;PDE4A;CEACAM1;RBM3,secondary_annotation
+Tcon,WT_heat_up,thermal_proteostasis,HSR_core,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Tcon,WT_heat_up,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,SF_vs_PB,1,1,5,False,"1 of 1 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Tcon,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18,11,5,True,,2.07363798653405,1.49744179438036e-05,3.49403085355418e-05,CDKN1A;SDC4;FOSL2;PLAUR;ANXA2;P4HA2;ATF3;AK4,secondary_annotation
+Tcon,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35,26,5,True,,2.20166259914131,3.27775419451539e-06,1.14721396808039e-05,CDKN1A;SDC4;FOSL2;PLAUR;CCL4;CCL20;ATF3;NR4A1;EGR1;CD80;HBEGF;CSF2;CD83;EGR3;SPHK1,secondary_annotation
+Tcon,WT_heat_up,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,SF_vs_PB,1,1,5,False,"1 of 1 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Tcon,WT_heat_up,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,SF_vs_PB,21,11,5,True,,1.9575333712839,0.0003186384765332,0.0005576173339331,RGS16;CDKN1A;CD70;PLAUR;CCL20;TIMP1,secondary_annotation
+Tcon,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14,10,5,True,,1.8018816705716,0.0027262300938199,0.0038167221313478,RGS16;EOMES;BATF3;FAH;CSF2;CD83,secondary_annotation
+Tcon,WT_heat_up,unassigned,(none),SF_vs_PB,137,67,5,True,,2.13030579146288,1.18727408347654e-06,8.31091858433578e-06,ATP2B4;CYSTM1;SEMA4A;FASLG;UPP1;CCL3;OAS3;CLU;ITGA3;TNFSF14;PLXNB2;DENND3;ADAM8;CAMK2N1;GFI1;FAM83G;C15orf48;CD53;SPINT1;EMILIN2,secondary_annotation
+Tcon,WT_heat_down,thermal_proteostasis,HSR_core,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+Tcon,WT_heat_down,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+Tcon,WT_heat_down,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+Tcon,WT_heat_down,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Tcon,WT_heat_down,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,SF_vs_PB,3,3,5,False,"3 of 3 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Tcon,WT_heat_down,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+Tcon,WT_heat_down,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,6,5,5,True,,1.48592256185261,0.0524079867145561,0.0611426511669821,RHOB;ITGAE;AHR,secondary_annotation
+Tcon,WT_heat_down,unassigned,(none),SF_vs_PB,83,51,5,True,,1.2716906949467,0.125794433486741,0.125794433486741,PDE4A;HLA-DRB5;HLA-DRB1;ENTPD1;GALNT10;CIITA;BMF;CEACAM1,secondary_annotation
+CD8,WT_heat_up,thermal_proteostasis,HSR_core,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+CD8,WT_heat_up,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,SF_vs_PB,1,1,5,False,"1 of 1 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+CD8,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18,12,5,True,,1.81836310074011,0.00306072012471,0.0107125204364853,CDKN1A;ANXA2;SDC4;AK4;ATF3;SERPINE1,secondary_annotation
+CD8,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35,27,5,True,,1.43482294580657,0.0624226413700098,0.0873916979180137,CDKN1A;SDC4;CCL4;CSF2;ATF3;CD80;EGR1;SERPINE1;TNFSF9;EGR2,secondary_annotation
+CD8,WT_heat_up,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,SF_vs_PB,1,1,5,False,"1 of 1 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+CD8,WT_heat_up,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,SF_vs_PB,21,12,5,True,,1.51864021250517,0.0488194365233261,0.0873916979180137,CDKN1A;RGS16;CD70;SERPINE1;TNFSF9,secondary_annotation
+CD8,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14,9,5,True,,1.3159808445455,0.158440910747511,0.18484772920543,RGS16;CSF2;FAH;BATF3;EOMES,secondary_annotation
+CD8,WT_heat_up,unassigned,(none),SF_vs_PB,137,71,5,True,,2.0203626625195,2.15602760224069e-05,0.0001509219321568,CYSTM1;CCL3;SEMA4A;CLU;ITGA3;OAS3;SPINT1;ATP2B4;C15orf48;FASLG;FAM83G;PLK3;PLXNB2;FAM110C;TP73;UPP1;EMILIN2;B3GNT5;CASZ1;SLC4A11;ZBTB32;ASB2;DENND3;NAB2;ADORA2A,secondary_annotation
+CD8,WT_heat_down,thermal_proteostasis,HSR_core,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+CD8,WT_heat_down,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+CD8,WT_heat_down,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,0,0,5,False,no WT_heat_down gene belongs to this curated set,,,,,secondary_annotation
+CD8,WT_heat_down,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+CD8,WT_heat_down,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,SF_vs_PB,3,3,5,False,"3 of 3 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+CD8,WT_heat_down,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,SF_vs_PB,2,2,5,False,"2 of 2 gene(s) present in the ranked list, below the gsea_min_size floor of 5",,,,,secondary_annotation
+CD8,WT_heat_down,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,6,5,5,True,,1.47561870066891,0.0582399626517274,0.0873916979180137,RHOB;AHR;ITGAE,secondary_annotation
+CD8,WT_heat_down,unassigned,(none),SF_vs_PB,83,52,5,True,,-1.03856948012292,0.383090697833368,0.383090697833368,ACCS;CIRBP;SIDT1;MYLIP;PRRT1;SGK3;CA11;BANK1;AK5;AGAP1;PYROXD2;CNR2;NUAK2,secondary_annotation
