@@ -97,7 +97,20 @@ referenced files under `docs/_internal/`.
 
 ## Notes
 
-[Caveats, known issues, or interpretation notes relevant to all agents on this project]
+**Raw mounts shadow their `.gitkeep` — do not commit the deletion.** Each
+`00_data/<accession>/raw/` is a read-only bind mount of the staged bytes on
+`/data2`, so the tracked `00_data/**/raw/.gitkeep` placeholder disappears from the
+working tree whenever the container is up and git reports it as deleted. It is not
+deleted: the placeholder must stay in HEAD or a fresh clone has no `raw/` directory
+to mount into, and the mount is read-only so it cannot be restored in place.
+Silence the phantom deletion once per clone, alongside `bash hooks/install.sh`:
+
+```bash
+git update-index --skip-worktree 00_data/*/raw/.gitkeep
+```
+
+This is local index state, never committed. The other compartments carry the same
+mount and the same fix.
 
 <!-- BEGIN SCIAGENT:ROLES v1 hash=cef2142357f46125eef5599c5524670bd467f933 -->
 # Active roles
