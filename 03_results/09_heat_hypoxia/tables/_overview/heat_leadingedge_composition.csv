@@ -1,0 +1,4 @@
+population,signature,n_leading_edge,n_heat_shock_proteostasis,n_hypoxia_HIF,n_immediate_early_stress,n_effector_activation,n_other,frac_heat_shock_proteostasis,frac_hypoxia_HIF,frac_immediate_early_stress,frac_effector_activation,frac_other,n_unclassified,taxonomy_source,evidence_tier
+Treg,WT_heat_up,50.0,3.0,7.0,10.0,24.0,6.0,0.06,0.14,0.2,0.48,0.12,0,agy_gemini_3.1_pro_2026-07-14,secondary_exploratory
+Tcon,WT_heat_up,46.0,2.0,8.0,5.0,26.0,5.0,0.0434782609,0.173913043,0.108695652,0.565217391,0.108695652,0,agy_gemini_3.1_pro_2026-07-14,secondary_exploratory
+CD8,WT_heat_up,44.0,2.0,6.0,8.0,22.0,6.0,0.0454545455,0.136363636,0.181818182,0.5,0.136363636,0,agy_gemini_3.1_pro_2026-07-14,secondary_exploratory

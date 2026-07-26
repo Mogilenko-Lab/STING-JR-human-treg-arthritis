@@ -1,0 +1,4 @@
+population,signature,contrast,nes,pvalue,padj,set_size,n_ranked_genes,evidence_tier
+Treg,HSR_core,SF_vs_PB,1.49891908,0.0282349388,0.0564698777,43.0,14714.0,secondary_annotation
+Tcon,HSR_core,SF_vs_PB,-1.3578945,0.0692949571,0.138589914,44.0,15229.0,secondary_annotation
+CD8,HSR_core,SF_vs_PB,-1.10170313,0.293114622,0.405417484,44.0,15070.0,secondary_annotation

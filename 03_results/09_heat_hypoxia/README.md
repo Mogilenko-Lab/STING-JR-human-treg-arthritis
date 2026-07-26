@@ -4,6 +4,8 @@ _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized
 
 I added a correlative heat-vs-hypoxia check for the JIA SF-vs-PB `WT_heat` signal. The primary read is donor-pseudobulk fgsea after removing `HALLMARK_HYPOXIA` overlap genes from the mouse `WT_heat_up` set. The secondary reads ask whether per-cell heat and hypoxia scores co-localize within SF cells, and which biological programs the `WT_heat_up` leading-edge genes represent. Hypoxia is a transcriptional readout here, not a HIF-causality claim.
 
+The three figures walk the same argument in order: how much of the enrichment survives the purge, whether heat-high and hypoxia-high are even the same cells, and what the enriching genes turn out to be. The third is where the answer stops being reassuring, and it is why an activation-free proteostasis lens was built next.
+
 ## gene_purge_nes_comparison.csv
 
 Removing 18 `HALLMARK_HYPOXIA` overlap genes reduces the `WT_heat_up` NES modestly, but the enrichment remains SF-high in Treg, Tcon, and CD8 at FDR < 5e-5.
@@ -73,3 +75,97 @@ The hypoxia-purged inputs: 181 up genes after dropping the 18 `HALLMARK_HYPOXIA`
 | `02_analysis/scripts/09_heat_hypoxia.py` | `prepare_signature_dirs` | `signature_contract = ../mouse_anchor/03_results/human_projection/` | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt`, `00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt` |
 
 **How to read:** Same format and sign convention as `_signatures_full/` -- newline-delimited HGNC symbols, alphabetical, direction carried by the filename. The purge is a plain set difference against the 200-gene `HALLMARK_HYPOXIA` reference, applied to both arms; that it changes only the up list is itself informative, since the hypoxia overlap is entirely on the SF-high side. Inputs rather than results, at the primary donor-pseudobulk tier: they define the gene universe for `gsea_purged_*`, and the removed-gene list is echoed in the `genes_removed` column of `gene_purge_nes_comparison.csv`.
+
+## tables/_overview/heat_purge_nes_paired.csv
+
+One row per population and mouse arm, pairing the full and hypoxia-purged NES side by side so the cost of the purge reads as a single subtraction.
+
+**How to read:** `nes_full`/`nes_purged` with their FDRs and testable `set_size` are the plotted marker positions; positive NES is synovial-fluid-high. Six rows, six markers, nothing aggregated. Primary donor-pseudobulk tier.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `purge_paired_table` | `thresholds.gsea_fdr=0.05` | `03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` |
+
+## tables/_overview/heat_hypoxia_colocalization.csv
+
+The plotted cell-level rows only: within-SF correlation of the per-cell heat and hypoxia scores, Spearman and Pearson, per population.
+
+**How to read:** `r` is the bar height and `n` the cell count printed under each population. The unpowered donor-level rows are deliberately absent and stay in the full stage table. Secondary per-cell tier.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `colocalization_table` | `level=cell; tissue=synovial_fluid` | `03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv` |
+
+## tables/_overview/heat_leadingedge_composition.csv
+
+The plotted composition rows: leading-edge gene counts and fractions per biological program, one row per population.
+
+**How to read:** `frac_<program>` are the stacked segment widths and `n_<program>` the counts printed inside them; `n_leading_edge` is the bar total. Exploratory secondary tier.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `leadingedge_table` | `taxonomy=00_data/references/heat_leadingedge_taxonomy` | `03_results/09_heat_hypoxia/tables/leadingedge_composition.csv` |
+
+## figures/_overview/heat_purge_nes_paired.png
+
+Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C up-set costs
+only 0.14 to 0.19 NES and leaves the synovial-fluid enrichment strong
+and significant in all three sorted populations, so hypoxia does not
+explain it.
+
+**How to read:** One row per population and mouse arm; x is fgsea NES, positive =
+enriched toward the synovial-fluid end of the paired SF-vs-blood
+ranking. Each row pairs the full mouse set (diamond) with the hypoxia-
+purged set (circle); the connecting bar is what the purge cost. Warm
+brown = up arm, cool blue = down arm. A filled marker means FDR <
+0.05, an open marker FDR at or above it — no other significance glyph
+is used. The right-hand text gives testable set size before and after
+the purge and the purged FDR; the down arm loses no genes because the
+hypoxia overlap sits entirely in the up arm. Primary donor-pseudobulk
+tier; correlative.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_purge_paired` | `thresholds.gsea_fdr=0.05; gsea_min_size=5; gsea_nperm=100000` | `03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` |
+
+## figures/_overview/heat_hypoxia_colocalization.png
+
+Within synovial-fluid cells the mouse heat score and the hypoxia score
+correlate only weakly (Spearman 0.08 to 0.20), so the niche's thermal
+and hypoxic readouts are carried by largely different cells rather
+than one shared stress state.
+
+**How to read:** Bars are the within-SF, cell-level correlation between the per-cell
+WT_heat_up and HALLMARK_HYPOXIA AUCell scores, Spearman (dark) beside
+Pearson (light), with the cell count under each population. The y-axis
+deliberately runs the full -0.05 to 1 range: read the shortness of the
+bars, not their rank order. Positive r means a heat-high cell tends to
+be hypoxia-high. Donor-level SF means are unpowered at 6 to 7 donors
+and are left in the stage table rather than drawn. This is a secondary
+per-cell diagnostic of where the two scores sit, never pooled with the
+pseudobulk NES and never read as directional evidence.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_colocalization` | `level=cell; tissue=synovial_fluid; evidence_tier=secondary_percell` | `03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv` |
+
+## figures/_overview/heat_leadingedge_composition.png
+
+Half the WT_heat up leading edge in synovial-fluid T cells is effector
+and activation genes, with a hypoxia-overlap minority and only two or
+three classic heat-shock genes, so surviving the hypoxia purge does
+not make the enrichment thermally specific.
+
+**How to read:** One stacked bar per population, spanning that population's full
+WT_heat up leading edge; segment width is the fraction of leading-edge
+genes in each program and the number inside a segment is its gene
+count (printed where the segment is wide enough to hold it; every
+count is in the source table). Program assignment comes from a frozen
+external-model gene taxonomy, not from this run. The narrow heat-shock
+segment is the point, and it is why an activation-free proteostasis
+lens was built next. Exploratory secondary tier, never pooled with the
+pseudobulk NES.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_leadingedge` | `taxonomy=00_data/references/heat_leadingedge_taxonomy; evidence_tier=secondary_exploratory` | `03_results/09_heat_hypoxia/tables/leadingedge_composition.csv` |

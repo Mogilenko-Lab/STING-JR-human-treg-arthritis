@@ -1,0 +1,7 @@
+population,arm,signature,contrast,nes_full,padj_full,set_size_full,nes_purged,padj_purged,set_size_purged,evidence_tier
+Treg,up,WT_heat_up,SF_vs_PB,2.51455978,9.65040803e-14,105.0,2.37810699,1.22926079e-10,95.0,primary_pseudobulk
+Treg,down,WT_heat_down,SF_vs_PB,1.01098584,0.434865588,57.0,1.01192327,0.433152014,57.0,primary_pseudobulk
+Tcon,up,WT_heat_up,SF_vs_PB,2.57174864,4.47024949e-15,111.0,2.38587649,5.16384977e-11,100.0,primary_pseudobulk
+Tcon,down,WT_heat_down,SF_vs_PB,1.33729658,0.0740384456,61.0,1.33816791,0.0748909678,61.0,primary_pseudobulk
+CD8,up,WT_heat_up,SF_vs_PB,2.05028145,8.41976471e-07,115.0,1.89585083,4.63428517e-05,103.0,primary_pseudobulk
+CD8,down,WT_heat_down,SF_vs_PB,1.22380033,0.148382186,62.0,1.22529143,0.148108089,62.0,primary_pseudobulk
