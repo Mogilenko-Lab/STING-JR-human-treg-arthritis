@@ -36,22 +36,30 @@ POP_TAG    <- c(Treg = "treg", Tcon = "tcon", CD8 = "cd8")
 GENE_SETS  <- c("WT_heat_up", "WT_heat_down")
 SET_LABELS <- c(WT_heat_up = "WT_heat up", WT_heat_down = "WT_heat down")
 # Diverging cue: heat-up = warm = brown, heat-down = cool = blue (semantic,
-# theme-consistent). Keyed BY LEGEND LABEL — see `apply_set_palette()` for why
-# a positional vector cannot express this mapping safely.
+# theme-consistent). Keyed BY LEGEND LABEL, which is the value the colour
+# aesthetic actually carries — see `apply_set_palette()` for why a positional
+# vector cannot express this mapping safely.
 SET_PAL <- c("WT_heat up" = "#A6611A", "WT_heat down" = "#2166AC")
 
 #' Re-assert the up/down colour mapping BY NAME on every panel.
 #'
-#' The toolkit plotter takes `palette` as an UNNAMED vector and forwards it to
-#' `enrichplot::gseaplot2()`, which maps `colour = Description` and calls
-#' `scale_color_manual(values = palette)`. Discrete levels there are the
-#' Descriptions in ggplot's ALPHABETICAL order — "WT_heat down" sorts before
-#' "WT_heat up" — so a positional palette in GENE_SETS order lands brown on the
-#' down curve and blue on the up curve. The `labels` lookup is named, so the
-#' legend TEXT stayed right while the colours swapped: it read as a deliberate
-#' bad choice rather than a bug. Adding a NAMED `scale_color_manual` on top
-#' (patchwork `&` -> every panel, ES line + hit rug) makes the mapping
-#' order-independent; `limits` fixes legend order to up-then-down.
+#' Defence in depth, kept deliberately. The original defect was upstream: the
+#' toolkit plotter forwarded `palette` UNNAMED into `enrichplot::gseaplot2()`,
+#' which maps `colour = Description` and calls `scale_color_manual(values =)`.
+#' Unnamed values match by POSITION against levels ggplot has sorted
+#' ALPHABETICALLY — "WT_heat down" precedes "WT_heat up" — so a positional
+#' palette in GENE_SETS order put brown on the down curve. The `labels` lookup
+#' is named, so the legend TEXT stayed correct while the colours swapped, and it
+#' read as a deliberate bad choice rather than a bug.
+#'
+#' The toolkit now re-keys the palette to the plotted label itself and owns the
+#' scale (RNAseq-toolkit `fix(GSEA): key running-sum palette by plotted label`),
+#' so this is no longer load-bearing — verified idempotent: toolkit-only and
+#' toolkit-plus-this both bind brown to the up curve. It stays because the
+#' parent pins the toolkit by gitlink and that fix carries no release tag yet,
+#' so an older pin would silently reintroduce the swap. Retire it once the
+#' compartment pins a toolkit tag containing the fix. `limits` fixes legend
+#' order to up-then-down.
 apply_set_palette <- function(p, ids) {
   labs_in_order <- unname(SET_LABELS[ids])
   suppressMessages(
