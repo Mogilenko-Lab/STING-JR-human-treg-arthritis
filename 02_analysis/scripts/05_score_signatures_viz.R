@@ -36,9 +36,28 @@ POP_TAG    <- c(Treg = "treg", Tcon = "tcon", CD8 = "cd8")
 GENE_SETS  <- c("WT_heat_up", "WT_heat_down")
 SET_LABELS <- c(WT_heat_up = "WT_heat up", WT_heat_down = "WT_heat down")
 # Diverging cue: heat-up = warm = brown, heat-down = cool = blue (semantic,
-# theme-consistent). UNNAMED on purpose — the toolkit plotter requires an
-# unnamed color vector; order follows GENE_SETS (up first, then down).
-SET_PAL <- c("#A6611A", "#2166AC")
+# theme-consistent). Keyed BY LEGEND LABEL — see `apply_set_palette()` for why
+# a positional vector cannot express this mapping safely.
+SET_PAL <- c("WT_heat up" = "#A6611A", "WT_heat down" = "#2166AC")
+
+#' Re-assert the up/down colour mapping BY NAME on every panel.
+#'
+#' The toolkit plotter takes `palette` as an UNNAMED vector and forwards it to
+#' `enrichplot::gseaplot2()`, which maps `colour = Description` and calls
+#' `scale_color_manual(values = palette)`. Discrete levels there are the
+#' Descriptions in ggplot's ALPHABETICAL order — "WT_heat down" sorts before
+#' "WT_heat up" — so a positional palette in GENE_SETS order lands brown on the
+#' down curve and blue on the up curve. The `labels` lookup is named, so the
+#' legend TEXT stayed right while the colours swapped: it read as a deliberate
+#' bad choice rather than a bug. Adding a NAMED `scale_color_manual` on top
+#' (patchwork `&` -> every panel, ES line + hit rug) makes the mapping
+#' order-independent; `limits` fixes legend order to up-then-down.
+apply_set_palette <- function(p, ids) {
+  labs_in_order <- unname(SET_LABELS[ids])
+  suppressMessages(
+    p & ggplot2::scale_color_manual(values = SET_PAL, limits = labs_in_order,
+                                    name = NULL))
+}
 
 ylim    <- as.numeric(unlist(FIG_CFG$figures$running_sum_ylim     %||% c(-1, 1)))
 heights <- as.numeric(unlist(FIG_CFG$figures$running_sum_heights  %||% c(2.4, 0.7, 0.9)))
@@ -52,13 +71,14 @@ if (exists("purge_figures"))
 FINDING <- paste(
   "Per-population leading-edge view: where the mouse 39 °C WT_heat up- and",
   "down-programs concentrate along each population's SF-vs-PB pseudobulk ranking.",
-  "The Treg up-curve is the go/no-go money panel; Tcon/CD8 are the",
-  "Treg-specificity controls.")
+  "The Treg up-curve carries the claim; Tcon and CD8 test whether it is",
+  "Treg-selective.")
 HOW_TO_READ <- paste(
   "Top panel = weighted running enrichment score (ES) walking the ranked list",
   "from SF-enriched (left) to PB-enriched (right); a positive, left-shifted peak",
   "= SF enrichment. Middle rug = gene-set member positions; bottom = the signed",
-  "Wald ranking metric. Two curves per panel: WT_heat up (warm) and down (cool).",
+  "Wald ranking metric. Two curves per panel, same colour in curve and rug:",
+  "WT_heat up = warm brown, WT_heat down = cool blue.",
   "ES y clamped to [-1, 1] for cross-population comparability. Display of compute",
   "output (clusterProfiler gseaResult); correlative, not causal.")
 CONFIG_KV <- paste0("gsea_min_size=", FIG_CFG$thresholds$gsea_min_size %||% 5,
@@ -84,13 +104,14 @@ for (pop in names(POP_TAG)) {
   p <- gsea_running_sum_plot(
     g,
     gene_set_ids    = ids,
-    palette         = SET_PAL[seq_along(ids)],
+    palette         = unname(SET_PAL[SET_LABELS[ids]]),
     labels          = SET_LABELS[ids],
     es_ylim         = ylim,
     panel_heights   = heights,
     legend_position = "right",
     base_theme      = base_thm,
     title           = sprintf("%s — WT_heat running enrichment (SF vs PB)", pop))
+  p <- apply_set_palette(p, ids)
 
   # Source table = the gseaResult summary rows behind THIS figure.
   res <- g@result

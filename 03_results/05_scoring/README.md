@@ -40,16 +40,17 @@ because up and down co-shift in SF. Correlative.
 
 Per-population leading-edge view: where the mouse 39 °C WT_heat up-
 and down-programs concentrate along each population's SF-vs-PB
-pseudobulk ranking. The Treg up-curve is the primary money panel;
-Tcon/CD8 are the Treg-specificity controls.
+pseudobulk ranking. The Treg up-curve carries the claim; Tcon and CD8
+test whether it is Treg-selective.
 
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
 left-shifted peak = SF enrichment. Middle rug = gene-set member
 positions; bottom = the signed Wald ranking metric. Two curves per
-panel: WT_heat up (warm) and down (cool). ES y clamped to [-1, 1] for
-cross-population comparability. Display of compute output
-(clusterProfiler gseaResult); correlative, not causal.
+panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
+down = cool blue. ES y clamped to [-1, 1] for cross-population
+comparability. Display of compute output (clusterProfiler
+gseaResult); correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -59,16 +60,17 @@ cross-population comparability. Display of compute output
 
 Per-population leading-edge view: where the mouse 39 °C WT_heat up-
 and down-programs concentrate along each population's SF-vs-PB
-pseudobulk ranking. The Treg up-curve is the primary money panel;
-Tcon/CD8 are the Treg-specificity controls.
+pseudobulk ranking. The Treg up-curve carries the claim; Tcon and CD8
+test whether it is Treg-selective.
 
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
 left-shifted peak = SF enrichment. Middle rug = gene-set member
 positions; bottom = the signed Wald ranking metric. Two curves per
-panel: WT_heat up (warm) and down (cool). ES y clamped to [-1, 1] for
-cross-population comparability. Display of compute output
-(clusterProfiler gseaResult); correlative, not causal.
+panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
+down = cool blue. ES y clamped to [-1, 1] for cross-population
+comparability. Display of compute output (clusterProfiler
+gseaResult); correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -78,16 +80,17 @@ cross-population comparability. Display of compute output
 
 Per-population leading-edge view: where the mouse 39 °C WT_heat up-
 and down-programs concentrate along each population's SF-vs-PB
-pseudobulk ranking. The Treg up-curve is the primary money panel;
-Tcon/CD8 are the Treg-specificity controls.
+pseudobulk ranking. The Treg up-curve carries the claim; Tcon and CD8
+test whether it is Treg-selective.
 
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
 left-shifted peak = SF enrichment. Middle rug = gene-set member
 positions; bottom = the signed Wald ranking metric. Two curves per
-panel: WT_heat up (warm) and down (cool). ES y clamped to [-1, 1] for
-cross-population comparability. Display of compute output
-(clusterProfiler gseaResult); correlative, not causal.
+panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
+down = cool blue. ES y clamped to [-1, 1] for cross-population
+comparability. Display of compute output (clusterProfiler
+gseaResult); correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -174,3 +177,4 @@ Correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/05_score_signatures.py` | `main` | `percell_score_ncores=8; signature=WT_heat_{up,down} (AUCell + UCell, rank-based [0,1])` | `03_results/objects/02_annotation.h5ad`, `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |
+
