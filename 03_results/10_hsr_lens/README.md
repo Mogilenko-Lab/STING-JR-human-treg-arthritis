@@ -2,9 +2,29 @@
 
 _Abbreviations: SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, HSR = heat-shock response._
 
+### Where this lens came from
+
+The HSR lens is anchor-independent and MSigDB-derived: the union of three human MSigDB v2026.1.Hs sets, pulled from the offline `msigdbr` 26.1.0 package by exact `gs_name` with validated sizes — `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS` (101), `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` (82), `GOBP_RESPONSE_TO_HEAT` (104). The union is 176 genes and is carried here as `HSR_sensitivity`.
+
+A per-gene functional taxonomy — external large-context-model classification, human-curated, and committed as non-deterministically-regenerable — splits those 176 into `hsf1_core_hsr` (45), `co_chaperone` (11), `generic_stress` (72), `npc_transport` (30), `thermosensory` (10) and `upr_er` (8). `HSR_core` (56) is `hsf1_core_hsr` plus `co_chaperone`: the cleaned cytosolic thermal core, and the term the figure below uses.
+
+Three candidate sets were deliberately kept out of the union. `GOBP_DETECTION_OF_TEMPERATURE_STIMULUS` and `GOBP_DETECTION_OF_TEMPERATURE_STIMULUS_INVOLVED_IN_THERMOCEPTION` are thermosensory-neuron programs with no bearing on T cells, and `HP_FEVER` is a mutation-etiology panel rather than a transcriptional signature.
+
+| Asset | Source | n | Frozen by |
+|---|---|---|---|
+| `HSR_sensitivity` | union of three MSigDB v2026.1.Hs sets (Reactome ×2, GO:BP) via `msigdbr` 26.1.0 | 176 | `02_analysis/scripts/freeze_hsr_lens.R` |
+| `HSR_core` | taxonomy categories `hsf1_core_hsr` + `co_chaperone` | 56 | `02_analysis/scripts/freeze_hsr_lens.R` |
+| `WT_heat_up` | mouse-anchor 39 °C up-arm, projected to human orthologs | 199 | frozen signature contract |
+
+So the answer to "is this circular?" is no: `HSR_core` shares two genes with the 199-gene `WT_heat_up` (HSPA1A, HSPH1, Jaccard 0.008, tallied in `tables/hsr_wtheatup_overlap.csv`). The lens is a separate probe rather than a restatement of the anchor, and that independence is the reason for carrying it.
+
+This compartment never re-pulls MSigDB. `02_analysis/scripts/freeze_hsr_lens.R` freezes the byte-identical lens from the mouse anchor's `temp_hsr_human_lens.rds`, so the JIA lists and the anchor lists are the same genes. Upstream curation detail lives with that RDS in `mouse_anchor/00_data/references/gene_sets/temp_hsr_lens/`.
+
+### What the lens returns
+
 Honest ceiling: even the clean HSR core is proteotoxic-stress-general, not fever-specific. Only the mouse anchor's experimental 37/39 contrast can measure thermal-ness. In JIA, this lens is carried and read correlatively; it does not decompose temperature causality from human scRNA-seq. The HSR NES is annotation-tier only and is firewalled from the confirmatory `WT_heat` effect-size spine; it is not written to `effect_sizes_treg_arthritis.csv`.
 
-What the lens actually returns is selective in sign and short of significance: HSR core points toward synovial fluid in Treg and away from it in Tcon and CD8, with Treg at FDR 0.056. The figures draw both halves of that — the sign pattern and the FDR — so no bar here is solid and no glyph implies a significance the numbers do not carry.
+The result is selective in sign and short of significance: HSR core points toward synovial fluid in Treg and away from it in Tcon and CD8, with Treg at FDR 0.056. The figure prints every FDR on its face, so the sign pattern and its weakness are read together and no glyph implies a significance the numbers do not carry.
 
 ## tables/per_cell_hsr_scores.csv
 
@@ -106,26 +126,6 @@ The stage-local HSR signature copies make the fgsea command self-contained while
 |---|---|---|---|
 | `02_analysis/scripts/10_hsr_lens.py` | `prepare_hsr_signature_dir` | `signature_source=00_data/references/temp_hsr_lens` | `00_data/references/temp_hsr_lens/{HSR_core,HSR_sensitivity}.txt` |
 
-## tables/_overview/hsr_nes_by_population.csv
-
-The plotted NES source table carries the same HSR_core and HSR_sensitivity enrichment values shown in the grouped population figure.
-
-**How to read:** Rows are the plotted bars: population, HSR term, NES, p-value, FDR, and leading edge. Positive NES means enrichment toward SF-up genes. Secondary annotation tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/10_hsr_lens_viz.py` | `hsr_nes_by_population` | `evidence_tier=secondary_annotation` | `03_results/10_hsr_lens/tables/hsr_lens_nes.csv` |
-
-## tables/_overview/hsr_wtheatup_colocalization.csv
-
-The plotted colocalization source table carries the within-SF cell-level Spearman correlations between `WT_heat_up_AUCell` and `HSR_core_AUCell`.
-
-**How to read:** Rows are the plotted bars by population. Low `r` means the empirical WT_heat_up lens and curated HSR_core lens mark mostly different SF cells; high `r` means they co-localize. The `n_wtheatup_genes`/`n_hsr_core_genes`/`n_genes_shared`/`genes_shared` columns repeat the gene-overlap annotation drawn on the figure, so the correlation and the reason it is small sit in one place. Secondary per-cell tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/10_hsr_lens_viz.py` | `hsr_wtheatup_colocalization` | `level=cell; method=spearman; tissue=synovial_fluid` | `03_results/10_hsr_lens/tables/hsr_colocalization.csv`, `03_results/10_hsr_lens/tables/hsr_wtheatup_overlap.csv` |
-
 ## tables/_overview/hsr_core_running_sum.csv
 
 The annotated numbers behind the HSR_core running-sum figure: each population's NES, FDR, testable set size, and the length of the ranked list its trace walks.
@@ -135,50 +135,6 @@ The annotated numbers behind the HSR_core running-sum figure: each population's 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/10_hsr_lens_viz.py` | `running_sum_traces` | `evidence_tier=secondary_annotation` | `03_results/10_hsr_lens/tables/runsum_interactive_hsr_gsea_{treg,tcon,cd8}_HSR_core.csv`, `03_results/10_hsr_lens/tables/hsr_lens_nes.csv` |
-
-## figures/_overview/hsr_nes_by_population.png
-
-The activation-free HSR lens is selective in sign, not in strength:
-HSR core enriches toward synovial fluid in Treg (+1.50) and away from
-it in Tcon (-1.36) and CD8 (-1.10), with Treg at FDR 0.056 — a trend,
-not a significant result.
-
-**How to read:** Bars are fgsea NES for the two curated HSR terms on each population's
-synovial-fluid-vs-paired-blood ranked list; positive means enriched
-toward the synovial-fluid-up end, negative toward blood. Every bar is
-labelled with its NES and its FDR. A bar is solid only when it clears
-FDR < 0.05 and is drawn open and hatched otherwise, which on this data
-is every bar — read the sign pattern across populations, not any
-single bar's magnitude, and read nothing here as significant. Deep
-blue is the 56-gene HSR core, pale blue the 176-gene sensitivity lens
-that contains it. Annotation tier, firewalled from the confirmatory
-WT_heat effect-size spine.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/10_hsr_lens_viz.py` | `plot_hsr_nes` | `thresholds.gsea_fdr=0.05; gsea_min_size=5; evidence_tier=secondary_annotation` | `03_results/10_hsr_lens/tables/hsr_lens_nes.csv` |
-
-## figures/_overview/hsr_wtheatup_colocalization.png
-
-Within synovial-fluid cells the empirical mouse lens and the curated
-HSR core correlate at only 0.11 to 0.19 while sharing just two genes,
-so they label largely different cells and the curated lens is an
-independent probe rather than a restatement.
-
-**How to read:** Each bar is the within-synovial-fluid, cell-level Spearman r between
-WT_heat_up_AUCell and HSR_core_AUCell, with the cell count under each
-population. The axis runs the full -0.05 to 1 range on purpose: read
-how short the bars are. Positive r means a heat-high cell tends to be
-HSR-high. The in-figure gene-overlap line is what makes a low r
-interpretable — the two lenses share two genes out of 199 and 56, so
-they are near-independent by construction. Secondary per-cell tier:
-this is a diagnostic of where two scores sit in the same cells and is
-never read as evidence for the temperature program, which rests on the
-donor-pseudobulk enrichment instead.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/10_hsr_lens_viz.py` | `plot_colocalization` | `level=cell; method=spearman; tissue=synovial_fluid; evidence_tier=secondary_percell` | `03_results/10_hsr_lens/tables/hsr_colocalization.csv, 03_results/10_hsr_lens/tables/hsr_wtheatup_overlap.csv` |
 
 ## figures/_overview/hsr_core_running_sum.png
 
@@ -195,8 +151,7 @@ core genes sit in its ranking, in matching colour. Legend labels carry
 each NES and FDR, so read the Treg trace as a trend at FDR 0.056, not
 a significant enrichment. Ranked-list lengths differ slightly, so
 compare shapes rather than x positions; the y range is data-driven
-because all three curves share one axis. The source table carries the
-annotated numbers, the traces are the cited inputs. Annotation tier.
+because all three curves share one axis. Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

@@ -1,4 +1,0 @@
-population,hsr_term,level,method,r,pvalue,n,evidence_tier,n_wtheatup_genes,n_hsr_core_genes,n_genes_shared,genes_shared
-Treg,HSR_core,cell,spearman,0.191240261,5.81257507e-112,13572.0,secondary_percell,199.0,56.0,2.0,HSPA1A;HSPH1
-Tcon,HSR_core,cell,spearman,0.129772437,5.30383111e-74,19502.0,secondary_percell,199.0,56.0,2.0,HSPA1A;HSPH1
-CD8,HSR_core,cell,spearman,0.109715659,5.41464551e-52,19010.0,secondary_percell,199.0,56.0,2.0,HSPA1A;HSPH1
