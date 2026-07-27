@@ -24,7 +24,7 @@ This compartment never re-pulls MSigDB. `02_analysis/scripts/freeze_hsr_lens.R` 
 
 Honest ceiling: even the clean HSR core is proteotoxic-stress-general, not fever-specific. Only the mouse anchor's experimental 37/39 contrast can measure thermal-ness. In JIA, this lens is carried and read correlatively; it does not decompose temperature causality from human scRNA-seq. The HSR NES is annotation-tier only and is firewalled from the confirmatory `WT_heat` effect-size spine; it is not written to `effect_sizes_treg_arthritis.csv`.
 
-The result is selective in sign and short of significance: HSR core points toward synovial fluid in Treg and away from it in Tcon and CD8, with Treg at FDR 0.056. The figure prints every FDR on its face, so the sign pattern and its weakness are read together and no glyph implies a significance the numbers do not carry.
+The result is selective in sign and short of significance: HSR core points toward synovial fluid in Treg and away from it in Tcon and CD8, with Treg at FDR 0.064. The figure prints every FDR on its face, so the sign pattern and its weakness are read together and no glyph implies a significance the numbers do not carry.
 
 ## tables/per_cell_hsr_scores.csv
 
@@ -148,7 +148,7 @@ is walked from synovial-fluid-up (left) to blood-up (right); a
 positive, left-shifted excursion is synovial-fluid enrichment, a
 negative trace the opposite. Bottom panel: where each population's HSR
 core genes sit in its ranking, in matching colour. Legend labels carry
-each NES and FDR, so read the Treg trace as a trend at FDR 0.056, not
+each NES and FDR, so read the Treg trace as a trend at FDR 0.064, not
 a significant enrichment. Ranked-list lengths differ slightly, so
 compare shapes rather than x positions; the y range is data-driven
 because all three curves share one axis. Annotation tier.

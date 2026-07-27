@@ -31,7 +31,7 @@ The frozen lists themselves live under `00_data/references/`, which is not commi
 
 ### What the decomposition returns
 
-Every testable up-arm part enriches toward synovial fluid, so the shift is broad rather than localised. The strongest part in Treg and CD8 is the 137-gene remainder that no curated program claims (+2.15 and +2.02). The TNFA/NF-kB part is the most CD4-selective (+2.06 Treg, +2.20 Tcon, +1.43 CD8), and the curated IL2-STAT5 activation proxy is the weakest in Treg (+1.12 at FDR 0.39).
+Every testable up-arm part enriches toward synovial fluid, so the shift is broad rather than localised. The strongest part in Treg and CD8 is the 137-gene remainder that no curated program claims (+2.21 and +2.10). The TNFA/NF-kB part is the most CD4-selective (+2.24 Treg, +2.32 Tcon, +1.23 CD8), and the curated IL2-STAT5 activation proxy is the weakest in Treg (+1.32 at FDR 0.22).
 
 Two nulls carry as much weight as the positives. The canonical HSF1 thermal core contributes 2 of the 199 up genes and type-I interferon contributes 1, both far under the size floor, so in this projection the mouse thermal program is neither a heat-shock-transcript program nor an interferon program. The down arm tells the same story: 83 of its 94 genes belong to no named program, and nothing in it separates synovial fluid from blood.
 
@@ -59,7 +59,7 @@ Curated public gene sets claim 62 of the 199 mouse up genes and 11 of the 94 dow
 
 ## tables/decomposition_nes.csv
 
-Every testable up-arm part enriches toward synovial fluid (NES +1.12 to +2.15) while no down-arm part reaches significance, and 27 of the 48 population-by-part cells are untestable and carry their reason.
+Every testable up-arm part enriches toward synovial fluid (NES +1.23 to +2.32) while no down-arm part reaches significance, and 27 of the 48 population-by-part cells are untestable and carry their reason.
 
 **How to read:** One row per population, mouse arm and part — every requested part, whether or not fgsea could score it. `n_genes` is the part's size, `set_size_in_ranked` its intersection with that population's ranked list, and `testable` is False when that intersection falls under `gsea_min_size`, with `untestable_reason` naming which condition failed. Positive `nes` means enrichment toward SF-up genes and `padj` is BH across the parts scored within one population. Annotation tier, never pooled with the pseudobulk spine.
 
@@ -162,8 +162,8 @@ tallied in sting_axis_overlap.csv. Annotation tier.
 ## figures/_overview/heatdecomp_runsum_up_unassigned.png
 
 The 137 up-arm genes that no curated presumption claims give the
-strongest synovial-fluid enrichment of any part in Treg (+2.15) and
-CD8 (+2.02), so the shift is not carried by any single named program.
+strongest synovial-fluid enrichment of any part in Treg (+2.21) and
+CD8 (+2.10), so the shift is not carried by any single named program.
 
 **How to read:** This part is the residual: the up-arm genes belonging to none of the
 curated presumptions. Top panel: the weighted running enrichment score
@@ -184,8 +184,8 @@ confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_nfkb_tnfa.png
 
 The 35 TNFA/NF-kB up-arm genes enrich toward synovial fluid strongly
-in Treg (+2.06) and Tcon (+2.20) and only weakly in CD8 (+1.43, FDR
-0.087), making the inflammatory-signalling part the most CD4-selective
+in Treg (+2.24) and Tcon (+2.32) and only weakly in CD8 (+1.23, FDR
+0.22), making the inflammatory-signalling part the most CD4-selective
 of the decomposition.
 
 **How to read:** This part is the up-arm genes that also sit in
@@ -207,7 +207,7 @@ confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_hypoxia.png
 
 The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in
-all three populations (+1.82 to +2.07), confirming that the hypoxic
+all three populations (+1.81 to +2.07), confirming that the hypoxic
 co-exposure is real even though removing these genes barely moves the
 whole-signature NES.
 
@@ -230,7 +230,7 @@ from the confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_inflammatory.png
 
 The 21 inflammatory-response up-arm genes track the whole up-arm
-(+1.52 to +1.96), adding no separation of their own beyond the broad
+(+1.48 to +2.11), adding no separation of their own beyond the broad
 synovial-fluid shift.
 
 **How to read:** This part is the up-arm genes that also sit in
@@ -252,7 +252,7 @@ confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_t_activation.png
 
 The 14 IL2-STAT5 activation up-arm genes are the weakest testable part
-in Treg (+1.12, FDR 0.39) while reaching +1.80 in Tcon, so a curated
+in Treg (+1.32, FDR 0.22) while reaching +1.89 in Tcon, so a curated
 T-cell activation program does not account for the Treg shift.
 
 **How to read:** This part is the up-arm genes that also sit in
@@ -275,7 +275,7 @@ spine.
 ## figures/_overview/heatdecomp_runsum_down_unassigned.png
 
 The 83 down-arm genes no presumption claims sit nowhere in particular
-— NES +0.95 in Treg, +1.27 in Tcon and -1.04 in CD8, none of them
+— NES +0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them
 significant — so the mouse down arm does not separate synovial fluid
 from blood in either direction.
 

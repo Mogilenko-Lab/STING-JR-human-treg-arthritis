@@ -1,4 +1,4 @@
 population,mouse_arm,subcomponent,curated_set,contrast,n_genes,set_size_in_ranked,nes,pvalue,padj,n_ranked_genes,evidence_tier
-Treg,WT_heat_up,unassigned,(none),SF_vs_PB,137.0,66.0,2.14661618,3.52358584e-07,2.46651009e-06,14714.0,secondary_annotation
-Tcon,WT_heat_up,unassigned,(none),SF_vs_PB,137.0,67.0,2.13030579,1.18727408e-06,8.31091858e-06,15229.0,secondary_annotation
-CD8,WT_heat_up,unassigned,(none),SF_vs_PB,137.0,71.0,2.02036266,2.1560276e-05,0.000150921932,15070.0,secondary_annotation
+Treg,WT_heat_up,unassigned,(none),SF_vs_PB,137.0,70.0,2.21480227,2.78892833e-07,1.95224983e-06,13999.0,secondary_annotation
+Tcon,WT_heat_up,unassigned,(none),SF_vs_PB,137.0,75.0,2.27240852,1.04045581e-07,7.28319068e-07,14411.0,secondary_annotation
+CD8,WT_heat_up,unassigned,(none),SF_vs_PB,137.0,66.0,2.09750546,5.48642076e-06,3.84049453e-05,14014.0,secondary_annotation

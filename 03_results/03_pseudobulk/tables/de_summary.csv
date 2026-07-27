@@ -1,4 +1,4 @@
-population,n_sf,n_pb,model,n_sig_de,n_ranked
-Treg,6,7,~ donor + tissue,1584,14714
-Tcon,7,6,~ donor + tissue,1560,15229
-CD8,7,6,~ donor + tissue,1795,15070
+"population","n_sf","n_pb","model","n_sig_de","n_ranked"
+"Treg",6,7,"~ donor + tissue",1797,13999
+"Tcon",7,6,"~ donor + tissue",1949,14411
+"CD8",7,6,"~ donor + tissue",1695,14014

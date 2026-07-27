@@ -10,7 +10,7 @@ Two further figures put the mouse sets back into the plain Treg SF-vs-PB volcano
 
 ## gene_purge_nes_comparison.csv
 
-Removing 18 `HALLMARK_HYPOXIA` overlap genes reduces the `WT_heat_up` NES modestly, but the enrichment remains SF-high in Treg, Tcon, and CD8 at FDR < 5e-5.
+Removing 18 `HALLMARK_HYPOXIA` overlap genes reduces the `WT_heat_up` NES modestly, but the enrichment remains SF-high in Treg, Tcon, and CD8 at FDR <= 4.1e-5.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -30,7 +30,7 @@ Within SF cells, `WT_heat_up_AUCell` and `HALLMARK_HYPOXIA_AUCell` show weak pos
 
 ## leadingedge_composition.csv
 
-The `WT_heat_up` leading edge in SF T cells is predominantly T-cell activation and effector genes (48% to 57%) plus immediate-early stress genes (11% to 20%), with a hypoxia-overlap minority (14% to 17%) and only a trace of classic heat-shock or proteostasis genes (4% to 6%: HSPA1A, HSPH1, CLU).
+The `WT_heat_up` leading edge in SF T cells is predominantly T-cell activation and effector genes (42% to 47%) plus immediate-early stress genes (11% to 15%), with a hypoxia-overlap minority (13% to 14%) and only a trace of classic heat-shock or proteostasis genes (3% to 5%).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -40,17 +40,17 @@ The `WT_heat_up` leading edge in SF T cells is predominantly T-cell activation a
 
 ## tables/gsea_full_{treg,tcon,cd8}.csv
 
-With the complete 199-gene mouse `WT_heat_up` set, SF-vs-PB enrichment is positive and strong in every sorted population -- NES 2.51 (Treg), 2.57 (Tcon), 2.05 (CD8), all at FDR <= 8.4e-7 -- while `WT_heat_down` is non-significant everywhere (NES 1.01 to 1.34, FDR 0.07 to 0.43) and also leans positive, so the signature's two arms do not separate in opposite directions.
+With the complete 199-gene mouse `WT_heat_up` set, SF-vs-PB enrichment is positive and strong in every sorted population -- NES 2.59 (Treg), 2.68 (Tcon), 2.07 (CD8), all at FDR <= 3.6e-7 -- while `WT_heat_down` also leans positive and reaches significance in Tcon (NES 1.47, FDR 0.026) though not in Treg (0.97, FDR 0.51) or CD8 (1.09, FDR 0.31), so the signature's two arms do not separate in opposite directions.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `run_fgsea` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, `03_results/09_heat_hypoxia/tables/_signatures_full/WT_heat_{up,down}.txt` |
 
-**How to read:** One file per sorted population, two rows each (`WT_heat_up`, `WT_heat_down`). Positive `nes` means enrichment toward the SF-high end of the donor-pseudobulk SF-vs-PB ranked list; `padj` is BH across the two sets in that run only. `set_size` counts signature genes surviving intersection with the ranked list (105/111/115 of 199 up; 57/61/62 of 94 down) -- roughly half the projected signature is testable here. `core_enrichment` is the slash-separated leading edge. Primary donor-pseudobulk tier, and the unpurged reference for the hypoxia-purged run. The non-significant, positive `WT_heat_down` arm is the caveat: the SF-high shift is not a clean bidirectional recapitulation of the mouse contrast.
+**How to read:** One file per sorted population, two rows each (`WT_heat_up`, `WT_heat_down`). Positive `nes` means enrichment toward the SF-high end of the donor-pseudobulk SF-vs-PB ranked list; `padj` is BH across the two sets in that run only. `set_size` counts signature genes surviving intersection with the ranked list (119/130/113 of 199 up; 56/61/57 of 94 down) -- roughly half to two-thirds of the projected signature is testable here. `core_enrichment` is the slash-separated leading edge. Primary donor-pseudobulk tier, and the unpurged reference for the hypoxia-purged run. The positive `WT_heat_down` arm is the caveat, and in Tcon it is significant: the SF-high shift is not a clean bidirectional recapitulation of the mouse contrast, because both arms move the same way.
 
 ## tables/gsea_purged_{treg,tcon,cd8}.csv
 
-Removing the 18 `HALLMARK_HYPOXIA` overlap genes leaves `WT_heat_up` SF-high in all three populations -- NES 2.38 (Treg), 2.39 (Tcon), 1.90 (CD8), FDR <= 4.6e-5, a loss of only 0.14 to 0.19 NES -- and leaves `WT_heat_down` untouched (NES 1.01/1.34/1.23), since none of its 94 genes overlap hypoxia.
+Removing the 18 `HALLMARK_HYPOXIA` overlap genes leaves `WT_heat_up` SF-high in all three populations -- NES 2.43 (Treg), 2.55 (Tcon), 1.93 (CD8), FDR <= 4.1e-5, a loss of only 0.13 to 0.16 NES -- and leaves `WT_heat_down` untouched (NES 0.97/1.47/1.09), since none of its 94 genes overlap hypoxia.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -130,11 +130,10 @@ The 103 testable mouse up-arm genes together with every testable member of the t
 
 ## figures/_overview/heat_purge_nes_paired.png
 
-Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C-derived
-up-set costs only 0.14 to 0.19 NES and leaves the synovial-fluid
-enrichment strong and significant in all three sorted populations, so
-the enrichment is not reducible to HALLMARK_HYPOXIA-overlap gene
-content.
+Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C up-set costs
+only 0.14 to 0.19 NES and leaves the synovial-fluid enrichment strong
+and significant in all three sorted populations, so hypoxia does not
+explain it.
 
 **How to read:** One row per population and mouse arm. x is fgsea NES, positive =
 enriched toward the synovial-fluid end of the paired ranking. Each row
@@ -153,10 +152,10 @@ purged FDR. Primary donor-pseudobulk tier, correlative.
 
 ## figures/_overview/heat_hypoxia_colocalization.png
 
-Within synovial-fluid cells the mouse 39 °C-derived WT_heat_up score
-and the HALLMARK_HYPOXIA score correlate only weakly (Spearman 0.08 to
-0.20), so the two readouts are carried by largely different cells
-rather than one shared state.
+Within synovial-fluid cells the mouse heat score and the hypoxia score
+correlate only weakly (Spearman 0.08 to 0.20), so the niche's thermal
+and hypoxic readouts are carried by largely different cells rather
+than one shared stress state.
 
 **How to read:** Bars are the within-SF, cell-level correlation between the per-cell
 WT_heat_up and HALLMARK_HYPOXIA AUCell scores, Spearman (dark) beside
@@ -195,10 +194,10 @@ pseudobulk NES.
 
 ## figures/_overview/heat_treg_volcano_signature.png
 
-40 of the 103 testable mouse 39 °C up-arm genes clear the Treg SF-vs-
-PB significance gates on the synovial-fluid side against 5 on the
+48 of the 119 testable mouse 39 °C up-arm genes clear the Treg SF-vs-
+PB significance gates on the synovial-fluid side against 7 on the
 blood side, so the enrichment is visible in the plain differential-
-expression view, while accounting for 4.9% of the SF-high response.
+expression view, while accounting for 5.6% of the SF-high response.
 
 **How to read:** Every tested Treg gene, x = log2 fold change synovial fluid over
 paired blood, y = -log10 FDR, dashed lines = the config gates. Warm

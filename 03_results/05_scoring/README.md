@@ -46,7 +46,7 @@ test whether it is Treg-selective.
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
 left-shifted peak = SF enrichment. Middle rug = gene-set member
-positions; bottom = the signed Wald ranking metric. Two curves per
+positions; bottom = the signed moderated-t ranking metric. Two curves per
 panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
 down = cool blue. ES y clamped to [-1, 1] for cross-population
 comparability. Display of compute output (clusterProfiler
@@ -66,7 +66,7 @@ test whether it is Treg-selective.
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
 left-shifted peak = SF enrichment. Middle rug = gene-set member
-positions; bottom = the signed Wald ranking metric. Two curves per
+positions; bottom = the signed moderated-t ranking metric. Two curves per
 panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
 down = cool blue. ES y clamped to [-1, 1] for cross-population
 comparability. Display of compute output (clusterProfiler
@@ -86,7 +86,7 @@ test whether it is Treg-selective.
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
 left-shifted peak = SF enrichment. Middle rug = gene-set member
-positions; bottom = the signed Wald ranking metric. Two curves per
+positions; bottom = the signed moderated-t ranking metric. Two curves per
 panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
 down = cool blue. ES y clamped to [-1, 1] for cross-population
 comparability. Display of compute output (clusterProfiler
@@ -112,7 +112,7 @@ step (`helpers/fgsea_prerank.R`) off the clusterProfiler `gseaResult`.
 |---|---|---|
 | `rank` | int | 1-based position in the ranked list (1 = most SF-enriched; N = most PB-enriched). |
 | `gene` | str | HGNC symbol at this rank. |
-| `stat` | float | Signed Wald statistic — the ranking metric (positive = SF-up, negative = PB-up). |
+| `stat` | float | Signed moderated t-statistic (limma-voom) — the ranking metric (positive = SF-up, negative = PB-up). |
 | `running_es` | float | Weighted running enrichment score at this rank (DOSE `gseaScores`, exponent 1). The curve to plot vs `rank`. |
 | `hit` | bool | TRUE if `gene` is a member of this gene set (a rug tick / step-up in the curve). |
 | `leading_edge` | bool | TRUE if `gene` is a core / leading-edge gene (member of the object's `core_enrichment`); the genes driving the ES. |
@@ -132,17 +132,18 @@ The NES / p-value summarising each curve live in the sibling `gsea_pseudobulk_{t
 
 ## tables/gsea_pseudobulk_{treg,tcon,cd8}.csv
 
-The mouse 39 °C `WT_heat_up` program enriches toward the SF end of every
-population's donor-pseudobulk ranked list — NES 2.5146 in Treg (padj 9.65e-14, 105
-members matched), 2.5717 in Tcon (padj 4.47e-15, 111), 2.0503 in CD8 (padj
-8.42e-07, 115) — while `WT_heat_down` reaches significance nowhere (Treg NES 1.011,
-padj 0.435; Tcon 1.337, padj 0.074; CD8 1.224, padj 0.148). The axis is up-arm only,
-and it is pan-T rather than Treg-exclusive, with Treg and Tcon carrying it more
-strongly than CD8.
+The mouse 39 °C-derived `WT_heat_up` set enriches toward the SF end of every
+population's donor-pseudobulk ranked list — NES 2.5915 in Treg (padj 3.23e-14, 119
+members matched), 2.6809 in Tcon (padj 8.09e-17, 130), 2.0710 in CD8 (padj
+3.61e-07, 113). `WT_heat_down` also leans positive and reaches significance in Tcon
+(NES 1.4718, padj 0.026) but not in Treg (0.9676, padj 0.512) or CD8 (1.0943, padj
+0.308), so the up arm carries the axis in Treg and CD8 while both arms move together
+in Tcon. The enrichment is pan-T rather than Treg-exclusive, with Treg and Tcon
+carrying it more strongly than CD8.
 
 **How to read:** One CSV per sorted population, one row per gene set (`WT_heat_up`,
 `WT_heat_down`). `nes` is the normalized enrichment score of that set against the
-population's signed-Wald SF-vs-PB ranked list: positive = enriched toward the SF-up
+population's signed moderated-t SF-vs-PB ranked list: positive = enriched toward the SF-up
 end of the list, negative = toward PB-up. `set_size` counts set members actually
 present in that ranked list, so it varies by population; `padj` is BH FDR across the
 sets in the file; `core_enrichment` is the `/`-delimited leading edge;
@@ -177,4 +178,3 @@ Correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/05_score_signatures.py` | `main` | `percell_score_ncores=8; signature=WT_heat_{up,down} (AUCell + UCell, rank-based [0,1])` | `03_results/objects/02_annotation.h5ad`, `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |
-

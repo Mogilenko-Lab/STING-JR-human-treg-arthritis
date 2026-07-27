@@ -1,4 +1,4 @@
 population,mouse_arm,subcomponent,curated_set,contrast,n_genes,set_size_in_ranked,nes,pvalue,padj,n_ranked_genes,evidence_tier
-Treg,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18.0,10.0,1.93850076,0.000169868619,0.000396360111,14714.0,secondary_annotation
-Tcon,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18.0,11.0,2.07363799,1.49744179e-05,3.49403085e-05,15229.0,secondary_annotation
-CD8,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18.0,12.0,1.8183631,0.00306072012,0.0107125204,15070.0,secondary_annotation
+Treg,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18.0,12.0,2.05417053,7.76415584e-05,0.000181163636,13999.0,secondary_annotation
+Tcon,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18.0,15.0,2.06843081,0.000146435204,0.000256261608,14411.0,secondary_annotation
+CD8,WT_heat_up,hypoxia,HALLMARK_HYPOXIA,SF_vs_PB,18.0,12.0,1.80567269,0.00254572373,0.00891003304,14014.0,secondary_annotation

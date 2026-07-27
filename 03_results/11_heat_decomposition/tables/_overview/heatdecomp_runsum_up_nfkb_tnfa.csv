@@ -1,4 +1,4 @@
 population,mouse_arm,subcomponent,curated_set,contrast,n_genes,set_size_in_ranked,nes,pvalue,padj,n_ranked_genes,evidence_tier
-Treg,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35.0,24.0,2.06033488,5.10372736e-05,0.000178630458,14714.0,secondary_annotation
-Tcon,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35.0,26.0,2.2016626,3.27775419e-06,1.14721397e-05,15229.0,secondary_annotation
-CD8,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35.0,27.0,1.43482295,0.0624226414,0.0873916979,15070.0,secondary_annotation
+Treg,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35.0,30.0,2.23612236,5.47857226e-06,1.91750029e-05,13999.0,secondary_annotation
+Tcon,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35.0,31.0,2.31606436,5.52610643e-07,1.93413725e-06,14411.0,secondary_annotation
+CD8,WT_heat_up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,SF_vs_PB,35.0,28.0,1.22781952,0.188555605,0.219981539,14014.0,secondary_annotation

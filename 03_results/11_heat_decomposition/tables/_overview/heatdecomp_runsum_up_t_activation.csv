@@ -1,4 +1,4 @@
 population,mouse_arm,subcomponent,curated_set,contrast,n_genes,set_size_in_ranked,nes,pvalue,padj,n_ranked_genes,evidence_tier
-Treg,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14.0,7.0,1.12413252,0.338461831,0.394872137,14714.0,secondary_annotation
-Tcon,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14.0,10.0,1.80188167,0.00272623009,0.00381672213,15229.0,secondary_annotation
-CD8,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14.0,9.0,1.31598084,0.158440911,0.184847729,15070.0,secondary_annotation
+Treg,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14.0,9.0,1.31934284,0.157458941,0.220442518,13999.0,secondary_annotation
+Tcon,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14.0,13.0,1.89316871,0.00137220624,0.00192108874,14411.0,secondary_annotation
+CD8,WT_heat_up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,SF_vs_PB,14.0,10.0,1.43765987,0.0828049847,0.115926979,14014.0,secondary_annotation
