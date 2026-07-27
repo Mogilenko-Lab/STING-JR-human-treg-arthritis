@@ -172,7 +172,7 @@ def main() -> None:
             "excursion is synovial-fluid enrichment, a negative trace the opposite. Bottom "
             "panel: where each population's HSR core genes sit in its ranking, in matching "
             "colour. Legend labels carry each NES and FDR, so read the Treg trace as a "
-            "trend at FDR 0.056, not a significant enrichment. Ranked-list lengths differ "
+            "trend at FDR 0.064, not a significant enrichment. Ranked-list lengths differ "
             "slightly, so compare shapes rather than x positions; the y range is data-driven "
             "because all three curves share one axis. Annotation tier."),
         config=FIG_CFG, height=7.0,

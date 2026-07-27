@@ -126,28 +126,31 @@ def _(INTERACTIVE, RESULTS, pd):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # The mouse 39 °C Treg stress axis in JIA synovial-fluid T cells
+    # The mouse 39 °C-derived signature in JIA synovial-fluid T cells
 
     Here I ask the question:
-    > does the mouse 39 °C fever program (`WT_heat`, derived from the internal mouse iTreg experiment)
+    > does the mouse 39 °C-derived signature (`WT_heat`, derived from the internal mouse iTreg experiment)
     > show interpretable enrichment in sorted synovial-fluid (SF) T cells
     > relative to paired peripheral blood (PB) in GSE160097, and does that enrichment
     > concentrate in Tregs or read across the whole T compartment?
 
     **The finding.**
-    The mouse `WT_heat` up-program is **enriched** in JIA synovial-fluid T cells
+    The mouse `WT_heat` up arm is **enriched** in JIA synovial-fluid T cells
     versus paired blood.
     The enrichment is **broad across the sorted populations — pan-T, not Treg-preferential**.
 
-    The running sum packs the core set at the top of every ranked list:
-    * NES ≈ 2.5 in Treg,
-    * NES ≈ 2.6 in Tcon,
-    * and 2.1 in CD8,
-    ... all clearing FDR far below 1e-6.
+    The running sum packs the up-arm genes at the top of every ranked list:
+    * NES **+2.59** in Treg (FDR 3.2e-14),
+    * NES **+2.68** in Tcon (FDR 8.1e-17),
+    * NES **+2.07** in CD8 (FDR 3.6e-7).
 
-    This is a signal read from the WT_heat mouse axis.
+    The down arm is not a mirror of the up arm. It also leans synovial-high, and it
+    reaches significance in Tcon (NES +1.47, FDR 0.026) while staying flat in Treg
+    (+0.97, FDR 0.51) and CD8 (+1.09, FDR 0.31) — the same sign as the up arm, not the
+    opposite one. So the up arm is not the only arm here carrying a direction.
 
-    It cannot be read though as pure temperature effect if we look at the DE set.
+    What the enriching genes actually are is the next question, and it is what bounds
+    how far this enrichment can be read.
     """)
     return
 
@@ -179,12 +182,13 @@ def _(mo):
     ## Primary evidence — `WT_heat` NES on donor-pseudobulk SF-vs-PB ranked lists
 
     Pre-ranked fgsea of the mouse `WT_heat` up / down sets against the
-    SF-vs-PB donor-pseudobulk signed-Wald ranked list, one column per sorted
-    population. Positive NES (red) means the set packs toward the SF-high end.
-    The `WT_heat_up` row is the number that settles the claim: it is strongly
-    positive and significant in Treg, Tcon, and CD8 alike, so the signal is
-    pan-T rather than Treg-restricted. Stars mark BH-FDR (`***` < 0.001,
-    `**` < 0.01, `*` < 0.05).
+    SF-vs-PB donor-pseudobulk signed moderated-`t` ranked list (edgeR/limma-voom),
+    one column per sorted population. Positive NES (red) means the set packs toward
+    the SF-high end. The `WT_heat_up` row is the one the claim rests on: it is
+    strongly positive and significant in Treg, Tcon, and CD8 alike, so the signal is
+    pan-T rather than Treg-restricted. Read the `WT_heat_down` row alongside it —
+    it runs the same sign, not the opposite one, and is significant in Tcon.
+    Stars mark BH-FDR (`***` < 0.001, `**` < 0.01, `*` < 0.05).
     """)
     return
 
@@ -260,11 +264,14 @@ def pseudo_bulk(go, gsea, mo):
     )
     _cap = mo.md(
         "**Reading the panel.** `WT_heat_up` runs strongly SF-high in every sorted "
-        "population — Treg NES +2.51, Tcon +2.57, CD8 +2.05, each at FDR far below "
-        "1e-6 — so the enrichment runs pan-T across the sorted populations. "
-        "`WT_heat_down` stays non-significant, consistent with the up-limb carrying the "
-        "signal. This donor-pseudobulk NES is the primary evidence the review rests "
-        "on.\n\n" + _tbl
+        "population — Treg NES +2.59 (FDR 3.2e-14), Tcon +2.68 (8.1e-17), CD8 +2.07 "
+        "(3.6e-7) — so the enrichment runs pan-T, and the Treg is the weaker of the two "
+        "CD4 arms rather than the leading one. `WT_heat_down` does not run the other way: "
+        "it is also positive, significant in Tcon (NES +1.47, FDR 0.026) and flat in Treg "
+        "(+0.97, FDR 0.51) and CD8 (+1.09, FDR 0.31), so the two arms of the mouse set do "
+        "not separate in opposite directions here and the up arm is not the only "
+        "informative one. This donor-pseudobulk NES is the primary evidence on this "
+        "page.\n\n" + _tbl
     )
     mo.vstack([mo.ui.plotly(_fig), _cap])
     return
@@ -273,18 +280,17 @@ def pseudo_bulk(go, gsea, mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Heat-vs-hypoxia check inside JIA SF
+    ## `HALLMARK_HYPOXIA` overlap inside JIA SF
 
-    Synovial fluid is a hypoxic tissue niche, so the SF-vs-PB `WT_heat` enrichment
-    could reflect the hypoxic microenvironment rather than a heat program. I ask
-    that here three ways, all within JIA. Does the enrichment survive removing the
-    genes `WT_heat_up` shares with `HALLMARK_HYPOXIA` (primary donor-pseudobulk
-    tier)? Do per-cell heat and hypoxia scores co-localize in SF cells, and which
-    biological programs do the enriching leading-edge genes actually represent
-    (both secondary annotation)? These do not fully deconfound tissue context —
-    heat and hypoxia separate cleanly only where an elevated temperature occurs
-    without a hypoxic niche — but they do separate a hypoxia-overlap signal from
-    the rest.
+    The SF-vs-PB `WT_heat` enrichment includes genes that also sit in
+    `HALLMARK_HYPOXIA`. I ask that here three ways, all within JIA. Does the
+    enrichment survive removing the genes `WT_heat_up` shares with
+    `HALLMARK_HYPOXIA` (primary donor-pseudobulk tier)? Do per-cell `WT_heat`
+    and `HALLMARK_HYPOXIA` scores co-localize in SF cells, and which biological
+    programs do the enriching leading-edge genes actually represent (both
+    secondary annotation)? These checks separate `HALLMARK_HYPOXIA`-overlap gene
+    content from the rest of the signature without assigning causal structure to
+    the human SF-vs-PB contrast.
     """)
     return
 
@@ -353,19 +359,20 @@ def _(
         + "\n".join(_rows)
     )
     _cap = mo.md(
-        "The `WT_heat_up` enrichment is hypoxia-independent but not thermal-specific. "
-        "Removing the 18 genes it shares with `HALLMARK_HYPOXIA` barely dents the NES — "
-        "Treg +2.38, Tcon +2.39, CD8 +1.90, all at FDR < 5e-5 — so the SF-vs-PB signal "
-        "is not carried by the hypoxia-overlap genes. Within SF the per-cell heat and "
-        "hypoxia scores correlate only weakly (Spearman 0.08 to 0.20), so heat-high and "
-        "hypoxia-high are largely different cells. But the leading edge that drives the "
-        "enrichment is mostly generic T-cell activation and immediate-early genes "
-        "(about two-thirds together), with a hypoxia minority and only a trace of "
-        "classic heat-shock or proteostasis genes (HSPA1A, HSPH1, CLU). I read this "
-        "honestly: the mouse `WT_heat` overlap with inflamed-joint T cells is real and "
-        "is not a hypoxia artefact, but at gene resolution it reads as an activation "
-        "and immediate-early program more than a thermal-specific one, so heat is a "
-        "loose label here for what is largely in-vivo T-cell activation.\n\n" + _tbl
+        "Dropping the 18 genes `WT_heat_up` shares with `HALLMARK_HYPOXIA` lowers the "
+        "NES only slightly — Treg +2.59 to +2.43, Tcon +2.68 to +2.55, CD8 +2.07 to "
+        "+1.93, a loss of 0.13 to 0.16 and all still at FDR <= 4.1e-5 — so the "
+        "enrichment is not reducible to that shared gene content. That is a statement "
+        "about gene membership and nothing more: it does not tell me which stresses the "
+        "synovial niche imposes, and a cross-sectional human contrast cannot take "
+        "temperature and hypoxia apart. Within SF the per-cell `WT_heat_up` and "
+        "`HALLMARK_HYPOXIA` scores correlate only weakly (Spearman 0.08 to 0.20). "
+        "The leading edge that drives the enrichment is mostly generic T-cell activation "
+        "and immediate-early genes (55-61% together), with a hypoxia minority (13-14%) "
+        "and only a trace of heat-shock or proteostasis genes (3-5%: HSPA1A and CLU in "
+        "all three, HSPH1 in Treg). I read this as a real overlap between the mouse "
+        "39 C-derived up arm and inflamed-joint T cells, and not as a mechanism-specific "
+        "claim about the human SF-vs-PB contrast.\n\n" + _tbl
     )
     mo.vstack([mo.ui.plotly(_fig), _cap])
     return
@@ -377,22 +384,22 @@ def _(mo):
     ## Is `WT_heat_up` even heat? A curated heat-shock lens
 
     The leading edge said `WT_heat_up` is a loose label — mostly activation, only a trace of
-    heat-shock. That fits: it's bulk RNA-seq of iTregs activated at 39 °C, so activation rides
-    along, and one mouse signature can't pull the two apart.
+    heat-shock-response genes. That fits: it comes from bulk RNA-seq of iTregs activated at
+    39 °C, so activation rides along, and one mouse signature cannot pull the two apart.
 
-    So I bring a second lens — a curated heat-shock signature from public MSigDB / Reactome / GO
-    sets, refined to an activation-free proteostasis core (`HSR_core`, 56 genes) and a broader
-    sensitivity set (176). I keep it separate from `WT_heat_up`, never blended; the HSF1 / chaperone
-    program is the thermal core itself, not something to purge.
+    So I bring a second lens — a curated HSR signature from public MSigDB / Reactome / GO
+    sets, refined to the curated HSR core (`HSR_core`, 56 genes) and a broader sensitivity set
+    (176). I keep it separate from `WT_heat_up`, never blended; the curated HSR core is a
+    separate anchor-independent gene list, not something inferred from the JIA enrichment.
 
-    The mouse anchor already showed a real thermal program lives in the 39 °C response, stronger than
-    the activation tangled with it. JIA can't measure temperature — but it can ask two things the
-    mouse can't. Does a clean thermal signal survive the SF-vs-PB contrast? And do the two lenses
-    point at the same cells?
+    The mouse anchor defines the 39 °C-derived response, but JIA cannot measure temperature.
+    In this compartment I can ask whether the curated HSR lens enriches in the SF-vs-PB
+    contrast, and whether the two lenses point at the same cells.
 
-    This second lens is annotation — it sits beside the `WT_heat` claim and enriches the reading. Its
-    core answers proteotoxic stress broadly: oxidative, proteasomal, thermal alike. So a positive read
-    here marks proteostasis stress, and the mouse 37/39 contrast is where that ties back to temperature.
+    This second lens is annotation — it sits beside the `WT_heat` result and enriches the reading.
+    Its core answers proteotoxic stress broadly: oxidative, proteasomal, and heat-shock response
+    alike. A positive read here marks curated HSR gene content and nothing more; the mouse 37/39 °C
+    contrast is the only place in this project where a temperature difference was actually imposed.
     """)
     return
 
@@ -471,17 +478,22 @@ def _(go, hsr_coloc, hsr_lens_nes, hsr_overlap, mo):
     _genes = str(_ov["genes_intersect"]).replace(";", ", ")
 
     _cap = mo.md(
-        "**Reading the panels.** The curated core separates SF from blood in one population only — Tregs, "
-        "at NES +1.50. Tcon (−1.36) and CD8 (−1.10) go the other way. `WT_heat_up` was pan-T; the clean "
-        "lens narrows the thermal read to the Treg.\n\n"
+        "**Reading the panels.** The curated HSR core is the one lens here whose sign differs between "
+        "populations: it points synovial-high in Treg (NES +1.49) and blood-high in Tcon (−1.34) and "
+        "CD8 (−1.15). None of the three clears FDR 0.05 — Treg comes closest at 0.064, Tcon sits at "
+        "0.16 and CD8 at 0.38 — so this is a sign flip at trend level, not a significant enrichment, "
+        "and it carries no claim on its own. What it does say is that the pan-T pattern of "
+        "`WT_heat_up` is not reproduced by an anchor-independent curated list.\n\n"
         "Do the two lenses mark the same cells? Barely. Within SF they correlate weakly per cell — Treg "
         "Spearman 0.19, Tcon 0.13, CD8 0.11 — and share just "
         f"{_n_int} genes ({_genes}). So `WT_heat_up` and "
-        "the clean core light up largely different Tregs. The empirical label is activation-tinged; the "
-        "curated lens finds a smaller, genuinely thermal pocket underneath.\n\n"
-        "The number that settles the `WT_heat` claim is still the pseudobulk NES above. This panel sharpens "
-        "what that signal is made of — and asks the next question: where would it show up without the "
-        "hypoxic niche? Febrile blood, normoxic, is the test.\n\n" + _tbl
+        "the curated core light up largely different SF cells. By composition `WT_heat_up` is "
+        "activation-tinged; the curated core is a smaller, separately derived list and is read on its "
+        "own footing.\n\n"
+        "The number that carries the `WT_heat` claim is still the pseudobulk NES above. This panel "
+        "describes what that enrichment is made of. What it cannot do is attribute the enrichment to "
+        "temperature: the inflamed joint imposes several stresses at once, and this contrast has no "
+        "handle that separates them.\n\n" + _tbl
     )
     mo.vstack([mo.ui.plotly(_fig), _cap])
     return
@@ -1171,8 +1183,8 @@ def _(mo):
     - near zero in Treg (+0.16) and mildly negative in Tcon (−0.22) and CD8 (−0.56),
     - so it carries no coherent SF-vs-PB shift.
 
-    Synovial-Treg hypoxia pocket is the a readout worth carrying forward,
-    and the hypoxia surface remains a readout of the tissue state.
+    The synovial-Treg hypoxia pocket is a readout worth carrying forward, and the
+    hypoxia surface remains a readout of the tissue state.
     """)
     return
 
@@ -1282,13 +1294,15 @@ def _(mo):
     mo.md("""
     ## Decision
 
-    **Where the analysis goes next: continue.** The mouse 39 °C `WT_heat`
-    up-program is enriched in JIA synovial-fluid T cells relative to paired blood,
-    and the enrichment runs broad across the sorted populations — NES ≈ 2.51 in
-    Treg, 2.57 in Tcon, 2.05 in CD8, all clearing FDR far below 1e-6. The signal is
-    pan-T. It is positive, reproducible, and read as **consistent with** the mouse
-    stress axis: correlative, and I state plainly that it holds across the T-cell
-    populations rather than singling out the Treg.
+    **Where the analysis goes next: continue.** The mouse 39 °C-derived `WT_heat`
+    up arm is enriched in JIA synovial-fluid T cells relative to paired blood, and
+    the enrichment runs broad across the sorted populations — NES +2.59 in Treg,
+    +2.68 in Tcon, +2.07 in CD8, at FDR 3.2e-14, 8.1e-17 and 3.6e-7. The signal is
+    pan-T. The down arm runs the same sign rather than the opposite one and is
+    significant in Tcon (+1.47, FDR 0.026), so the up arm is not the only arm
+    carrying a direction. It is positive, reproducible, and read as **consistent
+    with** the mouse stress axis: correlative, and I state plainly that it holds
+    across the T-cell populations rather than singling out the Treg.
 
     **Harvest strategy remains revisitable.** The OR-gated drafted subset above is
     a current design preview, a draft rather than a committed cohort. The

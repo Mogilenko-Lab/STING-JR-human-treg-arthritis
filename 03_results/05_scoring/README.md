@@ -38,10 +38,11 @@ because up and down co-shift in SF. Correlative.
 
 ## figures/_overview/wt_heat_running_sum_treg.png
 
-Per-population leading-edge view: where the mouse 39 °C WT_heat up-
-and down-programs concentrate along each population's SF-vs-PB
-pseudobulk ranking. The Treg up-curve carries the claim; Tcon and CD8
-test whether it is Treg-selective.
+Per-population leading-edge view: where the mouse 39 °C-derived WT_heat
+up and down arms concentrate along each population's SF-vs-PB
+pseudobulk ranking. All three up-curves climb alike — Tcon highest
+(NES 2.68), then Treg (2.59), then CD8 (2.07) — so the enrichment reads
+pan-T rather than Treg-preferential.
 
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
@@ -58,10 +59,11 @@ gseaResult); correlative, not causal.
 
 ## figures/_overview/wt_heat_running_sum_tcon.png
 
-Per-population leading-edge view: where the mouse 39 °C WT_heat up-
-and down-programs concentrate along each population's SF-vs-PB
-pseudobulk ranking. The Treg up-curve carries the claim; Tcon and CD8
-test whether it is Treg-selective.
+Per-population leading-edge view: where the mouse 39 °C-derived WT_heat
+up and down arms concentrate along each population's SF-vs-PB
+pseudobulk ranking. All three up-curves climb alike — Tcon highest
+(NES 2.68), then Treg (2.59), then CD8 (2.07) — so the enrichment reads
+pan-T rather than Treg-preferential.
 
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,
@@ -78,10 +80,11 @@ gseaResult); correlative, not causal.
 
 ## figures/_overview/wt_heat_running_sum_cd8.png
 
-Per-population leading-edge view: where the mouse 39 °C WT_heat up-
-and down-programs concentrate along each population's SF-vs-PB
-pseudobulk ranking. The Treg up-curve carries the claim; Tcon and CD8
-test whether it is Treg-selective.
+Per-population leading-edge view: where the mouse 39 °C-derived WT_heat
+up and down arms concentrate along each population's SF-vs-PB
+pseudobulk ranking. All three up-curves climb alike — Tcon highest
+(NES 2.68), then Treg (2.59), then CD8 (2.07) — so the enrichment reads
+pan-T rather than Treg-preferential.
 
 **How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
 list from SF-enriched (left) to PB-enriched (right); a positive,

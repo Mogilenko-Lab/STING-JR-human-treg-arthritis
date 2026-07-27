@@ -49,7 +49,9 @@ The `__marimo__/` cache and the exported `reactive_review.html` are gitignored
    up-program enriches in synovial-fluid T cells versus paired blood, pan-T and not
    Treg-preferential. Correlative.
 2. **Primary evidence** — `WT_heat` NES heatmap + table (Treg / Tcon / CD8), donor
-   pseudobulk. NES ≈ 2.51 / 2.57 / 2.05, all FDR ≪ 1e-6. The primary tier.
+   pseudobulk. Up arm NES +2.59 / +2.68 / +2.07 at FDR 3.2e-14 / 8.1e-17 / 3.6e-7; the
+   down arm runs the same sign and is significant in Tcon (+1.47, FDR 0.026). The
+   primary tier.
 3. **Secondary corroboration** — per-cell `WT_heat_up` AUCell SF-vs-PB donor SMD table.
    Corroborative tier, on its own scale.
 4. **Reactive dual embedding** — two synced square UMAPs of one filtered+sampled cell

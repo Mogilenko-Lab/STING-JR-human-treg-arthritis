@@ -61,7 +61,7 @@ gsea %>%
   transmute(cell_state, signature = pathway_id, NES = round(nes, 3),
             pvalue = signif(pvalue, 3), padj = signif(padj, 3), set_size) %>%
   arrange(signature, factor(cell_state, c("Treg", "Tcon", "CD8"))) %>%
-  kable(caption = "Pre-ranked fgsea of mouse WT_heat up/down vs SF-vs-PB pseudobulk (signed Wald stat).")
+  kable(caption = "Pre-ranked fgsea of mouse WT_heat up/down vs SF-vs-PB pseudobulk (signed moderated t).")
 ```
 
 **The number that settles it:** `WT_heat_up` NES in **Treg** vs Tcon vs CD8 — is the Treg
@@ -129,7 +129,7 @@ for (f in c("wt_heat_nes_forest.png",
 
 *The running sums, **interactively**: where the mouse-anchor `WT_heat` core genes fall in
 each cell type's SF-vs-PB ranked list. One running-ES line per population (forest palette),
-with a rug of the core genes below. **Hover a tick** for its symbol, SF-vs-PB signed-Wald
+with a rug of the core genes below. **Hover a tick** for its symbol, SF-vs-PB signed moderated-t
 statistic, and leading-edge status. The drop-down (top-right) switches the **up** / **down**
 set. A legend **click** toggles a population's line and rug. Reading it: a Treg-preferential
 signal climbs highest in Treg with its core genes packed at the top ranks. A pan-T signal
@@ -148,7 +148,7 @@ build_runsum_widget(here("03_results/05_scoring/tables"))
 **[0, 1]** and rank-based, so robust to library size and normalisation. Their absolute level
 reflects set size and background detection, so I read the **relative** SF-vs-PB shift within
 each population (Treg SF vs Treg PB), not the height. The forest is a **different estimand**:
-fgsea on the donor-pseudobulk signed-Wald ranked list, asking whether the whole `WT_heat` set
+fgsea on the donor-pseudobulk signed moderated-t ranked list, asking whether the whole `WT_heat` set
 packs at the top as a NES on its own scale. The two stay separate. Here every population
 shifts SF-high in the same direction as the NES — the pseudobulk NES is the primary evidence.
 
@@ -186,11 +186,14 @@ for (it in flow) {
 
 ## Decision
 
-> **Claim (one sentence):** The mouse 39 °C Treg up-program is **enriched** in JIA
+> **Claim (one sentence):** The mouse 39 °C-derived up arm is **enriched** in JIA
 > synovial-fluid T cells relative to paired peripheral blood, and the enrichment is
 > **broad across the sorted populations (pan-T), not Treg-preferential**: the running-sum
-> concentrates the core gene set at the top of every ranked list, with NES ≈ 2.52 in Treg,
-> 2.57 in Tcon, and 2.05 in CD8, all clearing significance at FDR < 1e-6.
+> concentrates the core gene set at the top of every ranked list, with NES +2.59 in Treg,
+> +2.68 in Tcon, and +2.07 in CD8, at FDR 3.2e-14, 8.1e-17 and 3.6e-7. The down arm runs
+> the same sign rather than the opposite one, reaching significance in Tcon (NES +1.47,
+> FDR 0.026) while staying flat in Treg (+0.97) and CD8 (+1.09), so the up arm is not the
+> only arm here carrying a direction.
 >
 > **Where the analysis goes next: continue.** This is a positive, reproducible signal
 > worth carrying into the cross-dataset comparison, so I proceed to the comparator

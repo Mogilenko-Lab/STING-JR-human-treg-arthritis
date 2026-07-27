@@ -110,8 +110,8 @@ essentially flat, and if anything runs slightly the wrong way (mt-hi
 effector median -0.075 vs normal -0.060, rbc -0.17); WT_heat_up shifts
 up but is confounded (co-varies with the effector/depth axis). This is
 secondary_percell and must NOT be read as the pocket carrying the mouse
-39C signal — the pseudobulk primary-result NES (Treg 2.51 / Tcon 2.57 /
-CD8 2.05, pan-T) was unchanged when these high-mito cells were recovered.
+39C signal — the pseudobulk primary-result NES (Treg 2.59 / Tcon 2.68 /
+CD8 2.07, pan-T) was unchanged when these high-mito cells were recovered.
 
 **How to read:** Point = group median, bar = IQR, for WT_heat_up (left) and balanced
 WT_heat_updown (right), across the two mt-hi Treg groups, normal Treg,

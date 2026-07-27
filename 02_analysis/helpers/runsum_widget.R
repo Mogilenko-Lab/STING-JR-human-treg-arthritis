@@ -26,7 +26,7 @@
 #
 # Renders: one running-ES curve per population; a per-set hit-rug (stacked ticks
 # below that set's curves) marking where the mouse-anchor core signature genes
-# land; hover on the rug showing gene symbol + SF-vs-PB signed-Wald stat +
+# land; hover on the rug showing gene symbol + SF-vs-PB signed moderated-t stat +
 # leading-edge flag; an up/down gene-set dropdown; population toggling via the
 # legend (legendgroup ties each population's curve + rug together).
 #
@@ -109,7 +109,7 @@ build_runsum_widget <- function(source) {
                      visible = vis, showlegend = FALSE, hoverinfo = "text",
                      text = sprintf(paste0("<b>%s</b> (%s core gene)<br>",
                                            "population: %s<br>rank: %d<br>",
-                                           "SF-vs-PB signed-Wald: %.2f<br>leading edge: %s"),
+                                           "SF-vs-PB signed moderated t: %.2f<br>leading edge: %s"),
                                     h$gene, sets[[sd]], pop, h$rank, h$stat,
                                     ifelse(h$leading_edge, "yes", "no")))
     }
@@ -131,7 +131,7 @@ build_runsum_widget <- function(source) {
       "Interactive running-sum — mouse WT_heat core gene set across sorted ",
       "Treg / Tcon / CD8 (SF-vs-PB)"),
       font = list(size = 12), y = 0.98, yanchor = "top"),
-    xaxis = list(title = "rank in SF-vs-PB signed-Wald list (1 = most SF-up)", automargin = TRUE),
+    xaxis = list(title = "rank in SF-vs-PB signed moderated-t list (1 = most SF-up)", automargin = TRUE),
     yaxis = list(title = "running enrichment score", automargin = TRUE),
     hovermode = "closest",
     # Legend as a horizontal strip along the BOTTOM (below the x-axis title) so it

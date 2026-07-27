@@ -77,15 +77,15 @@ if (exists("purge_figures"))
   purge_figures(STAGE, "wt_heat_running_sum", overview = TRUE, config = FIG_CFG)
 
 FINDING <- paste(
-  "Per-population leading-edge view: where the mouse 39 °C WT_heat up- and",
-  "down-programs concentrate along each population's SF-vs-PB pseudobulk ranking.",
-  "The Treg up-curve carries the claim; Tcon and CD8 test whether it is",
-  "Treg-selective.")
+  "Per-population leading-edge view: where the mouse 39 °C-derived WT_heat up and",
+  "down arms concentrate along each population's SF-vs-PB pseudobulk ranking.",
+  "All three up-curves climb alike — Tcon highest (NES 2.68), then Treg (2.59),",
+  "then CD8 (2.07) — so the enrichment reads pan-T rather than Treg-preferential.")
 HOW_TO_READ <- paste(
   "Top panel = weighted running enrichment score (ES) walking the ranked list",
   "from SF-enriched (left) to PB-enriched (right); a positive, left-shifted peak",
   "= SF enrichment. Middle rug = gene-set member positions; bottom = the signed",
-  "Wald ranking metric. Two curves per panel, same colour in curve and rug:",
+  "moderated-t ranking metric. Two curves per panel, same colour in curve and rug:",
   "WT_heat up = warm brown, WT_heat down = cool blue.",
   "ES y clamped to [-1, 1] for cross-population comparability. Display of compute",
   "output (clusterProfiler gseaResult); correlative, not causal.")
