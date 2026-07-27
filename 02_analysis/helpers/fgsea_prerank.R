@@ -2,7 +2,7 @@
 # fgsea_prerank.R — pre-ranked GSEA of gene sets against ONE ranked list.
 # =======================================================================
 # The primary-evidence step: score the mouse WT_heat up/down sets against a
-# donor-pseudobulk SF-vs-PB ranked list (signed Wald stat). Called as a
+# donor-pseudobulk SF-vs-PB ranked list (signed moderated t). Called as a
 # subprocess by 05_score_signatures.py so the compute stays reproducible.
 #
 # COMPUTE ONLY — writes tables + a `gseaResult` RDS; NEVER plots. The static
@@ -52,7 +52,20 @@ seed      <- as.integer(args[6])
 nperm     <- as.integer(args[7])
 set_specs <- args[8:length(args)]
 
-DATABASE <- "mouse_projection"
+database_for_set <- function(nm) {
+  base <- sub("_(up|down)$", "", nm)
+  if (base %in% c("WT_heat", "WT_heat_no_hypoxia", "unassigned")) {
+    return("mouse_projection")
+  }
+  if (base %in% c("HSR_core", "HSR_sensitivity", "hsr_curated")) {
+    return("curated_hsr_reactome_go")
+  }
+  if (base %in% c("upr_er", "hypoxia", "nfkb_tnfa", "ifn_type_i",
+                  "inflammatory", "t_activation") || grepl("^HALLMARK_", base)) {
+    return("msigdb_hallmark")
+  }
+  "custom_gene_set"
+}
 
 # --- ranked vector (named, unique, descending) ------------------------------
 rnk <- read.table(rnk_path, sep = "\t", header = FALSE,
@@ -66,6 +79,7 @@ stats <- sort(stats, decreasing = TRUE)
 # --- pathways: name=path/to/genes.txt ---------------------------------------
 pathways   <- list()
 directions <- c()
+databases  <- c()
 for (spec in set_specs) {
   kv <- strsplit(spec, "=", fixed = TRUE)[[1]]
   nm <- kv[1]; fp <- kv[2]
@@ -73,6 +87,7 @@ for (spec in set_specs) {
   genes <- genes[nzchar(genes)]
   pathways[[nm]]  <- unique(genes)
   directions[nm]  <- if (grepl("_up$", nm)) "up" else if (grepl("_down$", nm)) "down" else "na"
+  databases[nm]   <- database_for_set(nm)
 }
 
 # --- clusterProfiler::GSEA (by = "fgsea") -> a real gseaResult S4 object -----
@@ -103,13 +118,13 @@ res <- gsea@result
 row_for <- function(nm) {
   hit <- res[res$ID == nm, , drop = FALSE]
   if (nrow(hit) == 1) {
-    data.frame(pathway_id = nm, pathway_name = nm, database = DATABASE,
+    data.frame(pathway_id = nm, pathway_name = nm, database = databases[[nm]],
                nes = hit$NES, pvalue = hit$pvalue, padj = hit$p.adjust,
                set_size = hit$setSize, core_enrichment = hit$core_enrichment,
                contrast = contrast, direction = directions[[nm]],
                stringsAsFactors = FALSE)
   } else {
-    data.frame(pathway_id = nm, pathway_name = nm, database = DATABASE,
+    data.frame(pathway_id = nm, pathway_name = nm, database = databases[[nm]],
                nes = NA_real_, pvalue = NA_real_, padj = NA_real_,
                set_size = length(intersect(pathways[[nm]], names(stats))),
                core_enrichment = "", contrast = contrast,
@@ -157,7 +172,7 @@ for (nm in names(pathways)) {
   runsum_df <- data.frame(
     rank         = seq_len(N),                       # 1-based position in the ranked list
     gene         = gnames,                            # HGNC symbol at this rank
-    stat         = as.numeric(gl),                    # signed Wald stat (ranking metric)
+    stat         = as.numeric(gl),                    # signed moderated t (ranking metric)
     running_es   = running_es,                        # DOSE weighted running enrichment score
     hit          = hits,                              # TRUE = gene is a member of this set
     leading_edge = hits & (gnames %in% core_genes),   # TRUE = core / leading-edge gene

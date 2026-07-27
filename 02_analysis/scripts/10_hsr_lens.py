@@ -116,11 +116,11 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) ->
 
 
 def drop_legacy_hsr_master_rows() -> None:
-    """Remove this stage's pre-database-stamped HSR rows before re-appending.
+    """Remove this stage's prior HSR rows before re-appending.
 
-    The fgsea helper writes `database=mouse_projection`; this stage owns only rows
-    with stage=10_hsr_lens and pathway_id in HSR_TERMS. Removing that narrow slice
-    lets append_master_table re-add rows under database=HSR_{tag}.
+    This stage owns only rows with stage=10_hsr_lens and pathway_id in HSR_TERMS.
+    Removing that narrow slice lets append_master_table re-add rows under
+    database=HSR_{tag}.
     """
     master = PATHS.master_file("master_gsea_pseudobulk.csv")
     if not master.exists():
