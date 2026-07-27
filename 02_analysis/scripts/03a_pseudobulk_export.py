@@ -8,7 +8,7 @@ frozen-label pseudobulk. Emits CSVs for downstream R (limma-voom) DE.
 Outputs:
   03_results/03_pseudobulk/tables/pseudobulk_counts.csv
   03_results/03_pseudobulk/tables/pseudobulk_coldata.csv
-  03_results/03_pseudobulk/tables/gene_map.csv
+  03_results/03_pseudobulk/tables/gene_symbols.csv
   03_results/03_pseudobulk/tables/strata_dropped.csv
 
 The counts matrix is keyed by Ensembl id, but every downstream consumer of the ranked
@@ -50,16 +50,13 @@ def main() -> None:
     counts.to_csv(tdir / "pseudobulk_counts.csv")
     coldata.to_csv(tdir / "pseudobulk_coldata.csv")
 
-    # Export gene symbols mapping for R
-    gene_map = adata.var[["gene_symbol"]].copy()
-    gene_map.index.name = "ensembl_id"
-    gene_map.to_csv(tdir / "gene_symbols.csv")
-
+    # Ensembl -> HGNC map for the R seam. Restricted to the exported columns and in their
+    # order, so a mismatch between counts and map is impossible by construction.
     gene_map = pd.DataFrame({
         "ensembl_id": adata.var_names.astype(str),
         "gene_symbol": adata.var["gene_symbol"].astype(str),
     }).set_index("ensembl_id").loc[counts.columns]
-    gene_map.to_csv(tdir / "gene_map.csv")
+    gene_map.to_csv(tdir / "gene_symbols.csv")
     n_unmapped = int((gene_map["gene_symbol"].isin(["nan", "None", ""])).sum())
     print(f"[03a_pseudobulk_export] gene_map: {len(gene_map)} ids, "
           f"{gene_map['gene_symbol'].nunique()} distinct symbols, {n_unmapped} unmapped")

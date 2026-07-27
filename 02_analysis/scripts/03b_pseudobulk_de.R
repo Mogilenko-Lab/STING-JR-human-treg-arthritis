@@ -33,7 +33,7 @@ DONOR_KEY <- YAML_CONFIG$design$donor_key
 
 counts_path <- file.path(tdir, "pseudobulk_counts.csv")
 coldata_path <- file.path(tdir, "pseudobulk_coldata.csv")
-genemap_path <- file.path(tdir, "gene_map.csv")
+genemap_path <- file.path(tdir, "gene_symbols.csv")
 
 stopifnot(file.exists(counts_path) && file.exists(coldata_path))
 # The counts matrix is keyed by Ensembl id; every consumer of ranked_*.tsv matches on
@@ -117,11 +117,14 @@ for (pop in names(POP_TAG)) {
                  "pvalue", "padj", "B", "model", "n_paired_donors", "de_engine")]
   write.csv(res, file.path(tdir, sprintf("de_SFvsPB_%s.csv", tag)), row.names=FALSE)
   
-  # Ranked list for fgsea by t-statistic
-  res_ranked <- res[!is.na(res$t) & !is.na(res$gene_symbol) & res$gene_symbol != "nan", ]
-  res_ranked <- res_ranked[order(abs(res_ranked$t), decreasing=TRUE), ]
+  # Ranked list for fgsea, keyed by symbol and sign-preserving. `stat` is the canonical
+  # name for the moderated t written above; several Ensembl ids can share a symbol, so
+  # keep the most extreme |stat| per symbol -- a duplicated symbol corrupts a pre-ranked run.
+  res_ranked <- res[!is.na(res$stat) & !is.na(res$gene_symbol), ]
+  res_ranked <- res_ranked[!res_ranked$gene_symbol %in% c("", "nan", "None", "NA"), ]
+  res_ranked <- res_ranked[order(abs(res_ranked$stat), decreasing=TRUE), ]
   res_ranked <- res_ranked[!duplicated(res_ranked$gene_symbol), ]
-  res_ranked <- res_ranked[order(res_ranked$t, decreasing=TRUE), c("gene_symbol", "t")]
+  res_ranked <- res_ranked[order(res_ranked$stat, decreasing=TRUE), c("gene_symbol", "stat")]
   write.table(res_ranked, file.path(tdir, sprintf("ranked_%s.tsv", tag)), sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
   
   n_sig <- sum(res$padj < YAML_CONFIG$thresholds$de_fdr & abs(res$log2FoldChange) >= 1.0, na.rm=TRUE)

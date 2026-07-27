@@ -101,7 +101,7 @@ the matrix handed across the Python-to-R seam.
 |---|---|---|---|
 | `02_analysis/scripts/03a_pseudobulk_export.py` | `main` | `pseudobulk_min_cells` | `03_results/objects/02_annotation.h5ad` (`counts` layer) |
 
-## tables/gene_map.csv
+## tables/gene_symbols.csv
 
 All 21,740 exported Ensembl ids carry a gene symbol and every symbol is distinct, so the
 Ensembl-to-symbol rename loses no gene and creates no collision in this dataset.
@@ -132,7 +132,7 @@ tissues; `de_engine` records the engine. Primary donor-pseudobulk tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key`, `thresholds.de_fdr` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_map.csv` |
+| `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key`, `thresholds.de_fdr` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_symbols.csv` |
 
 ## tables/ranked_{treg,tcon,cd8}.tsv
 
@@ -147,4 +147,4 @@ because `filterByExpr` is applied within each population's own design.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_map.csv` |
+| `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_symbols.csv` |

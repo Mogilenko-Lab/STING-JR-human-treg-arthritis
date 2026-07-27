@@ -31,7 +31,7 @@ Run `sciagent status` to see the current stack, effective skills, agents, and co
 4. **Cache expensive operations.** Anything over a minute goes through a checkpoint object.
 5. **Pseudobulk DE runs in R, across an explicit seam.** Aggregation is Python
    (`NNa_pseudobulk_export.py`, counts only, no statistics); the model is R
-   (`NNb_pseudobulk_de.R`, edgeR/limma-voom). The export **must** emit `gene_map.csv`
+   (`NNb_pseudobulk_de.R`, edgeR/limma-voom). The export **must** emit `gene_symbols.csv`
    (`ensembl_id,gene_symbol`) and the R side must join on it before ranking — count matrices are
    keyed by Ensembl id while every reference gene set matches on HGNC symbol, so skipping the map
    yields ranked lists that intersect the references at ~zero and fail **silently**, looking like a
