@@ -33,11 +33,17 @@ DONOR_KEY <- YAML_CONFIG$design$donor_key
 
 counts_path <- file.path(tdir, "pseudobulk_counts.csv")
 coldata_path <- file.path(tdir, "pseudobulk_coldata.csv")
+genemap_path <- file.path(tdir, "gene_map.csv")
 
 stopifnot(file.exists(counts_path) && file.exists(coldata_path))
+# The counts matrix is keyed by Ensembl id; every consumer of ranked_*.tsv matches on
+# HGNC symbol. Without this map the ranked lists would carry ENSG ids and silently
+# intersect the reference gene sets at ~zero.
+stopifnot(file.exists(genemap_path))
 
 counts_df <- read.csv(counts_path, row.names=1, check.names=FALSE)
 coldata <- read.csv(coldata_path, row.names=1, stringsAsFactors=FALSE)
+gene_map <- read.csv(genemap_path, row.names=1, stringsAsFactors=FALSE)
 
 common_strata <- intersect(rownames(coldata), rownames(counts_df))
 coldata <- coldata[common_strata, , drop=FALSE]
@@ -89,16 +95,36 @@ for (pop in names(POP_TAG)) {
   
   coef_name <- sprintf("%s%s", COND_KEY, COND_NUM)
   res <- topTable(fit, coef=coef_name, number=Inf, sort.by="none")
-  res$gene_symbol <- rownames(res)
-  
-  res <- res[order(res$P.Value), ]
+  res$ensembl_id <- rownames(res)
+  res$gene_symbol <- gene_map[res$ensembl_id, "gene_symbol"]
+
+  # Canonical, engine-agnostic DE schema — this is the seam contract. Consumers
+  # (03_pseudobulk_de_viz.py, 09_heat_hypoxia_viz.py) read these names, so swapping the
+  # engine again must not ripple into them. limma's native columns are kept alongside.
+  # avg_expr is limma's AveExpr (log2-CPM); it is deliberately NOT called baseMean,
+  # which in DESeq2 is a normalised mean count on a different scale.
+  res$log2FoldChange <- res$logFC
+  res$stat           <- res$t
+  res$pvalue         <- res$P.Value
+  res$padj           <- res$adj.P.Val
+  res$avg_expr       <- res$AveExpr
+  res$model          <- model_str
+  res$n_paired_donors <- shared_donors
+  res$de_engine      <- "limma-voom"
+
+  res <- res[order(res$pvalue), ]
+  res <- res[, c("ensembl_id", "gene_symbol", "avg_expr", "log2FoldChange", "stat",
+                 "pvalue", "padj", "B", "model", "n_paired_donors", "de_engine")]
   write.csv(res, file.path(tdir, sprintf("de_SFvsPB_%s.csv", tag)), row.names=FALSE)
   
-  res_ranked <- res[!is.na(res$t), ]
+  # Ranked list for fgsea by t-statistic
+  res_ranked <- res[!is.na(res$t) & !is.na(res$gene_symbol) & res$gene_symbol != "nan", ]
+  res_ranked <- res_ranked[order(abs(res_ranked$t), decreasing=TRUE), ]
+  res_ranked <- res_ranked[!duplicated(res_ranked$gene_symbol), ]
   res_ranked <- res_ranked[order(res_ranked$t, decreasing=TRUE), c("gene_symbol", "t")]
   write.table(res_ranked, file.path(tdir, sprintf("ranked_%s.tsv", tag)), sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
   
-  n_sig <- sum(res$adj.P.Val < YAML_CONFIG$thresholds$de_fdr & abs(res$logFC) >= 1.0, na.rm=TRUE)
+  n_sig <- sum(res$padj < YAML_CONFIG$thresholds$de_fdr & abs(res$log2FoldChange) >= 1.0, na.rm=TRUE)
   cat(sprintf("[03b_pseudobulk_de] %s: model %s; %d sig DE (padj<%.2f, |lfc|>=1); ranked %d genes\n", 
               pop, model_str, n_sig, YAML_CONFIG$thresholds$de_fdr, nrow(res_ranked)))
   
