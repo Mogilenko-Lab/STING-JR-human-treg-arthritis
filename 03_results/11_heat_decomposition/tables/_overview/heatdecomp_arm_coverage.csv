@@ -4,7 +4,7 @@ WT_heat_up,up,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,200.0,199.0,35.0,0.1758
 WT_heat_up,up,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,200.0,199.0,21.0,0.105527638,15.0,17.0,3.0,3.0,5.0,secondary_annotation
 WT_heat_up,up,hypoxia,HALLMARK_HYPOXIA,200.0,199.0,18.0,0.0904522613,12.0,15.0,3.0,3.0,5.0,secondary_annotation
 WT_heat_up,up,t_activation,HALLMARK_IL2_STAT5_SIGNALING,199.0,199.0,14.0,0.0703517588,9.0,13.0,3.0,3.0,5.0,secondary_annotation
-WT_heat_up,up,thermal_proteostasis,HSR_core,56.0,199.0,2.0,0.0100502513,2.0,2.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_up,up,hsr_curated,HSR_core,56.0,199.0,2.0,0.0100502513,2.0,2.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_up,up,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,113.0,199.0,1.0,0.00502512563,1.0,1.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_up,up,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,97.0,199.0,1.0,0.00502512563,1.0,1.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_down,down,unassigned,(none),nan,94.0,83.0,0.882978723,46.0,50.0,3.0,3.0,5.0,secondary_annotation
@@ -12,6 +12,6 @@ WT_heat_down,down,t_activation,HALLMARK_IL2_STAT5_SIGNALING,199.0,94.0,6.0,0.063
 WT_heat_down,down,ifn_type_i,HALLMARK_INTERFERON_ALPHA_RESPONSE,97.0,94.0,3.0,0.0319148936,3.0,3.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_down,down,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,200.0,94.0,2.0,0.0212765957,2.0,2.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_down,down,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,200.0,94.0,2.0,0.0212765957,2.0,2.0,0.0,3.0,5.0,secondary_annotation
-WT_heat_down,down,thermal_proteostasis,HSR_core,56.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation
+WT_heat_down,down,hsr_curated,HSR_core,56.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_down,down,upr_er,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,113.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation
 WT_heat_down,down,hypoxia,HALLMARK_HYPOXIA,200.0,94.0,0.0,0.0,0.0,0.0,0.0,3.0,5.0,secondary_annotation

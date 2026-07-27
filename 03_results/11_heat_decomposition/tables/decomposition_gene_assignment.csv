@@ -181,9 +181,9 @@ GRP,WT_heat_up,0,unassigned
 HAVCR1,WT_heat_up,0,unassigned
 HBEGF,WT_heat_up,2,nfkb_tnfa;inflammatory
 HK2,WT_heat_up,2,hypoxia;t_activation
-HSPA1A,WT_heat_up,1,thermal_proteostasis
+HSPA1A,WT_heat_up,1,hsr_curated
 HSPG2,WT_heat_up,0,unassigned
-HSPH1,WT_heat_up,1,thermal_proteostasis
+HSPH1,WT_heat_up,1,hsr_curated
 IDI2,WT_heat_up,0,unassigned
 IER3,WT_heat_up,2,hypoxia;nfkb_tnfa
 IGF2BP2,WT_heat_up,0,unassigned

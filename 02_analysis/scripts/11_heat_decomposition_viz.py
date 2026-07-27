@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-11_heat_decomposition_viz.py — VIZ ONLY. Which part of the mouse heat program
+11_heat_decomposition_viz.py — VIZ ONLY. Which part of the mouse 39 C-derived arm
 carries the synovial-fluid shift?
 ============================================================================
 The mouse 39 °C up-arm enriches toward synovial fluid as a whole. This family
@@ -60,8 +60,8 @@ POP_ORDER = list(POP_TAG)
 _OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
 POP_COL = {"Treg": _OKABE["bluish_green"], "Tcon": _OKABE["orange"],
            "CD8": _OKABE["reddish_purple"]}
-# Mouse-arm diverging cue, IDENTICAL to 09_heat_hypoxia_viz.py: heat-up = warm
-# brown, heat-down = cool blue. Keyed by arm so the mapping can never come out of
+# Mouse-arm diverging cue, IDENTICAL to 09_heat_hypoxia_viz.py: up = warm
+# brown, down = cool blue. Keyed by arm so the mapping can never come out of
 # a positional vector in the wrong order.
 ARM_COL = {"up": "#A6611A", "down": "#2166AC"}
 
@@ -80,7 +80,7 @@ SUB_LABEL = {
     "inflammatory": "inflammatory response",
     "hypoxia": "hypoxia",
     "t_activation": "IL2-STAT5 activation",
-    "thermal_proteostasis": "HSF1 thermal core",
+    "hsr_curated": "curated HSR core (Reactome/GO)",
     "ifn_type_i": "type-I interferon",
     "upr_er": "unfolded-protein response",
 }
@@ -203,7 +203,7 @@ def plot_coverage(df: pd.DataFrame):
     ax.set_xlim(0, 400)
     ax.set_xticks([0, 50, 100, 150])
     ax.set_xlabel("Genes of the mouse arm that the curated set contains")
-    ax.set_title("Two thirds of the mouse heat up-arm belongs to no named program")
+    ax.set_title("Two thirds of the mouse 39 C-derived up arm belongs to no named program")
     handles = [
         Patch(facecolor=ARM_COL["up"], label=f"{PRIMARY} up arm, 199 genes"),
         Patch(facecolor=ARM_COL["down"], label=f"{PRIMARY} down arm, 94 genes"),
@@ -306,10 +306,10 @@ def main() -> None:
     save_overview(
         fig, STAGE, "heatdecomp_arm_coverage",
         table=round_numeric_cols(cov),
-        finding=("Curated public gene sets claim only 62 of the 199 mouse heat up genes and "
-                 "11 of the 94 down genes, so the largest part of the projected signature — "
-                 "137 up genes — belongs to no named program, and the canonical HSF1 thermal "
-                 "core contributes 2 genes."),
+        finding=("Curated public gene sets claim only 62 of the 199 mouse 39 C-derived up "
+                 "genes and 11 of the 94 down genes, so the largest part of the projected "
+                 "signature — 137 up genes — belongs to no named program, and the curated "
+                 "HSR core (Reactome/GO) contributes 2 genes."),
         script=SCRIPT, fn="plot_coverage",
         config_kv=(f"gsea_min_size={MIN_SIZE}; figures.top_n={TOP_N}; "
                    "evidence_tier=secondary_annotation"),
@@ -375,26 +375,27 @@ def main() -> None:
 FINDINGS = {
     ("up", "unassigned"): (
         "The 137 up-arm genes that no curated presumption claims give the strongest "
-        "synovial-fluid enrichment of any part in Treg (+2.15) and CD8 (+2.02), so the "
-        "shift is not carried by any single named program."),
+        "synovial-fluid enrichment of any part in CD8 (+2.10) and remain strongly "
+        "enriched in Treg (+2.21) and Tcon (+2.27), so the shift is not carried by "
+        "any single named program."),
     ("up", "nfkb_tnfa"): (
         "The 35 TNFA/NF-kB up-arm genes enrich toward synovial fluid strongly in Treg "
-        "(+2.06) and Tcon (+2.20) and only weakly in CD8 (+1.43, FDR 0.087), making the "
+        "(+2.24) and Tcon (+2.32) and only weakly in CD8 (+1.23, FDR 0.22), making the "
         "inflammatory-signalling part the most CD4-selective of the decomposition."),
     ("up", "hypoxia"): (
         "The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in all three "
-        "populations (+1.82 to +2.07), confirming that the hypoxic co-exposure is real "
-        "even though removing these genes barely moves the whole-signature NES."),
+        "populations (+1.82 to +2.07), while removing these genes barely moves the "
+        "whole-signature NES."),
     ("up", "inflammatory"): (
         "The 21 inflammatory-response up-arm genes track the whole up-arm (+1.52 to "
-        "+1.96), adding no separation of their own beyond the broad synovial-fluid shift."),
+        "+2.11), adding no separation of their own beyond the broad synovial-fluid shift."),
     ("up", "t_activation"): (
         "The 14 IL2-STAT5 activation up-arm genes are the weakest testable part in Treg "
-        "(+1.12, FDR 0.39) while reaching +1.80 in Tcon, so a curated T-cell activation "
+        "(+1.32, FDR 0.22) while reaching +1.89 in Tcon, so a curated T-cell activation "
         "program does not account for the Treg shift."),
     ("down", "unassigned"): (
         "The 83 down-arm genes no presumption claims sit nowhere in particular — NES "
-        "+0.95 in Treg, +1.27 in Tcon and -1.04 in CD8, none of them significant — so the "
+        "+0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them significant — so the "
         "mouse down arm does not separate synovial fluid from blood in either direction."),
 }
 

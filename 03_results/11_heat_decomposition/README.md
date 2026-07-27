@@ -4,7 +4,7 @@ _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized
 
 The mouse 39 °C up-arm enriches toward synovial fluid in every sorted population and survives a hypoxia-gene purge, but it is 199 genes doing many different things. Here I split the projected signature into subcomponents and ask where each one sits in the same donor-pseudobulk ranked lists. The whole stage is annotation tier: no row reaches `effect_sizes_treg_arthritis.csv` or any `03_results/master/` accumulator.
 
-The parts are defined by intersection with curated, versioned, anchor-independent public gene sets — the frozen HSR core plus five MSigDB Hallmark programs. The `WT_heat_up` leading-edge taxonomy is deliberately unused: it covers only the 66 genes that are the union of the three populations' leading edges, so scoring subsets of it would score genes selected because they had already enriched.
+The parts are defined by intersection with curated, versioned, anchor-independent public gene sets — the frozen curated HSR core (Reactome/GO) plus six MSigDB Hallmark programs. The `WT_heat_up` leading-edge taxonomy is deliberately unused: it covers only the 66 genes that are the union of the three populations' leading edges, so scoring subsets of it would score genes selected because they had already enriched.
 
 Parts overlap. A gene in two curated programs appears in both, 25 of the 199 up genes are multiply claimed, and the NES rows therefore do not sum to the arm. Forcing a priority-ordered disjoint partition would silently decide which program gets credit for a shared gene, so the full per-gene membership is published instead. The genes no curated set claims are reported as their own `unassigned` part.
 
@@ -12,13 +12,13 @@ Several parts are small. A part whose intersection with a ranked list falls unde
 
 ### Where the curated sets came from
 
-The HSR core is anchor-independent and MSigDB-derived: 56 genes, the `hsf1_core_hsr` plus `co_chaperone` categories of a per-gene taxonomy over the 176-gene union of three human MSigDB v2026.1.Hs sets (`REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS` 101, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` 82, `GOBP_RESPONSE_TO_HEAT` 104). It shares two genes with `WT_heat_up`, so intersecting the two measures something rather than restating it.
+The curated HSR core (Reactome/GO) is anchor-independent and MSigDB-derived: 56 genes, the `hsf1_core_hsr` plus `co_chaperone` categories of a per-gene taxonomy over the 176-gene union of three human MSigDB v2026.1.Hs sets (`REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS` 101, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` 82, `GOBP_RESPONSE_TO_HEAT` 104). It shares two genes with `WT_heat_up`, so intersecting the two measures something rather than restating it.
 
-The five Hallmark programs come from the offline `msigdbr` 26.1.0 package, frozen with validated sizes by `02_analysis/scripts/freeze_hallmark_sets.R`, and are used WHOLE — no taxonomy refinement, where the HSR union was refined from 176 down to 56. That asymmetry deserves naming: for a purge or a claim test the unrefined set is the conservative choice, because a larger curated set claims more of the mouse signature and so understates what is left over.
+The six Hallmark programs come from the offline `msigdbr` 26.1.0 package, frozen with validated sizes by `02_analysis/scripts/freeze_hallmark_sets.R`, and are used WHOLE — no taxonomy refinement, where the HSR union was refined from 176 down to 56. That asymmetry deserves naming: for a purge or a claim test the unrefined set is the conservative choice, because a larger curated set claims more of the mouse signature and so understates what is left over.
 
 | Presumption | Curated set | n | Frozen by |
 |---|---|---|---|
-| HSF1 thermal core | `HSR_core` (taxonomy `hsf1_core_hsr` + `co_chaperone`) | 56 | `02_analysis/scripts/freeze_hsr_lens.R` |
+| curated HSR core (Reactome/GO) | `HSR_core` (taxonomy `hsf1_core_hsr` + `co_chaperone`) | 56 | `02_analysis/scripts/freeze_hsr_lens.R` |
 | unfolded-protein response | `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` | 113 | `02_analysis/scripts/freeze_hallmark_sets.R` |
 | hypoxia | `HALLMARK_HYPOXIA` | 200 | `02_analysis/scripts/freeze_hallmark_sets.R` |
 | TNFA / NF-kB signalling | `HALLMARK_TNFA_SIGNALING_VIA_NFKB` | 200 | `02_analysis/scripts/freeze_hallmark_sets.R` |
@@ -31,15 +31,15 @@ The frozen lists themselves live under `00_data/references/`, which is not commi
 
 ### What the decomposition returns
 
-Every testable up-arm part enriches toward synovial fluid, so the shift is broad rather than localised. The strongest part in Treg and CD8 is the 137-gene remainder that no curated program claims (+2.21 and +2.10). The TNFA/NF-kB part is the most CD4-selective (+2.24 Treg, +2.32 Tcon, +1.23 CD8), and the curated IL2-STAT5 activation proxy is the weakest in Treg (+1.32 at FDR 0.22).
+Every testable up-arm part enriches toward synovial fluid, so the shift is broad rather than localised. The 137-gene remainder that no curated program claims remains strongly enriched (+2.21 Treg, +2.27 Tcon, +2.10 CD8). The TNFA/NF-kB part is the most CD4-selective (+2.24 Treg, +2.32 Tcon, +1.23 CD8), and the curated IL2-STAT5 activation proxy is the weakest in Treg (+1.32 at FDR 0.22).
 
-Two nulls carry as much weight as the positives. The canonical HSF1 thermal core contributes 2 of the 199 up genes and type-I interferon contributes 1, both far under the size floor, so in this projection the mouse thermal program is neither a heat-shock-transcript program nor an interferon program. The down arm tells the same story: 83 of its 94 genes belong to no named program, and nothing in it separates synovial fluid from blood.
+Two nulls carry as much weight as the positives. The curated HSR core (Reactome/GO) contributes 2 of the 199 up genes and type-I interferon contributes 1, both far under the size floor, so these curated gene contents explain very little of `WT_heat_up`. The down arm tells the same story: 83 of its 94 genes belong to no named program, and nothing in it separates synovial fluid from blood.
 
-The cGAS/STING axis falls the same way. Of the published 21-gene interferon-independent STING signature, PLAUR and PTGS2 sit in the up arm and none in the down arm, and PLAUR is itself one of the 18 hypoxia-purged genes. Two of 21 is far below the size floor, so it stays a tally rather than an arm: the mouse thermal program is essentially not a STING program.
+The cGAS/STING tally falls the same way. Of the published 21-gene interferon-independent STING signature, PLAUR and PTGS2 sit in the up arm and none in the down arm, and PLAUR is itself one of the 18 hypoxia-purged genes. Two of 21 is far below the size floor, so it stays a tally rather than an arm and does not support reading `WT_heat_up` as STING-specific.
 
 ## tables/decomposition_overlap.csv
 
-Curated public gene sets claim 62 of the 199 mouse up genes and 11 of the 94 down genes, with TNFA/NF-kB the largest single claim at 35 and the HSF1 thermal core at 2.
+Curated public gene sets claim 62 of the 199 `WT_heat_up` genes and 11 of the 94 `WT_heat_down` genes, with TNFA/NF-kB the largest single claim at 35 and the curated HSR core (Reactome/GO) at 2.
 
 **How to read:** One row per mouse arm and presumption, plus an `unassigned` row per arm. `n_intersect` is how many of that arm's genes the curated set contains, `frac_of_mouse_arm` its share of the 199 or 94, and `frac_of_curated_set` how much of the public set the mouse arm covers. `genes` is the semicolon-delimited membership. Rows overlap because presumptions overlap, so `n_intersect` does not sum to the arm. Annotation tier.
 
@@ -69,7 +69,7 @@ Every testable up-arm part enriches toward synovial fluid (NES +1.23 to +2.32) w
 
 ## tables/sting_axis_overlap.csv
 
-The published interferon-independent STING signature contributes PLAUR and PTGS2 to the mouse up arm and nothing to the down arm, and PLAUR is itself a `HALLMARK_HYPOXIA` gene, so the mouse thermal program is essentially not a STING program.
+The published interferon-independent STING signature contributes PLAUR and PTGS2 to the mouse 39 C-derived up arm and nothing to the down arm, and PLAUR is itself a `HALLMARK_HYPOXIA` gene, so the overlap does not support reading `WT_heat_up` as STING-specific.
 
 **How to read:** One row per mouse arm. `n_intersect` and `genes_intersect` are the shared genes, `n_intersect_also_in_hypoxia` counts how many of them the hypoxia purge also removes, and `testable_as_gsea_arm` records that the overlap sits under `gsea_min_size`. That last column is the reason this is a gene tally and no STING NES appears anywhere in the stage. Annotation tier.
 
@@ -79,7 +79,7 @@ The published interferon-independent STING signature contributes PLAUR and PTGS2
 
 ## tables/_signatures_decomp/{subcomponent}_{up,down}.txt
 
-The sixteen sub-signature lists are the decomposition itself, and their sizes are the shape of the finding: 137 up genes unclaimed against 2 in the HSF1 thermal core, with three down-arm parts empty.
+The sixteen sub-signature lists are the decomposition itself, and their sizes are the shape of the finding: 137 up genes unclaimed against 2 in the curated HSR core (Reactome/GO), with three down-arm parts empty.
 
 **How to read:** Plain newline-delimited HGNC symbols, one per line, sorted; the mouse arm and the presumption are both carried by the filename. An empty file means no gene of that arm belongs to that curated set. These are inputs rather than results — the exact gene universe handed to fgsea, regenerated from the frozen references on every run. Diff `unassigned_up.txt` against the full arm to see what the presumptions collectively claim.
 
@@ -139,10 +139,10 @@ The annotated numbers behind each running-sum figure: one part's NES, FDR, testa
 
 ## figures/_overview/heatdecomp_arm_coverage.png
 
-Curated public gene sets claim only 62 of the 199 mouse heat up genes
-and 11 of the 94 down genes, so the largest part of the projected
-signature — 137 up genes — belongs to no named program, and the
-canonical HSF1 thermal core contributes 2 genes.
+Curated public gene sets claim only 62 of the 199 mouse 39 C-derived
+up genes and 11 of the 94 down genes, so the largest part of the
+projected signature — 137 up genes — belongs to no named program, and
+the curated HSR core (Reactome/GO) contributes 2 genes.
 
 **How to read:** One bar per mouse arm and curated presumption; length is how many of
 that arm's genes the curated set contains. Warm brown = the 199-gene
@@ -162,8 +162,9 @@ tallied in sting_axis_overlap.csv. Annotation tier.
 ## figures/_overview/heatdecomp_runsum_up_unassigned.png
 
 The 137 up-arm genes that no curated presumption claims give the
-strongest synovial-fluid enrichment of any part in Treg (+2.21) and
-CD8 (+2.10), so the shift is not carried by any single named program.
+strongest synovial-fluid enrichment of any part in CD8 (+2.10) and
+remain strongly enriched in Treg (+2.21) and Tcon (+2.27), so the
+shift is not carried by any single named program.
 
 **How to read:** This part is the residual: the up-arm genes belonging to none of the
 curated presumptions. Top panel: the weighted running enrichment score
@@ -207,9 +208,8 @@ confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_hypoxia.png
 
 The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in
-all three populations (+1.81 to +2.07), confirming that the hypoxic
-co-exposure is real even though removing these genes barely moves the
-whole-signature NES.
+all three populations (+1.82 to +2.07), while removing these genes
+barely moves the whole-signature NES.
 
 **How to read:** This part is the up-arm genes that also sit in HALLMARK_HYPOXIA, the
 same 18 the whole-signature purge removes. Top panel: the weighted
@@ -230,7 +230,7 @@ from the confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_inflammatory.png
 
 The 21 inflammatory-response up-arm genes track the whole up-arm
-(+1.48 to +2.11), adding no separation of their own beyond the broad
+(+1.52 to +2.11), adding no separation of their own beyond the broad
 synovial-fluid shift.
 
 **How to read:** This part is the up-arm genes that also sit in

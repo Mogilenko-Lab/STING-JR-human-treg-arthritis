@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 11_heat_decomposition.py — COMPUTE ONLY. Where does each part of the mouse
-heat signature sit in each population's ranking?
+39 C-derived signature sit in each population's ranking?
 =========================================================================
 The JIA SF-vs-PB enrichment of the mouse 39 °C `WT_heat_up` set survives the
 hypoxia purge but is carried by 199 genes doing many different things. This stage
@@ -96,13 +96,13 @@ STING_SIG_LABEL = "de_Cevins_sting_specific_up"
 # the mouse signature knows nothing about any of them, so an intersection is a genuine
 # partition of the signature rather than a restatement of a result.
 PROGRAMS: list[tuple[str, str, Path, str]] = [
-    ("thermal_proteostasis", "HSR_core", HSR_DIR / "HSR_core.txt",
-     "canonical HSF1 / co-chaperone thermal core"),
+    ("hsr_curated", "HSR_core", HSR_DIR / "HSR_core.txt",
+     "curated heat-shock-response core, Reactome/GO-derived"),
     ("upr_er", "HALLMARK_UNFOLDED_PROTEIN_RESPONSE",
      HALLMARK_DIR / "HALLMARK_UNFOLDED_PROTEIN_RESPONSE.txt",
      "ER-side proteostasis"),
     ("hypoxia", "HALLMARK_HYPOXIA", HALLMARK_DIR / "HALLMARK_HYPOXIA.txt",
-     "the niche's other stress, co-exposure with joint temperature"),
+     "MSigDB Hallmark hypoxia response"),
     ("nfkb_tnfa", "HALLMARK_TNFA_SIGNALING_VIA_NFKB",
      HALLMARK_DIR / "HALLMARK_TNFA_SIGNALING_VIA_NFKB.txt",
      "TNFA / NF-kB inflammatory signalling"),
