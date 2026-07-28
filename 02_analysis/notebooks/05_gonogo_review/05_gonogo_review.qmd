@@ -110,7 +110,7 @@ eff %>%
 
 ## Figures (rendered by `05_score_signatures_viz.{py,R}`)
 
-*NES forest + per-cell `WT_heat_up` AUCell violins from the `.py` viz. Per-population
+*Ordered NES dot plot + per-cell `WT_heat_up` AUCell violins from the `.py` viz. Per-population
 running-sum panels (Treg / Tcon / CD8) from the `.R` viz. The violin shows the
 `WT_heat_up` arm only, since up and down shift together in SF and AUCell scores each
 list unsigned (see the stage README caption). The pseudobulk NES is the primary evidence.*
@@ -128,7 +128,7 @@ for (f in c("wt_heat_nes_forest.png",
 ### Interactive running-sums — core gene-set distribution across Treg / Tcon / CD8
 
 *The running sums, **interactively**: where the mouse-anchor `WT_heat` core genes fall in
-each cell type's SF-vs-PB ranked list. One running-ES line per population (forest palette),
+each cell type's SF-vs-PB ranked list. One running-ES line per population (population palette),
 with a rug of the core genes below. **Hover a tick** for its symbol, SF-vs-PB signed moderated-t
 statistic, and leading-edge status. The drop-down (top-right) switches the **up** / **down**
 set. A legend **click** toggles a population's line and rug. Reading it: a Treg-preferential
@@ -143,14 +143,12 @@ climbs alike across all three.*
 build_runsum_widget(here("03_results/05_scoring/tables"))
 ```
 
-**How to read the per-cell violins vs the forest.** The per-cell `WT_heat_up` scores are
-**AUCell** values — area under each cell's gene-recovery curve for the up-set, bounded in
-**[0, 1]** and rank-based, so robust to library size and normalisation. Their absolute level
-reflects set size and background detection, so I read the **relative** SF-vs-PB shift within
-each population (Treg SF vs Treg PB), not the height. The forest is a **different estimand**:
-fgsea on the donor-pseudobulk signed moderated-t ranked list, asking whether the whole `WT_heat` set
-packs at the top as a NES on its own scale. The two stay separate. Here every population
-shifts SF-high in the same direction as the NES — the pseudobulk NES is the primary evidence.
+**How to read the per-cell violins vs the ordered NES dot plot.** Per-cell `WT_heat_up`
+scores are rank-based **AUCell** values in **[0, 1]**. Absolute level reflects set size and
+background detection, so I read the relative SF-vs-PB shift within each population. The dot
+plot is a different estimand: fgsea on donor-pseudobulk signed moderated-t rankings. The two
+stay separate. Every population shifts SF-high in the same direction. Pseudobulk NES is the
+primary evidence.
 
 ### The drafted subset — from what's on the map to what I end up with
 
@@ -191,9 +189,8 @@ for (it in flow) {
 > **broad across the sorted populations (pan-T), not Treg-preferential**: the running-sum
 > concentrates the core gene set at the top of every ranked list, with NES +2.59 in Treg,
 > +2.68 in Tcon, and +2.07 in CD8, at FDR 3.2e-14, 8.1e-17 and 3.6e-7. The down arm runs
-> the same sign rather than the opposite one, reaching significance in Tcon (NES +1.47,
-> FDR 0.026) while staying flat in Treg (+0.97) and CD8 (+1.09), so the up arm is not the
-> only arm here carrying a direction.
+> at the same sign, reaching significance in Tcon (NES +1.47, FDR 0.026) while staying
+> flat in Treg (+0.97) and CD8 (+1.09). Both arms therefore carry direction in Tcon.
 >
 > **Where the analysis goes next: continue.** This is a positive, reproducible signal
 > worth carrying into the cross-dataset comparison, so I proceed to the comparator

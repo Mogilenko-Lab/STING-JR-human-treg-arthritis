@@ -126,18 +126,14 @@ finding_for <- function(pop, tbl, nominal) {
 }
 
 HOW_TO_READ <- paste(
-  "One population per panel. Shows HOW the confirmatory answer arises rather than",
-  "adding one: the same donor-level pseudobulk fgsea result, one sorted population at",
-  "a time. Top panel = weighted running enrichment score walking the ranked list from",
-  "SF-enriched (left) to PB-enriched (right); a positive, left-shifted peak = SF",
-  "enrichment. Middle rug = member positions; bottom = the signed moderated-t ranking",
-  "metric. Same colour in curve and rug: WT_heat up = warm brown, down = cool blue.",
-  "Each legend entry carries that arm's effective set size against its nominal size,",
-  "its NES and its FDR, so no enrichment score sits here without the size it was",
-  "computed on. ES y clamped to [-1, 1] so heights compare across the three panels,",
-  "but the NES ordering ACROSS populations is not read here — the ordered NES dot plot",
-  "carries that, and carries the answer that the result is pan-T rather than",
-  "Treg-preferential. Display of compute output; correlative, not causal.")
+  "One population per panel, showing the donor-pseudobulk fgsea result behind the",
+  "confirmatory answer. The top trace walks from SF-enriched to PB-enriched genes;",
+  "a positive left peak indicates SF enrichment. The middle rug marks set members",
+  "and the bottom shows the signed moderated-t ranking. Warm brown is the up arm and",
+  "cool blue the down arm. Legends report effective and nominal size, NES, and FDR.",
+  "The shared [-1, 1] enrichment-score range supports shape comparison. Read the",
+  "cross-population result from the ordered NES dot plot, which establishes the",
+  "pan-T pattern. Display of compute output; correlative.")
 CONFIG_KV <- paste0("gsea_min_size=", FIG_CFG$thresholds$gsea_min_size %||% 5,
                     "; gsea_max_size=", FIG_CFG$thresholds$gsea_max_size %||% 500,
                     "; running_sum_ylim=[", ylim[1], ",", ylim[2], "]",

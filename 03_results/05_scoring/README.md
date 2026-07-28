@@ -1,6 +1,6 @@
 # 05_scoring — artifact captions
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The SF-vs-PB contrast is paired within each of the 7 JIA donors. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
+_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The cohort contains 7 JIA donors, of whom 6 span both arms in each analyzed population. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
 
 ## figures/_overview/wt_heat_nes_forest.png
 
@@ -8,25 +8,20 @@ The mouse 39 °C-derived up arm separates synovial fluid from paired
 blood in every sorted population — NES 2.5915 in Treg (119 of 199
 genes ranked), 2.6809 in Tcon (130) and 2.0710 in CD8 (113), all at
 FDR below 1e-6 — so the answer to Treg preference is NO: the result is
-pan-T with Tcon the largest, and Tregs are in it rather than
-privileged in it. The down arm is not silent either, reaching NES
-1.4718 at FDR 0.026 in Tcon, the same sign as the up arm, while
-carrying no direction in Treg (0.9676) or CD8 (1.0943).
+pan-T, and Tregs are in it rather than privileged in it. The down arm
+is not silent either, reaching NES 1.4718 at FDR 0.026 in Tcon, the
+same sign as the up arm, while carrying no direction in Treg (0.9676)
+or CD8 (1.0943).
 
 **How to read:** ANSWERS, at the only tier that may: donor-level pseudobulk within
-frozen sort labels, limma-voom then fgsea, paired within each of the 7
-donors. Points = fgsea NES for the WT_heat up (circle) and down
-(diamond) arm, coloured by sorted population; x = 0 dashed = no
-enrichment; * = FDR below 0.05. Beside each point is the effective set
-size — members present in that population's ranked list — against the
-nominal arm size, and the FDR. Read the answer as written on the face,
-not as a Treg-preference check: Tcon has the largest up-arm NES, all
-three are significant, the result is pan-T. Read the down arm too —
-significant in Tcon at the up arm's sign, so the up arm is not the
-only informative one. Do NOT read the ordering of the three NES as a
-biological ranking; effective set size tracks it across these rows. An
-ordered NES dot plot, not a forest: no pseudobulk NES row here carries
-an interval. Correlative, not causal.
+frozen sort labels, limma-voom then fgsea, using the 6 donors
+represented in both arms. Points are NES for the up (circle) and down
+(diamond) arms, coloured by population; the asterisk marks FDR below
+0.05. Labels give effective and nominal set sizes plus FDR. All three
+up arms are significant, so the result is pan-T. The down arm also
+reaches significance in Tcon at the up arm's sign. Effective size
+tracks the NES ordering, which therefore is not a biological ranking.
+Ordered NES dot plot with FDR encoding and no interval. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -66,21 +61,16 @@ each arm concentrates; whether one sorted population separates more
 than another is a cross-population comparison and is read off the
 ordered NES dot plot, not off this panel.
 
-**How to read:** One population per panel. Shows HOW the confirmatory answer arises
-rather than adding one: the same donor-level pseudobulk fgsea result,
-one sorted population at a time. Top panel = weighted running
-enrichment score walking the ranked list from SF-enriched (left) to
-PB-enriched (right); a positive, left-shifted peak = SF enrichment.
-Middle rug = member positions; bottom = the signed moderated-t
-ranking metric. Same colour in curve and rug: WT_heat up = warm
-brown, down = cool blue. Each legend entry carries that arm's
-effective set size against its nominal size, its NES and its FDR, so
-no enrichment score sits here without the size it was computed on. ES
-y clamped to [-1, 1] so heights compare across the three panels, but
-the NES ordering ACROSS populations is not read here — the ordered
-NES dot plot carries that, and carries the answer that the result is
-pan-T rather than Treg-preferential. Display of compute output;
-correlative, not causal.
+**How to read:** One population per panel, showing the donor-pseudobulk fgsea result
+behind the confirmatory answer. The top trace walks from SF-enriched
+to PB-enriched genes; a positive left peak indicates SF enrichment.
+The middle rug marks set members and the bottom shows the signed
+moderated-t ranking. Warm brown is the up arm and cool blue the down
+arm. Legends report effective and nominal size, NES, and FDR. The
+shared [-1, 1] enrichment-score range supports shape comparison. Read
+the cross-population result from the ordered NES dot plot, which
+establishes the pan-T pattern. Display of compute output;
+correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -96,21 +86,16 @@ each arm concentrates; whether one sorted population separates more
 than another is a cross-population comparison and is read off the
 ordered NES dot plot, not off this panel.
 
-**How to read:** One population per panel. Shows HOW the confirmatory answer arises
-rather than adding one: the same donor-level pseudobulk fgsea result,
-one sorted population at a time. Top panel = weighted running
-enrichment score walking the ranked list from SF-enriched (left) to
-PB-enriched (right); a positive, left-shifted peak = SF enrichment.
-Middle rug = member positions; bottom = the signed moderated-t
-ranking metric. Same colour in curve and rug: WT_heat up = warm
-brown, down = cool blue. Each legend entry carries that arm's
-effective set size against its nominal size, its NES and its FDR, so
-no enrichment score sits here without the size it was computed on. ES
-y clamped to [-1, 1] so heights compare across the three panels, but
-the NES ordering ACROSS populations is not read here — the ordered
-NES dot plot carries that, and carries the answer that the result is
-pan-T rather than Treg-preferential. Display of compute output;
-correlative, not causal.
+**How to read:** One population per panel, showing the donor-pseudobulk fgsea result
+behind the confirmatory answer. The top trace walks from SF-enriched
+to PB-enriched genes; a positive left peak indicates SF enrichment.
+The middle rug marks set members and the bottom shows the signed
+moderated-t ranking. Warm brown is the up arm and cool blue the down
+arm. Legends report effective and nominal size, NES, and FDR. The
+shared [-1, 1] enrichment-score range supports shape comparison. Read
+the cross-population result from the ordered NES dot plot, which
+establishes the pan-T pattern. Display of compute output;
+correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -126,21 +111,16 @@ each arm concentrates; whether one sorted population separates more
 than another is a cross-population comparison and is read off the
 ordered NES dot plot, not off this panel.
 
-**How to read:** One population per panel. Shows HOW the confirmatory answer arises
-rather than adding one: the same donor-level pseudobulk fgsea result,
-one sorted population at a time. Top panel = weighted running
-enrichment score walking the ranked list from SF-enriched (left) to
-PB-enriched (right); a positive, left-shifted peak = SF enrichment.
-Middle rug = member positions; bottom = the signed moderated-t
-ranking metric. Same colour in curve and rug: WT_heat up = warm
-brown, down = cool blue. Each legend entry carries that arm's
-effective set size against its nominal size, its NES and its FDR, so
-no enrichment score sits here without the size it was computed on. ES
-y clamped to [-1, 1] so heights compare across the three panels, but
-the NES ordering ACROSS populations is not read here — the ordered
-NES dot plot carries that, and carries the answer that the result is
-pan-T rather than Treg-preferential. Display of compute output;
-correlative, not causal.
+**How to read:** One population per panel, showing the donor-pseudobulk fgsea result
+behind the confirmatory answer. The top trace walks from SF-enriched
+to PB-enriched genes; a positive left peak indicates SF enrichment.
+The middle rug marks set members and the bottom shows the signed
+moderated-t ranking. Warm brown is the up arm and cool blue the down
+arm. Legends report effective and nominal size, NES, and FDR. The
+shared [-1, 1] enrichment-score range supports shape comparison. Read
+the cross-population result from the ordered NES dot plot, which
+establishes the pan-T pattern. Display of compute output;
+correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

@@ -9,13 +9,12 @@ Reads the fgsea tables + score tables from 05_score_signatures.py and renders:
   - per-cell WT_heat_up AUCell score violins SF-Treg vs PB-Treg vs SF-Tcon vs SF-CD8
     (running-sum figure moved to 05_score_signatures_viz.R).
 
-Two naming rules bind this file. First, this panel is an **ordered NES dot plot,
-not a forest**: no `pseudobulk_nes` row in the project carries a standard error or
-an interval, and a panel without intervals may not be called a forest. The file
+Two naming rules bind this file. First, this panel is an ordered NES dot plot:
+no `pseudobulk_nes` row carries a standard error or interval. The legacy file
 stem `wt_heat_nes_forest` is load-bearing for consumers outside this compartment
-and is left alone, but no reader-facing string uses the word. Second, the set is
-named by how it was derived — from mouse iTreg 37/39 °C contrasts — and never by a
-specificity it does not have: the plotted answer is pan-T, with Tcon largest.
+and remains unchanged, while reader-facing text names the displayed geometry.
+Second, the set is named by how it was derived — from mouse iTreg 37/39 °C
+contrasts — and never by a specificity it does not have.
 """
 from __future__ import annotations
 
@@ -114,12 +113,11 @@ def main() -> None:
 
         # The answer, read off the plotted rows rather than asserted. It is
         # negative on Treg preference, and the panel has to say so on its face.
-        up = gsea[gsea["direction"].eq("up")].sort_values("nes", ascending=False)
-        top = up.iloc[0]
+        up = gsea[gsea["direction"].eq("up")]
         n_sig_up = int(up["padj"].lt(fdr).sum())
         down_sig = gsea[gsea["direction"].eq("down") & gsea["padj"].lt(fdr)]
-        answer = (f"pan-T, not Treg-preferential — {top['cell_state']} is highest at NES "
-                  f"{float(top['nes']):.2f}, and all {n_sig_up} up arms clear FDR {fdr}")
+        answer = (f"pan-T, not Treg-preferential — all {n_sig_up} up arms clear "
+                  f"FDR {fdr}")
 
         ax.axvline(0, ls="--", c="grey", lw=1)
         ax.set_yticks(yv); ax.set_yticklabels(ylabels)
@@ -166,8 +164,8 @@ def main() -> None:
                 "'Treg signature' names how the set was derived — from mouse\n"
                 "iTreg 37/39 °C contrasts — and never a specificity it does not have.\n"
                 + down_note
-                + "This panel has no intervals because no pseudobulk NES row in the project "
-                  "carries one, so it is an ordered dot plot and not a forest.",
+                + "Geometry: ordered NES dot plot with FDR encoding; no pseudobulk NES row "
+                  "carries an interval.",
                 transform=ax.transAxes, ha="left", va="top", fontsize=9)
     fig.tight_layout()
     save_overview(fig, STAGE, "wt_heat_nes_forest",
@@ -178,29 +176,23 @@ def main() -> None:
                            "blood in every sorted population — NES 2.5915 in Treg (119 of 199 "
                            "genes ranked), 2.6809 in Tcon (130) and 2.0710 in CD8 (113), all at "
                            "FDR below 1e-6 — so the answer to Treg preference is NO: the result "
-                           "is pan-T with Tcon the largest, and Tregs are in it rather than "
-                           "privileged in it. The down arm is not silent either, reaching NES "
+                           "is pan-T, and Tregs are in it rather than privileged in it. The down "
+                           "arm is not silent either, reaching NES "
                            "1.4718 at FDR 0.026 in Tcon, the same sign as the up arm, while "
                            "carrying no direction in Treg (0.9676) or CD8 (1.0943)."),
                   script=SCRIPT, fn="main",
                   config_kv=f"thresholds.gsea_fdr={PARAMS.gsea_fdr}; gsea_min_size={PARAMS.gsea_min_size}",
                   input="03_results/05_scoring/tables/gsea_pseudobulk_{treg,tcon,cd8}.csv",
                   how_to_read=("ANSWERS, at the only tier that may: donor-level pseudobulk "
-                               "within frozen sort labels, limma-voom then fgsea, paired within "
-                               "each of the 7 donors. Points = fgsea NES for the WT_heat up "
-                               "(circle) and down (diamond) arm, coloured by sorted population; "
-                               "x = 0 dashed = no enrichment; * = FDR below "
-                               f"{PARAMS.gsea_fdr}. Beside each point is the effective set size "
-                               "— members present in that population's ranked list — against "
-                               "the nominal arm size, and the FDR. Read the answer as written on "
-                               "the face, not as a Treg-preference check: Tcon has the largest "
-                               "up-arm NES, all three are significant, the result is pan-T. Read "
-                               "the down arm too — significant in Tcon at the up arm's sign, so "
-                               "the up arm is not the only informative one. Do NOT read the "
-                               "ordering of the three NES as a biological ranking; effective set "
-                               "size tracks it across these rows. An ordered NES dot plot, not a "
-                               "forest: no pseudobulk NES row here carries an interval. "
-                               "Correlative, not causal."),
+                               "within frozen sort labels, limma-voom then fgsea, using the 6 "
+                               "donors represented in both arms. Points are NES for the up "
+                               "(circle) and down (diamond) arms, coloured by population; the "
+                               f"asterisk marks FDR below {PARAMS.gsea_fdr}. Labels give effective "
+                               "and nominal set sizes plus FDR. All three up arms are significant, "
+                               "so the result is pan-T. The down arm also reaches significance in "
+                               "Tcon at the up arm's sign. Effective size tracks the NES ordering, "
+                               "which therefore is not a biological ranking. Ordered NES dot plot "
+                               "with FDR encoding and no interval. Correlative."),
                   config=FIG_CFG, width=9.5, height=8.5)
 
     # ---- 2. per-cell score violins ----
@@ -248,7 +240,7 @@ def main() -> None:
                                "with it. Down arm omitted because up and down co-shift in SF. "
                                "Correlative."),
                   config=FIG_CFG)
-    print("[05_scoring_viz] wrote 2 overviews (NES forest + score violins)")
+    print("[05_scoring_viz] wrote 2 overviews (ordered NES dot plot + score violins)")
 
 
 if __name__ == "__main__":
