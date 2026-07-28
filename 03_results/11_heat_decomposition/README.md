@@ -195,9 +195,11 @@ synovial-fluid enrichment and a negative trace the opposite. Bottom
 panel: where this part's genes sit in each ranking, in matching
 colour. Legend labels carry the testable gene count, the NES and the
 FDR, and no other glyph marks significance. The y-range is shared
-across every figure of this decomposition family, so curve heights
-compare between figures. Annotation tier, firewalled from the
-confirmatory WT_heat effect-size spine.
+across the whole decomposition family, so curve heights compare
+between figures. CORROBORATES; does not answer the niche question —
+annotation tier, firewalled from the confirmatory WT_heat spine, no
+effect-size row. The parts overlap, so their NES may not be added or
+ranked as shares of the whole.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -218,9 +220,11 @@ excursion is synovial-fluid enrichment and a negative trace the
 opposite. Bottom panel: where this part's genes sit in each ranking,
 in matching colour. Legend labels carry the testable gene count, the
 NES and the FDR, and no other glyph marks significance. The y-range is
-shared across every figure of this decomposition family, so curve
-heights compare between figures. Annotation tier, firewalled from the
-confirmatory WT_heat effect-size spine.
+shared across the whole decomposition family, so curve heights compare
+between figures. CORROBORATES; does not answer the niche question —
+annotation tier, firewalled from the confirmatory WT_heat spine, no
+effect-size row. The parts overlap, so their NES may not be added or
+ranked as shares of the whole.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -229,8 +233,10 @@ confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_hypoxia.png
 
 The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in
-all three populations (+1.82 to +2.07), while removing these genes
-barely moves the whole-signature NES.
+all three populations (+1.81 to +2.07), so this part carries a shift
+of its own — which is a separate question from whether the whole set's
+enrichment is reducible to it, and that one is answered by the
+deletion panel rather than here.
 
 **How to read:** This part is the up-arm genes that also sit in HALLMARK_HYPOXIA, the
 same 18 the whole-signature purge removes. Top panel: the weighted
@@ -240,9 +246,11 @@ shifted excursion is synovial-fluid enrichment and a negative trace
 the opposite. Bottom panel: where this part's genes sit in each
 ranking, in matching colour. Legend labels carry the testable gene
 count, the NES and the FDR, and no other glyph marks significance. The
-y-range is shared across every figure of this decomposition family, so
-curve heights compare between figures. Annotation tier, firewalled
-from the confirmatory WT_heat effect-size spine.
+y-range is shared across the whole decomposition family, so curve
+heights compare between figures. CORROBORATES; does not answer the
+niche question — annotation tier, firewalled from the confirmatory
+WT_heat spine, no effect-size row. The parts overlap, so their NES may
+not be added or ranked as shares of the whole.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -251,7 +259,7 @@ from the confirmatory WT_heat effect-size spine.
 ## figures/_overview/heatdecomp_runsum_up_inflammatory.png
 
 The 21 inflammatory-response up-arm genes track the whole up-arm
-(+1.52 to +2.11), adding no separation of their own beyond the broad
+(+1.48 to +2.11), adding no separation of their own beyond the broad
 synovial-fluid shift.
 
 **How to read:** This part is the up-arm genes that also sit in
@@ -262,9 +270,11 @@ excursion is synovial-fluid enrichment and a negative trace the
 opposite. Bottom panel: where this part's genes sit in each ranking,
 in matching colour. Legend labels carry the testable gene count, the
 NES and the FDR, and no other glyph marks significance. The y-range is
-shared across every figure of this decomposition family, so curve
-heights compare between figures. Annotation tier, firewalled from the
-confirmatory WT_heat effect-size spine.
+shared across the whole decomposition family, so curve heights compare
+between figures. CORROBORATES; does not answer the niche question —
+annotation tier, firewalled from the confirmatory WT_heat spine, no
+effect-size row. The parts overlap, so their NES may not be added or
+ranked as shares of the whole.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -284,10 +294,12 @@ blood-up (right); a positive, left-shifted excursion is synovial-fluid
 enrichment and a negative trace the opposite. Bottom panel: where this
 part's genes sit in each ranking, in matching colour. Legend labels
 carry the testable gene count, the NES and the FDR, and no other glyph
-marks significance. The y-range is shared across every figure of this
+marks significance. The y-range is shared across the whole
 decomposition family, so curve heights compare between figures.
-Annotation tier, firewalled from the confirmatory WT_heat effect-size
-spine.
+CORROBORATES; does not answer the niche question — annotation tier,
+firewalled from the confirmatory WT_heat spine, no effect-size row.
+The parts overlap, so their NES may not be added or ranked as shares
+of the whole.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -297,8 +309,11 @@ spine.
 
 The 83 down-arm genes no presumption claims sit nowhere in particular
 — NES +0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them
-significant — so the mouse down arm does not separate synovial fluid
-from blood in either direction.
+significant — so this remainder does not separate synovial fluid from
+blood in either direction. Read that as a statement about the
+remainder and not about the arm — the whole 94-gene down arm does
+reach significance in Tcon, at the same sign as the up arm, and that
+result belongs to the whole-set panels rather than to this one.
 
 **How to read:** This part is the residual of the mouse down arm: the genes belonging
 to none of the curated presumptions. Top panel: the weighted running
@@ -308,9 +323,11 @@ excursion is synovial-fluid enrichment and a negative trace the
 opposite. Bottom panel: where this part's genes sit in each ranking,
 in matching colour. Legend labels carry the testable gene count, the
 NES and the FDR, and no other glyph marks significance. The y-range is
-shared across every figure of this decomposition family, so curve
-heights compare between figures. Annotation tier, firewalled from the
-confirmatory WT_heat effect-size spine.
+shared across the whole decomposition family, so curve heights compare
+between figures. CORROBORATES; does not answer the niche question —
+annotation tier, firewalled from the confirmatory WT_heat spine, no
+effect-size row. The parts overlap, so their NES may not be added or
+ranked as shares of the whole.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

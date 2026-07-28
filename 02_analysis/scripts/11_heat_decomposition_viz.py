@@ -433,10 +433,11 @@ FINDINGS = {
         "inflammatory-signalling part the most CD4-selective of the decomposition."),
     ("up", "hypoxia"): (
         "The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in all three "
-        "populations (+1.82 to +2.07), while removing these genes barely moves the "
-        "whole-signature NES."),
+        "populations (+1.81 to +2.07), so this part carries a shift of its own — which is a "
+        "separate question from whether the whole set's enrichment is reducible to it, and "
+        "that one is answered by the deletion panel rather than here."),
     ("up", "inflammatory"): (
-        "The 21 inflammatory-response up-arm genes track the whole up-arm (+1.52 to "
+        "The 21 inflammatory-response up-arm genes track the whole up-arm (+1.48 to "
         "+2.11), adding no separation of their own beyond the broad synovial-fluid shift."),
     ("up", "t_activation"): (
         "The 14 IL2-STAT5 activation up-arm genes are the weakest testable part in Treg "
@@ -444,8 +445,11 @@ FINDINGS = {
         "program does not account for the Treg shift."),
     ("down", "unassigned"): (
         "The 83 down-arm genes no presumption claims sit nowhere in particular — NES "
-        "+0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them significant — so the "
-        "mouse down arm does not separate synovial fluid from blood in either direction."),
+        "+0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them significant — so this "
+        "remainder does not separate synovial fluid from blood in either direction. Read that "
+        "as a statement about the remainder and not about the arm — the whole 94-gene down arm "
+        "does reach significance in Tcon, at the same sign as the up arm, and that result "
+        "belongs to the whole-set panels rather than to this one."),
 }
 
 _HOW_BASE = (
@@ -454,9 +458,10 @@ _HOW_BASE = (
     "excursion is synovial-fluid enrichment and a negative trace the opposite. Bottom "
     "panel: where this part's genes sit in each ranking, in matching colour. Legend labels "
     "carry the testable gene count, the NES and the FDR, and no other glyph marks "
-    "significance. The y-range is shared across every figure of this decomposition family, "
-    "so curve heights compare between figures. Annotation tier, firewalled from the "
-    "confirmatory WT_heat effect-size spine.")
+    "significance. The y-range is shared across the whole decomposition family, so curve "
+    "heights compare between figures. CORROBORATES; does not answer the niche question — "
+    "annotation tier, firewalled from the confirmatory WT_heat spine, no effect-size row. The "
+    "parts overlap, so their NES may not be added or ranked as shares of the whole.")
 
 HOW_TO_READ = {
     ("up", "unassigned"): (
