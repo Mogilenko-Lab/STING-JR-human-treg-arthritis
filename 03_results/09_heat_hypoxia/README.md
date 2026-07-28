@@ -2,9 +2,9 @@
 
 _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, FDR = BH-adjusted p-value._
 
-I added a correlative heat-vs-hypoxia check for the JIA SF-vs-PB `WT_heat` signal. The primary read is donor-pseudobulk fgsea after removing `HALLMARK_HYPOXIA` overlap genes from the mouse `WT_heat_up` set. The secondary reads ask whether per-cell heat and hypoxia scores co-localize within SF cells, and which biological programs the `WT_heat_up` leading-edge genes represent. Hypoxia is a transcriptional readout here, not a HIF-causality claim.
+This stage asks one bounded question of the JIA SF-vs-PB `WT_heat` enrichment: is it reducible to the set's own `HALLMARK_HYPOXIA`-overlap gene content? That is a membership question, and it is answered by deleting those genes and re-running the same donor-pseudobulk fgsea. It is deliberately not a question about temperature, and it is not a question about whether hypoxia is a confound or a co-exposure — those are not separable in cross-sectional human data, and nothing here licenses a statement about either. Hypoxia is a transcriptional readout throughout, never a HIF-causality claim.
 
-The figures walk the same argument in order: how much of the enrichment survives the purge, whether heat-high and hypoxia-high are even the same cells, and what the enriching genes turn out to be. The third is where the answer stops being reassuring, and it is why an activation-free proteostasis lens was built next.
+The figures walk that in order. The first answers the membership question at confirmatory tier and stops there. The second and third corroborate and cannot answer: whether the two per-cell scores even mark the same cells, and what sits at the synovial-fluid end of each ranking. The third is the weakest of the three by construction — its categories are model-assigned and applied only to genes selected because they enriched — so the composition of the set is settled by the whole-arm partition against curated versioned sets in `11_heat_decomposition`, and the leading-edge bars carry that partition's counts on their own face so the two can never be confused. An activation-free curated heat-shock lens was built separately, in `10_hsr_lens`, precisely because it does not depend on this taxonomy.
 
 Two further figures put the mouse sets back into the plain Treg SF-vs-PB volcano, so a reader can see how much of the differential-expression response the signature accounts for, and how little it shares with the published IFN-independent STING-activation signature of de Cevins et al. 2023 (Cell Rep Med, PMID 38118407) that the STING positive-control compartment carries as a reference axis.
 
@@ -130,21 +130,31 @@ The 103 testable mouse up-arm genes together with every testable member of the t
 
 ## figures/_overview/heat_purge_nes_paired.png
 
-Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C up-set costs
-only 0.14 to 0.19 NES and leaves the synovial-fluid enrichment strong
-and significant in all three sorted populations, so hypoxia does not
-explain it.
+Deleting the 18 HALLMARK_HYPOXIA-overlap genes from the mouse 39
+°C-derived up-set takes 12 to 15 testable genes out of the arm and
+costs 0.129 to 0.165 NES — 2.5915 to 2.4268 in Treg, 2.6809 to 2.5516
+in Tcon, 2.0710 to 1.9261 in CD8 — leaving all three significant, so
+the synovial-fluid enrichment is not reducible to its
+HALLMARK_HYPOXIA-overlap gene content. That is a statement about gene
+content and nothing else: it says nothing about temperature, and
+nothing about whether hypoxia is a confound or a co-exposure, which
+are not separable in cross-sectional human data.
 
-**How to read:** One row per population and mouse arm. x is fgsea NES, positive =
-enriched toward the synovial-fluid end of the paired ranking. Each row
-pairs the full mouse set (large diamond) with the hypoxia-purged set
-(small circle), and the bar between them is what the purge cost. Warm
-brown = up arm, cool blue = down arm. Every marker is filled and
-translucent, so the down-arm pair, which the purge leaves untouched,
-reads as a darker circle inside a lighter diamond. A heavier dark
-outline marks FDR below 0.05 and is the only significance glyph. The
-right-hand text prints set size before and after the purge and the
-purged FDR. Primary donor-pseudobulk tier, correlative.
+**How to read:** ANSWERS, at confirmatory tier: donor-level pseudobulk within frozen
+sort labels, limma-voom then fgsea. One row per population and arm; x
+is fgsea NES, positive = toward the synovial-fluid end. Each row pairs
+the full mouse set (large diamond) with the hypoxia-purged set (small
+circle), and the bar between them is the cost. Warm brown = up arm,
+cool blue = down arm; all markers are translucent, so the untouched
+down-arm pair reads as a circle inside a diamond. A dark outline marks
+FDR below 0.05 and is the only significance glyph. The right-hand text
+gives effective set size before and after the purge against the arm's
+nominal size, the NES cost, and the purged FDR. Read the two removal
+counts apart: 18 genes leave the frozen file, but only the 12 to 15
+present in that ranked list could move anything, and both are columns
+of the source table. The down arm is not silent — Tcon only, at the up
+arm's sign. The purge licenses a membership statement and no more.
+Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

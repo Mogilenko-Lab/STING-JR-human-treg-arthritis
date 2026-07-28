@@ -2,24 +2,29 @@
 """
 09_heat_hypoxia_viz.py — VIZ ONLY. The heat-versus-hypoxia narrative in five beats.
 ==================================================================================
-Synovial fluid is a hypoxic niche as well as an inflamed one, so the standing
-objection to reading the mouse 39 °C enrichment as thermal is that it is really
-hypoxia. The heat-versus-hypoxia readout answered by purging `HALLMARK_HYPOXIA`
-genes from the mouse sets and re-running the same fgsea engine. These figures
-walk that answer, then put the mouse signature back into the plain Treg
-differential-expression view so its size and its specificity are both visible:
+The inflamed synovial niche is hypoxic as well as inflamed, so one bounded
+question can be asked of the mouse 39 °C-derived enrichment: is it reducible to
+the set's own HALLMARK_HYPOXIA-overlap gene content? That is a membership
+question and it is answered by deleting those genes from the mouse sets and
+re-running the same fgsea engine. It is not a question about temperature, and it
+is not a question about whether hypoxia is a confound or a co-exposure — those
+are not separable in cross-sectional human data, and nothing here licenses a
+statement about either. These figures walk the bounded answer, then put the
+mouse signature back into the plain Treg differential-expression view so its
+size and its specificity are both visible:
 
   1. heat_purge_nes_paired         — how much of the enrichment survives the purge
   2. heat_hypoxia_colocalization   — do heat-high and hypoxia-high mark the same cells
-  3. heat_leadingedge_composition  — what the enriching genes actually are
+  3. heat_leadingedge_composition  — what sits at the synovial-fluid end of each
+                                     ranking, at exploratory tier only
   4. heat_treg_volcano_signature   — where the mouse arms sit in the Treg SF-vs-PB volcano
   5. heat_treg_volcano_programs    — which programs those genes are, and how little
                                      they share with the published STING axis
 
 Computes no statistic. Every NES, FDR, correlation, logFC and p is read verbatim
 from a committed CSV; the only derived quantities are set membership over frozen
-gene lists, plain counts of those memberships, and the usual -log10(FDR) volcano
-display transform.
+gene lists, plain counts and differences of those memberships, and the usual
+-log10(FDR) volcano display transform.
 
 Run from the compartment root, AFTER 09_heat_hypoxia.py:
   python 02_analysis/scripts/09_heat_hypoxia_viz.py
@@ -120,14 +125,42 @@ def fmt_fdr(p: float) -> str:
 # ===========================================================================
 # 1. Paired full-versus-purged NES — does the enrichment survive the purge?
 # ===========================================================================
+def _count_symbols(path: Path) -> int:
+    """Plain line count of a frozen newline-delimited symbol file. No statistic."""
+    if not path.exists():
+        raise FileNotFoundError(f"[09_viz] frozen signature file missing: {path}")
+    return len({ln.strip() for ln in path.read_text().splitlines() if ln.strip()})
+
+
 def purge_paired_table() -> pd.DataFrame:
     """Marshal the per-population full/purged fgsea rows into one row per arm.
 
     `gene_purge_nes_comparison.csv` carries only the up arm, so the down arm is read
     from the same `gsea_{full,purged}_*.csv` files that table was built from. No
     number is recomputed — NES, p, FDR and set_size are all read as written.
+
+    Two membership counts travel with every row so the caption can quote the
+    nominal-versus-effective distinction from its own same-stem table rather than
+    from a neighbour:
+
+      `n_removed_nominal`  — genes the purge deletes from the frozen set FILE
+                             (a line-count difference over two committed files);
+      `n_removed_testable` — how many of those were in that population's ranked
+                             list at all, i.e. the number the purge could actually
+                             move (`set_size_full - set_size_purged`).
+
+    They differ, and quoting the nominal count as "genes removed" overstates the
+    purge. `delta_nes` is likewise carried so the caption never has to subtract
+    two columns in prose.
     """
     tdir = PATHS.tables(STAGE)
+    n_nominal = {arm: _count_symbols(tdir / "_signatures_full" / f"{ARM_SET[arm]}.txt")
+                 for arm in ARM_ORDER}
+    nominal = {
+        arm: n_nominal[arm]
+        - _count_symbols(tdir / "_signatures_purged" / f"{ARM_SET[arm]}.txt")
+        for arm in ARM_ORDER
+    }
     rows = []
     for pop, tag in POP_TAG.items():
         full = pd.read_csv(tdir / f"gsea_full_{tag}.csv").set_index("pathway_id")
@@ -136,6 +169,8 @@ def purge_paired_table() -> pd.DataFrame:
             sid = ARM_SET[arm]
             if sid not in full.index or sid not in purged.index:
                 continue
+            size_full = int(full.loc[sid, "set_size"])
+            size_purged = int(purged.loc[sid, "set_size"])
             rows.append({
                 "population": pop,
                 "arm": arm,
@@ -143,10 +178,14 @@ def purge_paired_table() -> pd.DataFrame:
                 "contrast": "SF_vs_PB",
                 "nes_full": float(full.loc[sid, "nes"]),
                 "padj_full": float(full.loc[sid, "padj"]),
-                "set_size_full": int(full.loc[sid, "set_size"]),
+                "set_size_full": size_full,
                 "nes_purged": float(purged.loc[sid, "nes"]),
                 "padj_purged": float(purged.loc[sid, "padj"]),
-                "set_size_purged": int(purged.loc[sid, "set_size"]),
+                "set_size_purged": size_purged,
+                "delta_nes": float(purged.loc[sid, "nes"]) - float(full.loc[sid, "nes"]),
+                "n_nominal": n_nominal[arm],
+                "n_removed_nominal": nominal[arm],
+                "n_removed_testable": size_full - size_purged,
                 "evidence_tier": "primary_pseudobulk",
             })
     return pd.DataFrame(rows)
@@ -186,8 +225,16 @@ def plot_purge_paired(df: pd.DataFrame):
                        facecolors=to_rgba(col, MARKER_ALPHA),
                        edgecolors=EDGE_CONTRAST if passes else to_rgba(col, MARKER_ALPHA),
                        linewidths=2.2 if passes else 0.0)
-        ax.text(3.0, y, f"n {r['set_size_full']}→{r['set_size_purged']}  ·  "
-                        f"{fmt_fdr(r['padj_purged'])}",
+        # Effective set size against this arm's OWN nominal size, then what the
+        # purge cost. Where the purge takes nothing there is no NES to quote, so
+        # the row says that instead of printing a rounded zero.
+        if int(r["n_removed_testable"]) == 0:
+            cost = "purge removes no gene"
+        else:
+            cost = f"ΔNES {r['delta_nes']:+.3f}"
+        ax.text(2.95, y,
+                f"n {r['set_size_full']}→{r['set_size_purged']} of {r['n_nominal']}  ·  "
+                f"{cost}  ·  {fmt_fdr(r['padj_purged'])}",
                 va="center", ha="left", fontsize=ANNOT_SIZE)
         ylabels.append(f"{r['population']} · {r['arm']}")
 
@@ -195,21 +242,46 @@ def plot_purge_paired(df: pd.DataFrame):
     ax.set_yticks(range(n))
     ax.set_yticklabels(list(reversed(ylabels)))
     ax.set_ylim(-0.6, n - 0.4)
-    ax.set_xlim(0, 4.25)
+    ax.set_xlim(0, 4.6)
     ax.set_xticks([0, 1, 2, 3])
     ax.set_xlabel("fgsea NES (synovial fluid vs paired blood)")
-    ax.set_title("Purging hypoxia genes barely moves the mouse heat enrichment")
+    # The title states the bounded answer in membership terms. It may not say
+    # anything about temperature, and it may not call hypoxia a confound or a
+    # co-exposure: the purge tests gene content and licenses nothing else.
+    ax.set_title("The synovial-fluid enrichment is not reducible to the set's\n"
+                 "HALLMARK_HYPOXIA-overlap gene content")
+    # Q -> A marker, placed under the axis so it cannot collide with a marker:
+    # this panel answers, and it says on its face what it answers, at what tier,
+    # and where the answer stops. `bbox_inches="tight"` keeps below-axis text.
+    up = df[df["arm"].eq("up")]
+    ax.text(0.0, -0.135,
+            "ANSWER — confirmatory tier (donor-level pseudobulk, limma-voom → fgsea).\n"
+            f"Deleting the {int(up['n_removed_nominal'].iloc[0])} HALLMARK_HYPOXIA-overlap genes "
+            f"takes {int(up['n_removed_testable'].min())}–{int(up['n_removed_testable'].max())} "
+            "testable genes out of the up arm and costs "
+            f"{abs(float(up['delta_nes'].max())):.3f}–{abs(float(up['delta_nes'].min())):.3f} NES;\n"
+            "all three up arms stay significant, so the enrichment is not reducible to that gene "
+            "content. That is the whole claim. It says nothing\n"
+            "about temperature, and nothing about whether hypoxia is a confound or a co-exposure — "
+            "those are not separable in cross-sectional human data.",
+            transform=ax.transAxes, ha="left", va="top", fontsize=ANNOT_SIZE)
     # Three keys: each arm key carries its colour AND its two shapes, and the one
     # remaining key explains the outline. No open/filled convention anywhere.
     handles = [_pair_handles(ARM_COL["up"]), _pair_handles(ARM_COL["down"]),
                Line2D([0], [0], linestyle="none", marker="o",
                       markerfacecolor=to_rgba("grey", MARKER_ALPHA),
                       markeredgecolor=EDGE_CONTRAST, markeredgewidth=2.2, markersize=11)]
+    # The down-arm key names where that arm is significant, read from the table
+    # rather than asserted, so the panel cannot outlive "the up arm is the only
+    # informative arm" by carrying it in a legend.
+    down_sig = df[df["arm"].eq("down") & df["padj_full"].lt(FDR)]["population"].tolist()
+    down_where = (", ".join(down_sig) + " only") if down_sig else "no population"
     labels = ["WT_heat up arm — diamond = full mouse set, circle = hypoxia-purged set",
-              "WT_heat down arm — same pair, and the purge removes no gene, so they coincide",
+              "WT_heat down arm — same pair, and the purge removes no gene, so they coincide; "
+              f"this arm is not silent, reaching FDR below {FDR} in {down_where}",
               f"dark outline = FDR below {FDR} (every FDR is printed at right)"]
     ax.legend(handles, labels, handler_map={tuple: HandlerTuple(ndivide=None, pad=0.7)},
-              loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=1, frameon=False,
+              loc="upper center", bbox_to_anchor=(0.5, -0.30), ncol=1, frameon=False,
               fontsize=LEGEND_SIZE, handlelength=3.2, handletextpad=1.0, labelspacing=0.7)
     fig.tight_layout()
     return fig
@@ -610,24 +682,33 @@ def main() -> None:
     save_overview(
         fig, STAGE, "heat_purge_nes_paired",
         table=round_numeric_cols(paired),
-        finding=("Removing every HALLMARK_HYPOXIA gene from the mouse 39 °C up-set costs "
-                 "only 0.14 to 0.19 NES and leaves the synovial-fluid enrichment strong and "
-                 "significant in all three sorted populations, so hypoxia does not explain it."),
+        finding=("Deleting the 18 HALLMARK_HYPOXIA-overlap genes from the mouse 39 °C-derived "
+                 "up-set takes 12 to 15 testable genes out of the arm and costs 0.129 to 0.165 "
+                 "NES — 2.5915 to 2.4268 in Treg, 2.6809 to 2.5516 in Tcon, 2.0710 to 1.9261 in "
+                 "CD8 — leaving all three significant, so the synovial-fluid enrichment is not "
+                 "reducible to its HALLMARK_HYPOXIA-overlap gene content. That is a statement "
+                 "about gene content and nothing else: it says nothing about temperature, and "
+                 "nothing about whether hypoxia is a confound or a co-exposure, which are not "
+                 "separable in cross-sectional human data."),
         script=SCRIPT, fn="plot_purge_paired",
         config_kv=(f"thresholds.gsea_fdr={FDR}; gsea_min_size={PARAMS.gsea_min_size}; "
                    f"gsea_nperm={PARAMS.gsea_nperm}"),
         input="03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv",
         how_to_read=(
-            "One row per population and mouse arm. x is fgsea NES, positive = enriched toward "
-            "the synovial-fluid end of the paired ranking. Each row pairs the full mouse set "
-            "(large diamond) with the hypoxia-purged set (small circle), and the bar between "
-            "them is what the purge cost. Warm brown = up arm, cool blue = down arm. Every "
-            "marker is filled and translucent, so the down-arm pair, which the purge leaves "
-            "untouched, reads as a darker circle inside a lighter diamond. A heavier dark "
-            f"outline marks FDR below {FDR} and is the only significance glyph. The right-hand "
-            "text prints set size before and after the purge and the purged FDR. Primary "
-            "donor-pseudobulk tier, correlative."),
-        config=FIG_CFG, height=7.0,
+            "ANSWERS, at confirmatory tier: donor-level pseudobulk within frozen sort labels, "
+            "limma-voom then fgsea. One row per population and arm; x is fgsea NES, positive = "
+            "toward the synovial-fluid end. Each row pairs the full mouse set (large diamond) "
+            "with the hypoxia-purged set (small circle), and the bar between them is the cost. "
+            "Warm brown = up arm, cool blue = down arm; all markers are translucent, so the "
+            "untouched down-arm pair reads as a circle inside a diamond. A dark outline marks "
+            f"FDR below {FDR} and is the only significance glyph. The right-hand text gives "
+            "effective set size before and after the purge against the arm's nominal size, the "
+            "NES cost, and the purged FDR. Read the two removal counts apart: 18 genes leave the "
+            "frozen file, but only the 12 to 15 present in that ranked list could move anything, "
+            "and both are columns of the source table. The down arm is not silent — Tcon only, "
+            "at the up arm's sign. The purge licenses a membership statement and no more. "
+            "Correlative."),
+        config=FIG_CFG, height=7.6,
     )
     plt.close(fig)
 

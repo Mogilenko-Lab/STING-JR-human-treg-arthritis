@@ -1,7 +1,7 @@
-population,arm,signature,contrast,nes_full,padj_full,set_size_full,nes_purged,padj_purged,set_size_purged,evidence_tier
-Treg,up,WT_heat_up,SF_vs_PB,2.59152412,3.2263942e-14,119.0,2.42677791,6.80332944e-11,107.0,primary_pseudobulk
-Treg,down,WT_heat_down,SF_vs_PB,0.967559724,0.511650503,56.0,0.967464394,0.509620181,56.0,primary_pseudobulk
-Tcon,up,WT_heat_up,SF_vs_PB,2.6808778,8.09433293e-17,130.0,2.55163887,2.42227168e-13,115.0,primary_pseudobulk
-Tcon,down,WT_heat_down,SF_vs_PB,1.47175394,0.0262872489,61.0,1.47142799,0.0261771995,61.0,primary_pseudobulk
-CD8,up,WT_heat_up,SF_vs_PB,2.07098454,3.60985508e-07,113.0,1.92607902,4.12470661e-05,101.0,primary_pseudobulk
-CD8,down,WT_heat_down,SF_vs_PB,1.09433951,0.30814594,57.0,1.09242326,0.310237345,57.0,primary_pseudobulk
+population,arm,signature,contrast,nes_full,padj_full,set_size_full,nes_purged,padj_purged,set_size_purged,delta_nes,n_nominal,n_removed_nominal,n_removed_testable,evidence_tier
+Treg,up,WT_heat_up,SF_vs_PB,2.59152412,3.2263942e-14,119.0,2.42677791,6.80332944e-11,107.0,-0.164746214,199.0,18.0,12.0,primary_pseudobulk
+Treg,down,WT_heat_down,SF_vs_PB,0.967559724,0.511650503,56.0,0.967464394,0.509620181,56.0,-9.53297374e-05,94.0,0.0,0.0,primary_pseudobulk
+Tcon,up,WT_heat_up,SF_vs_PB,2.6808778,8.09433293e-17,130.0,2.55163887,2.42227168e-13,115.0,-0.129238936,199.0,18.0,15.0,primary_pseudobulk
+Tcon,down,WT_heat_down,SF_vs_PB,1.47175394,0.0262872489,61.0,1.47142799,0.0261771995,61.0,-0.000325952473,94.0,0.0,0.0,primary_pseudobulk
+CD8,up,WT_heat_up,SF_vs_PB,2.07098454,3.60985508e-07,113.0,1.92607902,4.12470661e-05,101.0,-0.144905529,199.0,18.0,12.0,primary_pseudobulk
+CD8,down,WT_heat_down,SF_vs_PB,1.09433951,0.30814594,57.0,1.09242326,0.310237345,57.0,-0.00191625092,94.0,0.0,0.0,primary_pseudobulk
