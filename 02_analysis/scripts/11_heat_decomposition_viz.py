@@ -186,7 +186,23 @@ def coverage_note(r: pd.Series) -> str:
             f"({ranked} in the ranked lists)")
 
 
-def plot_coverage(df: pd.DataFrame):
+def multiplicity_rows() -> pd.DataFrame:
+    """The committed per-arm multiplicity of the overlapping assignment.
+
+    A hard failure rather than a skip: the bars in this figure overlap, and a
+    reader who cannot see by how much will read them as a partition. That warning
+    is not optional decoration, so a missing table stops the render.
+    """
+    path = PATHS.tables(STAGE) / "decomposition_assignment_multiplicity.csv"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"[11_viz] {path} not found. Re-run 11_heat_decomposition.py — the coverage "
+            "figure may not be drawn without the counts that show its bars are not a "
+            "partition.")
+    return pd.read_csv(path).set_index("arm")
+
+
+def plot_coverage(df: pd.DataFrame, mult: pd.DataFrame):
     fig, ax = plt.subplots()
     n = len(df)
     labels = []
@@ -205,11 +221,31 @@ def plot_coverage(df: pd.DataFrame):
     ax.set_xlabel("Genes of the mouse arm that the curated set contains")
     ax.set_title("Two thirds of the mouse 39 C-derived up arm belongs to no named program")
     handles = [
-        Patch(facecolor=ARM_COL["up"], label=f"{PRIMARY} up arm, 199 genes"),
-        Patch(facecolor=ARM_COL["down"], label=f"{PRIMARY} down arm, 94 genes"),
+        Patch(facecolor=ARM_COL[a],
+              label=f"{PRIMARY} {a} arm, {int(mult.loc[a, 'n_arm'])} genes")
+        for a in ("up", "down")
     ]
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.11),
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.27),
               ncol=2, frameon=False, fontsize=LEGEND_SIZE)
+    # THE BARS ARE NOT A PARTITION, stated as a count rather than as a caution.
+    # Overlapping bars read as a partition unless the panel says otherwise, and
+    # this is the panel most likely to be over-read, so the multiplicity goes on
+    # the face and not only into the caption. Placed under the axis, where it
+    # cannot land on a bar or on a right-hand testability note; `bbox_inches=
+    # "tight"` keeps below-axis text in the render.
+    u, d = mult.loc["up"], mult.loc["down"]
+    ax.text(0.0, -0.115,
+            "NOT A PARTITION — do not sum these bars.  "
+            f"{int(u['n_claimed'])} of the {int(u['n_arm'])} up-arm genes are claimed by a curated "
+            f"set, but they carry {int(u['n_claims_total'])} claims between them: "
+            f"{int(u['n_claimed_multiply'])} of the {int(u['n_claimed'])}\n"
+            f"belong to two or three sets at once, so adding the named bars double-counts "
+            f"{int(u['n_excess_claims'])} claims and shrinks the {int(u['n_unassigned'])}-gene "
+            f"remainder — the largest single part. On the down arm {int(d['n_claimed_multiply'])} "
+            f"of {int(d['n_claimed'])} are multiply claimed.\n"
+            "ANSWERS by membership over frozen versioned gene lists — arithmetic over committed "
+            "files, not an effect estimate, and no NES is on this face.",
+            transform=ax.transAxes, ha="left", va="top", fontsize=ANNOT_SIZE)
     fig.tight_layout()
     return fig
 
@@ -302,28 +338,41 @@ def main() -> None:
     purge_figures(STAGE, "heatdecomp_", overview=True, config=FIG_CFG)
 
     cov = coverage_table()
-    fig = plot_coverage(cov)
+    mult = multiplicity_rows()
+    fig = plot_coverage(cov, mult)
     save_overview(
         fig, STAGE, "heatdecomp_arm_coverage",
         table=round_numeric_cols(cov),
         finding=("Curated public gene sets claim only 62 of the 199 mouse 39 C-derived up "
                  "genes and 11 of the 94 down genes, so the largest part of the projected "
                  "signature — 137 up genes — belongs to no named program, and the curated "
-                 "HSR core (Reactome/GO) contributes 2 genes."),
+                 "HSR core (Reactome/GO) contributes 2 genes. The bars are not a partition: "
+                 "25 of those 62 claimed up genes belong to two or three curated sets at "
+                 "once, so the 62 carry 92 claims and summing the named bars double-counts "
+                 "30 of them."),
         script=SCRIPT, fn="plot_coverage",
         config_kv=(f"gsea_min_size={MIN_SIZE}; figures.top_n={TOP_N}; "
                    "evidence_tier=secondary_annotation"),
         input=("03_results/11_heat_decomposition/tables/decomposition_overlap.csv, "
                "03_results/11_heat_decomposition/tables/decomposition_nes.csv, "
+               "03_results/11_heat_decomposition/tables/"
+               "decomposition_assignment_multiplicity.csv, "
                "03_results/11_heat_decomposition/tables/sting_axis_overlap.csv"),
         how_to_read=(
-            "One bar per mouse arm and curated presumption; length is how many of that "
-            "arm's genes the curated set contains. Warm brown = the 199-gene up arm, cool "
-            "blue = the 94-gene down arm. The right-hand text gives the count, then the "
+            "ANSWERS what the projected set is made of, by membership over frozen versioned "
+            "gene lists — arithmetic over committed files, not an effect estimate, and no NES "
+            "on the face. One bar per mouse arm and curated presumption; length is how many "
+            "of that arm's genes the curated set contains. Warm brown = the 199-gene up arm, "
+            "cool blue = the 94-gene down arm. The right-hand text gives the count, then the "
             f"testability: parts reaching {MIN_SIZE} genes in the ranked lists are tested, "
-            "smaller parts are marked as under the floor, and a part with no gene in that "
-            "arm says so. Presumptions overlap, so bars share genes and do not sum to the "
-            "arm; per-gene memberships are in decomposition_gene_assignment.csv. "
+            "smaller parts are marked under the floor, and a part with no gene in that arm "
+            "says so. **Do not sum the bars.** The assignment is not a partition — 25 of the "
+            "62 claimed up-arm genes sit in two or three sets, so adding the named bars "
+            "double-counts 30 claims and shrinks the 137-gene remainder, the largest single "
+            "part. That count is on the face, per arm in "
+            "decomposition_assignment_multiplicity.csv, and per gene in "
+            "decomposition_gene_assignment.csv. The remainder is reported as a remainder: it "
+            "is not named, and is evidence for no mechanism. "
             + sting_sentence() + " Annotation tier."),
         config=FIG_CFG, wide=True, height=8.0,
     )

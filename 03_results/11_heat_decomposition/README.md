@@ -152,22 +152,33 @@ The annotated numbers behind each running-sum figure: one part's NES, FDR, testa
 Curated public gene sets claim only 62 of the 199 mouse 39 C-derived
 up genes and 11 of the 94 down genes, so the largest part of the
 projected signature — 137 up genes — belongs to no named program, and
-the curated HSR core (Reactome/GO) contributes 2 genes.
+the curated HSR core (Reactome/GO) contributes 2 genes. The bars are
+not a partition: 25 of those 62 claimed up genes belong to two or
+three curated sets at once, so the 62 carry 92 claims and summing the
+named bars double-counts 30 of them.
 
-**How to read:** One bar per mouse arm and curated presumption; length is how many of
-that arm's genes the curated set contains. Warm brown = the 199-gene
-up arm, cool blue = the 94-gene down arm. The right-hand text gives
-the count, then the testability: parts reaching 5 genes in the ranked
-lists are tested, smaller parts are marked as under the floor, and a
-part with no gene in that arm says so. Presumptions overlap, so bars
-share genes and do not sum to the arm; per-gene memberships are in
-decomposition_gene_assignment.csv. The published 21-gene interferon-
-independent STING signature contributes only PLAUR and PTGS2 here,
-tallied in sting_axis_overlap.csv. Annotation tier.
+**How to read:** ANSWERS what the projected set is made of, by membership over frozen
+versioned gene lists — arithmetic over committed files, not an effect
+estimate, and no NES on the face. One bar per mouse arm and curated
+presumption; length is how many of that arm's genes the curated set
+contains. Warm brown = the 199-gene up arm, cool blue = the 94-gene
+down arm. The right-hand text gives the count, then the testability:
+parts reaching 5 genes in the ranked lists are tested, smaller parts
+are marked under the floor, and a part with no gene in that arm says
+so. **Do not sum the bars.** The assignment is not a partition — 25 of
+the 62 claimed up-arm genes sit in two or three sets, so adding the
+named bars double-counts 30 claims and shrinks the 137-gene remainder,
+the largest single part. That count is on the face, per arm in
+decomposition_assignment_multiplicity.csv, and per gene in
+decomposition_gene_assignment.csv. The remainder is reported as a
+remainder: it is not named, and is evidence for no mechanism. The
+published 21-gene interferon-independent STING signature contributes
+only PLAUR and PTGS2 here, tallied in sting_axis_overlap.csv.
+Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/11_heat_decomposition_viz.py` | `plot_coverage` | `gsea_min_size=5; figures.top_n=20; evidence_tier=secondary_annotation` | `03_results/11_heat_decomposition/tables/decomposition_overlap.csv, 03_results/11_heat_decomposition/tables/decomposition_nes.csv, 03_results/11_heat_decomposition/tables/sting_axis_overlap.csv` |
+| `02_analysis/scripts/11_heat_decomposition_viz.py` | `plot_coverage` | `gsea_min_size=5; figures.top_n=20; evidence_tier=secondary_annotation` | `03_results/11_heat_decomposition/tables/decomposition_overlap.csv, 03_results/11_heat_decomposition/tables/decomposition_nes.csv, 03_results/11_heat_decomposition/tables/decomposition_assignment_multiplicity.csv, 03_results/11_heat_decomposition/tables/sting_axis_overlap.csv` |
 
 ## figures/_overview/heatdecomp_runsum_up_unassigned.png
 
