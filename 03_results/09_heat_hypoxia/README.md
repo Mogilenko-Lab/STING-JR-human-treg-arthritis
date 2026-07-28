@@ -30,13 +30,13 @@ Within SF cells, `WT_heat_up_AUCell` and `HALLMARK_HYPOXIA_AUCell` show weak pos
 
 ## leadingedge_composition.csv
 
-The `WT_heat_up` leading edge in SF T cells is predominantly T-cell activation and effector genes (42% to 47%) plus immediate-early stress genes (11% to 15%), with a hypoxia-overlap minority (13% to 14%) and only a trace of classic heat-shock or proteostasis genes (3% to 5%).
+Of the 49 to 71 genes at the SF end of each population's ranking, the taxonomy calls 42% to 47% effector or activation, 11% to 15% immediate-early, 13% to 14% hypoxia-overlap and 3% to 5% classic heat-shock, leaving 8% to 21% unclassified. Those are fractions of a leading edge and not of the 199-gene set — the set's own composition is a different measurement, and it is the whole-arm curated partition that carries it.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `leadingedge_composition` | taxonomy from `00_data/references/heat_leadingedge_taxonomy/` | `03_results/09_heat_hypoxia/tables/runsum_interactive_gsea_full_{treg,tcon,cd8}_WT_heat_up.csv`, `00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv` |
 
-**How to read:** One row per population. `n_leading_edge` is the count of fgsea core-enrichment genes from the full `WT_heat_up` run. Each is assigned to one program — `heat_shock_proteostasis`, `hypoxia_HIF`, `immediate_early_stress`, `effector_activation`, `other` — from a frozen gene taxonomy (external large-context-model classification, provenance in `00_data/references/heat_leadingedge_taxonomy/`). The `n_`/`frac_` columns tally each program and the `genes_` columns list members. Exploratory secondary tier, never pooled with the pseudobulk NES. The dominance of activation and immediate-early genes, against only a trace of classic heat-shock, is a caution: the SF-vs-PB `WT_heat` enrichment survives the gene purge above (hypoxia-independent) but is carried mostly by a generic activation program, not a thermal-specific one.
+**How to read:** One row per population. `n_leading_edge` is the count of fgsea core-enrichment genes from the full `WT_heat_up` run. Each is assigned to one program — `heat_shock_proteostasis`, `hypoxia_HIF`, `immediate_early_stress`, `effector_activation`, `other` — from a frozen gene taxonomy (external large-context-model classification, provenance in `00_data/references/heat_leadingedge_taxonomy/`). The `n_`/`frac_` columns tally each program, the `genes_` columns list members, and `n_unclassified` counts the leading-edge genes the taxonomy assigns to nothing — so the categories plus the unclassified count exhaust the leading edge, and the categories alone do not. Exploratory secondary tier, never pooled with the pseudobulk NES and never used to support a claim. Two limits bound what this table can be read for, and together they are why it corroborates rather than answers. The categories are model-assigned rather than curated and versioned; and they are applied to the leading edge, which is by definition the genes selected because they enriched, so a fraction taken over them describes that leading edge and is not a fraction of the 199-gene set. The composition of the set is settled instead by the whole-arm partition against curated versioned sets, which puts 137 of the 199 up genes in no named program and gives the curated HSR core 2.
 
 ## tables/gsea_full_{treg,tcon,cd8}.csv
 
@@ -186,24 +186,33 @@ pseudobulk NES and never read as directional evidence.
 
 ## figures/_overview/heat_leadingedge_composition.png
 
-Half the WT_heat up leading edge in synovial-fluid T cells is effector
-and activation genes, with a hypoxia-overlap minority and only two or
-three classic heat-shock genes, so surviving the hypoxia purge does
-not make the enrichment thermally specific.
+At the synovial-fluid end of each ranking the 49 to 71 leading-edge
+genes are dominated by effector and activation categories, with 2 to 3
+classic heat-shock genes and 4 to 15 the taxonomy leaves unclassified.
+This describes the leading edge and cannot be read as the composition
+of the 199-gene set: the categories are model-assigned and applied
+only to genes selected because they enriched, and against curated
+versioned sets the whole up arm reads differently — 137 of 199 genes
+belong to no named program and the curated HSR core contributes 2.
 
-**How to read:** One stacked bar per population, spanning that population's full
-WT_heat up leading edge; segment width is the fraction of leading-edge
-genes in each program and the number inside a segment is its gene
-count (printed where the segment is wide enough to hold it; every
-count is in the source table). Program assignment comes from a frozen
-external-model gene taxonomy, not from this run. The narrow heat-shock
-segment is the point, and it is why an activation-free proteostasis
-lens was built next. Exploratory secondary tier, never pooled with the
-pseudobulk NES.
+**How to read:** CORROBORATES and never answers. One stacked bar per population,
+spanning that population's whole WT_heat up leading edge: every gene
+is in a segment, including the ones the taxonomy leaves unclassified,
+drawn in grey rather than left as unfilled axis. Segment width is the
+fraction of leading-edge genes in each category, the number inside is
+its gene count, and the segments are checked to sum to the bar. The
+right-hand text gives the leading-edge size against the 199-gene up
+arm. Two limits are on the face. The categories are model-assigned
+rather than curated and versioned, and they are applied to the leading
+edge — the genes that enriched — so a fraction over them is not a
+fraction of the set. The whole-arm curated partition, printed beneath
+the bars, is where composition is settled: it puts 137 of 199 genes in
+no named program. Exploratory tier, never pooled with the pseudobulk
+NES.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_leadingedge` | `taxonomy=00_data/references/heat_leadingedge_taxonomy; evidence_tier=secondary_exploratory` | `03_results/09_heat_hypoxia/tables/leadingedge_composition.csv` |
+| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_leadingedge` | `taxonomy=00_data/references/heat_leadingedge_taxonomy; evidence_tier=secondary_exploratory; claim_tier=corroborative_only` | `03_results/09_heat_hypoxia/tables/leadingedge_composition.csv, 03_results/11_heat_decomposition/tables/_overview/heatdecomp_arm_coverage.csv` |
 
 ## figures/_overview/heat_treg_volcano_signature.png
 

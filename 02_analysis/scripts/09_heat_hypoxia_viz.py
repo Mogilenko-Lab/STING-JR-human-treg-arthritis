@@ -70,6 +70,13 @@ ARM_SET = {"up": "WT_heat_up", "down": "WT_heat_down"}
 # Same module-constant idiom 09_heat_hypoxia.py uses for its reference inputs.
 DE_TREG_PATH = Path("03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv")
 TAXONOMY_PATH = Path("00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv")
+# The whole-arm partition of the same 199-gene up set against curated, versioned,
+# anchor-independent sets, published by stage 11. Read here so the leading-edge
+# panel can print the whole-set denominator on its own face: a fraction of the
+# leading edge is not a fraction of the set, and a reader who sees only the
+# former will read it as the latter. Values are read, never recomputed.
+ARM_COVERAGE_PATH = Path(
+    "03_results/11_heat_decomposition/tables/_overview/heatdecomp_arm_coverage.csv")
 # Frozen reference axes published by the STING positive-control compartment: the
 # 21-gene IFN-independent STING-activation signature of de Cevins et al. 2023
 # (Cell Rep Med, PMID 38118407) and the 200-gene generic type-I IFN program from
@@ -331,16 +338,67 @@ def plot_colocalization(df: pd.DataFrame):
 
 
 # ===========================================================================
-# 3. Leading-edge composition — what are the enriching genes?
+# 3. Leading-edge composition — an exploratory description, not an answer
 # ===========================================================================
+# This panel describes the genes at the synovial-fluid end of each ranking. It
+# is deliberately kept at exploratory tier and may not answer anything, for two
+# reasons that must stay visible on its face:
+#
+#   (1) its category assignment is a MODEL-assigned taxonomy over LEADING-EDGE
+#       genes only, and the leading edge is by definition the genes that
+#       enriched, so a fraction taken over it cannot be read as the set's
+#       composition;
+#   (2) the whole-arm partition against curated, versioned, anchor-independent
+#       sets gives a different answer by an order of magnitude, and that
+#       partition — not this one — is what the composition question is settled
+#       against. Its counts are printed here as the denominator so the two can
+#       never be confused.
+UNCLASSIFIED_LABEL = "unclassified by the taxonomy"
+
+
+def arm_reference_counts() -> dict:
+    """Whole-arm curated counts for the SAME 199-gene up set, read from stage 11.
+
+    Not recomputed here: `heatdecomp_arm_coverage.csv` is a committed table and
+    these are its `n_intersect` values for the up arm. A hard failure rather than
+    a skip, because a missing denominator is exactly the condition under which
+    this panel becomes misreadable.
+    """
+    if not ARM_COVERAGE_PATH.exists():
+        raise FileNotFoundError(
+            f"[09_viz] whole-arm curated partition not found at {ARM_COVERAGE_PATH}. "
+            "Run 11_heat_decomposition.py + 11_heat_decomposition_viz.py first — the "
+            "leading-edge panel may not be drawn without its whole-set denominator.")
+    cov = pd.read_csv(ARM_COVERAGE_PATH)
+    up = cov[cov["mouse_arm"].eq("WT_heat_up")].set_index("subcomponent")
+    return {"n_arm": int(up["n_mouse_arm"].iloc[0]),
+            "n_unassigned": int(up.loc["unassigned", "n_intersect"]),
+            "n_hsr_curated": int(up.loc["hsr_curated", "n_intersect"]),
+            "n_ifn_type_i": int(up.loc["ifn_type_i", "n_intersect"])}
+
+
 def leadingedge_table() -> pd.DataFrame:
+    """The plotted rows, plus the whole-arm curated counts the caption must quote.
+
+    The reference columns are constant across rows on purpose: they are a
+    property of the 199-gene set, not of a population, and carrying them in the
+    same-stem table is what lets the caption state the denominator without
+    reaching into a neighbouring table.
+    """
     df = pd.read_csv(PATHS.tables(STAGE) / "leadingedge_composition.csv")
     keep = ["population", "signature", "n_leading_edge"]
     keep += [f"n_{k}" for k, _, _ in LE_PROGRAMS]
     keep += [f"frac_{k}" for k, _, _ in LE_PROGRAMS]
     keep += ["n_unclassified", "taxonomy_source", "evidence_tier"]
     df["population"] = pd.Categorical(df["population"], list(POP_TAG), ordered=True)
-    return df.sort_values("population")[keep].reset_index(drop=True)
+    out = df.sort_values("population")[keep].reset_index(drop=True)
+    ref = arm_reference_counts()
+    out["whole_arm_n_genes"] = ref["n_arm"]
+    out["whole_arm_n_unassigned_curated"] = ref["n_unassigned"]
+    out["whole_arm_n_hsr_curated"] = ref["n_hsr_curated"]
+    out["whole_arm_n_ifn_type_i"] = ref["n_ifn_type_i"]
+    out["claim_tier"] = "corroborative_only"
+    return out
 
 
 def plot_leadingedge(df: pd.DataFrame):
@@ -349,10 +407,16 @@ def plot_leadingedge(df: pd.DataFrame):
     sub = df.set_index("population").reindex(pops)
     for i, pop in enumerate(pops):
         y = len(pops) - 1 - i
+        n_le = int(sub.loc[pop, "n_leading_edge"])
         left = 0.0
-        for key, _, colour in LE_PROGRAMS:
-            frac = float(sub.loc[pop, f"frac_{key}"])
-            count = int(sub.loc[pop, f"n_{key}"])
+        # The unclassified genes are drawn as their own segment, so the bar spans
+        # the whole leading edge. Leaving them out shortened every bar and the
+        # unfilled remainder read as unused axis rather than as genes.
+        segments = [(lab, colour, int(sub.loc[pop, f"n_{key}"]))
+                    for key, lab, colour in LE_PROGRAMS]
+        segments.append((UNCLASSIFIED_LABEL, BG_COL, int(sub.loc[pop, "n_unclassified"])))
+        for _, colour, count in segments:
+            frac = count / n_le
             ax.barh(y, frac, left=left, height=0.62, color=colour, edgecolor="white",
                     linewidth=1.2)
             # Print the count inside the segment whenever it fits; the trace-level
@@ -363,18 +427,44 @@ def plot_leadingedge(df: pd.DataFrame):
                 ax.text(left + frac / 2, y, txt, ha="center", va="center",
                         fontsize=ANNOT_SIZE, color="black")
             left += frac
-        ax.text(1.02, y, f"{int(sub.loc[pop, 'n_leading_edge'])} genes",
+        # `left` is 1.0 by construction now; assert it rather than trust it, so a
+        # taxonomy that stops accounting for its own genes fails loudly instead of
+        # silently reintroducing a short bar under a caption that says otherwise.
+        if abs(left - 1.0) > 1e-9:
+            raise ValueError(
+                f"[09_viz] {pop} leading-edge segments sum to {left:.6f}, not 1.0 — "
+                f"the plotted categories do not account for all {n_le} genes.")
+        ax.text(1.02, y, f"{n_le} of the {int(sub.loc[pop, 'whole_arm_n_genes'])} up genes",
                 va="center", ha="left", fontsize=ANNOT_SIZE)
 
     ax.set_yticks(range(len(pops)))
     ax.set_yticklabels(list(reversed(pops)))
     ax.set_xlim(0, 1.0)
     ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-    ax.set_xlabel("Fraction of the WT_heat up leading edge")
-    ax.set_title("The surviving signal is carried mostly by activation genes")
+    ax.set_xlabel("Fraction of that population's WT_heat up leading edge\n"
+                  "(every gene is in a segment; the bar spans the whole leading edge)")
+    ax.set_title("What sits at the synovial-fluid end of each ranking —\n"
+                 "a description of the leading edge, not of the 199-gene set")
     handles = [Patch(facecolor=c, label=lab) for _, lab, c in LE_PROGRAMS]
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.2),
+    handles.append(Patch(facecolor=BG_COL, label=UNCLASSIFIED_LABEL))
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.34),
               ncol=3, frameon=False, fontsize=LEGEND_SIZE)
+    ref = {c: int(df[c].iloc[0]) for c in
+           ("whole_arm_n_genes", "whole_arm_n_unassigned_curated",
+            "whole_arm_n_hsr_curated", "whole_arm_n_ifn_type_i")}
+    ax.text(0.0, -0.155,
+            "CORROBORATES ONLY — it cannot answer what the set is made of, and two things on its "
+            "face say why.\n"
+            "The categories come from a model-assigned gene taxonomy, applied to the leading edge, "
+            "i.e. to the genes selected because\n"
+            "they enriched; a fraction over them is not a fraction of the set. Against curated "
+            f"versioned sets the whole {ref['whole_arm_n_genes']}-gene up arm\n"
+            f"reads differently: {ref['whole_arm_n_unassigned_curated']} genes belong to no named "
+            f"program, the curated HSR core contributes {ref['whole_arm_n_hsr_curated']} and type-I "
+            f"interferon {ref['whole_arm_n_ifn_type_i']},\n"
+            "both under the testable floor. That partition, not this one, is where the composition "
+            "question is settled.",
+            transform=ax.transAxes, ha="left", va="top", fontsize=ANNOT_SIZE)
     fig.tight_layout()
     return fig
 
@@ -746,23 +836,33 @@ def main() -> None:
     save_overview(
         fig, STAGE, "heat_leadingedge_composition",
         table=round_numeric_cols(le),
-        finding=("Half the WT_heat up leading edge in synovial-fluid T cells is effector and "
-                 "activation genes, with a hypoxia-overlap minority and only two or three "
-                 "classic heat-shock genes, so surviving the hypoxia purge does not make the "
-                 "enrichment thermally specific."),
+        finding=("At the synovial-fluid end of each ranking the 49 to 71 leading-edge genes are "
+                 "dominated by effector and activation categories, with 2 to 3 classic "
+                 "heat-shock genes and 4 to 15 the taxonomy leaves unclassified. This describes "
+                 "the leading edge and cannot be read as the composition of the 199-gene set: "
+                 "the categories are model-assigned and applied only to genes selected because "
+                 "they enriched, and against curated versioned sets the whole up arm reads "
+                 "differently — 137 of 199 genes belong to no named program and the curated HSR "
+                 "core contributes 2."),
         script=SCRIPT, fn="plot_leadingedge",
-        config_kv="taxonomy=00_data/references/heat_leadingedge_taxonomy; evidence_tier=secondary_exploratory",
-        input="03_results/09_heat_hypoxia/tables/leadingedge_composition.csv",
+        config_kv=("taxonomy=00_data/references/heat_leadingedge_taxonomy; "
+                   "evidence_tier=secondary_exploratory; claim_tier=corroborative_only"),
+        input=("03_results/09_heat_hypoxia/tables/leadingedge_composition.csv, "
+               "03_results/11_heat_decomposition/tables/_overview/heatdecomp_arm_coverage.csv"),
         how_to_read=(
-            "One stacked bar per population, spanning that population's full WT_heat up "
-            "leading edge; segment width is the fraction of leading-edge genes in each "
-            "program and the number inside a segment is its gene count (printed where the "
-            "segment is wide enough to hold it; every count is in the source table). Program "
-            "assignment comes from a frozen external-model gene taxonomy, not from this run. "
-            "The narrow heat-shock segment is the point, and it is why an activation-free "
-            "proteostasis lens was built next. Exploratory secondary tier, never pooled with "
-            "the pseudobulk NES."),
-        config=FIG_CFG, height=7.0,
+            "CORROBORATES and never answers. One stacked bar per population, spanning that "
+            "population's whole WT_heat up leading edge: every gene is in a segment, including "
+            "the ones the taxonomy leaves unclassified, drawn in grey rather than left as "
+            "unfilled axis. Segment width is the fraction of leading-edge genes in each "
+            "category, the number inside is its gene count, and the segments are checked to sum "
+            "to the bar. The right-hand text gives the leading-edge size against the 199-gene up "
+            "arm. Two limits are on the face. The categories are model-assigned rather than "
+            "curated and versioned, and they are applied to the leading edge — the genes that "
+            "enriched — so a fraction over them is not a fraction of the set. The whole-arm "
+            "curated partition, printed beneath the bars, is where composition is settled: it "
+            "puts 137 of 199 genes in no named program. Exploratory tier, never pooled with the "
+            "pseudobulk NES."),
+        config=FIG_CFG, height=7.6,
     )
     plt.close(fig)
 
