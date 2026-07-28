@@ -1,9 +1,7 @@
 gene_symbol,log2FoldChange,pvalue,padj,neg_log10_padj,sf_direction,passes_de_gates,arm,hypoxia_purged,le_program,reference_axis,label_drawn,n_genes_tested,n_gates_sf_high_all_genes,n_gates_blood_high_all_genes,contrast,evidence_tier
 IFI6,1.55961575,6.3337339e-08,2.55787863e-05,4.59212007,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 SPATS2L,1.80335324,5.06838362e-07,6.82233675e-05,4.16606685,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
-LY6E,1.0924059,6.81134698e-07,7.80390708e-05,4.10768791,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 OASL,2.05577934,1.96298894e-06,0.000139491788,3.85545136,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
-MT2A,1.31953128,6.23164743e-06,0.000281691083,3.5502269,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 RSAD2,2.08354618,1.01961561e-05,0.000375621024,3.42525011,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 IFI44,1.03412947,1.25710059e-05,0.000428583776,3.36796427,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 ZBTB43,0.824911107,1.53433445e-05,0.000479445268,3.31926096,SF_high,False,not_in_signature,False,not_annotated,sting_specific,True,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
@@ -22,7 +20,6 @@ CARD17,-0.943041401,0.000655935771,0.00502321929,2.29901786,blood_high,False,not
 IRF7,0.690372281,0.000663153659,0.00505534904,2.29624885,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 IGFBP4,2.05484332,0.000791047197,0.00563842654,2.24884207,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 OTOF,1.33892281,0.00134565977,0.00824054728,2.08404394,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
-PGAP1,0.597087172,0.00164919947,0.00945032478,2.02455327,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 AC011997.1,-1.52152461,0.00237383317,0.0123170091,1.90949474,blood_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 IFI44L,1.05051016,0.00325980321,0.0153443124,1.81405257,SF_high,True,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 SLC38A5,0.431226177,0.00402403465,0.0176646162,1.75289579,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
@@ -32,12 +29,12 @@ TSC22D2,-0.520248197,0.00969231711,0.0332392815,1.47834837,blood_high,False,not_
 KLF4,1.92771336,0.00983113252,0.0334693638,1.47535254,SF_high,True,not_in_signature,False,not_annotated,sting_specific,True,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 ZBP1,0.486116051,0.0110974139,0.0365880116,1.43666119,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 ADRB2,2.14938983,0.0121760927,0.0390857882,1.40798113,SF_high,True,not_in_signature,False,not_annotated,sting_specific,True,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
+TREX1,0.311413064,0.0142853449,0.0440212355,1.35633777,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 PNPT1,0.303860309,0.0301319514,0.0765131847,1.11626372,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 CXCL10,1.51697404,0.0314914192,0.0790192466,1.10226712,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 HERC6,0.411771886,0.0348494447,0.0852513749,1.06929861,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 ZFP36L2,-0.589100881,0.0393668896,0.0932324628,1.03043284,blood_high,False,not_in_signature,False,not_annotated,sting_specific,True,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 IFIH1,0.42955521,0.0396168655,0.0935711996,1.0288578,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
-ABTB2,0.97196078,0.044566941,0.102097532,0.990984755,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 ISG20,0.374496019,0.0522685443,0.115356669,0.937957293,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 WDR64,-1.3128273,0.059433321,0.126946454,0.896379425,blood_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 DDX60L,0.326220803,0.0611088965,0.129478347,0.887802852,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
@@ -46,8 +43,6 @@ SDS,1.4123932,0.0873055416,0.169093444,0.77187323,SF_high,False,not_in_signature
 IFIT2,-0.621122682,0.0942804354,0.179130268,0.746831024,blood_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 RPS4Y2,-0.900109344,0.109961139,0.200461777,0.697968425,blood_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 IFIT3,0.467857685,0.12742354,0.224182766,0.649397778,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
-MASTL,0.916007137,0.136315148,0.236670687,0.625855528,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
-CCNA1,1.76623271,0.147986302,0.25159828,0.599292333,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 HERC5,0.538085898,0.151698352,0.256569438,0.590795078,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 APOBEC3B,1.30784035,0.175279329,0.285916491,0.543760796,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 OTUD1,0.261888969,0.19649646,0.311423993,0.506647931,SF_high,False,not_in_signature,False,not_annotated,sting_specific,True,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
@@ -68,6 +63,7 @@ BCL2L14,-0.266032468,0.701874472,0.78889207,0.102982409,blood_high,False,not_in_
 LRRC3,0.177626164,0.77470808,0.845295278,0.0729915572,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 MDK,-0.103299828,0.790670374,0.856304701,0.0673716717,blood_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 PLSCR1,0.085418623,0.800994673,0.86494326,0.063012381,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
+FAM215A,0.0250651921,0.916893626,0.944557647,0.0247715314,SF_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 APOBEC3A,-0.0165430629,0.982742834,0.988320182,0.00510233606,blood_high,False,not_in_signature,False,not_annotated,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 CDKN1A,4.50522407,1.89479155e-09,6.63129672e-06,5.17840154,SF_high,True,up,True,hypoxia_HIF,none,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk
 IL1RN,6.43016593,2.50866072e-08,1.5269018e-05,4.81618889,SF_high,True,up,False,effector_activation,ifn_only,False,13999.0,860.0,937.0,SF_vs_PB,primary_pseudobulk

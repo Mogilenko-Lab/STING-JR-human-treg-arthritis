@@ -238,7 +238,7 @@ tier, correlative.
 ## figures/_overview/heat_treg_volcano_programs.png
 
 Only 2 of the 21 published IFN-independent STING-activation genes and
-7 of 200 generic type-I IFN genes are in the mouse 39 °C up-arm, so
+6 of 200 generic type-I IFN genes are in the mouse 39 °C up-arm, so
 the SF-high program the purge leaves standing is an effector and
 activation program that shares almost nothing with the STING reference
 axis.
