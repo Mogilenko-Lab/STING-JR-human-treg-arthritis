@@ -31,7 +31,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import DONOR_KEY, PARAMS, PATHS, TISSUE_DEN, TISSUE_KEY, TISSUE_NUM  # noqa: E402
+from config import CONFIG, DONOR_KEY, PARAMS, PATHS, TISSUE_DEN, TISSUE_KEY, TISSUE_NUM  # noqa: E402
 from helpers.figure_style import FIG_CFG, append_master_table  # noqa: E402
 from helpers.geneset_utils import load_signature  # noqa: E402
 from helpers.source_hash_manifest import verify_source_hashes  # noqa: E402
@@ -56,6 +56,16 @@ LE_CATEGORIES = [
     "effector_activation",
     "other",
 ]
+
+
+def effect_size_signoff_state() -> str:
+    """Read the owner-controlled integration gate; an absent/invalid key is an error."""
+    state = CONFIG.get("decisions", {}).get("effect_sizes", {}).get("signoff")
+    if state not in {"pending", "signed_off"}:
+        raise ValueError(
+            "decisions.effect_sizes.signoff must be recorded as pending or signed_off"
+        )
+    return state
 
 
 def read_gene_list(path: Path) -> list[str]:
@@ -311,6 +321,9 @@ def leadingedge_composition(tables_dir: Path, runsum_paths: dict[str, Path]) -> 
 def update_effect_sizes(gene_purge: pd.DataFrame) -> pd.DataFrame:
     eff_path = PATHS.master_file("effect_sizes_treg_arthritis.csv")
     existing = pd.read_csv(eff_path) if eff_path.exists() else pd.DataFrame()
+    signoff_state = effect_size_signoff_state()
+    if not existing.empty:
+        existing["signoff_state"] = signoff_state
     primary_existing = pd.DataFrame()
     if not existing.empty:
         primary_existing = existing[
@@ -346,6 +359,7 @@ def update_effect_sizes(gene_purge: pd.DataFrame) -> pd.DataFrame:
             }
         )
     new = pd.DataFrame(rows)
+    new["signoff_state"] = signoff_state
     if existing.empty:
         combined = new
     else:

@@ -44,8 +44,8 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import (PATHS, PARAMS, TISSUE_KEY, DONOR_KEY, TISSUE_NUM, TISSUE_DEN,  # noqa: E402
-                    COARSE_LABEL)
+from config import (CONFIG, PATHS, PARAMS, TISSUE_KEY, DONOR_KEY, TISSUE_NUM,  # noqa: E402
+                    TISSUE_DEN, COARSE_LABEL)
 from helpers.geneset_utils import (load_signature, score_cells_aucell_ucell,  # noqa: E402
                                    _symbol_to_varname)
 from helpers.figure_style import append_master_table, FIG_CFG  # noqa: E402
@@ -56,6 +56,16 @@ PRIMARY = "WT_heat"
 POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
 FGSEA_R = "02_analysis/helpers/fgsea_prerank.R"
 DATASET = "GSE160097"
+
+
+def effect_size_signoff_state() -> str:
+    """Read the owner-controlled integration gate; an absent/invalid key is an error."""
+    state = CONFIG.get("decisions", {}).get("effect_sizes", {}).get("signoff")
+    if state not in {"pending", "signed_off"}:
+        raise ValueError(
+            "decisions.effect_sizes.signoff must be recorded as pending or signed_off"
+        )
+    return state
 
 
 def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) -> pd.DataFrame:
@@ -184,7 +194,8 @@ def main() -> None:
 
     cols = ["dataset", "signature", "cell_state", "contrast", "effect_metric", "evidence_tier",
             "estimate", "se", "ci_low", "ci_high", "direction", "pvalue", "padj",
-            "n_donors", "n_cells"]
+            "n_donors", "n_cells", "signoff_state"]
+    eff["signoff_state"] = effect_size_signoff_state()
     eff = eff[cols]
     eff.to_csv(PATHS.master_file("effect_sizes_treg_arthritis.csv"), index=False)
     append_master_table(eff, database=DATASET, stage=STAGE, name="master_effect_sizes",

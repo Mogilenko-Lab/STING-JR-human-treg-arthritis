@@ -24,9 +24,10 @@ project:
 # =============================================================================
 
 design:
-  # GSE160097: FACS-sorted memory T-cell populations from PAIRED synovial fluid (SF)
-  # and peripheral blood (PB) of 7 JIA donors. The contrast is tissue (SF vs PB),
-  # blocked on donor; run independently within each sorted population.
+  # GSE160097: FACS-sorted memory T-cell populations from synovial fluid (SF)
+  # and peripheral blood (PB) of 7 JIA donors. Six donors span both arms within
+  # each analyzed population. The contrast is blocked on donor and run
+  # independently within each sorted population.
   tissue_key: "tissue"                 # obs column carrying SF / PB
   tissue_levels:
     synovial_fluid: "synovial_fluid"   # numerator (inflamed joint)
@@ -41,7 +42,7 @@ design:
     - name: "SF_vs_PB"
       numerator: "synovial_fluid"
       denominator: "peripheral_blood"
-      model: "~ donor + tissue"        # paired; p3 absent for PB Tcon/CD8 -> effectively unpaired there
+      model: "~ donor + tissue"        # donor-blocked model; six donors span both arms
   n_donors: 7
 
 # =============================================================================
@@ -280,6 +281,7 @@ schemas:
       - padj
       - n_donors
       - n_cells
+      - signoff_state     # pending | signed_off; integration fails closed
 
 # =============================================================================
 # HUMAN-REVIEW DECISIONS (recorded at breakpoints so re-runs replay them)
@@ -289,6 +291,10 @@ schemas:
 # must not proceed past it until status flips.
 
 decisions:
+  effect_sizes:
+    # Deliberately pending. Only the compartment owner may admit these rows to
+    # cross-dataset panels after reviewing the regenerated 12-row artifact.
+    signoff: pending       # pending | signed_off
   qc:
     status: APPROVED         # QC thresholds sound; libraries retain high yield; only GSM4859852 (near-empty) dropped
     drop_gsms:
