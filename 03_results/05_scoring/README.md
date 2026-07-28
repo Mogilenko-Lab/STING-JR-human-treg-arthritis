@@ -4,14 +4,29 @@ _**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood.
 
 ## figures/_overview/wt_heat_nes_forest.png
 
-The primary readout: whether the mouse 39 °C Treg up-program enriches
-in JIA SF-vs-PB Tregs, and whether that enrichment is Treg-
-preferential over Tcon/CD8.
+The mouse 39 °C-derived up arm separates synovial fluid from paired
+blood in every sorted population — NES 2.5915 in Treg (119 of 199
+genes ranked), 2.6809 in Tcon (130) and 2.0710 in CD8 (113), all at
+FDR below 1e-6 — so the answer to Treg preference is NO: the result is
+pan-T with Tcon the largest, and Tregs are in it rather than
+privileged in it. The down arm is not silent either, reaching NES
+1.4718 at FDR 0.026 in Tcon, the same sign as the up arm, while
+carrying no direction in Treg (0.9676) or CD8 (1.0943).
 
-**How to read:** Points = fgsea NES for WT_heat up (circle) / down (diamond), colored
-by population; x=0 dashed = no enrichment; * = FDR < threshold. Read
-Treg-preference as: is the Treg-up NES the largest and significant?
-Correlative (consistent-with), not causal.
+**How to read:** ANSWERS, at the only tier that may: donor-level pseudobulk within
+frozen sort labels, limma-voom then fgsea, paired within each of the 7
+donors. Points = fgsea NES for the WT_heat up (circle) and down
+(diamond) arm, coloured by sorted population; x = 0 dashed = no
+enrichment; * = FDR below 0.05. Beside each point is the effective set
+size — members present in that population's ranked list — against the
+nominal arm size, and the FDR. Read the answer as written on the face,
+not as a Treg-preference check: Tcon has the largest up-arm NES, all
+three are significant, the result is pan-T. Read the down arm too —
+significant in Tcon at the up arm's sign, so the up arm is not the
+only informative one. Do NOT read the ordering of the three NES as a
+biological ranking; effective set size tracks it across these rows. An
+ordered NES dot plot, not a forest: no pseudobulk NES row here carries
+an interval. Correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
