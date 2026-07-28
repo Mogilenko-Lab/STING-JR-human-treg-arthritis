@@ -34,18 +34,23 @@ an interval. Correlative, not causal.
 
 ## figures/_overview/score_violins.png
 
-Corroborative per-cell view: donor-mean WT_heat_up AUCell score in SF
-vs PB across Treg/Tcon/CD8 — is the SF-vs-PB shift Treg-preferential?
+Donor-mean WT_heat_up AUCell sits higher in synovial fluid than in
+paired blood in all three sorted populations, so the per-cell channel
+shadows the pseudobulk answer in the same direction. It corroborates
+and cannot answer: a per-cell score is a different estimand on a
+secondary tier, and the shift it shows is not confined to Tregs
+either.
 
-**How to read:** Each dot is one donor's mean WT_heat_up AUCell score for that
-state×tissue, and the violins summarise across donors. AUCell is a
-rank-based score in [0,1], the area under each cell's gene-recovery
-curve for the up-set, robust to library size and composition. Read the
-RELATIVE SF-vs-PB shift within each population (Treg SF vs Treg PB),
-not the absolute level. This is a different estimand from the forest
-NES (fgsea on the donor-pseudobulk ranked list). Secondary tier
-(percell), NEVER pooled with the pseudobulk NES. Down arm omitted
-because up and down co-shift in SF. Correlative.
+**How to read:** This panel CORROBORATES and never answers — per-cell scores are not a
+tier that may support a claim. Each dot is one donor's mean WT_heat_up
+AUCell score for that state×tissue, and the violins summarise across
+donors. AUCell is a rank-based score in [0,1], the area under each
+cell's gene-recovery curve for the up-set, robust to library size and
+composition. Read the RELATIVE SF-vs-PB shift within each population
+(Treg SF vs Treg PB), not the absolute level. This is a different
+estimand from the pseudobulk NES dot plot and shares no axis with it;
+NEVER pooled with it. Down arm omitted because up and down co-shift in
+SF. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -223,3 +228,4 @@ Correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/05_score_signatures.py` | `main` | `percell_score_ncores=8; signature=WT_heat_{up,down} (AUCell + UCell, rank-based [0,1])` | `03_results/objects/02_annotation.h5ad`, `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |
+

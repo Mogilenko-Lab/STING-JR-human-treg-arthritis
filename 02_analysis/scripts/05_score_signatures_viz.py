@@ -216,23 +216,30 @@ def main() -> None:
         ax.scatter(np.full(len(vals), i), vals, s=18, c="black", zorder=3)
     ax.set_xticks(range(len(groups))); ax.set_xticklabels(groups, rotation=30, ha="right")
     ax.set_ylabel("donor-mean WT_heat_up AUCell score")
-    ax.set_title("Per-cell WT_heat_up AUCell score, donor means by state × tissue")
+    ax.set_title("Per-cell WT_heat_up AUCell score, donor means by state × tissue\n"
+                 "CORROBORATES ONLY — a per-cell score may never answer")
     fig3.tight_layout()
     save_overview(fig3, STAGE, "score_violins", table=dm,
-                  finding=("Corroborative per-cell view: donor-mean WT_heat_up AUCell score in SF vs PB "
-                           "across Treg/Tcon/CD8 — is the SF-vs-PB shift Treg-preferential?"),
+                  finding=("Donor-mean WT_heat_up AUCell sits higher in synovial fluid than in "
+                           "paired blood in all three sorted populations, so the per-cell channel "
+                           "shadows the pseudobulk answer in the same direction. It corroborates "
+                           "and cannot answer: a per-cell score is a different estimand on a "
+                           "secondary tier, and the shift it shows is not confined to Tregs "
+                           "either."),
                   script=SCRIPT, fn="main",
                   config_kv="signature = WT_heat_up (AUCell, rank-based [0,1])",
                   input="03_results/05_scoring/tables/donor_label_score_means.csv",
-                  how_to_read=("Each dot is one donor's mean WT_heat_up AUCell score for that "
-                               "state×tissue, and the violins summarise across donors. AUCell is a "
-                               "rank-based score in [0,1], the area under each cell's gene-recovery "
-                               "curve for the up-set, robust to library size and composition. Read the "
-                               "RELATIVE SF-vs-PB shift within each population (Treg SF vs Treg PB), "
-                               "not the absolute level. This is a different estimand from the forest "
-                               "NES (fgsea on the donor-pseudobulk ranked list). Secondary tier "
-                               "(percell), NEVER pooled with the pseudobulk NES. Down arm omitted "
-                               "because up and down co-shift in SF. Correlative."),
+                  how_to_read=("This panel CORROBORATES and never answers — per-cell scores are "
+                               "not a tier that may support a claim. Each dot is one donor's mean "
+                               "WT_heat_up AUCell score for that state×tissue, and the violins "
+                               "summarise across donors. AUCell is a rank-based score in [0,1], "
+                               "the area under each cell's gene-recovery curve for the up-set, "
+                               "robust to library size and composition. Read the RELATIVE "
+                               "SF-vs-PB shift within each population (Treg SF vs Treg PB), not "
+                               "the absolute level. This is a different estimand from the "
+                               "pseudobulk NES dot plot and shares no axis with it; NEVER pooled "
+                               "with it. Down arm omitted because up and down co-shift in SF. "
+                               "Correlative."),
                   config=FIG_CFG)
     print("[05_scoring_viz] wrote 2 overviews (NES forest + score violins)")
 
