@@ -4,7 +4,9 @@ _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized
 
 This stage asks one bounded question of the JIA SF-vs-PB `WT_heat` enrichment: is it reducible to the set's own `HALLMARK_HYPOXIA`-overlap gene content? That is a membership question, and it is answered by deleting those genes and re-running the same donor-pseudobulk fgsea. It is deliberately not a question about temperature, and it is not a question about whether hypoxia is a confound or a co-exposure — those are not separable in cross-sectional human data, and nothing here licenses a statement about either. Hypoxia is a transcriptional readout throughout, never a HIF-causality claim.
 
-The figures walk that in order. The first answers the membership question at confirmatory tier and stops there. The second and third corroborate and cannot answer: whether the two per-cell scores even mark the same cells, and what sits at the synovial-fluid end of each ranking. The third is the weakest of the three by construction — its categories are model-assigned and applied only to genes selected because they enriched — so the composition of the set is settled by the whole-arm partition against curated versioned sets in `11_heat_decomposition`, and the leading-edge bars carry that partition's counts on their own face so the two can never be confused. An activation-free curated heat-shock lens was built separately, in `10_hsr_lens`, precisely because it does not depend on this taxonomy.
+The figures walk that in order. The first answers the membership question at confirmatory tier and stops there. The second corroborates and cannot answer whether the two per-cell scores mark the same cells. The reader sequence then moves directly to the curated whole-arm coverage panel in `11_heat_decomposition`, which alone answers what the set contains: 137 of 199 up-arm genes belong to no named program, the curated HSR core contains 2, and type-I interferon contains 1.
+
+I withdrew the former leading-edge composition figure for redundancy and denominator risk, not because it re-tested selected subsets. It only described the genes at the synovial-fluid end of each ranking. Its model-assigned taxonomy (`agy_gemini_3.1_pro_2026-07-14`) put 55% to 61% of those selected leading-edge genes in immediate-early or effector/activation categories, a memorable fraction that is not comparable to the curated whole-arm activation counts of 5.6% in mouse and 6.0% after human projection. I retain `leadingedge_composition.csv` as an exploratory compute resource and notebook input, but no visualization of it remains in the published overview.
 
 Two further figures put the mouse sets back into the plain Treg SF-vs-PB volcano, so a reader can see how much of the differential-expression response the signature accounts for, and how little it shares with the published IFN-independent STING-activation signature of de Cevins et al. 2023 (Cell Rep Med, PMID 38118407) that the STING positive-control compartment carries as a reference axis.
 
@@ -30,13 +32,13 @@ Within SF cells, `WT_heat_up_AUCell` and `HALLMARK_HYPOXIA_AUCell` show weak pos
 
 ## leadingedge_composition.csv
 
-Of the 49 to 71 genes at the SF end of each population's ranking, the taxonomy calls 42% to 47% effector or activation, 11% to 15% immediate-early, 13% to 14% hypoxia-overlap and 3% to 5% classic heat-shock, leaving 8% to 21% unclassified. Those are fractions of a leading edge and not of the 199-gene set — the set's own composition is a different measurement, and it is the whole-arm curated partition that carries it.
+Of the 49 to 71 genes at the SF end of each population's ranking, the model-assigned taxonomy describes 55% to 61% as immediate-early or effector/activation. Those are fractions of leading-edge genes only, not of the 199-gene set, and I retain them as an exploratory compute resource rather than a reader-sequence figure.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `leadingedge_composition` | taxonomy from `00_data/references/heat_leadingedge_taxonomy/` | `03_results/09_heat_hypoxia/tables/runsum_interactive_gsea_full_{treg,tcon,cd8}_WT_heat_up.csv`, `00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv` |
 
-**How to read:** One row per population. `n_leading_edge` is the count of fgsea core-enrichment genes from the full `WT_heat_up` run. Each is assigned to one program — `heat_shock_proteostasis`, `hypoxia_HIF`, `immediate_early_stress`, `effector_activation`, `other` — from a frozen gene taxonomy (external large-context-model classification, provenance in `00_data/references/heat_leadingedge_taxonomy/`). The `n_`/`frac_` columns tally each program, the `genes_` columns list members, and `n_unclassified` counts the leading-edge genes the taxonomy assigns to nothing — so the categories plus the unclassified count exhaust the leading edge, and the categories alone do not. Exploratory secondary tier, never pooled with the pseudobulk NES and never used to support a claim. Two limits bound what this table can be read for, and together they are why it corroborates rather than answers. The categories are model-assigned rather than curated and versioned; and they are applied to the leading edge, which is by definition the genes selected because they enriched, so a fraction taken over them describes that leading edge and is not a fraction of the 199-gene set. The composition of the set is settled instead by the whole-arm partition against curated versioned sets, which puts 137 of the 199 up genes in no named program and gives the curated HSR core 2.
+**How to read:** One row per population. `n_leading_edge` is the count of fgsea core-enrichment genes from the full `WT_heat_up` run. Each is assigned to one program — `heat_shock_proteostasis`, `hypoxia_HIF`, `immediate_early_stress`, `effector_activation`, `other` — by the frozen model-assigned taxonomy whose exact source is carried in `taxonomy_source`; `n_unclassified` counts genes assigned to nothing. This table was never used to re-test a leading-edge subset. It remains because the reactive review notebook reads it, but its visualization is withdrawn: a fraction over genes selected because they enriched describes that leading edge and not the 199-gene set. Read whole-arm composition only from `11_heat_decomposition/figures/_overview/heatdecomp_arm_coverage`, where the curated versioned lenses leave 137 of 199 genes unassigned and contain 2 curated-HSR and 1 type-I-interferon gene.
 
 ## tables/gsea_full_{treg,tcon,cd8}.csv
 
@@ -56,7 +58,7 @@ Removing the 18 `HALLMARK_HYPOXIA` overlap genes leaves `WT_heat_up` SF-high in 
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia.py` | `run_fgsea` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, `03_results/09_heat_hypoxia/tables/_signatures_purged/WT_heat_{up,down}.txt` |
 
-**How to read:** Same schema and sign convention as the full run above -- positive `nes` is SF-high, `padj` is BH within the run -- with the `contrast` column tagged `SF_vs_PB_<population>_hypoxia_purged` so the two families never get confused. `set_size` drops from 119/130/113 to 107/115/101 for `WT_heat_up` as the hypoxia genes leave — 18 genes go out of the frozen set file, but only the 12/15/12 that were in that population's ranked list could move anything — and `core_enrichment` correspondingly loses CDKN1A, ANXA2, SDC4, ATF3, PLAUR and friends. Primary donor-pseudobulk tier; these files are the per-population source rows behind `gene_purge_nes_comparison.csv`, which is where the paired comparison should be read. A still-positive, still-significant NES here means the `WT_heat_up` enrichment is not reducible to its HALLMARK_HYPOXIA-overlap gene content -- it does not, on its own, say anything about temperature.
+**How to read:** Positive `nes` is SF-high and `padj` is BH within each run. The contrast tag distinguishes purged rows. `WT_heat_up` effective size falls from 119/130/113 to 107/115/101: 18 genes leave the frozen set, but only 12/15/12 were testable in the corresponding ranking. These primary donor-pseudobulk rows feed `gene_purge_nes_comparison.csv`, which owns the paired comparison. A positive, significant purged NES supports only the bounded gene-content statement; it says nothing about temperature.
 
 ## tables/_signatures_full/WT_heat_{up,down}.txt
 
@@ -98,16 +100,6 @@ The plotted cell-level rows only: within-SF correlation of the per-cell heat and
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia_viz.py` | `colocalization_table` | `level=cell; tissue=synovial_fluid` | `03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv` |
 
-## tables/_overview/heat_leadingedge_composition.csv
-
-The plotted composition rows: leading-edge gene counts and fractions per biological program, one row per population.
-
-**How to read:** `frac_<program>` are the stacked segment widths and `n_<program>` the counts printed inside them; `n_leading_edge` is the bar total. Exploratory secondary tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `leadingedge_table` | `taxonomy=00_data/references/heat_leadingedge_taxonomy` | `03_results/09_heat_hypoxia/tables/leadingedge_composition.csv` |
-
 ## tables/_overview/heat_treg_volcano_signature.csv
 
 Every mouse `WT_heat` gene with a testable Treg SF-vs-PB result, 103 up-arm and 55 down-arm, carrying the fold change and FDR that place it on the volcano.
@@ -140,21 +132,16 @@ content and nothing else: it says nothing about temperature, and
 nothing about whether hypoxia is a confound or a co-exposure, which
 are not separable in cross-sectional human data.
 
-**How to read:** ANSWERS, at confirmatory tier: donor-level pseudobulk within frozen
-sort labels, limma-voom then fgsea. One row per population and arm; x
-is fgsea NES, positive = toward the synovial-fluid end. Each row pairs
-the full mouse set (large diamond) with the hypoxia-purged set (small
-circle), and the bar between them is the cost. Warm brown = up arm,
-cool blue = down arm; all markers are translucent, so the untouched
-down-arm pair reads as a circle inside a diamond. A dark outline marks
-FDR below 0.05 and is the only significance glyph. The right-hand text
-gives effective set size before and after the purge against the arm's
-nominal size, the NES cost, and the purged FDR. Read the two removal
-counts apart: 18 genes leave the frozen file, but only the 12 to 15
-present in that ranked list could move anything, and both are columns
-of the source table. The down arm is not silent — Tcon only, at the up
-arm's sign. The purge licenses a membership statement and no more.
-Correlative.
+**How to read:** ANSWERS at confirmatory tier: donor-level pseudobulk within frozen
+sort labels, limma-voom then fgsea. Positive NES points toward
+synovial fluid. Each row pairs the full set (large diamond) with its
+purged form (small circle); the connecting bar is the NES cost. Warm
+brown is the up arm and cool blue the down arm. A dark outline marks
+FDR below 0.05. Right-hand text reports effective and nominal set
+sizes, the NES cost, and purged FDR. Distinguish the 18 genes removed
+from the frozen set from the 12 to 15 present in a ranked list. The
+Tcon down arm remains significant at the up arm's sign. This licenses
+a membership statement only. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -168,51 +155,18 @@ so the two scores are carried by largely different cells rather than
 reading out one shared cell state. Per-cell tier: this corroborates
 the membership result and cannot answer anything on its own.
 
-**How to read:** This panel CORROBORATES and never answers — a per-cell score is not a
-tier that may support a claim. Bars are the within-SF, cell-level
-correlation between the per-cell WT_heat_up and HALLMARK_HYPOXIA
-AUCell scores, Spearman (dark) beside Pearson (light), with the cell
-count under each population. The y-axis deliberately runs the full
--0.05 to 1 range: read the shortness of the bars, not their rank
-order. Positive r means a heat-high cell tends to be hypoxia-high.
-Donor-level SF means are unpowered at 6 to 7 donors and are left in
-the stage table rather than drawn. This is a secondary per-cell
-diagnostic of where the two scores sit, never pooled with the
-pseudobulk NES and never read as directional evidence.
+**How to read:** CORROBORATES and never answers: this per-cell tier cannot support a
+claim. Bars show within-SF cell-level correlation between WT_heat_up
+and HALLMARK_HYPOXIA AUCell scores, with Spearman dark and Pearson
+light; cell counts sit below each population. The y-axis spans -0.05
+to 1, so read bar height rather than rank. Positive r means the scores
+tend to coincide. Donor-level SF means rest on 6 to 7 donors and
+remain in the stage table. Never pool this diagnostic with pseudobulk
+NES or read it as directional evidence.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_colocalization` | `level=cell; tissue=synovial_fluid; evidence_tier=secondary_percell` | `03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv` |
-
-## figures/_overview/heat_leadingedge_composition.png
-
-At the synovial-fluid end of each ranking the 49 to 71 leading-edge
-genes are dominated by effector and activation categories, with 2 to 3
-classic heat-shock genes and 4 to 15 the taxonomy leaves unclassified.
-This describes the leading edge and cannot be read as the composition
-of the 199-gene set: the categories are model-assigned and applied
-only to genes selected because they enriched, and against curated
-versioned sets the whole up arm reads differently — 137 of 199 genes
-belong to no named program and the curated HSR core contributes 2.
-
-**How to read:** CORROBORATES and never answers. One stacked bar per population,
-spanning that population's whole WT_heat up leading edge: every gene
-is in a segment, including the ones the taxonomy leaves unclassified,
-drawn in grey rather than left as unfilled axis. Segment width is the
-fraction of leading-edge genes in each category, the number inside is
-its gene count, and the segments are checked to sum to the bar. The
-right-hand text gives the leading-edge size against the 199-gene up
-arm. Two limits are on the face. The categories are model-assigned
-rather than curated and versioned, and they are applied to the leading
-edge — the genes that enriched — so a fraction over them is not a
-fraction of the set. The whole-arm curated partition, printed beneath
-the bars, is where composition is settled: it puts 137 of 199 genes in
-no named program. Exploratory tier, never pooled with the pseudobulk
-NES.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_leadingedge` | `taxonomy=00_data/references/heat_leadingedge_taxonomy; evidence_tier=secondary_exploratory; claim_tier=corroborative_only` | `03_results/09_heat_hypoxia/tables/leadingedge_composition.csv, 03_results/11_heat_decomposition/tables/_overview/heatdecomp_arm_coverage.csv` |
 
 ## figures/_overview/heat_treg_volcano_signature.png
 
