@@ -35,6 +35,7 @@ Outputs (all under 03_results/11_heat_decomposition/tables/):
   - _signatures_decomp/<subcomponent>_<arm>.txt
   - decomposition_overlap.csv
   - decomposition_gene_assignment.csv
+  - decomposition_assignment_multiplicity.csv
   - decomp_gsea_{treg,tcon,cd8}.csv (+ .rds + runsum_interactive_*.csv)
   - decomposition_nes.csv
   - sting_axis_overlap.csv
@@ -245,6 +246,42 @@ def gene_assignment(tables_dir: Path, arms: dict[str, list[str]],
     return out
 
 
+def assignment_multiplicity(tables_dir: Path, assignment: pd.DataFrame) -> pd.DataFrame:
+    """One row per arm: how far the overlapping assignment is from a partition.
+
+    The coverage figure draws one bar per curated set, and overlapping bars read
+    as a partition unless the panel says otherwise. The quantity that shows they
+    are not is the multiplicity: how many of the claimed genes carry more than one
+    assignment, and therefore how many more claims exist than claimed genes. Summing
+    the bars double-counts exactly that excess.
+
+    Computed here rather than in the viz script so the number the figure prints is
+    read from a committed table instead of derived at draw time.
+    """
+    rows = []
+    for arm in ARMS:
+        sub = assignment[assignment["mouse_arm"] == f"{PRIMARY}_{arm}"]
+        mult = sub["n_subcomponents"].astype(int)
+        claimed = mult > 0
+        rows.append({
+            "mouse_arm": f"{PRIMARY}_{arm}",
+            "arm": arm,
+            "n_arm": int(len(sub)),
+            "n_unassigned": int((~claimed).sum()),
+            "n_claimed": int(claimed.sum()),
+            "n_claimed_once": int((mult == 1).sum()),
+            "n_claimed_multiply": int((mult >= 2).sum()),
+            "max_subcomponents_per_gene": int(mult.max()) if len(mult) else 0,
+            "n_claims_total": int(mult.sum()),
+            "n_excess_claims": int(mult.sum() - claimed.sum()),
+            "is_partition": bool(int((mult >= 2).sum()) == 0),
+            "evidence_tier": "secondary_annotation",
+        })
+    out = pd.DataFrame(rows)
+    out.to_csv(tables_dir / "decomposition_assignment_multiplicity.csv", index=False)
+    return out
+
+
 # ===========================================================================
 # 2. Score every subcomponent against the same donor-pseudobulk ranked lists
 # ===========================================================================
@@ -403,16 +440,17 @@ def main() -> None:
     sig_dir = prepare_signature_dirs(tables_dir, subs)
     overlap = overlap_tallies(tables_dir, arms, curated, subs)
     assignment = gene_assignment(tables_dir, arms, curated)
+    multiplicity = assignment_multiplicity(tables_dir, assignment)
     nes = decomposition_nes(tables_dir, sig_dir, subs)
     sting = sting_axis_overlap(tables_dir, arms, curated)
 
     print("[11_heat_decomposition] how much of each arm each presumption claims:")
     print(overlap[["mouse_arm", "subcomponent", "n_intersect", "frac_of_mouse_arm"]]
           .to_string(index=False))
-    shared = assignment[assignment["n_subcomponents"] > 1]
-    by_arm = ", ".join(f"{arm}={n}" for arm, n in shared.groupby("mouse_arm").size().items())
-    print(f"[11_heat_decomposition] {len(shared)} gene(s) belong to more than one curated "
-          f"subcomponent ({by_arm}) — see decomposition_gene_assignment.csv")
+    print("[11_heat_decomposition] the assignment is NOT a partition:")
+    print(multiplicity[["mouse_arm", "n_arm", "n_unassigned", "n_claimed",
+                        "n_claimed_multiply", "n_claims_total", "is_partition"]]
+          .to_string(index=False))
     if len(nes):
         up = nes[nes["mouse_arm"] == f"{PRIMARY}_up"]
         print("[11_heat_decomposition] up-arm NES:")

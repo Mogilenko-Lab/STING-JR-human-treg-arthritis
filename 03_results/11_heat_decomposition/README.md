@@ -6,7 +6,7 @@ The mouse 39 °C up-arm enriches toward synovial fluid in every sorted populatio
 
 The parts are defined by intersection with curated, versioned, anchor-independent public gene sets — the frozen curated HSR core (Reactome/GO) plus six MSigDB Hallmark programs. The `WT_heat_up` leading-edge taxonomy is deliberately unused: it covers only the 66 genes that are the union of the three populations' leading edges, so scoring subsets of it would score genes selected because they had already enriched.
 
-Parts overlap. A gene in two curated programs appears in both, 25 of the 199 up genes are multiply claimed, and the NES rows therefore do not sum to the arm. Forcing a priority-ordered disjoint partition would silently decide which program gets credit for a shared gene, so the full per-gene membership is published instead. The genes no curated set claims are reported as their own `unassigned` part.
+Parts overlap, and the size of the overlap is what shows they are not a partition. 62 of the 199 up genes are claimed by a curated set at all, and those 62 carry 92 claims between them because 25 of them belong to two or three sets at once. So the bars and the NES rows do not sum to the arm: adding the named parts double-counts 30 claims and shrinks the 137-gene remainder, which is the largest single part. Forcing a priority-ordered disjoint partition would silently decide which program gets credit for a shared gene, so the full per-gene membership is published instead, the per-arm multiplicity is tabulated in `decomposition_assignment_multiplicity.csv`, and both are printed on the coverage figure's face. The genes no curated set claims are reported as their own `unassigned` part.
 
 Several parts are small. A part whose intersection with a ranked list falls under `gsea_min_size` = 5 gets no NES and is reported as untestable with its size and its reason, on the face of the coverage figure as well as in the tables. Silent truncation would read as full coverage.
 
@@ -49,13 +49,23 @@ Curated public gene sets claim 62 of the 199 `WT_heat_up` genes and 11 of the 94
 
 ## tables/decomposition_gene_assignment.csv
 
-25 of the 199 up genes and 2 of the 94 down genes belong to more than one curated presumption, with ATF3, CDKN1A, F3, PLAUR and SERPINE1 claimed by three, which is why the parts overlap instead of partitioning.
+25 of the 62 claimed up genes and 2 of the 11 claimed down genes belong to more than one curated presumption, with ATF3, CDKN1A, F3, PLAUR and SERPINE1 claimed by three, which is why the parts overlap instead of partitioning.
 
 **How to read:** One row per mouse-signature gene. `subcomponents` is the semicolon-delimited list of every presumption claiming it and `n_subcomponents` the count; a gene claimed by none reads `unassigned`. This is the audit trail behind the overlapping decomposition — it shows exactly which genes two parts share, so a reader can judge how independent any two NES values are. Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/11_heat_decomposition.py` | `gene_assignment` | `signature=WT_heat` | `03_results/09_heat_hypoxia/tables/_signatures_full/WT_heat_{up,down}.txt`, `00_data/references/msigdb_hallmark/HALLMARK_*.txt`, `00_data/references/temp_hsr_lens/HSR_core.txt` |
+
+## tables/decomposition_assignment_multiplicity.csv
+
+Neither arm's curated assignment is a partition: on the up arm 62 of 199 genes are claimed and carry 92 claims, so 30 claims are duplicates of a gene already counted, and on the down arm 11 claimed genes carry 13 claims.
+
+**How to read:** One row per mouse arm. `n_claimed` counts genes claimed by at least one curated set and `n_unassigned` the rest; `n_claimed_once` and `n_claimed_multiply` split the claimed genes by how many sets claim them, with `max_subcomponents_per_gene` giving the worst case. `n_claims_total` is the sum over genes of how many sets claim each, and `n_excess_claims` is that total minus the number of claimed genes — exactly the amount by which summing the per-set bars over-counts. `is_partition` is `False` whenever `n_claimed_multiply` is non-zero, which is the whole point of the table: it exists so the coverage figure can state the constraint as a measured count rather than as a caution, and so a reader who sums the bars can see how far wrong that goes. Annotation tier; a plain aggregation of `decomposition_gene_assignment.csv` with no statistic in it.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/11_heat_decomposition.py` | `assignment_multiplicity` | `signature=WT_heat` | `03_results/11_heat_decomposition/tables/decomposition_gene_assignment.csv` (in-memory from `gene_assignment`) |
 
 ## tables/decomposition_nes.csv
 

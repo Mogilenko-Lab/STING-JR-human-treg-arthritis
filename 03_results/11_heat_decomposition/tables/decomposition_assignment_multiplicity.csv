@@ -1,0 +1,3 @@
+mouse_arm,arm,n_arm,n_unassigned,n_claimed,n_claimed_once,n_claimed_multiply,max_subcomponents_per_gene,n_claims_total,n_excess_claims,is_partition,evidence_tier
+WT_heat_up,up,199,137,62,37,25,3,92,30,False,secondary_annotation
+WT_heat_down,down,94,83,11,9,2,2,13,2,False,secondary_annotation
