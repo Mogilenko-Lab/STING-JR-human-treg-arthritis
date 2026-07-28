@@ -35,6 +35,7 @@ TDIR   <- "03_results/05_scoring/tables"
 POP_TAG    <- c(Treg = "treg", Tcon = "tcon", CD8 = "cd8")
 GENE_SETS  <- c("WT_heat_up", "WT_heat_down")
 SET_LABELS <- c(WT_heat_up = "WT_heat up", WT_heat_down = "WT_heat down")
+SET_ARM    <- c(WT_heat_up = "up", WT_heat_down = "down")
 # Diverging cue: heat-up = warm = brown, heat-down = cool = blue (semantic,
 # theme-consistent). Keyed BY LEGEND LABEL, which is the value the colour
 # aesthetic actually carries — see `apply_set_palette()` for why a positional
@@ -60,12 +61,35 @@ SET_PAL <- c("WT_heat up" = "#A6611A", "WT_heat down" = "#2166AC")
 #' so an older pin would silently reintroduce the swap. Retire it once the
 #' compartment pins a toolkit tag containing the fix. `limits` fixes legend
 #' order to up-then-down.
-apply_set_palette <- function(p, ids) {
-  labs_in_order <- unname(SET_LABELS[ids])
+apply_set_palette <- function(p, ids, labs) {
+  labs_in_order <- unname(labs[ids])
+  pal <- stats::setNames(unname(SET_PAL[SET_LABELS[ids]]), labs_in_order)
   suppressMessages(
-    p & ggplot2::scale_color_manual(values = SET_PAL, limits = labs_in_order,
+    p & ggplot2::scale_color_manual(values = pal, limits = labs_in_order,
                                     name = NULL))
 }
+
+#' Nominal size of each frozen mouse arm — a line count, not a statistic.
+#'
+#' An effective set size only means something against the nominal one, so the
+#' legend carries both. Read from the frozen mouse->human projection contract that
+#' the compute step scored, so the denominator cannot drift from the numerator.
+nominal_set_sizes <- function() {
+  contract <- FIG_CFG$paths$signature_contract %||%
+    "../mouse_anchor/03_results/human_projection/"
+  sig_dir <- file.path(contract, "signatures", "WT_heat")
+  vapply(GENE_SETS, function(id) {
+    path <- file.path(sig_dir, paste0(id, ".txt"))
+    if (!file.exists(path))
+      stop("[05_viz_R] frozen signature not found: ", path)
+    genes <- trimws(readLines(path, warn = FALSE))
+    length(unique(genes[nzchar(genes)]))
+  }, FUN.VALUE = integer(1))
+}
+
+#' Render an FDR for an in-figure label: fixed below 3 decimals, else scientific.
+fmt_fdr <- function(p) if (is.na(p)) "FDR n/a" else if (p >= 0.001)
+  sprintf("FDR %.3f", p) else sprintf("FDR %.0e", p)
 
 ylim    <- as.numeric(unlist(FIG_CFG$figures$running_sum_ylim     %||% c(-1, 1)))
 heights <- as.numeric(unlist(FIG_CFG$figures$running_sum_heights  %||% c(2.4, 0.7, 0.9)))
@@ -76,23 +100,46 @@ base_thm <- if (exists("project_theme")) project_theme(config = FIG_CFG) else th
 if (exists("purge_figures"))
   purge_figures(STAGE, "wt_heat_running_sum", overview = TRUE, config = FIG_CFG)
 
-FINDING <- paste(
-  "Per-population leading-edge view: where the mouse 39 °C-derived WT_heat up and",
-  "down arms concentrate along each population's SF-vs-PB pseudobulk ranking.",
-  "All three up-curves climb alike — Tcon highest (NES 2.68), then Treg (2.59),",
-  "then CD8 (2.07) — so the enrichment reads pan-T rather than Treg-preferential.")
+#' Build this population's finding from THIS population's own summary rows.
+#'
+#' A caption may quote only its same-stem table, and this figure's same-stem table
+#' holds one population. The retired caption quoted all three populations' NES from
+#' the dot plot's table instead, which made a three-population claim from a
+#' one-population panel; the cross-population comparison belongs on the dot plot
+#' and this caption points there rather than restating it.
+finding_for <- function(pop, tbl, nominal) {
+  parts <- vapply(seq_len(nrow(tbl)), function(i) {
+    r <- tbl[i, ]
+    sprintf("the %s arm reaches NES %+.4f at %s with %d of its %d genes in the ranked list",
+            SET_ARM[[r$ID]], r$NES, fmt_fdr(r$p.adjust), r$setSize, nominal[[r$ID]])
+  }, FUN.VALUE = character(1))
+  paste0(
+    "In ", pop, " ", paste(parts, collapse = ", and "), ". ",
+    "The curve shows WHERE along this population's synovial-fluid-versus-blood ",
+    "ranking each arm concentrates; whether one sorted population separates more ",
+    "than another is a cross-population comparison and is read off the ordered NES ",
+    "dot plot, not off this panel.")
+}
+
 HOW_TO_READ <- paste(
-  "Top panel = weighted running enrichment score (ES) walking the ranked list",
-  "from SF-enriched (left) to PB-enriched (right); a positive, left-shifted peak",
-  "= SF enrichment. Middle rug = gene-set member positions; bottom = the signed",
-  "moderated-t ranking metric. Two curves per panel, same colour in curve and rug:",
-  "WT_heat up = warm brown, WT_heat down = cool blue.",
-  "ES y clamped to [-1, 1] for cross-population comparability. Display of compute",
-  "output (clusterProfiler gseaResult); correlative, not causal.")
+  "One population per panel. Shows HOW the confirmatory answer arises rather than",
+  "adding one: the same donor-level pseudobulk fgsea result, one sorted population at",
+  "a time. Top panel = weighted running enrichment score walking the ranked list from",
+  "SF-enriched (left) to PB-enriched (right); a positive, left-shifted peak = SF",
+  "enrichment. Middle rug = member positions; bottom = the signed moderated-t ranking",
+  "metric. Same colour in curve and rug: WT_heat up = warm brown, down = cool blue.",
+  "Each legend entry carries that arm's effective set size against its nominal size,",
+  "its NES and its FDR, so no enrichment score sits here without the size it was",
+  "computed on. ES y clamped to [-1, 1] so heights compare across the three panels,",
+  "but the NES ordering ACROSS populations is not read here — the ordered NES dot plot",
+  "carries that, and carries the answer that the result is pan-T rather than",
+  "Treg-preferential. Display of compute output; correlative, not causal.")
 CONFIG_KV <- paste0("gsea_min_size=", FIG_CFG$thresholds$gsea_min_size %||% 5,
                     "; gsea_max_size=", FIG_CFG$thresholds$gsea_max_size %||% 500,
                     "; running_sum_ylim=[", ylim[1], ",", ylim[2], "]",
                     "; engine=clusterProfiler::GSEA(by=fgsea)")
+
+NOMINAL <- nominal_set_sizes()
 
 n_written <- 0L
 for (pop in names(POP_TAG)) {
@@ -109,32 +156,49 @@ for (pop in names(POP_TAG)) {
     next
   }
 
-  p <- gsea_running_sum_plot(
-    g,
-    gene_set_ids    = ids,
-    palette         = unname(SET_PAL[SET_LABELS[ids]]),
-    labels          = SET_LABELS[ids],
-    es_ylim         = ylim,
-    panel_heights   = heights,
-    legend_position = "right",
-    base_theme      = base_thm,
-    title           = sprintf("%s — WT_heat running enrichment (SF vs PB)", pop))
-  p <- apply_set_palette(p, ids)
-
   # Source table = the gseaResult summary rows behind THIS figure.
   res <- g@result
   tbl <- res[res$ID %in% ids,
              c("ID", "Description", "setSize", "enrichmentScore", "NES",
                "pvalue", "p.adjust", "core_enrichment")]
-  tbl$population <- pop
+  tbl$population  <- pop
+  tbl$n_nominal   <- unname(NOMINAL[tbl$ID])
+  tbl <- tbl[match(ids, tbl$ID), ]
+
+  # Effective set size travels with every NES, on the FACE. The legend label is the
+  # only string on this plot wide enough to hold it, and the toolkit wraps labels
+  # only past `max_name_length`, so the limit is raised past the longest label
+  # rather than left to truncate one.
+  labs <- stats::setNames(
+    vapply(ids, function(id) {
+      r <- tbl[tbl$ID == id, ][1, ]
+      sprintf("%s   %d of %d genes ranked,  NES %+.2f,  %s",
+              SET_LABELS[[id]], r$setSize, r$n_nominal, r$NES, fmt_fdr(r$p.adjust))
+    }, FUN.VALUE = character(1)),
+    ids)
+
+  p <- gsea_running_sum_plot(
+    g,
+    gene_set_ids    = ids,
+    palette         = stats::setNames(unname(SET_PAL[SET_LABELS[ids]]), ids),
+    labels          = labs,
+    max_name_length = max(nchar(labs)) + 1L,
+    es_ylim         = ylim,
+    panel_heights   = heights,
+    legend_position = "right",
+    base_theme      = base_thm,
+    title           = sprintf(
+      "%s — where the mouse 39 °C-derived arms sit\nalong this population's SF-vs-PB ranking",
+      pop))
+  p <- apply_set_palette(p, ids, labs)
 
   save_overview(
     p, STAGE, sprintf("wt_heat_running_sum_%s", tag), table = tbl,
-    finding = FINDING, script = SCRIPT, fn = "main",
+    finding = finding_for(pop, tbl, NOMINAL), script = SCRIPT, fn = "main",
     config_kv = CONFIG_KV,
     input = sprintf("03_results/05_scoring/tables/gsea_pseudobulk_%s.rds", tag),
     how_to_read = HOW_TO_READ,
-    config = FIG_CFG, height = 7)
+    config = FIG_CFG, width = 11, height = 7)
   n_written <- n_written + 1L
 }
 

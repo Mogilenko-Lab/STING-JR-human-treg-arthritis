@@ -38,20 +38,29 @@ because up and down co-shift in SF. Correlative.
 
 ## figures/_overview/wt_heat_running_sum_treg.png
 
-Per-population leading-edge view: where the mouse 39 °C-derived WT_heat
-up and down arms concentrate along each population's SF-vs-PB
-pseudobulk ranking. All three up-curves climb alike — Tcon highest
-(NES 2.68), then Treg (2.59), then CD8 (2.07) — so the enrichment reads
-pan-T rather than Treg-preferential.
+In Treg the up arm reaches NES +2.5915 at FDR 3e-14 with 119 of its
+199 genes in the ranked list, and the down arm reaches NES +0.9676 at
+FDR 0.512 with 56 of its 94 genes in the ranked list. The curve shows
+WHERE along this population's synovial-fluid-versus-blood ranking
+each arm concentrates; whether one sorted population separates more
+than another is a cross-population comparison and is read off the
+ordered NES dot plot, not off this panel.
 
-**How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
-list from SF-enriched (left) to PB-enriched (right); a positive,
-left-shifted peak = SF enrichment. Middle rug = gene-set member
-positions; bottom = the signed moderated-t ranking metric. Two curves per
-panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
-down = cool blue. ES y clamped to [-1, 1] for cross-population
-comparability. Display of compute output (clusterProfiler
-gseaResult); correlative, not causal.
+**How to read:** One population per panel. Shows HOW the confirmatory answer arises
+rather than adding one: the same donor-level pseudobulk fgsea result,
+one sorted population at a time. Top panel = weighted running
+enrichment score walking the ranked list from SF-enriched (left) to
+PB-enriched (right); a positive, left-shifted peak = SF enrichment.
+Middle rug = member positions; bottom = the signed moderated-t
+ranking metric. Same colour in curve and rug: WT_heat up = warm
+brown, down = cool blue. Each legend entry carries that arm's
+effective set size against its nominal size, its NES and its FDR, so
+no enrichment score sits here without the size it was computed on. ES
+y clamped to [-1, 1] so heights compare across the three panels, but
+the NES ordering ACROSS populations is not read here — the ordered
+NES dot plot carries that, and carries the answer that the result is
+pan-T rather than Treg-preferential. Display of compute output;
+correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -59,20 +68,29 @@ gseaResult); correlative, not causal.
 
 ## figures/_overview/wt_heat_running_sum_tcon.png
 
-Per-population leading-edge view: where the mouse 39 °C-derived WT_heat
-up and down arms concentrate along each population's SF-vs-PB
-pseudobulk ranking. All three up-curves climb alike — Tcon highest
-(NES 2.68), then Treg (2.59), then CD8 (2.07) — so the enrichment reads
-pan-T rather than Treg-preferential.
+In Tcon the up arm reaches NES +2.6809 at FDR 8e-17 with 130 of its
+199 genes in the ranked list, and the down arm reaches NES +1.4718 at
+FDR 0.026 with 61 of its 94 genes in the ranked list. The curve shows
+WHERE along this population's synovial-fluid-versus-blood ranking
+each arm concentrates; whether one sorted population separates more
+than another is a cross-population comparison and is read off the
+ordered NES dot plot, not off this panel.
 
-**How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
-list from SF-enriched (left) to PB-enriched (right); a positive,
-left-shifted peak = SF enrichment. Middle rug = gene-set member
-positions; bottom = the signed moderated-t ranking metric. Two curves per
-panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
-down = cool blue. ES y clamped to [-1, 1] for cross-population
-comparability. Display of compute output (clusterProfiler
-gseaResult); correlative, not causal.
+**How to read:** One population per panel. Shows HOW the confirmatory answer arises
+rather than adding one: the same donor-level pseudobulk fgsea result,
+one sorted population at a time. Top panel = weighted running
+enrichment score walking the ranked list from SF-enriched (left) to
+PB-enriched (right); a positive, left-shifted peak = SF enrichment.
+Middle rug = member positions; bottom = the signed moderated-t
+ranking metric. Same colour in curve and rug: WT_heat up = warm
+brown, down = cool blue. Each legend entry carries that arm's
+effective set size against its nominal size, its NES and its FDR, so
+no enrichment score sits here without the size it was computed on. ES
+y clamped to [-1, 1] so heights compare across the three panels, but
+the NES ordering ACROSS populations is not read here — the ordered
+NES dot plot carries that, and carries the answer that the result is
+pan-T rather than Treg-preferential. Display of compute output;
+correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -80,20 +98,29 @@ gseaResult); correlative, not causal.
 
 ## figures/_overview/wt_heat_running_sum_cd8.png
 
-Per-population leading-edge view: where the mouse 39 °C-derived WT_heat
-up and down arms concentrate along each population's SF-vs-PB
-pseudobulk ranking. All three up-curves climb alike — Tcon highest
-(NES 2.68), then Treg (2.59), then CD8 (2.07) — so the enrichment reads
-pan-T rather than Treg-preferential.
+In CD8 the up arm reaches NES +2.0710 at FDR 4e-07 with 113 of its
+199 genes in the ranked list, and the down arm reaches NES +1.0943 at
+FDR 0.308 with 57 of its 94 genes in the ranked list. The curve shows
+WHERE along this population's synovial-fluid-versus-blood ranking
+each arm concentrates; whether one sorted population separates more
+than another is a cross-population comparison and is read off the
+ordered NES dot plot, not off this panel.
 
-**How to read:** Top panel = weighted running enrichment score (ES) walking the ranked
-list from SF-enriched (left) to PB-enriched (right); a positive,
-left-shifted peak = SF enrichment. Middle rug = gene-set member
-positions; bottom = the signed moderated-t ranking metric. Two curves per
-panel, same colour in curve and rug: WT_heat up = warm brown, WT_heat
-down = cool blue. ES y clamped to [-1, 1] for cross-population
-comparability. Display of compute output (clusterProfiler
-gseaResult); correlative, not causal.
+**How to read:** One population per panel. Shows HOW the confirmatory answer arises
+rather than adding one: the same donor-level pseudobulk fgsea result,
+one sorted population at a time. Top panel = weighted running
+enrichment score walking the ranked list from SF-enriched (left) to
+PB-enriched (right); a positive, left-shifted peak = SF enrichment.
+Middle rug = member positions; bottom = the signed moderated-t
+ranking metric. Same colour in curve and rug: WT_heat up = warm
+brown, down = cool blue. Each legend entry carries that arm's
+effective set size against its nominal size, its NES and its FDR, so
+no enrichment score sits here without the size it was computed on. ES
+y clamped to [-1, 1] so heights compare across the three panels, but
+the NES ordering ACROSS populations is not read here — the ordered
+NES dot plot carries that, and carries the answer that the result is
+pan-T rather than Treg-preferential. Display of compute output;
+correlative, not causal.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
