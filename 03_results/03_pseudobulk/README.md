@@ -148,3 +148,17 @@ because `filterByExpr` is applied within each population's own design.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_symbols.csv` |
+
+## tables/de_engine_migration.csv
+
+The limma-voom migration validation reported in commit `799e4fe` cannot be recomputed from tracked
+ranked-list artifacts in this repository.
+
+**How to read:** This is a provenance table, not a new validation. `not_reproducible` means the
+reported value exists only in the commit message and the required pre-migration ranked lists are not
+tracked. Current `ranked_*.tsv` files exist on disk only, so they are insufficient to reconstruct the
+before/after comparison.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| repository audit | `git show`, `git ls-files`, `find` | `commit=799e4fe` | commit message and tracked file index |
