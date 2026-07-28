@@ -1,6 +1,6 @@
 # 03_pseudobulk — artifact captions
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The SF-vs-PB contrast is paired within each of the 7 JIA donors. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
+_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The cohort contains 7 JIA donors, of whom 6 span both arms in each analyzed population after QC. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
 
 Differential expression runs in R. Aggregation to donor x tissue x label pseudobulk is done in
 Python (`03a_pseudobulk_export.py`, counts only), and the model is fitted in R
