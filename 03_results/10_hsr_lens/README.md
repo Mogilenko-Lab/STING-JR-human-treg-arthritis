@@ -22,9 +22,9 @@ This compartment never re-pulls MSigDB. `02_analysis/scripts/freeze_hsr_lens.R` 
 
 ### What the lens returns
 
-Honest ceiling: even the clean HSR core is proteotoxic-stress-general, not fever-specific. Only the mouse anchor's experimental 37/39 contrast can measure thermal-ness. In JIA, this lens is carried and read correlatively; it does not decompose temperature causality from human scRNA-seq. The HSR NES is annotation-tier only and is firewalled from the confirmatory `WT_heat` effect-size spine; it is not written to `effect_sizes_treg_arthritis.csv`.
+Honest ceiling: even the clean HSR core is proteotoxic-stress-general, not fever-specific. Only the mouse anchor provides an experimental 37/39 °C contrast. In JIA, I read this lens correlatively; it cannot identify a temperature driver from human scRNA-seq. The HSR NES is annotation-tier only and is firewalled from the confirmatory `WT_heat` effect-size spine; it is not written to `effect_sizes_treg_arthritis.csv`.
 
-The result is selective in sign and short of significance: HSR core points toward synovial fluid in Treg and away from it in Tcon and CD8, with Treg at FDR 0.064. The figure prints every FDR on its face, so the sign pattern and its weakness are read together and no glyph implies a significance the numbers do not carry.
+The result is a sign flip at trend level: HSR core points toward synovial fluid in Treg and away from it in Tcon and CD8, with Treg at FDR 0.064 and no population below FDR 0.05. The figure prints every FDR, effective size, testability band, and the secondary annotation tier on its face.
 
 ## tables/per_cell_hsr_scores.csv
 
@@ -150,10 +150,11 @@ The annotated numbers behind the HSR_core running-sum figure: each population's 
 
 ## figures/_overview/hsr_core_running_sum.png
 
-Walking each population's ranked list, HSR core accumulates a positive
-peak near the synovial-fluid end in Treg while Tcon and CD8 run
-negative throughout, so the sign selectivity is a property of the
-rankings and not an artefact of the summary statistic.
+The curated HSR core changes sign at trend level: Treg NES +1.4889 at
+FDR 0.0637, Tcon -1.3426 at 0.1574, and CD8 -1.1507 at 0.3753, with 43
+of 56 genes testable in every ranking. No population clears FDR 0.05,
+so this secondary annotation is directional context rather than
+evidence of a Treg-selective effect.
 
 **How to read:** Top panel: the weighted running enrichment score as each ranked list
 is walked from synovial-fluid-up (left) to blood-up (right); a
@@ -163,7 +164,10 @@ core genes sit in its ranking, in matching colour. Legend labels carry
 each NES and FDR, so read the Treg trace as a trend at FDR 0.064, not
 a significant enrichment. Ranked-list lengths differ slightly, so
 compare shapes rather than x positions; the y range is data-driven
-because all three curves share one axis. Annotation tier.
+because all three curves share one axis. The legend also gives
+effective size against the 56-gene nominal set and its testability
+band. Secondary annotation tier; no row supports a Treg-selective
+claim.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

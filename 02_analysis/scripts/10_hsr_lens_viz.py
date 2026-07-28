@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 """
-10_hsr_lens_viz.py — VIZ ONLY. The activation-free HSR lens, drawn as a trend.
-=============================================================================
+10_hsr_lens_viz.py — VIZ ONLY. The curated HSR lens, drawn as a trend.
+==========================================================================
 Heat-shock readouts in inflamed tissue are confounded by activation, so a
 curated, activation-free proteostasis lens was built to ask what is left. The
-answer is selective in SIGN — HSR core enriches toward synovial fluid in Treg
-and away from it in Tcon and CD8 — while sitting just outside significance in
-Treg. Both halves of that sentence have to be visible in the figure, so nothing
-here carries a star or any other glyph implying significance the numbers do not
-have; the FDRs are printed instead.
+answer is a sign flip at trend level — HSR core points toward synovial fluid in
+Treg and away from it in Tcon and CD8, while no population clears FDR 0.05.
+Both halves of that sentence have to be visible in the figure, so nothing here
+carries a star or any other glyph implying significance; the FDRs are printed.
 
   1. hsr_core_running_sum — the sign flip read off the ranked lists themselves
 
@@ -84,6 +83,10 @@ def running_sum_traces() -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
     tdir = PATHS.tables(STAGE)
     nes = pd.read_csv(tdir / "hsr_lens_nes.csv")
     nes = nes[nes["signature"] == "HSR_core"].set_index("population")
+    nominal_path = tdir / "_signatures_hsr" / "HSR_core.txt"
+    if not nominal_path.exists():
+        raise FileNotFoundError(f"[10_hsr_lens_viz] missing stage-local HSR core: {nominal_path}")
+    n_nominal = len({g.strip() for g in nominal_path.read_text().splitlines() if g.strip()})
     traces, rows = {}, []
     for pop, tag in POP_TAG.items():
         path = tdir / f"runsum_interactive_hsr_gsea_{tag}_HSR_core.csv"
@@ -94,6 +97,12 @@ def running_sum_traces() -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
         tr["hit"] = _bool_col(tr["hit"])
         traces[pop] = tr
         r = nes.loc[pop]
+        n_effective = int(r["set_size"])
+        testability = (
+            "testable" if n_effective >= 15
+            else "underpowered_reported" if n_effective >= 5
+            else "untestable"
+        )
         rows.append({
             "population": pop,
             "signature": "HSR_core",
@@ -101,7 +110,9 @@ def running_sum_traces() -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
             "nes": float(r["nes"]),
             "pvalue": float(r["pvalue"]),
             "padj": float(r["padj"]),
-            "set_size": int(r["set_size"]),
+            "set_size": n_effective,
+            "n_nominal": n_nominal,
+            "testability": testability,
             "n_ranked_genes": int(len(tr)),
             "evidence_tier": "secondary_annotation",
         })
@@ -124,11 +135,16 @@ def plot_running_sum(traces: dict[str, pd.DataFrame], summary: pd.DataFrame):
         tr = traces[pop]
         row = summary[summary["population"] == pop].iloc[0]
         ax.plot(tr["rank"], tr["running_es"], color=POP_COL[pop], lw=2.0,
-                label=f"{pop}   NES {row['nes']:+.2f}, {fmt_fdr(row['padj'])}")
+                label=(f"{pop}   NES {row['nes']:+.2f}, {fmt_fdr(row['padj'])}, "
+                       f"{int(row['set_size'])} of {int(row['n_nominal'])} genes "
+                       f"({row['testability']})"))
     ax.axhline(0, color="black", lw=1)
     ax.set_ylim(-span * 1.25, span * 1.25)
     ax.set_ylabel("Running enrichment score")
-    ax.set_title("HSR core sits at the synovial-fluid end only in Treg")
+    ax.set_title(
+        "Curated HSR-core sign flip is a trend, not a significant Treg effect\n"
+        "SECONDARY ANNOTATION TIER — Treg positive; Tcon and CD8 negative"
+    )
     ax.legend(frameon=False, fontsize=LEGEND_SIZE, loc="lower left")
 
     for i, pop in enumerate(pops):
@@ -157,10 +173,11 @@ def main() -> None:
     save_overview(
         fig, STAGE, "hsr_core_running_sum",
         table=round_numeric_cols(summary),
-        finding=("Walking each population's ranked list, HSR core accumulates a positive "
-                 "peak near the synovial-fluid end in Treg while Tcon and CD8 run negative "
-                 "throughout, so the sign selectivity is a property of the rankings and not "
-                 "an artefact of the summary statistic."),
+        finding=("The curated HSR core changes sign at trend level: Treg NES +1.4889 at "
+                 "FDR 0.0637, Tcon -1.3426 at 0.1574, and CD8 -1.1507 at 0.3753, with "
+                 "43 of 56 genes testable in every ranking. No population clears FDR 0.05, "
+                 "so this secondary annotation is directional context rather than evidence "
+                 "of a Treg-selective effect."),
         script=SCRIPT, fn="plot_running_sum",
         config_kv=(f"figures.running_sum_heights={RS_HEIGHTS[:2]}; "
                    f"thresholds.gsea_fdr={FDR}; evidence_tier=secondary_annotation"),
@@ -174,7 +191,9 @@ def main() -> None:
             "colour. Legend labels carry each NES and FDR, so read the Treg trace as a "
             "trend at FDR 0.064, not a significant enrichment. Ranked-list lengths differ "
             "slightly, so compare shapes rather than x positions; the y range is data-driven "
-            "because all three curves share one axis. Annotation tier."),
+            "because all three curves share one axis. The legend also gives effective size "
+            "against the 56-gene nominal set and its testability band. Secondary annotation "
+            "tier; no row supports a Treg-selective claim."),
         config=FIG_CFG, height=7.0,
     )
     plt.close(fig)
