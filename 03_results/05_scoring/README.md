@@ -229,3 +229,14 @@ Correlative.
 |---|---|---|---|
 | `02_analysis/scripts/05_score_signatures.py` | `main` | `percell_score_ncores=8; signature=WT_heat_{up,down} (AUCell + UCell, rank-based [0,1])` | `03_results/objects/02_annotation.h5ad`, `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |
 
+## tables/source_hash_manifest.csv
+
+The stage-05 mouse-signature read is pinned to the current mouse-anchor projection files.
+
+**How to read:** Each row is one cross-compartment source the scoring and running-sum scripts may
+read. `sha256` is checked before the file is consumed, so a changed mouse projection stops the stage
+instead of silently changing the JIA result.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/05_score_signatures.py` | `verify_source_hashes()` | pinned SHA-256 | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/` |

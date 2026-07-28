@@ -59,6 +59,7 @@ from helpers.figure_style import (  # noqa: E402
     save_overview,
     set_paper_style,
 )
+from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "09_heat_hypoxia"
 SCRIPT = "02_analysis/scripts/09_heat_hypoxia_viz.py"
@@ -493,7 +494,16 @@ def volcano_annotated_de() -> pd.DataFrame:
     purged = set(str(cmp_tab.loc[cmp_tab["population"] == "Treg",
                                  "genes_removed"].iloc[0]).split(";"))
     tax = pd.read_csv(TAXONOMY_PATH).set_index("gene")["category"]
-    axes = {k: _read_symbols(AXES_DIR / f"{k}_up.txt") for k in AXIS_LABEL}
+    axes = {}
+    for k in AXIS_LABEL:
+        source_path = AXES_DIR / f"{k}_up.txt"
+        verify_source_hash(
+            source_path,
+            f"savi_{k}_up",
+            PATHS.tables(STAGE) / "source_hash_manifest.csv",
+            root=ROOT.parent,
+        )
+        axes[k] = _read_symbols(source_path)
 
     sym = de["gene_symbol"].astype(str)
     de["arm"] = np.where(sym.isin(arms["up"]), "up",

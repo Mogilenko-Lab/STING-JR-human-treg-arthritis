@@ -34,6 +34,7 @@ os.chdir(ROOT)
 from config import DONOR_KEY, PARAMS, PATHS, TISSUE_DEN, TISSUE_KEY, TISSUE_NUM  # noqa: E402
 from helpers.figure_style import FIG_CFG, append_master_table  # noqa: E402
 from helpers.geneset_utils import load_signature  # noqa: E402
+from helpers.source_hash_manifest import verify_source_hashes  # noqa: E402
 
 STAGE = "09_heat_hypoxia"
 PRIMARY = "WT_heat"
@@ -77,8 +78,8 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) ->
         str(PARAMS.gsea_max_size),
         str(PARAMS.gsea_seed),
         str(PARAMS.gsea_nperm),
-        f"{PRIMARY}_up={sig_dir / f'{PRIMARY}_up.txt'}",
-        f"{PRIMARY}_down={sig_dir / f'{PRIMARY}_down.txt'}",
+        f"{PRIMARY}_up:mouse_projection={sig_dir / f'{PRIMARY}_up.txt'}",
+        f"{PRIMARY}_down:mouse_projection={sig_dir / f'{PRIMARY}_down.txt'}",
     ]
     subprocess.run(cmd, check=True)
     return pd.read_csv(out_csv)
@@ -374,6 +375,16 @@ def update_effect_sizes(gene_purge: pd.DataFrame) -> pd.DataFrame:
 def main() -> None:
     tables_dir = PATHS.tables(STAGE)
     hypoxia = set(read_gene_list(HYPOXIA_PATH))
+    sig_dir = PATHS.signature_contract / "signatures" / PRIMARY
+    verify_source_hashes(
+        tables_dir / "source_hash_manifest.csv",
+        [
+            (f"{PRIMARY}_up", sig_dir / f"{PRIMARY}_up.txt"),
+            (f"{PRIMARY}_down", sig_dir / f"{PRIMARY}_down.txt"),
+            (f"{PRIMARY}_ranked", sig_dir / f"{PRIMARY}_ranked.rnk"),
+        ],
+        root=ROOT.parent,
+    )
     sig = load_signature(PATHS.signature_contract, PRIMARY)
 
     gene_purge, runsum_paths = gene_purge_nes(tables_dir, sig, hypoxia)

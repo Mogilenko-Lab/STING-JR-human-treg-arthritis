@@ -87,6 +87,18 @@ The published interferon-independent STING signature contributes PLAUR and PTGS2
 |---|---|---|---|
 | `02_analysis/scripts/11_heat_decomposition.py` | `sting_axis_overlap` | `gsea_min_size=5; evidence_tier=secondary_annotation` | `../sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt`, `03_results/09_heat_hypoxia/tables/_signatures_full/WT_heat_{up,down}.txt` |
 
+## tables/source_hash_manifest.csv
+
+The STING positive-control overlap is pinned to the SAVI source signature used here.
+
+**How to read:** The stage checks the SAVI `sting_specific_up.txt` SHA-256 before tallying overlap.
+A changed positive-control axis stops this secondary annotation rather than silently changing the
+JIA table.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/11_heat_decomposition.py` | `verify_source_hash()` | pinned SHA-256 | `../sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt` |
+
 ## tables/_signatures_decomp/{subcomponent}_{up,down}.txt
 
 The sixteen sub-signature lists are the decomposition itself, and their sizes are the shape of the finding: 137 up genes unclaimed against 2 in the curated HSR core (Reactome/GO), with three down-arm parts empty.

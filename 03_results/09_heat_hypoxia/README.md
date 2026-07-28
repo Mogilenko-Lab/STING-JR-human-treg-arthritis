@@ -257,3 +257,15 @@ than at its markers. Primary donor-pseudobulk tier, correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_programs_axes_volcano` | `thresholds.de_fdr=0.05; de_logfc=1.0; taxonomy=00_data/references/heat_leadingedge_taxonomy` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv, 00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv, ../sting_positive_control/03_results/06_reference_axis/signatures/` |
+
+## tables/source_hash_manifest.csv
+
+The stage-09 mouse-signature and SAVI-axis reads are pinned to the source files used for this render.
+
+**How to read:** `source_label` names the dependency, `source_path` is relative to the umbrella
+checkout, and `sha256` is the required byte hash. The compute and viz scripts stop if the mouse
+projection or SAVI reference-axis files drift.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/09_heat_hypoxia.py` | `verify_source_hashes()` | pinned SHA-256 | mouse projection and SAVI reference-axis signature files |

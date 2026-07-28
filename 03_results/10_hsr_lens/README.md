@@ -96,6 +96,18 @@ The WT_heat_up gene list overlaps only the portion of each HSR lens listed in `g
 |---|---|---|---|
 | `02_analysis/scripts/10_hsr_lens.py` | `hsr_wtheatup_overlap` | `signature=WT_heat_up` | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_up.txt`, `00_data/references/temp_hsr_lens/{HSR_core,HSR_sensitivity}.txt` |
 
+## tables/source_hash_manifest.csv
+
+The HSR-lens overlap uses a pinned mouse-anchor projection source.
+
+**How to read:** The stage checks these SHA-256 values before loading the mouse `WT_heat` projection.
+If the anchor files change, the JIA overlap table is not regenerated until the source change is
+reviewed and the manifest is updated.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/10_hsr_lens.py` | `verify_source_hashes()` | pinned SHA-256 | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/` |
+
 ## tables/hsr_gsea_{treg,tcon,cd8}.rds
 
 The clusterProfiler `gseaResult` objects preserve the same HSR fgsea runs summarized in the CSV files, enabling exact running-sum reconstruction if a later display needs it.

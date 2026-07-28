@@ -58,6 +58,7 @@ from helpers.geneset_utils import (  # noqa: E402
     load_signature,
     score_cells_aucell_ucell,
 )
+from helpers.source_hash_manifest import verify_source_hashes  # noqa: E402
 
 STAGE = "10_hsr_lens"
 PRIMARY = "WT_heat"
@@ -108,8 +109,8 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) ->
         str(PARAMS.gsea_max_size),
         str(PARAMS.gsea_seed),
         str(PARAMS.gsea_nperm),
-        f"HSR_core={sig_dir / 'HSR_core.txt'}",
-        f"HSR_sensitivity={sig_dir / 'HSR_sensitivity.txt'}",
+        f"HSR_core:curated_hsr_reactome_go={sig_dir / 'HSR_core.txt'}",
+        f"HSR_sensitivity:curated_hsr_reactome_go={sig_dir / 'HSR_sensitivity.txt'}",
     ]
     subprocess.run(cmd, check=True)
     return pd.read_csv(out_csv)
@@ -307,6 +308,16 @@ def hsr_colocalization(tables_dir: Path, hsr_per_cell: pd.DataFrame) -> pd.DataF
 
 
 def hsr_wtheatup_overlap(tables_dir: Path, hsr: dict[str, list[str]]) -> pd.DataFrame:
+    sig_dir = PATHS.signature_contract / "signatures" / PRIMARY
+    verify_source_hashes(
+        tables_dir / "source_hash_manifest.csv",
+        [
+            (f"{PRIMARY}_up", sig_dir / f"{PRIMARY}_up.txt"),
+            (f"{PRIMARY}_down", sig_dir / f"{PRIMARY}_down.txt"),
+            (f"{PRIMARY}_ranked", sig_dir / f"{PRIMARY}_ranked.rnk"),
+        ],
+        root=ROOT.parent,
+    )
     sig = load_signature(PATHS.signature_contract, PRIMARY)
     wt_up = set(sig["up"])
     rows = []

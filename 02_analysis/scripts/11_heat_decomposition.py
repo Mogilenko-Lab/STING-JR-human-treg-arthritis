@@ -70,6 +70,7 @@ sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
 from config import PARAMS, PATHS  # noqa: E402
+from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "11_heat_decomposition"
 PRIMARY = "WT_heat"
@@ -120,6 +121,16 @@ PROGRAMS: list[tuple[str, str, Path, str]] = [
 RESIDUAL = "unassigned"
 RESIDUAL_DESC = "the part of the mouse arm no curated presumption claims"
 SUBCOMPONENTS = [p[0] for p in PROGRAMS] + [RESIDUAL]
+DATABASE_BY_SUBCOMPONENT = {
+    "hsr_curated": "curated_hsr_reactome_go",
+    "upr_er": "msigdb_hallmark",
+    "hypoxia": "msigdb_hallmark",
+    "nfkb_tnfa": "msigdb_hallmark",
+    "ifn_type_i": "msigdb_hallmark",
+    "inflammatory": "msigdb_hallmark",
+    "t_activation": "msigdb_hallmark",
+    RESIDUAL: "mouse_projection",
+}
 
 
 def read_gene_list(path: Path) -> list[str]:
@@ -297,7 +308,10 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path,
         str(PARAMS.gsea_max_size),
         str(PARAMS.gsea_seed),
         str(PARAMS.gsea_nperm),
-    ] + [f"{nm}={sig_dir / f'{nm}.txt'}" for nm in set_names]
+    ] + [
+        f"{nm}:{DATABASE_BY_SUBCOMPONENT[nm.rsplit('_', 1)[0]]}={sig_dir / f'{nm}.txt'}"
+        for nm in set_names
+    ]
     subprocess.run(cmd, check=True)
     return pd.read_csv(out_csv)
 
@@ -402,6 +416,12 @@ def sting_axis_overlap(tables_dir: Path, arms: dict[str, list[str]],
         print(f"[11_heat_decomposition] STING signature absent at {STING_SIG_PATH} — "
               "tally skipped (the positive-control compartment is not checked out)")
         return pd.DataFrame()
+    verify_source_hash(
+        STING_SIG_PATH,
+        "savi_sting_specific_up",
+        tables_dir / "source_hash_manifest.csv",
+        root=ROOT.parent,
+    )
     sting = set(read_gene_list(STING_SIG_PATH))
     hypoxia = curated["hypoxia"]
     rows = []

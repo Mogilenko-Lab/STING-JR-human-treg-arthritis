@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 ## freeze_hsr_lens.R — freeze the mouse-anchor human HSR lens to txt lists
 ## ===========================================================================
+
+source("02_analysis/helpers/source_hash_manifest.R")
 ## Stage 10 reproducer. Materializes the curated human heat-shock-response lens
 ## from the mouse-anchor single source of truth:
 ##   ../mouse_anchor/00_data/references/gene_sets/temp_hsr_lens/temp_hsr_human_lens.rds
@@ -32,11 +34,20 @@ PROJECT_ROOT <- normalizePath(file.path(dirname(script_path), "..", ".."))
 SOURCE_RDS_REL <- "../mouse_anchor/00_data/references/gene_sets/temp_hsr_lens/temp_hsr_human_lens.rds"
 SOURCE_RDS <- normalizePath(file.path(PROJECT_ROOT, SOURCE_RDS_REL), mustWork = FALSE)
 OUT_DIR <- file.path(PROJECT_ROOT, "00_data", "references", "temp_hsr_lens")
+EXPECTED_SOURCE_SHA256 <- "0046bffbdd405860b12e1686a7f2d10bac7d4ba2640cd7574ed549bc894cf487"
 
 if (!file.exists(SOURCE_RDS)) {
   stop(sprintf(
     "frozen mouse-anchor HSR lens is absent: %s\nExpected relative to compartment root: %s",
     SOURCE_RDS, SOURCE_RDS_REL
+  ), call. = FALSE)
+}
+source_hash <- source_sha256(SOURCE_RDS)
+if (!identical(source_hash, EXPECTED_SOURCE_SHA256)) {
+  stop(sprintf(
+    paste0("mouse-anchor HSR lens hash drift: expected %s, observed %s.\n",
+           "Review the anchor source and update this freeze pin before regenerating."),
+    EXPECTED_SOURCE_SHA256, source_hash
   ), call. = FALSE)
 }
 
@@ -69,6 +80,7 @@ manifest <- data.frame(
   set_name = character(),
   n_genes = integer(),
   source_rds = character(),
+  source_sha256 = character(),
   msigdbr_version = character(),
   date_frozen = character(),
   stringsAsFactors = FALSE
@@ -83,6 +95,7 @@ for (set_name in required) {
     set_name = set_name,
     n_genes = length(genes),
     source_rds = SOURCE_RDS_REL,
+    source_sha256 = source_hash,
     msigdbr_version = msigdbr_version,
     date_frozen = "FROZEN",
     stringsAsFactors = FALSE
@@ -102,6 +115,7 @@ writeLines(c(
   "- `HSR_sensitivity`: 176 HGNC symbols, the full sensitivity union.",
   "",
   sprintf("They were frozen from the mouse-anchor RDS `%s`.", SOURCE_RDS_REL),
+  sprintf("Source SHA-256: `%s`.", source_hash),
   "This compartment does not re-pull MSigDB; the anchor RDS is the single source of truth so the JIA lens is byte-identical to the anchor.",
   "",
   "Honest ceiling: even the clean HSR core is proteotoxic-stress-general (HSF1 fires on oxidative, proteasome, and metal stress), not fever-specific. Only the mouse anchor's experimental 37/39 contrast can measure thermal-ness. In JIA we carry the lens and read it correlatively; we do not decompose temperature causality from human scRNA-seq.",

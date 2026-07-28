@@ -26,6 +26,7 @@ suppressPackageStartupMessages({
 })
 
 source("02_analysis/helpers/figure_style.R")
+source("02_analysis/helpers/source_hash_manifest.R")
 source("01_modules/RNAseq-toolkit/scripts/GSEA/GSEA_plotting/gsea_running_sum_plot.R")
 
 STAGE  <- "05_scoring"
@@ -82,6 +83,9 @@ nominal_set_sizes <- function() {
     path <- file.path(sig_dir, paste0(id, ".txt"))
     if (!file.exists(path))
       stop("[05_viz_R] frozen signature not found: ", path)
+    verify_source_hash(
+      path, id, file.path(TDIR, "source_hash_manifest.csv"),
+      root = normalizePath("..", mustWork = FALSE))
     genes <- trimws(readLines(path, warn = FALSE))
     length(unique(genes[nzchar(genes)]))
   }, FUN.VALUE = integer(1))

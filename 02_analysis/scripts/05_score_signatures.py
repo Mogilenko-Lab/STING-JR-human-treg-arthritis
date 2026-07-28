@@ -49,6 +49,7 @@ from config import (PATHS, PARAMS, TISSUE_KEY, DONOR_KEY, TISSUE_NUM, TISSUE_DEN
 from helpers.geneset_utils import (load_signature, score_cells_aucell_ucell,  # noqa: E402
                                    _symbol_to_varname)
 from helpers.figure_style import append_master_table, FIG_CFG  # noqa: E402
+from helpers.source_hash_manifest import verify_source_hashes  # noqa: E402
 
 STAGE = "05_scoring"
 PRIMARY = "WT_heat"
@@ -62,8 +63,8 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) ->
         "Rscript", FGSEA_R, str(ranked_path), str(out_csv), contrast,
         str(PARAMS.gsea_min_size), str(PARAMS.gsea_max_size), str(PARAMS.gsea_seed),
         str(PARAMS.gsea_nperm),
-        f"{PRIMARY}_up={sig_dir / f'{PRIMARY}_up.txt'}",
-        f"{PRIMARY}_down={sig_dir / f'{PRIMARY}_down.txt'}",
+        f"{PRIMARY}_up:mouse_projection={sig_dir / f'{PRIMARY}_up.txt'}",
+        f"{PRIMARY}_down:mouse_projection={sig_dir / f'{PRIMARY}_down.txt'}",
     ]
     subprocess.run(cmd, check=True)
     return pd.read_csv(out_csv)
@@ -87,6 +88,16 @@ def smd(sf: np.ndarray, pb: np.ndarray) -> dict:
 
 def main() -> None:
     adata = sc.read_h5ad(PATHS.object("02_annotation"))
+    sig_dir = PATHS.signature_contract / "signatures" / PRIMARY
+    verify_source_hashes(
+        PATHS.tables(STAGE) / "source_hash_manifest.csv",
+        [
+            (f"{PRIMARY}_up", sig_dir / f"{PRIMARY}_up.txt"),
+            (f"{PRIMARY}_down", sig_dir / f"{PRIMARY}_down.txt"),
+            (f"{PRIMARY}_ranked", sig_dir / f"{PRIMARY}_ranked.rnk"),
+        ],
+        root=ROOT.parent,
+    )
     sig = load_signature(PATHS.signature_contract, PRIMARY)
     print(f"[05_scoring] {PRIMARY}: {len(sig['up'])} up / {len(sig['down'])} down genes")
 
@@ -120,8 +131,6 @@ def main() -> None:
     donor_means.to_csv(tdir / "donor_label_score_means.csv", index=False)
 
     ranked_dir = PATHS.tables("03_pseudobulk")
-    sig_dir = PATHS.signature_contract / "signatures" / PRIMARY
-
     eff_rows = []
     for pop, tag in POP_TAG.items():
         n_cells = int((adata.obs["coarse_label"].astype(str) == pop).sum())

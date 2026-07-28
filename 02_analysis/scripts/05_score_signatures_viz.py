@@ -36,6 +36,7 @@ os.chdir(ROOT)
 
 from config import PATHS, PARAMS  # noqa: E402
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
+from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "05_scoring"
 SCRIPT = "02_analysis/scripts/05_score_signatures_viz.py"
@@ -58,6 +59,12 @@ def nominal_set_sizes() -> dict:
         path = sig_dir / f"{PRIMARY}_{arm}.txt"
         if not path.exists():
             raise FileNotFoundError(f"[05_viz] frozen signature not found: {path}")
+        verify_source_hash(
+            path,
+            f"{PRIMARY}_{arm}",
+            PATHS.tables(STAGE) / "source_hash_manifest.csv",
+            root=ROOT.parent,
+        )
         out[arm] = len({ln.strip() for ln in path.read_text().splitlines() if ln.strip()})
     return out
 

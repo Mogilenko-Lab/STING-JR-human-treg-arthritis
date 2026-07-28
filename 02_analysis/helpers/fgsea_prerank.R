@@ -17,7 +17,7 @@
 #
 # Usage:
 #   Rscript fgsea_prerank.R <ranked.rnk> <out.csv> <contrast_label> \
-#       <min_size> <max_size> <seed> <nperm> name1=genes1.txt [name2=genes2.txt ...]
+#       <min_size> <max_size> <seed> <nperm> name1:database=genes1.txt [name2:database=genes2.txt ...]
 #
 # ranked.rnk : 2-col TSV (symbol \t stat), no header.
 # Outputs (all under dirname(out.csv), stem = basename(out.csv) w/o .csv):
@@ -52,19 +52,15 @@ seed      <- as.integer(args[6])
 nperm     <- as.integer(args[7])
 set_specs <- args[8:length(args)]
 
-database_for_set <- function(nm) {
-  base <- sub("_(up|down)$", "", nm)
-  if (base %in% c("WT_heat", "WT_heat_no_hypoxia", "unassigned")) {
-    return("mouse_projection")
-  }
-  if (base %in% c("HSR_core", "HSR_sensitivity", "hsr_curated")) {
-    return("curated_hsr_reactome_go")
-  }
-  if (base %in% c("upr_er", "hypoxia", "nfkb_tnfa", "ifn_type_i",
-                  "inflammatory", "t_activation") || grepl("^HALLMARK_", base)) {
-    return("msigdb_hallmark")
-  }
-  "custom_gene_set"
+parse_set_spec <- function(spec) {
+  kv <- strsplit(spec, "=", fixed = TRUE)[[1]]
+  if (length(kv) != 2L || !nzchar(kv[1]) || !nzchar(kv[2]))
+    stop("gene-set spec must be name:database=genes.txt, got: ", spec, call. = FALSE)
+  left <- strsplit(kv[1], ":", fixed = TRUE)[[1]]
+  if (length(left) != 2L || !nzchar(left[1]) || !nzchar(left[2]))
+    stop("gene-set spec must declare database as name:database=genes.txt, got: ",
+         spec, call. = FALSE)
+  list(name = left[1], database = left[2], path = kv[2])
 }
 
 # --- ranked vector (named, unique, descending) ------------------------------
@@ -81,13 +77,13 @@ pathways   <- list()
 directions <- c()
 databases  <- c()
 for (spec in set_specs) {
-  kv <- strsplit(spec, "=", fixed = TRUE)[[1]]
-  nm <- kv[1]; fp <- kv[2]
+  parsed <- parse_set_spec(spec)
+  nm <- parsed$name; fp <- parsed$path
   genes <- trimws(readLines(fp, warn = FALSE))
   genes <- genes[nzchar(genes)]
   pathways[[nm]]  <- unique(genes)
   directions[nm]  <- if (grepl("_up$", nm)) "up" else if (grepl("_down$", nm)) "down" else "na"
-  databases[nm]   <- database_for_set(nm)
+  databases[nm]   <- parsed$database
 }
 
 # --- clusterProfiler::GSEA (by = "fgsea") -> a real gseaResult S4 object -----
