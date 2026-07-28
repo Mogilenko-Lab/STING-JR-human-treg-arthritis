@@ -33,12 +33,13 @@ predicts. QC overlay tier (hand markers, not evidence).
 
 ## figures/_overview/counts_grid.png
 
-Every SF+PB Treg stratum clears the pseudobulk floor across the 7
-donors; p3 PB Tcon/CD8 are absent by design (empty cells).
+The cohort contains 7 donors, and 6 span SF and PB in each analyzed
+population after QC. Every observed stratum clears the pseudobulk cell
+floor; p3 PB Tcon/CD8 are absent by design.
 
 **How to read:** Heatmap of cells per donor (x) x label+tissue (y); red * marks a
 stratum below the pseudobulk cell floor; empty = intentionally-absent
-sample. Donor count per arm is the forest's power. Diagnostic.
+sample. Donor count per arm determines contrast precision. Diagnostic.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

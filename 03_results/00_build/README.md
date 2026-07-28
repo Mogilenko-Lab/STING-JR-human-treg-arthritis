@@ -1,16 +1,20 @@
 # 00_build — artifact captions
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The SF-vs-PB contrast is paired within each of the 7 JIA donors. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
+_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The cohort contains 7 JIA donors; ingest includes SF+PB Treg samples for all 7, while the post-QC donor-level analysis retains 6 paired donors in each population. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
 
 ## figures/_overview/cells_per_gsm.png
 
-All 7 donors contribute paired SF+PB Tregs; Tcon and CD8 lack a PB
-sample for p3 (by design). SF-Treg p5 is the thinnest stratum.
+At ingest, all 7 donors contribute SF+PB Treg samples; Tcon and CD8
+lack a PB sample for p3 by design. The near-empty SF-Treg p5 sample is
+later removed by QC, leaving 6 paired donors in each analyzed
+population.
 
 **How to read:** Grouped bars = cells recovered per donor; orange = synovial fluid
 (SF), blue = peripheral blood (PB); one facet per sorted population. A
 missing PB bar (p3 in Tcon/CD8) is an intentionally-absent sample, not
-a QC drop. Descriptive counts only — no claim tier.
+a QC drop. These are ingest counts before QC; the donor-level analysis
+uses 6 paired donors per population. Descriptive counts only — no
+claim tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

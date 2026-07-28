@@ -106,7 +106,8 @@ def main() -> None:
                   table=kept[["gsm", "donor", "tissue", "population", "n_cells", "n_kept", "n_dropped", "frac_kept"]],
                   finding=("QC retains ~86% of cells overall, but the SF-Treg p5 library "
                            "(GSM4859852) is near-empty (median ~14 UMIs) and drops entirely, "
-                           "leaving 6 of 7 donors with paired SF+PB Tregs for the forest."),
+                           "leaving 6 of 7 donors with paired SF+PB Tregs for the donor-level "
+                           "contrast."),
                   script=SCRIPT, fn="main",
                   config_kv="thresholds.qc_min_genes = 200; scrublet_expected_doublet_rate = 0.06",
                   input="03_results/01_qc/tables/cells_kept_dropped.csv",

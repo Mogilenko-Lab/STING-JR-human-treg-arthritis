@@ -120,14 +120,15 @@ def main() -> None:
     plt.colorbar(im, ax=ax, shrink=0.6)
     fig3.tight_layout()
     save_overview(fig3, STAGE, "counts_grid", table=counts,
-                  finding=("Every SF+PB Treg stratum clears the pseudobulk floor across the 7 donors; "
-                           "p3 PB Tcon/CD8 are absent by design (empty cells)."),
+                  finding=("The cohort contains 7 donors, and 6 span SF and PB in each analyzed "
+                           "population after QC. Every observed stratum clears the pseudobulk "
+                           "cell floor; p3 PB Tcon/CD8 are absent by design."),
                   script=SCRIPT, fn="main",
                   config_kv=f"thresholds.pseudobulk_min_cells = {floor}",
                   input="03_results/02_annotation/tables/counts_donor_by_label_tissue.csv",
                   how_to_read=("Heatmap of cells per donor (x) x label+tissue (y); red * marks a "
                                "stratum below the pseudobulk cell floor; empty = intentionally-absent "
-                               "sample. Donor count per arm is the forest's power. Diagnostic."),
+                               "sample. Donor count per arm determines contrast precision. Diagnostic."),
                   config=FIG_CFG)
     print("[02_annotation_viz] wrote 3 overviews")
 

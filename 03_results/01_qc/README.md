@@ -24,7 +24,8 @@ biological claim.
 
 QC retains ~86% of cells overall, but the SF-Treg p5 library
 (GSM4859852) is near-empty (median ~14 UMIs) and drops entirely,
-leaving 6 of 7 donors with paired SF+PB Tregs for the forest.
+leaving 6 of 7 donors with paired SF+PB Tregs for the donor-level
+contrast.
 
 **How to read:** Stacked bars per stratum: blue = kept, red = dropped (MAD outlier /
 low-gene / doublet). Confirm every SF+PB Treg stratum retains enough
