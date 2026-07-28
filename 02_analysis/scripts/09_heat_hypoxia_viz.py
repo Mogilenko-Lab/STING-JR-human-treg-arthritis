@@ -316,14 +316,15 @@ def plot_colocalization(df: pd.DataFrame):
     ax.set_xticklabels([f"{p}\nn = {int(v):,} cells" for p, v in zip(pops, ns)])
     ax.axhline(0, color="black", lw=1)
     ax.set_ylim(-0.05, 1.0)
-    ax.set_ylabel("Correlation of heat and hypoxia score, within SF cells")
-    ax.set_title("Heat-high and hypoxia-high are largely different cells")
+    ax.set_ylabel("Correlation of WT_heat_up and HALLMARK_HYPOXIA score, within SF cells")
+    ax.set_title("WT_heat_up-high and HALLMARK_HYPOXIA-high are largely different cells")
     ax.legend(frameon=False, fontsize=LEGEND_SIZE, loc="upper right")
     ax.text(0.02, 0.94,
-            "Full –0.05 to 1 scale, so the height of a bar is the whole story:\n"
-            "co-localization is weak, and the niche's two stresses land on\n"
-            "different cells. Donor-level SF means (n = 6–7) are unpowered and\n"
-            "reported in the stage table only.",
+            "CORROBORATES ONLY — per-cell scores never answer. Full –0.05 to 1\n"
+            "scale, so the height of a bar is the whole story: the two scores\n"
+            "co-localize weakly, i.e. they mark largely different cells.\n"
+            "Donor-level SF means (n = 6–7) are unpowered and reported in the\n"
+            "stage table only.",
             transform=ax.transAxes, ha="left", va="top", fontsize=ANNOT_SIZE)
     fig.tight_layout()
     return fig
@@ -717,15 +718,18 @@ def main() -> None:
     save_overview(
         fig, STAGE, "heat_hypoxia_colocalization",
         table=round_numeric_cols(coloc),
-        finding=("Within synovial-fluid cells the mouse heat score and the hypoxia score "
-                 "correlate only weakly (Spearman 0.08 to 0.20), so the niche's thermal and "
-                 "hypoxic readouts are carried by largely different cells rather than one "
-                 "shared stress state."),
+        finding=("Within synovial-fluid cells the per-cell WT_heat_up score and the "
+                 "HALLMARK_HYPOXIA score correlate only weakly (Spearman 0.08 to 0.20), so the "
+                 "two scores are carried by largely different cells rather than reading out one "
+                 "shared cell state. Per-cell tier: this corroborates the membership result and "
+                 "cannot answer anything on its own."),
         script=SCRIPT, fn="plot_colocalization",
         config_kv="level=cell; tissue=synovial_fluid; evidence_tier=secondary_percell",
         input="03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv",
         how_to_read=(
-            "Bars are the within-SF, cell-level correlation between the per-cell WT_heat_up "
+            "This panel CORROBORATES and never answers — a per-cell score is not a tier that may "
+            "support a claim. Bars are the within-SF, cell-level correlation between the "
+            "per-cell WT_heat_up "
             "and HALLMARK_HYPOXIA AUCell scores, Spearman (dark) beside Pearson (light), with "
             "the cell count under each population. The y-axis deliberately runs the full "
             "-0.05 to 1 range: read the shortness of the bars, not their rank order. Positive "

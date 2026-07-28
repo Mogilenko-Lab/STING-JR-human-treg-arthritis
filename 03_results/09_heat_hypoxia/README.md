@@ -162,19 +162,22 @@ Correlative.
 
 ## figures/_overview/heat_hypoxia_colocalization.png
 
-Within synovial-fluid cells the mouse heat score and the hypoxia score
-correlate only weakly (Spearman 0.08 to 0.20), so the niche's thermal
-and hypoxic readouts are carried by largely different cells rather
-than one shared stress state.
+Within synovial-fluid cells the per-cell WT_heat_up score and the
+HALLMARK_HYPOXIA score correlate only weakly (Spearman 0.08 to 0.20),
+so the two scores are carried by largely different cells rather than
+reading out one shared cell state. Per-cell tier: this corroborates
+the membership result and cannot answer anything on its own.
 
-**How to read:** Bars are the within-SF, cell-level correlation between the per-cell
-WT_heat_up and HALLMARK_HYPOXIA AUCell scores, Spearman (dark) beside
-Pearson (light), with the cell count under each population. The y-axis
-deliberately runs the full -0.05 to 1 range: read the shortness of the
-bars, not their rank order. Positive r means a heat-high cell tends to
-be hypoxia-high. Donor-level SF means are unpowered at 6 to 7 donors
-and are left in the stage table rather than drawn. This is a secondary
-per-cell diagnostic of where the two scores sit, never pooled with the
+**How to read:** This panel CORROBORATES and never answers — a per-cell score is not a
+tier that may support a claim. Bars are the within-SF, cell-level
+correlation between the per-cell WT_heat_up and HALLMARK_HYPOXIA
+AUCell scores, Spearman (dark) beside Pearson (light), with the cell
+count under each population. The y-axis deliberately runs the full
+-0.05 to 1 range: read the shortness of the bars, not their rank
+order. Positive r means a heat-high cell tends to be hypoxia-high.
+Donor-level SF means are unpowered at 6 to 7 donors and are left in
+the stage table rather than drawn. This is a secondary per-cell
+diagnostic of where the two scores sit, never pooled with the
 pseudobulk NES and never read as directional evidence.
 
 | Script | Function | Config | Input |
