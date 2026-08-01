@@ -1,0 +1,22 @@
+parameter,value,source
+subset_key,coarse_label,treg_reembedding.subset_key
+subset_value,Treg,treg_reembedding.subset_value
+n_cells_embedded,27175,derived
+n_cells_expected,27175,treg_reembedding.expected_n_cells
+hvg_n_top,3000,thresholds.hvg_n_top
+n_pcs,30,thresholds.n_pcs
+n_neighbors,"scanpy default (unset, as in 01_qc_filter.py)",recipe
+scale_max_value,10,recipe (01_qc_filter.py)
+random_seed,0,treg_reembedding.random_seed
+harmony_batch_key,donor,treg_reembedding.harmony_batch_key
+harmony_max_iter,10,treg_reembedding.harmony_max_iter
+harmony_adjusted_basis,X_pca_harmony,treg_reembedding.harmony_adjusted_basis
+corrected_coord_columns,x/y,derived
+uncorrected_coord_columns,x_uncorrected/y_uncorrected,derived
+mixing_k,30,treg_reembedding.mixing_k
+reference_embedding_key,X_umap_unsupervised,treg_reembedding.reference_embedding_key
+source_object,03_results/objects/02_annotation.h5ad,PATHS.object
+score_source_parquet,03_results/interactive/16_narrative_embedding.parquet,treg_reembedding.source_parquet
+n_score_columns_carried,16,derived
+coordinate_state,checkpoint_reused,derived
+evidence_tier,annotation_embedding,fixed

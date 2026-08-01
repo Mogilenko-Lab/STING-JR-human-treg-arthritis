@@ -1,0 +1,14 @@
+set_name,kind,source_path,n_genes_in_set,n_genes_found_in_object,frac_found,metric,gate
+Interaction_fdrOnly_up,mouse_derived_arm,mouse_anchor/03_results/human_projection/signatures/Interaction/Interaction_fdrOnly_up.txt,18,18,1.0,AUCell,testable
+Interaction_up,mouse_derived_arm,mouse_anchor/03_results/human_projection/signatures/Interaction/Interaction_up.txt,7,7,1.0,AUCell,underpowered_reported
+KO_heat_up,mouse_derived_arm,mouse_anchor/03_results/human_projection/signatures/KO_heat/KO_heat_up.txt,218,189,0.8669724770642202,AUCell,testable
+WT_heat_up,mouse_derived_arm,mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_up.txt,199,174,0.8743718592964824,AUCell,testable
+HALLMARK_HYPOXIA,curated_lens,human_treg_arthritis/00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt,200,173,0.865,AUCell,testable
+HALLMARK_IL2_STAT5_SIGNALING,curated_lens,human_treg_arthritis/00_data/references/msigdb_hallmark/HALLMARK_IL2_STAT5_SIGNALING.txt,199,191,0.9597989949748744,AUCell,testable
+HALLMARK_INFLAMMATORY_RESPONSE,curated_lens,human_treg_arthritis/00_data/references/msigdb_hallmark/HALLMARK_INFLAMMATORY_RESPONSE.txt,200,179,0.895,AUCell,testable
+HALLMARK_INTERFERON_ALPHA_RESPONSE,curated_lens,human_treg_arthritis/00_data/references/msigdb_hallmark/HALLMARK_INTERFERON_ALPHA_RESPONSE.txt,97,95,0.979381443298969,AUCell,testable
+HALLMARK_TNFA_SIGNALING_VIA_NFKB,curated_lens,human_treg_arthritis/00_data/references/msigdb_hallmark/HALLMARK_TNFA_SIGNALING_VIA_NFKB.txt,200,190,0.95,AUCell,testable
+HALLMARK_UNFOLDED_PROTEIN_RESPONSE,curated_lens,human_treg_arthritis/00_data/references/msigdb_hallmark/HALLMARK_UNFOLDED_PROTEIN_RESPONSE.txt,113,104,0.9203539823008849,AUCell,testable
+HSR_core,curated_lens,human_treg_arthritis/00_data/references/temp_hsr_lens/HSR_core.txt,56,47,0.8392857142857143,AUCell,testable
+ifn_generic_axis,curated_lens,sting_positive_control/03_results/06_reference_axis/signatures/ifn_only_up.txt,200,116,0.58,AUCell,testable
+sting_specific_published,curated_lens,sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt,21,17,0.8095238095238095,AUCell,testable
