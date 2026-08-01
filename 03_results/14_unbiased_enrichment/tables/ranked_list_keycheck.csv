@@ -1,0 +1,4 @@
+population,tag,n_ranked,frac_keys_ensembl_like,first_key,last_key,stat_min,stat_max
+Treg,treg,13999,0,AC017002.1,FAM65B,-20.2079527,26.3851158
+Tcon,tcon,14411,0,AC017002.1,LPAR6,-21.8951596,29.9306807
+CD8,cd8,14014,0,CAPG,FAM65B,-25.3354801,29.268947

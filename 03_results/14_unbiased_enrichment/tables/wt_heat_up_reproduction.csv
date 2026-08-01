@@ -1,0 +1,4 @@
+population,signature,nes_published,nes_this_stage,abs_nes_difference,set_size_published,set_size_this_stage,pvalue_published,pvalue_this_stage,nes_tolerance,reproduced
+Treg,WT_heat_up,2.59152412,2.59163282,1.08699418e-4,119,119,1.6131971e-14,1.01402716e-14,0.01,TRUE
+Tcon,WT_heat_up,2.6808778,2.68020613,6.71673847e-4,130,130,4.0471664599999996e-17,7.58365842e-17,0.01,TRUE
+CD8,WT_heat_up,2.07098454,2.07119654,2.11991854e-4,113,113,1.80492754e-7,1.48791087e-7,0.01,TRUE

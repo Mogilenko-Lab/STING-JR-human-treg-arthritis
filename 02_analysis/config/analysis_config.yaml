@@ -169,6 +169,208 @@ databases:
     # - { path: "00_data/references/custom_gene_sets.csv", name: "Custom" }
 
 # =============================================================================
+# CoReSh CO-REGULATION SEARCH (stage 15_coresh_search)
+# =============================================================================
+# Search the ~44k-dataset public HUMAN (hsa) GEO compendium for datasets in which
+# the query genes co-vary, then turn the top hits into data-driven gene sets and
+# score those on the same ranked list. Chunks are consumed READ-ONLY from the
+# shared reference cache; the container never holds a Synapse token.
+#
+# Query construction MIRRORS the mouse anchor (mouse_anchor 07_coresh_search.R and
+# its coresh.query_signatures block): the UP arm of the contrast at two stringency
+# gates, fdr_only and fdr_logfc. Here the contrast is the JIA synovial-fluid-versus-
+# paired-blood niche contrast and the gates are re-derived from the frozen
+# limma-voom DE table that produced the ranked lists.
+
+coresh:
+  species: human                      # hsa chunks demand HUMAN Entrez ids
+  chunks_subdir: "hsa"                # species subdir under CORESH_CHUNKS
+  chunks_fallback: "00_data/references/coresh/current/preprocessed_chunks"
+  top_n_hits: 5                       # top datasets per query -> derived sets
+  hits_export_n: 200                  # rows per query written to coresh_hits.csv; the FULL
+                                      #   ~265k-row ranking stays in the objects/ checkpoint
+                                      #   (set to null to export the whole ranking)
+  min_query_size: 3                   # coresh_batch asserts length(query) >= 3
+  n_cores: 12                         # BiocParallel workers over chunk files
+  pvalues: false                      # variance-only ranking (GESECA p-values are slow)
+  n_derive: 50                        # genes per derived set BEFORE size filter
+  jaccard: 0.8                        # drop a derived set >this Jaccard to an earlier one
+  derived_min_size: 15                # derived-set size floor (skill guidance)
+  derived_max_size: 500               # derived-set size ceiling
+  n_annotation_terms: 15              # metadata terms carried per recovered dataset
+  primary_population: treg            # the deliverable contrast
+  # Query matrix: `population` selects the ranked list + DE table, `gate` the
+  # stringency. direction is `up` for every entry, mirroring the mouse anchor.
+  query_signatures:
+    de_table: "03_results/03_pseudobulk/tables/de_SFvsPB_{population}.csv"
+    ranked:   "03_results/03_pseudobulk/tables/ranked_{population}.tsv"
+    sets:
+      - { population: treg, direction: up, gate: fdr_only,  origin: "SF-vs-PB up, Treg" }
+      - { population: treg, direction: up, gate: fdr_logfc, origin: "SF-vs-PB up, Treg" }
+      - { population: tcon, direction: up, gate: fdr_only,  origin: "SF-vs-PB up, Tcon" }
+      - { population: tcon, direction: up, gate: fdr_logfc, origin: "SF-vs-PB up, Tcon" }
+      - { population: cd8,  direction: up, gate: fdr_only,  origin: "SF-vs-PB up, CD8" }
+      - { population: cd8,  direction: up, gate: fdr_logfc, origin: "SF-vs-PB up, CD8" }
+
+# =============================================================================
+# UNBIASED ENRICHMENT SWEEP (stage 14_unbiased_enrichment)
+# =============================================================================
+# The unbiased counterpart to the targeted stage-05 test: every collection is
+# scored against the same frozen SF-vs-PB ranked lists and no set is privileged.
+# Declared as its own block rather than by widening `databases:` above, because
+# `databases:` records the compartment's default four-collection choice that other
+# stages may adopt, and this stage deliberately sweeps far wider.
+#
+# `msigdb` mirrors the mouse anchor's eight-collection sweep as closely as the human
+# MSigDB release allows. In msigdbr 26.1.0 / MSigDB 2026.1.Hs the subcollection
+# `CP:KEGG` was renamed `CP:KEGG_LEGACY`; the loader retries with the new name, so
+# the configured value stays the mouse-anchor one. The mouse anchor's TF collection
+# is MSigDB C3 TFT:GTRD; on the human side the repo already carries a curated
+# CollecTRI regulon table, used instead (see `tf_network`) and tagged `TF_Targets`
+# so the row stays comparable.
+#
+# Run parameters are NOT restated here: gsea_min_size / gsea_max_size / gsea_seed /
+# gsea_nperm / gsea_fdr come from `thresholds:` above, which is the single source of
+# truth this compartment's stage-05 run already used.
+
+unbiased_enrichment:
+  msigdb:
+    - { category: "H",  subcategory: "",                name: "Hallmark" }
+    - { category: "C2", subcategory: "CP:KEGG",         name: "KEGG" }
+    - { category: "C2", subcategory: "CP:REACTOME",     name: "Reactome" }
+    - { category: "C2", subcategory: "CP:WIKIPATHWAYS", name: "WikiPathways" }
+    - { category: "C5", subcategory: "GO:BP",           name: "GO_BP" }
+    - { category: "C5", subcategory: "GO:MF",           name: "GO_MF" }
+    - { category: "C5", subcategory: "GO:CC",           name: "GO_CC" }
+
+  # CollecTRI regulons -> one UNSIGNED gene set per TF, tagged database TF_Targets.
+  # Unsigned (activating and repressing targets pooled) so the set is the TF's
+  # transcriptional neighbourhood, the way MSigDB TFT sets are built; the signed use
+  # of the same network is decoupleR ULM, which is a different method and not this
+  # stage's job.
+  tf_network:
+    path: "../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv"
+    name: "TF_Targets"
+    source_col: "source"
+    target_col: "target"
+
+  # This compartment's own frozen curated lists, already size-validated by their
+  # reproducer scripts (freeze_hallmark_sets.R / freeze_hsr_lens.R).
+  #
+  # Six of these seven are re-pins of MSigDB Hallmark sets that the `Hallmark`
+  # collection above also fetches, and they stay declared here because
+  # freeze_hallmark_sets.R is what the decomposition and purge stages consume — a
+  # manifest that stopped listing them would hide a real dependency. Their gene content
+  # is identical to the live copies, so scoring both would put six exact duplicate
+  # hypotheses into the pooled Benjamini-Hochberg family and inflate every population's
+  # rank denominator by six. The stage resolves this itself: section 2b of
+  # 14_unbiased_enrichment.R detects any set id present in more than one collection,
+  # verifies the gene content matches, scores both copies (so each per-database table
+  # still reads as a standalone single-collection run) and pools only the canonical one.
+  # Canonicality follows the order collections are declared HERE, so `Hallmark` above
+  # wins; the resolution is recorded per population in geneset_alias_map.csv. Nothing
+  # needs tuning for this and no set name is hardcoded anywhere, so adding a seventh
+  # frozen Hallmark set below is deduplicated by construction.
+  project_frozen:
+    name: "project_frozen"
+    files:
+      - "00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt"
+      - "00_data/references/msigdb_hallmark/HALLMARK_UNFOLDED_PROTEIN_RESPONSE.txt"
+      - "00_data/references/msigdb_hallmark/HALLMARK_TNFA_SIGNALING_VIA_NFKB.txt"
+      - "00_data/references/msigdb_hallmark/HALLMARK_INTERFERON_ALPHA_RESPONSE.txt"
+      - "00_data/references/msigdb_hallmark/HALLMARK_INFLAMMATORY_RESPONSE.txt"
+      - "00_data/references/msigdb_hallmark/HALLMARK_IL2_STAT5_SIGNALING.txt"
+      - "00_data/references/temp_hsr_lens/HSR_core.txt"
+
+  # Mouse-derived projected arms, UP ARMS ONLY. Ordinary members of the sweep with no
+  # privilege; the WT_heat_up row doubles as the reproduction gate against the
+  # published stage-05 NES.
+  mouse_projection:
+    name: "mouse_projection"
+    files:
+      - "../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_up.txt"
+      - "../mouse_anchor/03_results/human_projection/signatures/KO_heat/KO_heat_up.txt"
+      - "../mouse_anchor/03_results/human_projection/signatures/Interaction/Interaction_up.txt"
+
+  # Frozen STING-versus-interferon axes from the SAVI positive-control compartment.
+  sting_axes:
+    name: "sting_axes"
+    files:
+      - "../sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt"
+      - "../sting_positive_control/03_results/06_reference_axis/signatures/ifn_only_up.txt"
+
+  # Pooled multiplicity correction is applied across the WHOLE family of tests
+  # within one population, exactly as the mouse anchor's pooled pass does.
+  padj_pooled_method: "BH"
+
+  # Running-sum substrate emission. The mouse up arms are always emitted; this is how
+  # many ADDITIONAL curated sets per population get a substrate table, chosen by
+  # pooled p-value ascending then |NES| descending. The quota is split evenly between
+  # the two directions: ranked on p-value alone every slot went to a paired-blood-side
+  # translation or ribosome set, leaving the downstream running-sum comparison with no
+  # synovial-fluid-side curated comparator for the up-going mouse arms.
+  runsum_top_curated: 6
+
+  # PROGENy (decoupleR MLM) — human model, mirroring the mouse anchor's top=500.
+  progeny:
+    organism: "Human"
+    top: 500
+    minsize: 5
+
+  # The published stage-05 NES this stage must reproduce off the same ranked lists,
+  # and the tolerance allowed for fgsea's stochastic normalisation.
+  reproduction_check:
+    signature: "WT_heat_up"
+    source: "03_results/05_scoring/tables/gsea_pseudobulk_{tag}.csv"
+    nes_tolerance: 0.01
+
+# =============================================================================
+# TREG-SUBSET RE-EMBEDDING (stage 17_treg_reembedding)
+# =============================================================================
+# A second map of the same cells, computed on the sorted Treg gate alone, so Treg
+# substructure is laid out without the other two sorted lineages taking up the
+# variance. The recipe is the one the full-object embedding used (01_qc_filter.py):
+# highly_variable_genes -> subset to HVGs -> scale(max_value=10) -> pca -> neighbors
+# -> umap. `hvg_n_top` and `n_pcs` are deliberately NOT restated here; they are read
+# from `thresholds:` above, which is the same source the full-object run read, so the
+# two maps differ by which cells went in and by nothing else. `n_neighbors` is left at
+# the scanpy default for the same reason (the full-object call did not set it).
+#
+# That recipe carries no batch correction, and on this single-lineage 27k subset it
+# resolves donor-by-tissue sample of origin: 66.1% of a cell's 30 nearest neighbours
+# share its donor against 14.6% expected, up from 42.0% on the full-object map. So the
+# stage runs the recipe TWICE on the same cells and same PCA — once uncorrected and once
+# with Harmony over `donor` applied to the PCA before neighbours and UMAP — and carries
+# both coordinate pairs in one parquet so they are comparable cell for cell. Harmony is
+# sanctioned for annotation/visualisation by the umbrella guardrail and claims nothing.
+# Neighbourhood composition for `donor` and for `tissue` is measured on all three maps
+# and published as a table, so the reader has the number before the map.
+#
+# Harmony runs at its standard settings (harmonypy defaults, restated here so they are
+# visible in the record rather than implicit). They are not tuned toward an acceptable
+# mixing number.
+
+treg_reembedding:
+  subset_key: "coarse_label"          # frozen label column the subset is taken on
+  subset_value: "Treg"                # FACS sort gate kept (a sort gate, never a score)
+  expected_n_cells: 27175             # reproduction check on the subset size; reported, not reconciled
+  random_seed: 0                      # random_state for pca / harmony / neighbors / umap
+  source_parquet: "16_narrative_embedding.parquet"   # per-cell scores joined in on barcode
+  output_parquet: "17_treg_reembedding.parquet"      # the widget substrate this stage writes
+  checkpoint: "17_treg_reembedding.parquet"          # objects/ coordinate cache (barcode + reps + coords)
+  reference_embedding_key: "X_umap_unsupervised"     # full-object map, restricted to the same cells
+  mixing_k: 30                        # k nearest neighbours for the composition statistic
+  mixing_keys:                        # obs factors whose neighbourhood composition is measured
+    - "donor"
+    - "tissue"
+
+  # --- batch correction for the second variant (annotation/visualisation only) ---
+  harmony_batch_key: "donor"          # the factor Harmony corrects over
+  harmony_basis: "X_pca"              # the uncorrected PCA representation Harmony adjusts
+  harmony_adjusted_basis: "X_pca_harmony"   # obsm key the corrected representation lands in
+  harmony_max_iter: 10                # max_iter_harmony; the harmonypy default, stated not tuned
+
+# =============================================================================
 # ANALYSIS STAGES
 # =============================================================================
 # Each stage owns 03_results/<id>/{tables,figures}/, created on first write.
@@ -209,6 +411,21 @@ stages:
   - id: "12_treg_localisation"
     title: "Treg-only niche localisation"
     purpose: "Exploratory and corroborative per-cell score distributions for sorted JIA CD4_Treg cells (99,915-cell substrate subsetted by sort gate coarse_label == 'Treg'). Compares per-cell AUCell score distributions across synovial fluid versus peripheral blood for five signatures: WT_heat_up, Interaction_up (7 genes), Interaction_fdrOnly_up (18 genes), HALLMARK_HYPOXIA, and WT_heat_up_purged_hypoxia. Evaluates set sizes, power bands, and gate dependence, citing donor-pseudobulk DE as the confirmatory tier."
+  - id: "13_arm_decomposition"
+    title: "Curated-lens membership of the mouse-derived up arms"
+    purpose: "SECONDARY/annotation tier only, firewalled from the confirmatory donor-pseudobulk claim spine (no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator). Answers a MEMBERSHIP question and nothing else: which curated, versioned, anchor-independent programs CONTAIN the genes of each mouse-derived UP arm in human projection space — WT_heat_up (199 genes, gate fdr_logfc), KO_heat_up (218, fdr_logfc), Interaction_up (7, fdr_logfc) and Interaction_up_fdrOnly (18, the relaxed fdr_only gate, file Interaction_fdrOnly_up.txt) — against a nine-lens panel: the six frozen MSigDB Hallmark programs (HYPOXIA, TNFA_SIGNALING_VIA_NFKB, INFLAMMATORY_RESPONSE, IL2_STAT5_SIGNALING, INTERFERON_ALPHA_RESPONSE, UNFOLDED_PROTEIN_RESPONSE), the frozen curated HSR_core, the 21 published de Cevins IFN-independent STING-activation genes, and the 200-gene generic type-I interferon axis. Membership is not enrichment — containment is arithmetic over committed gene lists and carries no NES, no p-value and no effect size. Down arms are out of scope by design. Programs overlap and the arms are linearly dependent (WT_heat = KO_heat + Interaction by construction), so the emitted bands are not a partition of genes: per-gene multiplicity and fractional weights (1/n_programs_for_gene) are published so a downstream display can choose duplicated or fractional accounting without recomputing, and the genes no lens claims are reported as a first-class 'unassigned' remainder."
+  - id: "14_unbiased_enrichment"
+    title: "Unbiased multi-database enrichment and pathway activity"
+    purpose: "The unbiased counterpart to the targeted stage-05 test, on the same frozen donor-pseudobulk SF-vs-PB ranked lists (limma-voom moderated t, HGNC symbol) and the same run parameters. Instead of asking whether one named signature enriches, it asks what the synovial-fluid-versus-paired-blood contrast contains at all: pre-ranked fgsea of every set in seven human MSigDB collections (Hallmark, KEGG, Reactome, WikiPathways, GO_BP, GO_MF, GO_CC), CollecTRI TF regulons, this compartment's frozen curated lists, the mouse-derived projected UP arms and the frozen SAVI STING-versus-interferon axes, per sorted population, with no set privileged and Benjamini-Hochberg pooled across the whole family of tests within a population so a headline is read against how many hypotheses were asked. Complemented by decoupleR MLM on the human PROGENy model, run both on the moderated-t contrast statistics and on the donor-level pseudobulk, which scores fourteen signalling footprints without any gene-set list. Its purpose is calibration: it says whether the mouse-derived enrichment is a distinctive feature of this niche contrast or one of many co-enriching programs. Reproduction gate: WT_heat_up must land on the published stage-05 NES off the same ranked lists, or the sweep is on a different footing and nothing in it is comparable."
+  - id: "15_coresh_search"
+    title: "Co-regulation search of the public human compendium"
+    purpose: "EXPLORATORY/hypothesis-generating tier only, firewalled from the confirmatory donor-pseudobulk claim spine (no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator). Asks the human counterpart of the mouse anchor's co-regulation question: across ~44k public human GEO datasets, in which ones do the genes that go up in the JIA synovial niche co-vary? The query is the UP arm of the frozen limma-voom SF-vs-PB contrast at two stringency gates (fdr_only, fdr_logfc) per sorted population, mapped from HGNC symbol to human Entrez id because the compendium is Entrez-keyed; the mapping loss is published as a first-class number. The top-ranked public datasets are then projected back into gene-level loadings to give data-driven co-regulation modules, which are scored by pre-ranked fgsea on the same ranked list they were seeded from. A module is a co-regulation neighbourhood mined from public variance structure, NOT a curated ontology term, and a module seeded from a query necessarily contains that query's genes, so its enrichment on the seeding ranked list is partly circular by construction and is read as a description of what public biology the niche signature co-moves with, never as independent evidence."
+  - id: "16_narrative_scoring"
+    title: "One per-cell AUCell substrate for the narrative embedding"
+    purpose: "SECONDARY/annotation tier only, never pooled with the donor-pseudobulk NES spine and writing no effect-size row. Scores the frozen 99,915-cell annotation once, with a single metric (AUCell), for the four mouse-derived human-projected UP arms (WT_heat_up 199, KO_heat_up 218, Interaction_up 7, Interaction_fdrOnly_up 18) and nine curated anchor-independent program lenses (six frozen MSigDB Hallmark sets, the frozen HSR_core proteostasis lens, the 21 published de Cevins IFN-independent STING genes, and the 200-gene generic type-I interferon axis), and joins them onto the published embedding coordinates so one substrate can colour the same map by an empirical arm and by a curated lens side by side. Down arms are deliberately out of scope. A provenance seam check re-derives the AUCell columns that already exist in the published per-cell readout and reports their correlation, so a reader can see whether this substrate sits on the same scale as the published one before trusting a colouring."
+  - id: "17_treg_reembedding"
+    title: "Treg-subset re-embedding of the same cells"
+    purpose: "ANNOTATION/visualisation tier only, never pooled with the donor-pseudobulk NES spine and writing no effect-size row. Recomputes the embedding recipe of 01_qc_filter.py (highly_variable_genes -> subset to HVGs -> scale(max_value=10) -> pca -> neighbors -> umap, hvg_n_top and n_pcs read from the same thresholds block the full-object run read, random_state fixed) on the sorted Treg gate alone (coarse_label == 'Treg', 27,175 of 99,915 cells), so Treg substructure is laid out without the Tcon and CD8 gates taking up the variance. Because that recipe applies no batch correction and on this subset it resolves donor-by-tissue sample of origin, the stage emits TWO coordinate pairs off the same PCA: the uncorrected map, and a second map with Harmony over donor applied to the PCA before neighbours and UMAP, at harmonypy standard settings. Harmony here is a visualisation aid under the umbrella embeddings guardrail and supports no claim. Per-cell scores are NOT recomputed: every score column of 16_narrative_embedding.parquet is joined in on barcode, with the join asserted complete, so all maps can be coloured by identical values. Neighbourhood composition for donor and for tissue at k nearest neighbours is measured on the uncorrected Treg-only map, the Harmony-corrected Treg-only map and the full-object map restricted to the same cells, against the composition expected from the group proportions, and published as one table so the reader has the number before the map. Whether the corrected map is usable is decided from that table, and a negative is a valid outcome."
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)
