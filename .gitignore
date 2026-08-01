@@ -19,6 +19,10 @@
 
 # Results — track the directory skeleton (.gitkeep) and caption READMEs, never artifacts.
 # Hard-ignore checkpoint state objects at any depth (large + recomputable).
+03_results/objects/**/*.h5ad
+03_results/objects/**/*.rds
+03_results/objects/**/*.rdata
+03_results/objects/**/*.parquet
 03_results/objects/*.h5ad
 03_results/objects/*.rds
 03_results/objects/*.rdata
