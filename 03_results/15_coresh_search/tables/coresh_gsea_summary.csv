@@ -1,0 +1,4 @@
+population,contrast,n_modules,n_sig_fdr,n_sig_up,n_sig_down,n_seeded_here,nes_min,nes_max,median_set_size,median_frac_seed,spearman_nes_vs_frac_seed,top_module,top_nes,bottom_module,bottom_nes
+treg,SF_vs_PB_Treg,21,14,10,4,8,-2.63865764288504,2.70516860447631,46,0.3,0.704850510753137,CORESH_cd8_up_fdr_logfc_GSE153098,2.70516860447631,CORESH_treg_up_fdr_only_GSE181061,-2.63865764288504
+tcon,SF_vs_PB_Tcon,21,17,12,5,6,-3.00674903755763,2.72753974397197,46,0.3,0.877971688832855,CORESH_cd8_up_fdr_logfc_GSE153098,2.72753974397197,CORESH_treg_up_fdr_only_GSE181061,-3.00674903755763
+cd8,SF_vs_PB_CD8,21,19,11,8,7,-3.1112128049919,2.65634513118053,46,0.3,0.815491865164987,CORESH_cd8_up_fdr_logfc_GSE153098,2.65634513118053,CORESH_treg_up_fdr_only_GSE181061,-3.1112128049919
