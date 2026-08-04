@@ -23,6 +23,14 @@
 #   running_sum.{pdf,png}   the three-panel enrichment curve (running ES, gene-hit
 #                           ticks, ranked moderated t) via enrichplot::gseaplot2
 #                           through the toolkit plotter. Selection: top N by |NES|.
+#                           Each curve's NES, pooled adjusted p and effective size are
+#                           on the FACE, in the legend, not only in the CSV.
+#   running_sum_focus       the same panel over a NAMED pair rather than a ranked one,
+#     .{pdf,png}            emitted only by a collection holding both members of
+#                           RS_FOCUS_SETS. Today that is project_frozen, which holds the
+#                           curated heat-shock core and HALLMARK_HYPOXIA — the comparison
+#                           that collection exists to make, and one a |NES| ranking need
+#                           not select.
 #
 # THE FOUR PANELS DISAGREE ABOUT WHAT "TOP" MEANS, AND THAT IS THE POINT TO CARRY.
 # dotplot and facet rank by adjusted p; barplot and running_sum rank by |NES| and
@@ -44,28 +52,39 @@
 # the conservative direction. The per-database value travels in every same-stem CSV
 # under `padj_in_database`.
 #
+# A CELL DRAWS ITS WHOLE COLLECTION, EVEN SETS POOLED SOMEWHERE ELSE
+# ------------------------------------------------------------------
+# A set id configured into two collections is pooled once, under whichever collection
+# the config declared first, and the copy in the other collection carries no pooled
+# adjusted p of its own. Those copies used to be dropped from this battery, which made a
+# collection's directory disagree with the collection: seven frozen lists are configured
+# under `project_frozen` and one appeared, which reads as six missing results rather than
+# as six sets pooled under `Hallmark`. An alias copy is now DRAWN, with the adjusted p of
+# the copy that was pooled — legitimate because geneset_alias_map.csv verifies the gene
+# content is identical, so the two copies are the same hypothesis — and `pooled_under`
+# says so on the panel and in every same-stem CSV. This affects two collections:
+# `project_frozen` (1 set drawn -> 7) and `HSR_lens` (1 -> 2). DRAWING A SET IS NOT
+# POOLING IT: the pooled family, its size and every adjusted p in gsea_all.csv are
+# unchanged, and the six aliases are still recorded there as
+# n_sets_aliased_out_of_pooling = 6.
+#
 # SOME COLLECTIONS ARE TOO SMALL FOR THE FULL BATTERY
 # ---------------------------------------------------
-# `project_frozen`, `HSR_lens` and `TCR_activation` each offer 1 set to the pooled
-# family, `sting_axes` 2 and `mouse_projection` 3. A top-20 dotplot, a direction split,
-# a significant-only barplot and a top-5 running sum over a 2-set collection are the
-# same two points drawn four ways. The rule applied here, recorded in the README:
+# `TCR_activation` offers 1 set, `HSR_lens` and `sting_axes` 2, `mouse_projection` 3. A
+# top-20 dotplot, a direction split, a significant-only barplot and a top-5 running sum
+# over a 2-set collection are the same two points drawn four ways. The rule applied here,
+# recorded in the README:
 #   n_sets >= 6  -> dotplot, facet, barplot, running_sum
 #   3 <= n <= 5  -> dotplot, running_sum
 #   n <= 2       -> running_sum
 # The running sum is kept at every size because it is the only panel that says where
 # in the ranking a set's genes sit, which a table cannot.
 #
-# `project_frozen` ALSO DOUBLE-COUNTS. Six of its seven sets are re-pins of MSigDB
-# Hallmark sets with identical gene content, already drawn in the Hallmark panel with
-# the same statistics; geneset_manifest.csv records them as
-# n_sets_aliased_out_of_pooling = 6 and they carry no pooled adjusted p. They are
-# excluded from this battery, so HALLMARK_HYPOXIA appears once, under Hallmark, and
-# HSR_core is the only set drawn under project_frozen.
-#
 # Inputs (READ-ONLY):
 #   03_results/objects/14_gsea/<tag>__<database>.rds   cached gseaResult per cell
-#   03_results/14_unbiased_enrichment/tables/gsea_all.csv
+#   03_results/14_unbiased_enrichment/tables/gsea_all.csv         the pooled family
+#   03_results/14_unbiased_enrichment/tables/gsea_<tag>_<db>.csv  the collection's roster
+#   03_results/14_unbiased_enrichment/tables/geneset_alias_map.csv
 #   03_results/14_unbiased_enrichment/tables/geneset_manifest.csv
 #
 # Outputs:
@@ -242,6 +261,14 @@ for (pop in names(POPS)) {
 ## own — and `pooled_under` records where it came from, on the panel and in every
 ## same-stem CSV. DRAWING A SET IS NOT POOLING IT: the pooled family, its size and
 ## every adjusted p in gsea_all.csv are untouched by this.
+##
+## Only the adjusted p is borrowed. The NES stays the alias copy's OWN, from the fgsea
+## run behind this collection's cached object, so it can differ from the canonical copy's
+## in the third decimal — HALLMARK_HYPOXIA in Treg is 2.2553 here and 2.2563 under
+## Hallmark, permutation noise on the same ranking and the same genes. Copying the
+## canonical NES across instead would make the panel disagree with the object it was drawn
+## from, which is the one disagreement the freshness gate below exists to catch;
+## geneset_alias_map.csv publishes the difference per set as `abs_nes_difference`.
 
 .CELL_CACHE <- new.env(parent = emptyenv())
 
@@ -751,13 +778,19 @@ DB_CONTENT <- c(
     "with one side of the contrast; it is a statement about target-gene expression",
     "and carries no measurement of the factor's activity."),
   project_frozen = paste(
-    "The frozen curated lists this compartment owns. Six of the seven are re-pins of",
-    "MSigDB Hallmark sets with identical gene content, already drawn in the Hallmark",
-    "panel with the same statistics, and geneset_manifest.csv records them as",
-    "n_sets_aliased_out_of_pooling = 6. They are excluded here, so HALLMARK_HYPOXIA",
-    "appears once in this battery and HSR_core is the only set drawn under this name.",
-    "HSR_core is the curated heat-shock-response lens, held independent of the mouse",
-    "anchor and general to proteotoxic stress."),
+    "The seven frozen curated lists this compartment owns, all seven drawn. Six are",
+    "re-pins of MSigDB Hallmark sets with identical gene content, so they are pooled",
+    "under Hallmark rather than twice — geneset_manifest.csv records them as",
+    "n_sets_aliased_out_of_pooling = 6 — and each is drawn here with the adjusted p it",
+    "was pooled under, marked `pooled under Hallmark` on the panel and in the",
+    "pooled_under column of every same-stem CSV. Being drawn twice is not being tested",
+    "twice. The seventh is HSR_core, the curated heat-shock-response lens, held",
+    "independent of the mouse anchor and general to proteotoxic stress. This is also the",
+    "one collection that holds both HSR_core and HALLMARK_HYPOXIA, so it carries the",
+    "extra running_sum_focus panel over that named pair: the inflamed niche imposes",
+    "proteotoxic and low-oxygen stress together and cross-sectional human data cannot",
+    "separate them, so the two curves are worth reading side by side rather than",
+    "leaving it to a |NES| ranking to decide whether both appear."),
   mouse_projection = paste(
     "The three mouse-derived up arms projected onto human symbols: WT_heat_up",
     "(199 genes, 119 in the Treg ranked list), KO_heat_up and Interaction_up. They are",
@@ -783,8 +816,10 @@ DB_CONTENT <- c(
   HSR_lens = paste(
     "The curated heat-shock-response lens, frozen in this compartment from human MSigDB",
     "sets: HSR_core is the 56-symbol cleaned cytosolic subset, HSR_sensitivity the",
-    "176-symbol full union. HSR_core is also the seventh file of project_frozen, which is",
-    "where it is pooled, so HSR_sensitivity is the set drawn here. The lens is independent",
+    "176-symbol full union. Both are drawn. HSR_core is also the seventh file of",
+    "project_frozen, which is where it is pooled, so it appears here with that adjusted p,",
+    "marked `pooled under project_frozen`; HSR_sensitivity is the one new hypothesis this",
+    "collection contributes to the pooled family. The lens is independent",
     "of the mouse anchor and general to proteotoxic stress, since HSF1 also fires on",
     "oxidative, proteasome and metal stress."),
   TCR_activation = paste(
@@ -860,11 +895,13 @@ for (db in DBS) {
     how_to_read = paste0(sprintf(paste0(
       "SELECTION RULES, which govern every absence: dotplot top %d by pooled adjusted p; ",
       "facet top %d per direction by pooled adjusted p; barplot sets at pooled FDR < %.2g only, ",
-      "then top %d of those by |NES|; running_sum top %d by |NES|. Glyphs, the sign convention ",
+      "then top %d of those by |NES|; running_sum top %d by |NES|; running_sum_focus, where it ",
+      "exists, a NAMED pair and no ranking at all. Glyphs, the sign convention ",
       "and the pooled correction are described once in the `figures/by_contrast/ (per-database GSEA battery)` section of this README. Each panel ",
       "writes its own same-stem CSV under tables/by_contrast/&lt;population&gt;/%s/ listing the ",
-      "rows it drew, in draw order, with the rule that picked them and the per-collection ",
-      "adjusted p under padj_in_database."),
+      "rows it drew, in draw order, with the rule that picked them, the per-collection ",
+      "adjusted p under padj_in_database, and under pooled_under the collection each pooled ",
+      "adjusted p was read from."),
       TOPN, FACET_TOPN, FDR, TOPN, RSTOP, db),
       rank_note,
       " A set enriching says its gene content moves with one side of this contrast. Correlative. ",
@@ -913,7 +950,7 @@ write_caption(
   script    = SCRIPT,
   fn        = "emit_cell",
   config_kv = CFG_KV,
-  input     = "03_results/objects/14_gsea/*.rds + 03_results/14_unbiased_enrichment/tables/{gsea_all,geneset_manifest}.csv",
+  input     = "03_results/objects/14_gsea/*.rds + 03_results/14_unbiased_enrichment/tables/{gsea_all,gsea_&lt;population&gt;_&lt;collection&gt;,geneset_alias_map,geneset_manifest}.csv",
   how_to_read = sprintf(paste0(
     "LAYOUT. figures/by_contrast/&lt;population&gt;/&lt;COLLECTION&gt;/{dotplot,facet,barplot,",
     "running_sum}.{pdf,png}, with the rows behind each panel in the mirrored path under ",
@@ -931,14 +968,20 @@ write_caption(
     "NES. running_sum: three stacked panels, the running enrichment score with its leading-edge ",
     "peak on top, gene-hit ticks at each member's rank in the middle, and the ranked moderated t ",
     "at the bottom, with the score clamped to [%.0f, %.0f] so curves stay comparable between ",
-    "collections. SIGN. NES > 0 means the set's genes concentrate on the synovial-fluid side of ",
-    "the ranking and NES < 0 on the paired-blood side. ",
+    "collections, and each curve's NES, pooled adjusted p and effective size in the legend beneath ",
+    "so the panel can be read without the CSV. SIGN. NES > 0 means the set's genes concentrate on ",
+    "the synovial-fluid side of the ranking and NES < 0 on the paired-blood side. ",
     "ADJUSTED P. Every panel uses the Benjamini-Hochberg correction across the whole family of ",
     "tests asked of one population's ranked list, which is stricter than a single-collection ",
     "correction; the per-collection value travels in each same-stem CSV under padj_in_database. ",
-    "RANKING. The four panel types rank by different metrics, adjusted p for dotplot and facet ",
+    "A SET CONFIGURED INTO TWO COLLECTIONS is pooled once and drawn in both, the second time with ",
+    "the adjusted p of the copy that was pooled, labelled `pooled under &lt;collection&gt;` on the ",
+    "panel and recorded in the pooled_under column; the gene content of the two copies is verified ",
+    "identical in geneset_alias_map.csv, so this is one hypothesis shown twice, not tested twice. ",
+    "RANKING. The panel types rank by different metrics, adjusted p for dotplot and facet ",
     "and |NES| for barplot and running_sum, so read an absence against the rule named in that ",
-    "panel's own subtitle before reading it as a null. ",
+    "panel's own subtitle before reading it as a null; running_sum_focus ranks nothing and draws a ",
+    "named pair. ",
     "This is a browse surface, wide on purpose and privileging no set, and the claim spine stays ",
     "the donor-pseudobulk effect sizes. Correlative: enrichment describes where a set's genes sit ",
     "in a ranking. Claim tier: L3 (enrichment statistics), and no row of this battery reaches an ",

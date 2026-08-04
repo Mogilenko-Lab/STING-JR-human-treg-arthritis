@@ -440,25 +440,33 @@ NES. running_sum: three stacked panels, the running enrichment score
 with its leading-edge peak on top, gene-hit ticks at each member's
 rank in the middle, and the ranked moderated t at the bottom, with
 the score clamped to [-1, 1] so curves stay comparable between
-collections. SIGN. NES > 0 means the set's genes concentrate on the
-synovial-fluid side of the ranking and NES < 0 on the paired-blood
-side. ADJUSTED P. Every panel uses the Benjamini-Hochberg correction
-across the whole family of tests asked of one population's ranked
-list, which is stricter than a single-collection correction; the
-per-collection value travels in each same-stem CSV under
-padj_in_database. RANKING. The four panel types rank by different
+collections, and each curve's NES, pooled adjusted p and effective
+size in the legend beneath so the panel can be read without the CSV.
+SIGN. NES > 0 means the set's genes concentrate on the synovial-fluid
+side of the ranking and NES < 0 on the paired-blood side. ADJUSTED P.
+Every panel uses the Benjamini-Hochberg correction across the whole
+family of tests asked of one population's ranked list, which is
+stricter than a single-collection correction; the per-collection
+value travels in each same-stem CSV under padj_in_database. A SET
+CONFIGURED INTO TWO COLLECTIONS is pooled once and drawn in both, the
+second time with the adjusted p of the copy that was pooled, labelled
+`pooled under &lt;collection&gt;` on the panel and recorded in the
+pooled_under column; the gene content of the two copies is verified
+identical in geneset_alias_map.csv, so this is one hypothesis shown
+twice, not tested twice. RANKING. The panel types rank by different
 metrics, adjusted p for dotplot and facet and |NES| for barplot and
 running_sum, so read an absence against the rule named in that
-panel's own subtitle before reading it as a null. This is a browse
-surface, wide on purpose and privileging no set, and the claim spine
-stays the donor-pseudobulk effect sizes. Correlative: enrichment
-describes where a set's genes sit in a ranking. Claim tier: L3
-(enrichment statistics), and no row of this battery reaches an
-effect-size accumulator.
+panel's own subtitle before reading it as a null; running_sum_focus
+ranks nothing and draws a named pair. This is a browse surface, wide
+on purpose and privileging no set, and the claim spine stays the
+donor-pseudobulk effect sizes. Correlative: enrichment describes
+where a set's genes sit in a ranking. Claim tier: L3 (enrichment
+statistics), and no row of this battery reaches an effect-size
+accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14c_gsea_battery_viz.R` | `emit_cell` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/*.rds + 03_results/14_unbiased_enrichment/tables/{gsea_all,geneset_manifest}.csv` |
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `emit_cell` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/*.rds + 03_results/14_unbiased_enrichment/tables/{gsea_all,gsea_&lt;population&gt;_&lt;collection&gt;,geneset_alias_map,geneset_manifest}.csv` |
 
 ## figures/_overview/named_sets_in_sweep.png
 
@@ -523,15 +531,17 @@ sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/GO_BP/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -550,15 +560,17 @@ sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/GO_MF/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -579,15 +591,17 @@ sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/Reactome/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -606,15 +620,17 @@ sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/GO_CC/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -633,15 +649,17 @@ collection (848 sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/WikiPathways/ listing the rows
-it drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+it drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -665,15 +683,17 @@ the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/TF_Targets/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -694,15 +714,17 @@ geneset_manifest.csv. All four panels are drawn for this collection
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/KEGG/ listing the rows it drew,
-in draw order, with the rule that picked them and the per-collection
-adjusted p under padj_in_database. A set enriching says its gene
-content moves with one side of this contrast. Correlative. Claim
-tier: L3 (enrichment statistics).
+in draw order, with the rule that picked them, the per-collection
+adjusted p under padj_in_database, and under pooled_under the
+collection each pooled adjusted p was read from. A set enriching says
+its gene content moves with one side of this contrast. Correlative.
+Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -724,18 +746,20 @@ are drawn for this collection (50 sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/Hallmark/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. Worked example of
-the two rankings diverging: in the Treg Hallmark cell
-HALLMARK_HYPOXIA (NES +2.2563, pooled FDR 6e-08, 139 genes in the
-ranked list) is 12 by |NES| and 10 by pooled adjusted p, so it sits
-inside the dotplot's top 20 and outside the running sum's top 5. An
-absence from one panel is a statement about that panel's ranking
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from.
+Worked example of the two rankings diverging: in the Treg Hallmark
+cell HALLMARK_HYPOXIA (NES +2.2563, pooled FDR 6e-08, 139 genes in
+the ranked list) is 12 by |NES| and 10 by pooled adjusted p, so it
+sits inside the dotplot's top 20 and outside the running sum's top 5.
+An absence from one panel is a statement about that panel's ranking
 metric. A set enriching says its gene content moves with one side of
 this contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
@@ -765,15 +789,17 @@ shows where in the ranking a set's genes sit.
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/mouse_projection/ listing the
-rows it drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+rows it drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -799,15 +825,17 @@ ranking a set's genes sit.
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/sting_axes/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -819,29 +847,39 @@ project_frozen GSEA of the donor-pseudobulk
 synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
 drawn with the RNAseq-toolkit plotters on the cached gseaResult from
 03_results/objects/14_gsea/ with the adjusted p re-keyed to the
-sweep-wide pooled correction published in gsea_all.csv. The frozen
-curated lists this compartment owns. Six of the seven are re-pins of
-MSigDB Hallmark sets with identical gene content, already drawn in
-the Hallmark panel with the same statistics, and geneset_manifest.csv
-records them as n_sets_aliased_out_of_pooling = 6. They are excluded
-here, so HALLMARK_HYPOXIA appears once in this battery and HSR_core
-is the only set drawn under this name. HSR_core is the curated
-heat-shock-response lens, held independent of the mouse anchor and
-general to proteotoxic stress. All four panels are drawn for this
-collection (7 sets in the pooled family).
+sweep-wide pooled correction published in gsea_all.csv. The seven
+frozen curated lists this compartment owns, all seven drawn. Six are
+re-pins of MSigDB Hallmark sets with identical gene content, so they
+are pooled under Hallmark rather than twice — geneset_manifest.csv
+records them as n_sets_aliased_out_of_pooling = 6 — and each is drawn
+here with the adjusted p it was pooled under, marked `pooled under
+Hallmark` on the panel and in the pooled_under column of every
+same-stem CSV. Being drawn twice is not being tested twice. The
+seventh is HSR_core, the curated heat-shock-response lens, held
+independent of the mouse anchor and general to proteotoxic stress.
+This is also the one collection that holds both HSR_core and
+HALLMARK_HYPOXIA, so it carries the extra running_sum_focus panel
+over that named pair: the inflamed niche imposes proteotoxic and
+low-oxygen stress together and cross-sectional human data cannot
+separate them, so the two curves are worth reading side by side
+rather than leaving it to a |NES| ranking to decide whether both
+appear. All four panels are drawn for this collection (7 sets in the
+pooled family).
 
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/project_frozen/ listing the
-rows it drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+rows it drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -924,15 +962,17 @@ collection (107 sets in the pooled family).
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/MitoPathways/ listing the rows
-it drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+it drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -963,15 +1003,17 @@ ranking a set's genes sit.
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/TCR_activation/ listing the
-rows it drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+rows it drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -986,30 +1028,34 @@ drawn with the RNAseq-toolkit plotters on the cached gseaResult from
 sweep-wide pooled correction published in gsea_all.csv. The curated
 heat-shock-response lens, frozen in this compartment from human
 MSigDB sets: HSR_core is the 56-symbol cleaned cytosolic subset,
-HSR_sensitivity the 176-symbol full union. HSR_core is also the
-seventh file of project_frozen, which is where it is pooled, so
-HSR_sensitivity is the set drawn here. The lens is independent of the
-mouse anchor and general to proteotoxic stress, since HSF1 also fires
-on oxidative, proteasome and metal stress. Panels drawn for this
-collection: running_sum. The collection offers 2 set(s) to the pooled
-family, and over a collection that small a dotplot, a direction split
-and a significant-only barplot are the same few points drawn several
-ways, so the redundant panels are left out. The running sum is kept
-at every size because it is the only panel that shows where in the
-ranking a set's genes sit.
+HSR_sensitivity the 176-symbol full union. Both are drawn. HSR_core
+is also the seventh file of project_frozen, which is where it is
+pooled, so it appears here with that adjusted p, marked `pooled under
+project_frozen`; HSR_sensitivity is the one new hypothesis this
+collection contributes to the pooled family. The lens is independent
+of the mouse anchor and general to proteotoxic stress, since HSF1
+also fires on oxidative, proteasome and metal stress. Panels drawn
+for this collection: running_sum. The collection offers 2 set(s) to
+the pooled family, and over a collection that small a dotplot, a
+direction split and a significant-only barplot are the same few
+points drawn several ways, so the redundant panels are left out. The
+running sum is kept at every size because it is the only panel that
+shows where in the ranking a set's genes sit.
 
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
 sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
-running_sum top 5 by |NES|. Glyphs, the sign convention and the
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+NAMED pair and no ranking at all. Glyphs, the sign convention and the
 pooled correction are described once in the `figures/by_contrast/
 (per-database GSEA battery)` section of this README. Each panel
 writes its own same-stem CSV under
 tables/by_contrast/&lt;population&gt;/HSR_lens/ listing the rows it
-drew, in draw order, with the rule that picked them and the
-per-collection adjusted p under padj_in_database. A set enriching
-says its gene content moves with one side of this contrast.
-Correlative. Claim tier: L3 (enrichment statistics).
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1025,28 +1071,22 @@ set's genes concentrate in that population's ranking; a difference in
 peak height between populations is a difference in concentration, not
 a measured difference in the program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1062,28 +1102,22 @@ the set's genes concentrate in that population's ranking; a difference
 in peak height between populations is a difference in concentration,
 not a measured difference in the program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1099,28 +1133,22 @@ set's genes concentrate in that population's ranking; a difference in
 peak height between populations is a difference in concentration, not
 a measured difference in the program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1136,28 +1164,22 @@ set's genes concentrate in that population's ranking; a difference in
 peak height between populations is a difference in concentration, not
 a measured difference in the program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1174,28 +1196,22 @@ population's ranking; a difference in peak height between populations
 is a difference in concentration, not a measured difference in the
 program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1212,28 +1228,22 @@ population's ranking; a difference in peak height between populations
 is a difference in concentration, not a measured difference in the
 program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1249,28 +1259,22 @@ set's genes concentrate in that population's ranking; a difference in
 peak height between populations is a difference in concentration, not
 a measured difference in the program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1287,28 +1291,22 @@ difference in peak height between populations is a difference in
 concentration, not a measured difference in the program the set is
 named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1324,28 +1322,22 @@ set's genes concentrate in that population's ranking; a difference in
 peak height between populations is a difference in concentration, not
 a measured difference in the program the set is named for.
 
-**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
-enrichment score as each population's ranked list is walked from its
-most synovial-fluid-up gene (left) to its most blood-up gene (right).
-A positive, left-shifted excursion means the set's genes concentrate
-on the synovial-fluid side of that ranking; a negative trace the
-opposite. MIDDLE: where that population's members of the set sit in
-its own ranking, one named row per population in matching colour.
-BOTTOM: the three signed moderated-t rankings, which is what shows the
-three lists crossing zero at comparable fractions and so justifies the
-shared axis. X IS A FRACTION of each list's length, not a rank,
-because the three ranked lists differ in length; each curve's own
-length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
-symmetric, because all three curves already share one axis — it is not
-the fixed range the per-population figures elsewhere in this stage
-use, so do not compare curve heights between this panel and those. The
-legend carries each NES, the sweep-wide pooled adjusted p, how many of
-the set's genes reached that ranked list, and how many are in the
-leading edge, so a tall curve resting on few genes is visible as such.
-Correlative: a set enriching says where its gene content sits in a
-ranking, not that the program it is named for is present. Claim tier:
-L3 (enrichment statistics); no row here reaches an effect-size
-accumulator.
+**How to read:** One set, three populations, one axis. TOP: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. MIDDLE: where that population's members
+of the set sit in its own ranking, one named row each. BOTTOM: the
+three moderated-t rankings, which show them crossing zero at
+comparable fractions and so justify the shared axis. X IS A FRACTION
+of each list's length, not a rank, because the lists differ in length.
+Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, so
+do not compare curve heights across the two families. The legend
+carries each NES, pooled adjusted p, genes reaching the ranked list
+and leading-edge count, so a tall curve resting on few genes shows as
+one. Correlative: this says where gene content sits in a ranking, not
+that the program the set is named for is present. Claim tier: L3; no
+row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
