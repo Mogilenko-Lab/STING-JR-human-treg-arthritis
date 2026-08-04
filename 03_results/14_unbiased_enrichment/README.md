@@ -470,15 +470,15 @@ accumulator.
 
 ## figures/_overview/named_sets_in_sweep.png
 
-Scored with no favourite against all 11,236 sets tested in the JIA
+Scored with no favourite against all 11,345 sets tested in the JIA
 Treg contrast, HALLMARK_HYPOXIA reaches NES +2.26 at pooled FDR
-5.8e-08, rank 92 of 11,236 by pooled FDR, while the best-placed of
-the six cGAS-STING sets reaches pooled FDR 0.195 at rank 2,934.
+5.9e-08, rank 92 of 11,345 by pooled FDR, while the best-placed of
+the six cGAS-STING sets reaches pooled FDR 0.196 at rank 2,945.
 sting_specific_up does reach pooled FDR 0.018 in Tcon on 15 genes, so
 the cGAS-STING reading turns on which population is read. Set size
-tracks the outcome closely: 46.8% of Treg sets of 130 to 150 genes
-reach pooled significance against 6.9% of sets of 10 to 22 genes, the
-band five of the six cGAS-STING sets fall in, and 1,490 of 11,236
+tracks the outcome closely: 45.9% of Treg sets of 130 to 150 genes
+reach pooled significance against 6.8% of sets of 10 to 22 genes, the
+band five of the six cGAS-STING sets fall in, and 1,491 of 11,345
 Treg tests are significant at all.
 
 **How to read:** Columns are the three sorted populations on one shared row axis. Each
@@ -496,11 +496,11 @@ pooled FDR alone; by NES the same sets order differently, and the two
 orderings answer different questions. A cell reading 'not tested' had
 fewer than the minimum five of its genes in that ranked list, so it
 carries no result. Four bounds on the reading. This contrast moves
-many programs at once: 1,490 of 11,236 tests reach pooled FDR < 0.05
-in Treg, 2,165 of 11,459 in Tcon and 1,027 of 11,242 in CD8. Set size
-drives that rate: in Treg 73 of 156 sets of 130 to 150 genes are
-pooled-significant (46.8%) against 231 of 3,327 sets of 10 to 22
-genes (6.9%); five of the six cGAS-STING sets sit in that smaller
+many programs at once: 1,491 of 11,345 tests reach pooled FDR < 0.05
+in Treg, 2,153 of 11,568 in Tcon and 1,028 of 11,351 in CD8. Set size
+drives that rate: in Treg 73 of 159 sets of 130 to 150 genes are
+pooled-significant (45.9%) against 230 of 3,359 sets of 10 to 22
+genes (6.8%); five of the six cGAS-STING sets sit in that smaller
 band and the sixth at five genes, while HALLMARK_HYPOXIA carries 139
 testable genes. KO_heat_up is drawn beside WT_heat_up because that
 comparator reaches pooled FDR 1.1e-12 against 3.7e-12, ranks 29
@@ -513,7 +513,6 @@ committed in tables/sweep_named_sets.csv. Correlative throughout.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14_sweep_named_sets_viz.R` | `main` | `gsea_min_size=5; gsea_max_size=500; gsea_fdr=0.05; nes_cap=3.5; padj_pooled_method=BH; set_selection=tables/sweep_named_sets.csv` | `03_results/14_unbiased_enrichment/tables/{gsea_all,sweep_named_sets,sweep_named_sets_stats,sweep_setsize_baseline}.csv` |
-
 
 ## figures/by_contrast/&lt;population&gt;/GO_BP/*.png
 
@@ -890,13 +889,13 @@ contrast. Correlative. Claim tier: L3 (enrichment statistics).
 All four oxygen-named sets rise on the synovial-fluid side of the
 paired contrast in Treg, and they spread across the panel:
 HALLMARK_HYPOXIA reaches NES 2.2563 at pooled FDR 6e-08 on 139 genes
-while GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS reaches 1.2172 at 0.334
+while GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS reaches 1.2172 at 0.335
 on 120, so a reading taken from one of the four would be a reading the
 other three do not reproduce. In the second group the two interferon
 sets carry the strongest rows in the figure, ifn_only_up reaching NES
 2.6057 at 5e-10 in CD8. sting_specific_up clears pooled FDR 0.05 in
 Tcon at NES 1.8745 on 15 genes and sits above the threshold in Treg
-(1.5187, 0.195) and CD8 (1.6700, 0.102), and the three pathway-
+(1.5187, 0.196) and CD8 (1.6700, 0.102), and the three pathway-
 database STING terms stay between NES -0.84 and 1.37 on 10 to 24
 genes.
 
@@ -915,8 +914,8 @@ fewer genes in that population's ranked list than gsea_min_size, so
 the sweep never scored it and the cell carries an absence rather than
 a null. Read every score against the gene count beside it. In this
 sweep, size alone moves the odds a long way: in Treg a set of 130 to
-150 genes clears pooled FDR 0.05 in 46.8% of the 156 such sets tested,
-while a set of 10 to 22 genes clears it in 6.9% of 3,327. The four
+150 genes clears pooled FDR 0.05 in 45.9% of the 159 such sets tested,
+while a set of 10 to 22 genes clears it in 6.8% of 3,359. The four
 oxygen-named sets are four differently built sets for one named
 biology, and their scores differ, so the group is read as a family and
 a single member's score is read as that member's. The cGAS-STING group
@@ -933,7 +932,6 @@ correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14_program_nes_by_cell_state_viz.py` | `build_figure` | `thresholds.gsea_fdr = 0.05; gsea_min_size = 5; gsea_max_size = 500; row order = descending Treg NES within a group` | `03_results/14_unbiased_enrichment/tables/_overview/named_sets_in_sweep.csv, 03_results/14_unbiased_enrichment/tables/gsea_all.csv, 03_results/14_unbiased_enrichment/tables/sweep_setsize_baseline.csv` |
-
 
 ## figures/by_contrast/&lt;population&gt;/MitoPathways/*.png
 
@@ -1384,4 +1382,3 @@ statistics).
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14d_runsum_overview_viz.py` | `load_family` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv + runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv` |
-

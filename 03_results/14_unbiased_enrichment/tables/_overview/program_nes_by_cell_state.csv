@@ -1,31 +1,31 @@
 group,pathway_id,cell_state,source_table,tested,contrast,nes,pvalue,padj_per_collection,padj_pooled,significant_pooled,genes_in_ranked_list,leading_edge_size,rank_padj_pooled,rank_nes_signed,n_sets_in_pooled_family
-Oxygen and HIF response,HALLMARK_HYPOXIA,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,2.2562687,4.75409476e-10,2.37704738e-09,5.8061966e-08,True,139.0,63.0,92,106,11236.0
-Oxygen and HIF response,HALLMARK_HYPOXIA,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,2.21171713,9.12538434e-10,5.06965797e-09,7.84381545e-08,True,153.0,61.0,132,144,11459.0
-Oxygen and HIF response,HALLMARK_HYPOXIA,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,1.7908442,2.37955039e-05,0.00011897752,0.00110086031,True,141.0,47.0,243,435,11242.0
-Oxygen and HIF response,GOBP_RESPONSE_TO_OXYGEN_LEVELS,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,1.69827134,2.90530966e-05,0.000957258028,0.000709653463,True,224.0,80.0,,,11236.0
-Oxygen and HIF response,GOBP_RESPONSE_TO_OXYGEN_LEVELS,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,1.9711444,3.99232299e-08,2.24406574e-06,2.07945587e-06,True,230.0,94.0,,,11459.0
-Oxygen and HIF response,GOBP_RESPONSE_TO_OXYGEN_LEVELS,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,1.4817727,0.00257757095,0.0360547879,0.0335771178,True,225.0,71.0,,,11242.0
-Oxygen and HIF response,GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,1.21716303,0.121927614,0.339095045,0.333834754,False,120.0,38.0,,,11236.0
-Oxygen and HIF response,GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,1.42874578,0.0180831826,0.0795363051,0.0794921806,False,123.0,47.0,,,11459.0
-Oxygen and HIF response,GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,1.23103409,0.111333866,0.335913371,0.3296831,False,122.0,45.0,,,11242.0
-Oxygen and HIF response,REACTOME_CELLULAR_RESPONSE_TO_HYPOXIA,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,2.08916407,1.23013916e-05,0.000210193344,0.000351700856,True,54.0,29.0,,,11236.0
-Oxygen and HIF response,REACTOME_CELLULAR_RESPONSE_TO_HYPOXIA,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,1.75698114,0.00180110864,0.0156618143,0.0150210364,True,53.0,27.0,,,11459.0
-Oxygen and HIF response,REACTOME_CELLULAR_RESPONSE_TO_HYPOXIA,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,1.55879839,0.0140670993,0.0899493785,0.101100251,False,53.0,24.0,,,11242.0
-cGAS-STING and interferon,sting_specific_up,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,1.51866801,0.0509026453,0.0509026453,0.194935966,False,12.0,6.0,2934,2260,11236.0
-cGAS-STING and interferon,sting_specific_up,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,1.87446061,0.00227960686,0.00227960686,0.0180900381,True,15.0,8.0,1444,815,11459.0
-cGAS-STING and interferon,sting_specific_up,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,1.6699546,0.0141559493,0.0141559493,0.10155787,False,12.0,6.0,1567,813,11242.0
-cGAS-STING and interferon,GOBP_CGAS_STING_SIGNALING_PATHWAY,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,0.869530222,0.64869899,0.808035942,0.815664934,False,22.0,6.0,8936,7220,11236.0
-cGAS-STING and interferon,GOBP_CGAS_STING_SIGNALING_PATHWAY,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,-0.844668947,0.700630067,0.815283647,0.825809498,False,24.0,7.0,9722,9566,11459.0
-cGAS-STING and interferon,GOBP_CGAS_STING_SIGNALING_PATHWAY,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,0.580518574,0.96623354,0.98204278,0.984455189,False,21.0,3.0,11033,8083,11242.0
-cGAS-STING and interferon,REACTOME_STING_MEDIATED_INDUCTION_OF_HOST_IMMUNE_RESPONSES,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,0.826979655,0.687016387,0.84506241,0.840426361,False,10.0,5.0,9185,7496,11236.0
-cGAS-STING and interferon,REACTOME_STING_MEDIATED_INDUCTION_OF_HOST_IMMUNE_RESPONSES,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,1.17055546,0.273667236,0.476906063,0.474778922,False,10.0,3.0,6604,5605,11459.0
-cGAS-STING and interferon,REACTOME_STING_MEDIATED_INDUCTION_OF_HOST_IMMUNE_RESPONSES,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,1.15574382,0.291686212,0.540133894,0.552707755,False,10.0,3.0,5932,4621,11242.0
-cGAS-STING and interferon,WP_STING_PATHWAY_IN_KAWASAKILIKE_DISEASE_AND_COVID19,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,0.944016365,0.531549483,0.700173593,0.742233916,False,16.0,7.0,8046,6737,11236.0
-cGAS-STING and interferon,WP_STING_PATHWAY_IN_KAWASAKILIKE_DISEASE_AND_COVID19,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,1.37195647,0.105397881,0.225700513,0.262726631,False,17.0,6.0,4597,3995,11459.0
-cGAS-STING and interferon,WP_STING_PATHWAY_IN_KAWASAKILIKE_DISEASE_AND_COVID19,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,0.844666173,0.677703025,0.800133017,0.822971707,False,16.0,10.0,9257,7050,11242.0
-cGAS-STING and interferon,ifn_only_up,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,2.31582852,2.40883101e-08,4.81766202e-08,1.72392517e-06,True,60.0,24.0,157,70,11236.0
-cGAS-STING and interferon,ifn_only_up,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,2.33505364,1.55644528e-08,3.11289056e-08,9.3870034e-07,True,71.0,30.0,190,69,11459.0
-cGAS-STING and interferon,ifn_only_up,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,2.60566947,2.04961642e-12,4.09923285e-12,5.00908431e-10,True,58.0,38.0,46,1,11242.0
-cGAS-STING and interferon,HALLMARK_INTERFERON_ALPHA_RESPONSE,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,2.35497011,3.47144444e-10,2.16965278e-09,4.48335055e-08,True,91.0,51.0,,,11236.0
-cGAS-STING and interferon,HALLMARK_INTERFERON_ALPHA_RESPONSE,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,2.30123852,8.63546759e-09,3.59811149e-08,5.49743462e-07,True,91.0,40.0,,,11459.0
-cGAS-STING and interferon,HALLMARK_INTERFERON_ALPHA_RESPONSE,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,2.25270313,1.01375089e-08,1.01375089e-07,1.40698612e-06,True,91.0,37.0,,,11242.0
+Oxygen and HIF response,HALLMARK_HYPOXIA,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,2.2562687,4.75409476e-10,2.37704738e-09,5.86252229e-08,True,139.0,63.0,92,106,11345.0
+Oxygen and HIF response,HALLMARK_HYPOXIA,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,2.21171713,9.12538434e-10,5.06965797e-09,7.91842718e-08,True,153.0,61.0,132,144,11568.0
+Oxygen and HIF response,HALLMARK_HYPOXIA,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,1.7908442,2.37955039e-05,0.00011897752,0.00111153401,True,141.0,47.0,243,435,11351.0
+Oxygen and HIF response,GOBP_RESPONSE_TO_OXYGEN_LEVELS,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,1.69827134,2.90530966e-05,0.000957258028,0.000716537784,True,224.0,80.0,,,11345.0
+Oxygen and HIF response,GOBP_RESPONSE_TO_OXYGEN_LEVELS,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,1.9711444,3.99232299e-08,2.24406574e-06,2.09923602e-06,True,230.0,94.0,,,11568.0
+Oxygen and HIF response,GOBP_RESPONSE_TO_OXYGEN_LEVELS,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,1.4817727,0.00257757095,0.0360547879,0.0337852285,True,225.0,71.0,,,11351.0
+Oxygen and HIF response,GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,1.21716303,0.121927614,0.339095045,0.335438581,False,120.0,38.0,,,11345.0
+Oxygen and HIF response,GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,1.42874578,0.0180831826,0.0795363051,0.080033428,False,123.0,47.0,,,11568.0
+Oxygen and HIF response,GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,1.23103409,0.111333866,0.335913371,0.330615741,False,122.0,45.0,,,11351.0
+Oxygen and HIF response,REACTOME_CELLULAR_RESPONSE_TO_HYPOXIA,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,2.08916407,1.23013916e-05,0.000210193344,0.000355112693,True,54.0,29.0,,,11345.0
+Oxygen and HIF response,REACTOME_CELLULAR_RESPONSE_TO_HYPOXIA,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,1.75698114,0.00180110864,0.0156618143,0.0151308822,True,53.0,27.0,,,11568.0
+Oxygen and HIF response,REACTOME_CELLULAR_RESPONSE_TO_HYPOXIA,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,1.55879839,0.0140670993,0.0899493785,0.101561334,False,53.0,24.0,,,11351.0
+cGAS-STING and interferon,sting_specific_up,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,1.51866801,0.0509026453,0.0509026453,0.196091854,False,12.0,6.0,2945,2267,11345.0
+cGAS-STING and interferon,sting_specific_up,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,1.87446061,0.00227960686,0.00227960686,0.0182242517,True,15.0,8.0,1447,815,11568.0
+cGAS-STING and interferon,sting_specific_up,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,1.6699546,0.0141559493,0.0141559493,0.102021702,False,12.0,6.0,1575,813,11351.0
+cGAS-STING and interferon,GOBP_CGAS_STING_SIGNALING_PATHWAY,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,0.869530222,0.64869899,0.808035942,0.81753944,False,22.0,6.0,9002,7271,11345.0
+cGAS-STING and interferon,GOBP_CGAS_STING_SIGNALING_PATHWAY,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,-0.844668947,0.700630067,0.815283647,0.82711385,False,24.0,7.0,9799,9609,11568.0
+cGAS-STING and interferon,GOBP_CGAS_STING_SIGNALING_PATHWAY,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,0.580518574,0.96623354,0.98204278,0.98463131,False,21.0,3.0,11138,8118,11351.0
+cGAS-STING and interferon,REACTOME_STING_MEDIATED_INDUCTION_OF_HOST_IMMUNE_RESPONSES,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,0.826979655,0.687016387,0.84506241,0.842434167,False,10.0,5.0,9252,7547,11345.0
+cGAS-STING and interferon,REACTOME_STING_MEDIATED_INDUCTION_OF_HOST_IMMUNE_RESPONSES,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,1.17055546,0.273667236,0.476906063,0.476553799,False,10.0,3.0,6642,5609,11568.0
+cGAS-STING and interferon,REACTOME_STING_MEDIATED_INDUCTION_OF_HOST_IMMUNE_RESPONSES,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,1.15574382,0.291686212,0.540133894,0.554051821,False,10.0,3.0,5975,4628,11351.0
+cGAS-STING and interferon,WP_STING_PATHWAY_IN_KAWASAKILIKE_DISEASE_AND_COVID19,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,0.944016365,0.531549483,0.700173593,0.744346803,False,16.0,7.0,8101,6779,11345.0
+cGAS-STING and interferon,WP_STING_PATHWAY_IN_KAWASAKILIKE_DISEASE_AND_COVID19,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,1.37195647,0.105397881,0.225700513,0.264019638,False,17.0,6.0,4618,3999,11568.0
+cGAS-STING and interferon,WP_STING_PATHWAY_IN_KAWASAKILIKE_DISEASE_AND_COVID19,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,0.844666173,0.677703025,0.800133017,0.82374397,False,16.0,10.0,9338,7071,11351.0
+cGAS-STING and interferon,ifn_only_up,Treg,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Treg,2.31582852,2.40883101e-08,4.81766202e-08,1.74064891e-06,True,60.0,24.0,157,70,11345.0
+cGAS-STING and interferon,ifn_only_up,Tcon,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_Tcon,2.33505364,1.55644528e-08,3.11289056e-08,9.47629421e-07,True,71.0,30.0,190,69,11568.0
+cGAS-STING and interferon,ifn_only_up,CD8,tables/_overview/named_sets_in_sweep.csv,True,SF_vs_PB_CD8,2.60566947,2.04961642e-12,4.09923285e-12,5.05765131e-10,True,58.0,38.0,46,1,11351.0
+cGAS-STING and interferon,HALLMARK_INTERFERON_ALPHA_RESPONSE,Treg,tables/gsea_all.csv,True,SF_vs_PB_Treg,2.35497011,3.47144444e-10,2.16965278e-09,4.52684336e-08,True,91.0,51.0,,,11345.0
+cGAS-STING and interferon,HALLMARK_INTERFERON_ALPHA_RESPONSE,Tcon,tables/gsea_all.csv,True,SF_vs_PB_Tcon,2.30123852,8.63546759e-09,3.59811149e-08,5.54972717e-07,True,91.0,40.0,,,11568.0
+cGAS-STING and interferon,HALLMARK_INTERFERON_ALPHA_RESPONSE,CD8,tables/gsea_all.csv,True,SF_vs_PB_CD8,2.25270313,1.01375089e-08,1.01375089e-07,1.42062795e-06,True,91.0,37.0,,,11351.0
