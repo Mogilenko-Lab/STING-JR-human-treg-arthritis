@@ -1,49 +1,24 @@
 #!/usr/bin/env python
-"""
-14d_runsum_overview_viz.py — VIZ ONLY. One running sum per set, three populations.
-==================================================================================
-The per-database battery in 14c answers "within one population, which sets move?".
-This script asks the transposed question: for ONE set, where along the
-synovial-fluid-versus-paired-blood ranking do its genes sit in Treg, in Tcon and in
-CD8 — on one axis, so the comparison is made by the eye rather than by holding three
-figures in mind. That transposition is the whole point: the constraint this
-compartment already reports for the mouse-derived arm is that its synovial
-enrichment is NOT cell-subset-selective, and a figure that puts the three
-populations on separate pages cannot show that either way.
+"""One running-sum figure per gene set, with Treg, Tcon and CD8 on one axis.
 
-WHY THE X AXIS IS A FRACTION AND NOT A RANK
--------------------------------------------
-The three populations have different ranked lists — different lengths, because
-filterByExpr keeps a different gene set in each — so a raw rank axis would end at a
-different x for each curve and the shortest list would read as a truncated curve
-rather than a shorter one. x is therefore rank / n_ranked, and each curve's own
-n_ranked travels in the legend and in the same-stem table.
+The transpose of the per-database battery: one set per figure, its position in all
+three sorted populations' synovial-fluid-versus-paired-blood rankings side by side.
 
-WHICH SETS GET A PANEL, AND WHY THE RULE MATTERS
-------------------------------------------------
-Only sets whose running-sum trace exists in ALL THREE populations. A trace is written
-by 14_unbiased_enrichment.R for every mouse-derived arm, every set named in
-`unbiased_enrichment.runsum_always`, and the top-N curated per population — so a set
-that ranked top-N in Treg alone HAS a Treg curve and no other. Drawing that as a
-one-curve panel in this family would read as "the set does not enrich in Tcon or
-CD8", when it means "no trace was written there". The partial-coverage sets are
-listed in the run summary and in the family caption, named, with that reason.
+Viz only. Every NES and adjusted p is read from gsea_all.csv and every curve from
+the trace table the compute script wrote; the arithmetic here is rank / n_ranked and
+the peak of a column.
 
-Reads committed stage-14 tables and computes no statistic. Every NES and adjusted p
-is read from gsea_all.csv; the curve is read from the trace table the compute stage
-wrote. The only arithmetic here is rank / n_ranked and the peak of a column.
+Reads, from 03_results/14_unbiased_enrichment/tables/:
+  runsum_interactive_index.csv         which trace tables exist, and why
+  runsum_interactive_<pop>_<set>.csv   the traces
+  gsea_all.csv                         NES, pooled FDR, set and leading-edge size
 
-Input (03_results/14_unbiased_enrichment/tables/):
-  runsum_interactive_index.csv                 which trace tables exist, and why
-  runsum_interactive_<pop>_<set>.csv           the traces themselves
-  gsea_all.csv                                 NES, pooled FDR, set and leading-edge size
+Writes, under 03_results/14_unbiased_enrichment/:
+  figures/_overview/runsum_<set>.{pdf,png}   one per set traced in all three populations
+  tables/_overview/runsum_<set>.csv          its three rows
+  README.md                                  one caption each, plus a family caption
 
-Output (03_results/14_unbiased_enrichment/):
-  figures/_overview/runsum_<set>.{pdf,png}     one per complete-coverage set
-  tables/_overview/runsum_<set>.csv            its three rows
-  README.md                                    one caption each, plus a family caption
-
-Run from the compartment root, AFTER 14_unbiased_enrichment.R:
+Run from the compartment root, after 14_unbiased_enrichment.R:
   python 02_analysis/scripts/14d_runsum_overview_viz.py
 """
 from __future__ import annotations
@@ -88,9 +63,8 @@ LEGEND_SIZE = float(_F["legend_text_size"])
 RS_HEIGHTS = [float(h) for h in _F["running_sum_heights"]]
 FDR = float(PARAMS.gsea_fdr)
 
-# Sets this compartment owns, named by HOW THEY WERE DERIVED rather than by the
-# mechanism they are hoped to represent, so a panel title cannot smuggle the
-# conclusion. Anything absent here keeps its identifier verbatim.
+# Each set this compartment owns, named by how it was derived. A set absent here keeps
+# its identifier as its subtitle.
 DERIVATION = {
     "WT_heat_up": "mouse 39 °C-derived up arm, wild type",
     "KO_heat_up": "mouse 39 °C-derived up arm, cGAS knockout",
@@ -100,8 +74,7 @@ DERIVATION = {
     "ifn_only_up": "SAVI-derived, generic type-I interferon",
 }
 
-# MSigDB collection prefixes, stripped for display only; the full identifier stays in
-# the table, the caption and the file stem.
+# Stripped for display only; the full identifier stays in the table, caption and stem.
 _PREFIX = re.compile(r"^(HALLMARK|REACTOME|KEGG|KEGG_LEGACY|WP|GOBP|GOCC|GOMF|MITOPATHWAYS)_")
 
 
@@ -112,7 +85,7 @@ def fmt_fdr(p: float) -> str:
 
 
 def display_name(set_id: str) -> str:
-    """A legible panel title for a set id, without ever truncating it."""
+    """Legible panel title for a set id, kept whole."""
     if set_id in DERIVATION:
         return set_id
     stripped = _PREFIX.sub("", set_id)
@@ -134,9 +107,10 @@ def _bool_col(s: pd.Series) -> pd.Series:
 def load_family() -> tuple[dict[str, dict[str, pd.DataFrame]], pd.DataFrame, pd.DataFrame]:
     """Return {set_id: {population: trace}}, the summary rows, and the skipped sets.
 
-    A set is admitted only with a trace in every population, for the reason in the
-    module docstring. The skipped frame is returned rather than discarded so the
-    family caption can name what is missing and why.
+    A set is admitted with a trace in every population. The compute script traces the
+    top-N curated sets per population, so a set that ranked top-N in one population has
+    one curve, and a lone curve in this family reads as absence of enrichment elsewhere.
+    The skipped frame carries those sets out so the family caption can name them.
     """
     tdir = PATHS.tables(STAGE)
     index_path = tdir / "runsum_interactive_index.csv"
@@ -175,8 +149,7 @@ def load_family() -> tuple[dict[str, dict[str, pd.DataFrame]], pd.DataFrame, pd.
             tr = pd.read_csv(path, usecols=["rank", "stat", "running_es", "hit", "leading_edge"])
             tr["hit"] = _bool_col(tr["hit"])
             tr["leading_edge"] = _bool_col(tr["leading_edge"])
-            # The one piece of arithmetic in this script: a fraction of the list, so
-            # three rankings of different length share one axis.
+            # A fraction, so three rankings of different length share one axis.
             tr["rank_fraction"] = tr["rank"] / len(tr)
             per_pop[pop] = tr
 
@@ -220,11 +193,10 @@ def load_family() -> tuple[dict[str, dict[str, pd.DataFrame]], pd.DataFrame, pd.
 def plot_set(set_id: str, per_pop: dict[str, pd.DataFrame], summary: pd.DataFrame):
     """Three populations' running sums for one set, on a shared fractional-rank axis.
 
-    Three stacked panels in the config's running-sum proportions: the enrichment
-    traces, the gene-hit rug with one NAMED row per population, and the three ranked
-    metrics. The metric panel is kept even though it repeats between panels of this
-    family, because it is what shows the three rankings crossing zero at comparable
-    fractions — the assumption the shared x axis rests on.
+    Three stacked panels in the config's running-sum proportions: the enrichment traces,
+    the gene-hit rug with one named row per population, and the three ranked metrics. The
+    metric panel earns its space by showing the three rankings crossing zero at comparable
+    fractions, which is the assumption the shared x axis rests on.
     """
     fig, (ax, rug, met) = plt.subplots(
         3, 1, sharex=True, layout="constrained", height_ratios=RS_HEIGHTS)
@@ -244,15 +216,10 @@ def plot_set(set_id: str, per_pop: dict[str, pd.DataFrame], summary: pd.DataFram
         f"{display_name(set_id)} along the synovial-fluid-versus-paired-blood ranking"
         + (f"\n{note}" if note else f"\n{set_id}"))
 
-    # The y range is DATA-DRIVEN, and asymmetric on purpose. The config's
-    # running_sum_ylim pins one fixed range across a family of separate per-population
-    # figures so their shapes stay comparable; here all three populations already share
-    # one axis, so comparability is intrinsic and a fixed range would spend most of the
-    # panel on white space. Zero is always included — a running-sum panel that cropped
-    # it would hide the sign — and the padding is split unevenly so the legend gets the
-    # room it needs on the side the curves leave empty, decided from the sign of the
-    # largest excursion rather than by eye. Without that, a three-line legend either
-    # overlaps the traces or forces the symmetric range back.
+    # The y range is data-driven: the config's running_sum_ylim pins one range across a
+    # family of separate per-population figures, and here the three populations already
+    # share one axis. Zero stays in range so the sign is readable, and the padding goes
+    # to the side the curves leave empty so the three-line legend clears the traces.
     hi = max(0.0, max(float(per_pop[p]["running_es"].max()) for p in POP_ORDER))
     lo = min(0.0, min(float(per_pop[p]["running_es"].min()) for p in POP_ORDER))
     rng = max(hi - lo, 1e-9)
@@ -284,6 +251,8 @@ def plot_set(set_id: str, per_pop: dict[str, pd.DataFrame], summary: pd.DataFram
     return fig
 
 
+# ===========================================================================
+# Emit: one figure per set, then the family caption
 # ===========================================================================
 def main() -> None:
     set_paper_style(config=FIG_CFG)
@@ -347,7 +316,7 @@ def main() -> None:
         )
         plt.close(fig)
 
-    # ---- family caption: what the family is, and what it deliberately omits ----
+    # ---- family caption: the family, and the sets it omits ----
     skipped_txt = (
         "Every set with a trace is drawn." if skipped.empty else
         "Not drawn, because a trace exists in only some populations and a one-curve panel in "

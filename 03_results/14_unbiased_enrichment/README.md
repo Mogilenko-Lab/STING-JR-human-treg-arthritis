@@ -1382,3 +1382,4 @@ statistics).
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14d_runsum_overview_viz.py` | `load_family` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv + runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv` |
+

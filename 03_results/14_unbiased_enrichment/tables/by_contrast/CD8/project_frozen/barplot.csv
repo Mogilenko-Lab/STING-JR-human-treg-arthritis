@@ -1,6 +1,0 @@
-population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-CD8,SF_vs_PB_CD8,project_frozen,barplot,every one of the 5 sets at pooled FDR < 0.05,1,HALLMARK_INTERFERON_ALPHA_RESPONSE,Interferon-alpha Response,up,2.25260365,0.573099238,1.03191603e-8,7.2234122e-8,1.42062795e-6,Hallmark,91,37,0.406593407
-CD8,SF_vs_PB_CD8,project_frozen,barplot,every one of the 5 sets at pooled FDR < 0.05,2,HALLMARK_IL2_STAT5_SIGNALING,IL-2/STAT5 Signaling,up,1.86689089,0.434894232,2.22299272e-6,7.78047451e-6,1.86680692e-4,Hallmark,166,62,0.373493976
-CD8,SF_vs_PB_CD8,project_frozen,barplot,every one of the 5 sets at pooled FDR < 0.05,3,HALLMARK_HYPOXIA,Hypoxia,up,1.79114328,0.426433209,4.53482857e-5,1.05812667e-4,0.00111153401,Hallmark,141,47,0.333333333
-CD8,SF_vs_PB_CD8,project_frozen,barplot,every one of the 5 sets at pooled FDR < 0.05,4,HALLMARK_INFLAMMATORY_RESPONSE,Inflammatory Response,up,1.71442699,0.410548778,3.12737345e-4,4.37832283e-4,0.0063697029,Hallmark,135,41,0.303703704
-CD8,SF_vs_PB_CD8,project_frozen,barplot,every one of the 5 sets at pooled FDR < 0.05,5,HALLMARK_TNFA_SIGNALING_VIA_NFKB,TNF-alpha Signaling via NF-kappaB,up,1.70265562,0.39564043,1.52596743e-4,2.67044301e-4,0.00411924045,Hallmark,169,51,0.301775148
