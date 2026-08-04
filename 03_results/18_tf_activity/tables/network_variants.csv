@@ -1,0 +1,13 @@
+population,variant,n_edges,n_tfs,n_tfs_ge_minsize,n_repressing_edges,median_regulon_size,hif1a_size,nfkb1_size
+Treg,signed,25135,1076,601,3355,17,293,280
+Treg,unsigned,25135,1076,601,0,17,293,280
+Treg,literature_signed,12402,843,388,3355,13,138,147
+Treg,alias_recovered,25529,1078,603,3388,17,296,282
+Tcon,signed,26422,1077,609,3521,17,302,289
+Tcon,unsigned,26422,1077,609,0,17,302,289
+Tcon,literature_signed,13063,843,392,3521,14,144,152
+Tcon,alias_recovered,26842,1079,611,3554,17,306,291
+CD8,signed,24820,1069,598,3300,16.5,285,276
+CD8,unsigned,24820,1069,598,0,16.5,285,276
+CD8,literature_signed,12202,835,381,3300,13,136,144
+CD8,alias_recovered,25220,1071,602,3334,16,288,278
