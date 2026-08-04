@@ -1,88 +1,41 @@
 #!/usr/bin/env Rscript
-# 18_tf_activity.R — COMPUTE (no plotting)
+# 18_tf_activity.R: COMPUTE. Calibration of the committed TF_Targets sweep's TF ranks.
 # =============================================================================
-# What this stage asks
-# -----------------------------------------------------------------------------
-# HIF1A's unsigned CollecTRI regulon sits fourth by normalised enrichment score in
-# the committed TF_Targets sweep of the JIA synovial-fluid-versus-paired-blood
-# donor-pseudobulk contrast for sorted Tregs (NES 2.329, pooled FDR 4.89e-14, 293
-# targets tested). The three regulons immediately around it carry 276 to 285
-# targets. This stage asks whether that is a regulatory signal or a property of
-# which genes CollecTRI assigns to HIF1A, by running the same forensics the mouse
-# anchor ran on its own HIF result (mouse_anchor/03_results/04_tf).
+# The top-ranking regulons of the committed TF_Targets sweep are re-scored here against
+# four properties of the network they were read from. Sections 6 to 9 take one each:
+# the rank's stability across network variant and estimator, which targets carry the
+# score and how many other regulons claim them, activity against regulon size with
+# matched random-regulon nulls, and whether the recorded per-edge signs change the answer.
+# These are the forensics the mouse anchor ran on its own HIF result
+# (mouse_anchor/03_results/04_tf), applied to the same question here.
 #
-# WHAT AN INFERRED TF ACTIVITY IS. decoupleR-ULM regresses the contrast statistic of
-# every gene on the mode of regulation a network assigns it, and reports the
-# t-statistic of the slope. The number is therefore a statistic over the expression
-# of the genes the network assigns to a transcription factor. It is not a measurement
-# of transcription-factor protein activity, and it inherits every property of the
-# regulon it was computed over: size, composition, how many other regulons claim the
-# same targets, and whether the recorded per-edge signs are used.
+# Annotation tier. No row reaches 03_results/master/ or any effect-size accumulator, and a
+# regulon scoring high says its target genes move with the synovial-fluid side of this
+# contrast.
 #
-# CLAIM TIER. ANNOTATION only. Nothing here is written to 03_results/master/ or to
-# any effect-size accumulator, nothing pools with the donor-pseudobulk claim spine,
-# and language stays correlative: a regulon scoring high says its target genes move
-# with the synovial-fluid side of this contrast.
-#
-# THE FOUR FORENSICS
-#   (1) RANK CASCADE. Four network variants crossed with three estimators, plus the
-#       committed unsigned-regulon fgsea rank. The mouse cascade moved HIF1a #1 ->
-#       #12 on a network swap and #12 -> #142 on a swap from ULM to MLM, so the same
-#       two axes are what this table has to move along, or fail to.
-#   (2) TARGET DECOMPOSITION. Which genes carry the score, each with its moderated t
-#       and the number of other CollecTRI regulons that contain it. A target claimed
-#       by thirty regulons is not evidence about any one of them. Run for HIF1A and
-#       for NFKB1 so a reader has a comparator on the same axis.
-#   (3) SIZE CALIBRATION. Activity against regulon size across every TF tested, with
-#       two random-regulon nulls (size-matched, and size-plus-expression-matched) and
-#       a size-conditional residual taken over the real regulons. If large regulons
-#       systematically score high on this contrast, that bounds every large-regulon
-#       TF here.
-#   (4) DIRECTION. Whether the recorded per-edge signs change the answer, and the
-#       direction in this contrast of the canonical HIF1A-selective targets by name.
-#
-# THE SILENT-FAILURE MODE THIS GUARDS AGAINST. The JIA count matrix carries pre-2019
-# HGNC symbols (MB21D1 not CGAS, TMEM173 not STING1, MARCH5 not MARCHF5, MRE11A not
-# MRE11) while CollecTRI carries current ones. A target whose symbol was renamed
-# therefore fails to join and leaves the regulon without any error being raised,
-# which is the same failure mode this stage is investigating. So every network target
-# that does not match is reported with its cause: absent from the count matrix,
-# dropped by the expression filter, or recoverable through an HGNC alias. The
-# recovered edges are carried as their own network variant so a reader can see
-# whether recovering them changes anything.
-#
-# Inputs (READ-ONLY):
-#   03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv   signed moderated t, HGNC symbol
+# Reads, read-only:
+#   03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv     signed moderated t, HGNC symbol
 #   03_results/03_pseudobulk/tables/de_SFvsPB_{treg,tcon,cd8}.csv  avg_expr + padj per gene
-#   03_results/03_pseudobulk/tables/gene_symbols.csv             the Ensembl->HGNC seam map
-#   03_results/14_unbiased_enrichment/tables/gsea_all.csv        the committed TF_Targets rows
+#   03_results/03_pseudobulk/tables/gene_symbols.csv               the Ensembl-to-HGNC seam map
+#   03_results/14_unbiased_enrichment/tables/gsea_all.csv          the committed TF_Targets rows
 #   ../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv  (SHA-256 pinned)
 #
-# Outputs — 03_results/18_tf_activity/tables/:
-#   source_hash_manifest.csv        the cross-compartment CollecTRI pin
-#   ranked_list_keycheck.csv        symbol-vs-Ensembl guard, per population
-#   symbol_vocabulary_check.csv     per focus TF, why each target did or did not match
-#   symbol_vocabulary_probes.csv    the four named pre-2019 symbol pairs, resolved
-#   alias_recovery.csv              every target recovered through an HGNC alias
-#   network_variants.csv            edges and TFs per variant per population
-#   tf_activity_all.csv             every TF x population x variant x method
-#   hif1a_rank_cascade.csv          the cascade, focus TFs x configuration
-#   target_decomposition.csv        per-target contribution and promiscuity
-#   target_decomposition_summary.csv  contribution by promiscuity band
-#   regulon_size_calibration.csv    per TF: size, activity, fgsea NES, size residual
-#   regulon_size_spearman.csv       the size-versus-activity correlations
-#   size_matched_null.csv           focus TFs against random regulons of matched size
-#   signed_vs_unsigned.csv          the direction audit, per focus TF
-#   canonical_hif1a_targets.csv     the named canonical targets and their direction
+# Writes 03_results/18_tf_activity/tables/, each captioned in that stage's README:
+#   source_hash_manifest.csv       ranked_list_keycheck.csv      symbol_vocabulary_probes.csv
+#   symbol_vocabulary_check.csv    alias_recovery.csv            network_variants.csv
+#   tf_activity_all.csv            fgsea_family_size_cap.csv     hif1a_rank_cascade.csv
+#   target_decomposition.csv       target_decomposition_summary.csv
+#   regulon_size_calibration.csv   regulon_size_spearman.csv     size_matched_null.csv
+#   signed_vs_unsigned.csv         canonical_hif1a_targets.csv
 #
-# Objects (checkpoints, not deliverables) — 03_results/objects/:
-#   18_tf_networks.rds              the four network variants per population
-#   18_tf_activity.rds              raw decoupleR output for every configuration
+# Writes 03_results/objects/ as checkpoints:
+#   18_tf_networks.rds   the network variants per population
+#   18_tf_activity.rds   raw decoupleR output for every configuration
+#
+# Compute only. Figures live in 18_tf_activity_viz.R.
 #
 # Run from the compartment root:
 #   Rscript 02_analysis/scripts/18_tf_activity.R
-#
-# COMPUTE ONLY — no ggplot/ggsave. Figures live in 18_tf_activity_viz.R.
 
 suppressPackageStartupMessages({
   library(dplyr)
@@ -103,7 +56,7 @@ SCRIPT <- "02_analysis/scripts/18_tf_activity.R"
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
 
 # ============================================================================
-# 0. CONFIG — every parameter read from analysis_config.yaml, none chosen here
+# 0. Config: every parameter read from analysis_config.yaml
 # ============================================================================
 
 CFG <- FIG_CFG
@@ -160,10 +113,10 @@ message("18_tf_activity — inferred TF activity on the SF-vs-PB niche contrast"
 message("=================================================================")
 
 # ============================================================================
-# 1. PIN THE CROSS-COMPARTMENT NETWORK
+# 1. Pin the cross-compartment network
 # ============================================================================
-# First run writes the pin; every later run is gated against it, so a network that
-# moves under this stage stops the run instead of quietly changing its answers.
+# The first run writes the pin and later runs are gated against it, so a network that
+# moves under this stage stops the run.
 
 message("\n[1] Pinning the cross-compartment CollecTRI network ...")
 MANIFEST  <- file.path(TBL, "source_hash_manifest.csv")
@@ -180,8 +133,13 @@ NET_SHA <- verify_source_hash(NET_PATH, NET_LABEL, MANIFEST, root = getwd())
 message(sprintf("  %s  sha256 %s", net_key, NET_SHA))
 
 # ============================================================================
-# 2. RANKED LISTS + THE SYMBOL-VOCABULARY GUARD
+# 2. Ranked lists and the symbol-vocabulary guard
 # ============================================================================
+# The trap this section guards. The JIA count matrix carries pre-2019 HGNC symbols
+# (MB21D1 for CGAS, TMEM173 for STING1, MARCH5 for MARCHF5, MRE11A for MRE11) while
+# CollecTRI carries current ones, so a renamed target drops out of a regulon silently.
+# Every unmatched target is therefore reported with its cause: absent from the count
+# matrix, dropped by the expression filter, or recoverable through an HGNC alias.
 
 message("\n[2] Ranked lists, expression annotation, and the key check ...")
 
@@ -207,13 +165,13 @@ read_de <- function(tag) {
 STATS <- lapply(names(POPS), read_ranked); names(STATS) <- names(POPS)
 DE    <- lapply(names(POPS), read_de);     names(DE)    <- names(POPS)
 
-# The seam map carries every symbol the count matrix held before filterByExpr, which
-# is what separates "renamed symbol" from "dropped for low expression" below.
+# The seam map holds every symbol the count matrix carried before filterByExpr, which is
+# what separates a renamed symbol from one dropped for low expression below.
 MATRIX_SYMBOLS <- unique(readr::read_csv(
   "03_results/03_pseudobulk/tables/gene_symbols.csv", show_col_types = FALSE)$gene_symbol)
 
-# Ensembl ids in a ranked list intersect every reference at ~zero and fgsea/decoupleR
-# report that as an empty result rather than an error. Guard before anything runs.
+# Ensembl ids in a ranked list intersect every reference at ~zero, and fgsea and decoupleR
+# report that as an empty result. Guard before anything runs.
 keycheck <- bind_rows(lapply(names(POPS), function(tag) {
   g <- names(STATS[[tag]])
   tibble(population = POPS[[tag]], n_genes = length(g),
@@ -226,7 +184,7 @@ if (any(keycheck$key != "hgnc_symbol"))
   stop("[18] a ranked list is keyed by Ensembl id; every network target matches on HGNC symbol.")
 emit(keycheck, "ranked_list_keycheck.csv")
 
-# ---- the four named pre-2019 probes, resolved against the actual vocabulary -----
+# ---- the four named pre-2019 probes, resolved against the live vocabulary ----
 probes <- bind_rows(lapply(TA$symbol_vocabulary_probes, function(p) {
   tibble(matrix_symbol  = p$matrix_symbol,
          current_symbol = p$current_symbol,
@@ -239,7 +197,7 @@ print(as.data.frame(probes), row.names = FALSE)
 emit(probes, "symbol_vocabulary_probes.csv")
 
 # ============================================================================
-# 3. THE NETWORK AND ITS VARIANTS
+# 3. The network and its variants
 # ============================================================================
 
 message("\n[3] Building the network variants ...")
@@ -258,17 +216,15 @@ message(sprintf("  CollecTRI: %d unique edges, %d TFs, %d repressing edges",
                 nrow(net_base), length(unique(net_base$source)), sum(net_base$mor < 0)))
 
 # ---- HGNC alias resolution: current network symbol -> the symbol the matrix carries ----
-# org.Hs.eg.db is the arbiter. A network target is recoverable when it is absent from the
-# ranked list, its symbol resolves to exactly one Entrez id, and exactly one alias of that
-# same Entrez id is present in the ranked list.
+# org.Hs.eg.db is the arbiter. A target is recoverable when it is absent from the ranked
+# list, its symbol resolves to exactly one Entrez id, and exactly one alias of that same
+# Entrez id is present in the ranked list.
 #
-# THE HAZARD THAT MAKES A NAIVE ALIAS JOIN WORSE THAN THE PROBLEM IT FIXES. Many old
-# symbols were reassigned as the OFFICIAL symbol of a different gene. PGF (placental
-# growth factor) carries the alias PIGF, and PIGF is now the official symbol of a
-# GPI-anchor biosynthesis gene; THPO carries the alias TPO, and TPO is now the official
-# symbol of thyroid peroxidase. Accepting either would silently attach one gene's
-# expression to another gene's regulon edge. So a candidate is rejected whenever it is the
-# official symbol of any OTHER Entrez id, and the rejections are counted and reported.
+# The hazard: many old symbols were reassigned as the official symbol of a different gene.
+# PGF carries the alias PIGF, and PIGF now names a GPI-anchor biosynthesis gene; THPO
+# carries TPO, and TPO now names thyroid peroxidase. Accepting either attaches one gene's
+# expression to another gene's regulon edge, so a candidate that is the official symbol of
+# any other Entrez id is rejected, counted and reported.
 build_alias_map <- function(missing_symbols, universe) {
   empty <- tibble(network_symbol = character(), matrix_symbol = character(),
                   entrez_id = character(), n_aliases_in_universe = integer())
@@ -342,8 +298,8 @@ alias_recovery <- bind_rows(lapply(names(POPS), function(tag) {
                   network_symbol = recovered_from, matrix_symbol = target, mor,
                   resolution = "accepted", focus_tf = source %in% FOCUS)
 }))
-# The rejected resolutions are published alongside the accepted ones, at symbol level, so
-# the guard is auditable rather than invisible.
+# The rejected resolutions are published beside the accepted ones, at symbol level, so the
+# guard is auditable.
 alias_rejected <- bind_rows(lapply(names(POPS), function(tag) {
   rj <- NETS[[tag]]$.rejected
   if (is.null(rj) || !nrow(rj)) return(NULL)
@@ -386,7 +342,7 @@ variant_summary <- bind_rows(lapply(names(POPS), function(tag) {
 print(as.data.frame(variant_summary %>% filter(population == POPS[[PRIMARY]])), row.names = FALSE)
 emit(variant_summary, "network_variants.csv")
 
-# ---- per-focus-TF vocabulary accounting: why each target did or did not match -----
+# ---- per-focus-TF accounting: the cause behind every unmatched target ----
 vocab <- bind_rows(lapply(names(POPS), function(tag) {
   universe <- names(STATS[[tag]])
   amap <- NETS[[tag]]$.alias_map
@@ -412,17 +368,19 @@ print(as.data.frame(vocab %>% filter(population == POPS[[PRIMARY]]) %>%
 emit(vocab, "symbol_vocabulary_check.csv")
 
 # ============================================================================
-# 4. THE ACTIVITY RUNS — ULM primary, MLM and consensus as forensics
+# 4. The activity runs: ULM primary, MLM and consensus as forensics
 # ============================================================================
+# ULM regresses the contrast statistic of every gene on the mode of regulation the network
+# assigns it and reports the slope's t, so the score is a statistic over the expression of
+# the genes the network assigns to a factor, and it inherits that regulon's size,
+# composition, target sharing and edge signs.
 
 message("\n[4] decoupleR over ", length(POPS), " populations x ", length(VARIANTS),
         " variants x ", length(METHODS), " methods ...")
 
 run_one <- function(mat, net) {
-  # decouple() emits the univariate wsum family alongside ulm/mlm, then the consensus.
-  # Keeping one call means ULM, MLM and consensus are computed from an identical
-  # network filtering, so a rank difference between them is the estimator and nothing
-  # else.
+  # One decouple() call, so ULM, MLM and the consensus see identical network filtering and
+  # a rank difference between them is the estimator alone.
   dec <- decouple(mat = mat, network = net,
                   .source = "source", .target = "target",
                   statistics = CONS_ST,
@@ -458,7 +416,7 @@ message(sprintf("  %d rows over %d configurations",
 emit(ACT %>% arrange(population, variant, method, rank), "tf_activity_all.csv")
 
 # ============================================================================
-# 5. THE COMMITTED UNSIGNED-REGULON fgsea ROWS — the headline being calibrated
+# 5. The committed unsigned-regulon fgsea rows, the ranks being calibrated
 # ============================================================================
 
 message("\n[5] Reading the committed TF_Targets fgsea rows ...")
@@ -478,11 +436,10 @@ message(sprintf("  %d rows over %d populations; the %s family holds %d regulons"
                 nrow(FG), n_distinct(FG$population), POPS[[PRIMARY]],
                 sum(FG$population == POPS[[PRIMARY]])))
 
-# WHAT THE HEADLINE'S DENOMINATOR IS. The sweep applies its size cap to the RAW CollecTRI
-# regulon, before intersecting with the ranked list, so every TF whose raw target list
-# exceeds gsea_max_size is outside the family a headline rank is read against. Those are
-# the most promiscuous regulons in the network, so the exclusion is not size-neutral and
-# it belongs in a table rather than in a footnote.
+# The denominator a rank is read against. The sweep applies its size cap to the raw
+# CollecTRI regulon, before intersecting with the ranked list, so a TF whose raw target
+# list exceeds gsea_max_size sits outside that family. Those are the network's most
+# promiscuous regulons, so the exclusion carries size with it and gets its own table.
 raw_size <- net_base %>% distinct(source, target) %>% count(source, name = "raw_targets")
 present_size <- NETS[[PRIMARY]]$signed %>% count(source, name = "targets_present")
 CAPPED <- raw_size %>%
@@ -504,8 +461,11 @@ print(as.data.frame(CAPPED %>% select(-population, -gsea_max_size)), row.names =
 emit(CAPPED, "fgsea_family_size_cap.csv")
 
 # ============================================================================
-# 6. FORENSIC 1 — THE RANK CASCADE
+# 6. Forensic 1: the rank cascade
 # ============================================================================
+# Four network variants crossed with three estimators, plus the committed fgsea rank. The
+# mouse anchor's Hif1a moved #1 to #12 on a network swap and #12 to #142 from ULM to MLM,
+# so those two axes are the ones this table travels along.
 
 message("\n[6] The rank cascade ...")
 
@@ -529,8 +489,10 @@ print(as.data.frame(CASCADE %>% filter(population == POPS[[PRIMARY]]) %>%
                       arrange(best_rank)), row.names = FALSE)
 
 # ============================================================================
-# 7. FORENSIC 2 — TARGET DECOMPOSITION AGAINST TARGET PROMISCUITY
+# 7. Forensic 2: target decomposition against target promiscuity
 # ============================================================================
+# Which genes carry the score, each with its moderated t. Run for HIF1A and for NFKB1, so
+# a reader has a comparator on the same axis.
 
 message("\n[7] Target decomposition ...")
 
@@ -539,9 +501,8 @@ universe <- names(STATS[[pop_tag]])
 signed   <- NETS[[pop_tag]]$signed
 de_prim  <- DE[[pop_tag]]
 
-# How many CollecTRI regulons claim each target, over the same universe the scores
-# were computed on. A target in many regulons carries information about all of them
-# jointly and about none of them alone.
+# How many CollecTRI regulons claim each target, over the universe the scores were computed
+# on. A target in many regulons carries information about all of them jointly.
 regulons_per_target <- signed %>% distinct(source, target) %>%
   count(target, name = "n_regulons")
 
@@ -591,8 +552,11 @@ print(as.data.frame(DECOMP_TBL %>% group_by(tf) %>% slice_head(n = 10) %>% ungro
                       select(tf, target, stat, contrib, n_regulons, mor)), row.names = FALSE)
 
 # ============================================================================
-# 8. FORENSIC 3 — REGULON-SIZE CALIBRATION
+# 8. Forensic 3: regulon-size calibration
 # ============================================================================
+# Activity against size across every TF tested, with a size-conditional residual taken
+# over the real regulons and two random-regulon nulls. A systematic size dependence on
+# this contrast bounds every large-regulon TF here.
 
 message("\n[8] Regulon-size calibration ...")
 
@@ -607,9 +571,8 @@ CAL <- ulm_prim %>%
   mutate(population = POPS[[pop_tag]], focus_tf = tf %in% FOCUS,
          log_size = log10(regulon_size))
 
-# Size-conditional expectation over the REAL regulons: what activity a regulon of
-# this size gets on this contrast, taken from the other regulons rather than assumed.
-# The residual is the part of a TF's score its size does not already account for.
+# Size-conditional expectation read off the real regulons: what activity a regulon of this
+# size gets on this contrast. The residual is the part of a score size leaves unaccounted.
 fit_resid <- function(x, y) {
   ok <- is.finite(x) & is.finite(y)
   out <- rep(NA_real_, length(y)); fitv <- rep(NA_real_, length(y))
@@ -626,8 +589,7 @@ CAL$ulm_score_size_residual <- r1$resid
 r2 <- fit_resid(log10(CAL$fgsea_set_size), CAL$fgsea_nes)
 CAL$fgsea_nes_size_expected <- r2$fit
 CAL$fgsea_nes_size_residual <- r2$resid
-# Rank on the residual, so a reader can compare "rank by activity" against "rank by the
-# part of that activity regulon size does not already account for" in one row.
+# Rank on the residual as well, so one row carries activity rank beside size-adjusted rank.
 rank_desc <- function(v) {
   out <- rep(NA_integer_, length(v)); ok <- is.finite(v)
   out[ok] <- as.integer(rank(-v[ok], ties.method = "first")); out
@@ -649,9 +611,9 @@ sp <- function(x, y) {
   ok <- is.finite(x) & is.finite(y)
   suppressWarnings(stats::cor(x[ok], y[ok], method = "spearman"))
 }
-# A label-permuted contrast is the reference: whatever size-versus-activity structure
-# survives shuffling the gene labels is arithmetic, and whatever does not is the
-# contrast's own broad shift being sampled more thoroughly by bigger regulons.
+# A label-permuted contrast is the reference. The size-versus-activity structure that
+# survives shuffling the gene labels is arithmetic, and the rest belongs to the contrast's
+# own broad shift, which a bigger regulon samples more thoroughly.
 perm_stats <- STATS[[pop_tag]]
 names(perm_stats) <- sample(names(perm_stats))
 perm_mat <- matrix(perm_stats, ncol = 1,
@@ -679,7 +641,7 @@ SPEAR <- bind_rows(lapply(names(POPS), function(tag) {
 print(as.data.frame(SPEAR), row.names = FALSE)
 emit(SPEAR, "regulon_size_spearman.csv")
 
-# ---- random-regulon nulls, matched on size, then on size and expression -----------
+# ---- random-regulon nulls, matched on size, then on size and expression ----
 message("  size-matched random-regulon nulls, ", NDRAW, " draws per focus TF ...")
 
 expr_lookup <- de_prim %>% select(gene_symbol, avg_expr) %>%
@@ -691,8 +653,8 @@ by_decile <- split(names(expr_dec), expr_dec)
 
 draw_matched <- function(obs_targets, match_expression) {
   if (!match_expression) return(sample(universe, length(obs_targets)))
-  # Draw within the observed set's expression-decile composition, so the null keeps
-  # the observed regulon's expression profile and varies only gene identity.
+  # Draw within the observed set's expression-decile composition, so the null keeps that
+  # regulon's expression profile and varies gene identity alone.
   want <- table(expr_dec[obs_targets])
   out <- unlist(lapply(names(want), function(d) {
     pool <- by_decile[[d]]
@@ -704,9 +666,9 @@ draw_matched <- function(obs_targets, match_expression) {
   out
 }
 
-# One TF and one match mode per decoupleR call. Pooling all draws into a single network
-# would build a genes-by-draws dense design matrix large enough to matter; batching keeps
-# the estimator and the universe identical while the working set stays small.
+# One TF and one match mode per decoupleR call. Pooling every draw into a single network
+# would build a genes-by-draws dense design matrix, and batching holds the estimator and
+# the universe identical while the working set stays small.
 prim_mat <- matrix(STATS[[pop_tag]], ncol = 1,
                    dimnames = list(names(STATS[[pop_tag]]), "primary"))
 
@@ -717,7 +679,7 @@ null_scores <- function(tf, match_expression) {
     target = unlist(lapply(seq_len(NDRAW),
                            function(i) draw_matched(obs$target, match_expression)),
                     use.names = FALSE),
-    # keep the observed sign composition so the null varies gene identity only
+    # the observed sign composition is kept, so the null varies gene identity alone
     mor = unlist(lapply(seq_len(NDRAW), function(i) sample(obs$mor)), use.names = FALSE),
     stringsAsFactors = FALSE)
   u <- run_ulm(mat = prim_mat, net = nn, .source = "source", .target = "target",
@@ -770,14 +732,14 @@ print(as.data.frame(NULLS %>% filter(null_match == "size_and_expression")), row.
 emit(NULLS, "size_matched_null.csv")
 
 # ============================================================================
-# 9. FORENSIC 4 — DIRECTION
+# 9. Forensic 4: direction
 # ============================================================================
 
 message("\n[9] The direction audit ...")
 
-# (a) Are the recorded signs doing anything? The committed TF_Targets headline pools
-#     activating and repressing edges into one unsigned set, so that number uses no
-#     sign at all. Within decoupleR, compare signed against unsigned on one estimator.
+# (a) What the recorded signs do. The committed TF_Targets rows pool activating and
+#     repressing edges into one unsigned set, so those ranks use no sign. Compare signed
+#     against unsigned within decoupleR, on one estimator.
 sv <- ACT %>% filter(population == POPS[[pop_tag]], method == "ulm",
                      variant %in% c("signed", "unsigned")) %>%
   select(tf, variant, score, rank, padj, regulon_size) %>%
@@ -800,9 +762,9 @@ message(sprintf("  across all %d TFs: Spearman(signed rank, unsigned rank) = %.4
                 nrow(sv), sp(sv$rank_signed, sv$rank_unsigned),
                 sum(abs(sv$delta_rank) > 10, na.rm = TRUE), nrow(sv)))
 
-# (b) The canonical HIF1A-selective targets, by name, with their direction here.
-#     Reported whether or not they match, and with an alias probe when they do not,
-#     because a silently dropped target is the failure mode under investigation.
+# (b) The canonical HIF1A-selective targets, by name, with their direction here. Every one
+#     is reported with the cause when it fails to match, and with an alias probe, since a
+#     silently dropped target is the failure mode under investigation.
 alias_of <- function(sym) {
   m <- NETS[[pop_tag]]$.alias_map
   hit <- m$matrix_symbol[m$network_symbol == sym]
@@ -837,7 +799,7 @@ print(as.data.frame(CANON_TBL %>% select(target, in_ranked_list, in_hif1a_regulo
 emit(CANON_TBL, "canonical_hif1a_targets.csv")
 
 # ============================================================================
-# 10. CHECKPOINTS + THE REPRODUCTION CHECK
+# 10. Checkpoints and the reproduction check
 # ============================================================================
 
 message("\n[10] Checkpoints and the reproduction check ...")
@@ -846,8 +808,8 @@ saveRDS(list(activity = ACT, fgsea = FG, cascade = CASCADE, calibration = CAL,
              nulls = NULLS, decomposition = DECOMP_TBL, source_sha256 = NET_SHA),
         file.path(DIR_OBJ, "18_tf_activity.rds"))
 
-# The committed sweep's TF_Targets rows are the starting point of this stage, so the
-# eight headline values are re-read here rather than remembered.
+# The committed sweep's TF_Targets rows are this stage's starting point, so the eight values
+# it starts from are re-read here from the published table on every run.
 gate <- FG %>% filter(population == POPS[[PRIMARY]], tf %in% FOCUS) %>%
   select(tf, nes = score, padj_pooled = padj, targets_tested = regulon_size, rank) %>%
   arrange(rank)
@@ -856,7 +818,7 @@ print(as.data.frame(gate), row.names = FALSE)
 stopifnot(
   nrow(CASCADE) > 0,
   all(FOCUS %in% CASCADE$tf),
-  # HIF1A's committed targets_tested must be the size its regulon has on this universe
+  # HIF1A's committed targets_tested equals the size its regulon has on this universe
   gate$targets_tested[gate$tf == "HIF1A"] ==
     sum(NETS[[PRIMARY]]$signed$source == "HIF1A"),
   nrow(DECOMP_TBL) > 0,

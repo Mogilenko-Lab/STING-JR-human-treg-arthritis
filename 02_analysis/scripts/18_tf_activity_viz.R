@@ -1,8 +1,6 @@
 #!/usr/bin/env Rscript
-# 18_tf_activity_viz.R — VIZ (reads committed tables, computes no statistics)
+# 18_tf_activity_viz.R: VIZ. Three figures off the tables 18_tf_activity.R wrote.
 # =============================================================================
-# Three figures, one claim each, off the tables 18_tf_activity.R wrote:
-#
 #   tf_rank_cascade              rank of each focus TF across every network variant
 #                                crossed with every estimator, plus the committed
 #                                unsigned-regulon fgsea rank
@@ -12,10 +10,11 @@
 #                                with the size-conditional expectation and the
 #                                size-and-expression-matched random-regulon null
 #
-# Every figure is written through save_overview(), which emits the vector PDF, the
-# raster PNG, the same-stem source CSV and the stage README caption in one call.
+# One claim each, and no statistics here. Every figure goes through save_overview(), which
+# emits the vector PDF, the raster PNG, the same-stem source CSV and the stage README
+# caption in one call.
 #
-# Inputs — 03_results/18_tf_activity/tables/:
+# Reads 03_results/18_tf_activity/tables/:
 #   hif1a_rank_cascade.csv, target_decomposition.csv, target_decomposition_summary.csv,
 #   regulon_size_calibration.csv, regulon_size_spearman.csv, size_matched_null.csv
 #
@@ -52,6 +51,9 @@ LBL_N   <- as.integer(FIG$volcano_label_top %||% 10L)
 LBL_SZ  <- as.numeric(FIG$label_size %||% 4)
 PT_SZ   <- as.numeric(FIG$point_size %||% 2.4)
 LN_W    <- as.numeric(FIG$line_width %||% 1.0)
+# ggrepel searches for label positions at random, so every repel call here takes this seed
+# and a re-render reproduces byte for byte.
+RPL_SEED <- as.integer(CFG$thresholds$gsea_seed %||% 123L)
 
 TBL <- file.path(CFG$paths$results %||% "03_results/", STAGE,
                  CFG$paths$stage_tables_subdir %||% "tables")
@@ -66,11 +68,10 @@ NULLS   <- rd("size_matched_null.csv")
 
 PRIMARY_LABEL <- CAL$population[1]
 
-# One colour and one point shape per focus TF, both reused across figures so a factor keeps
-# its identity between panels. Colours name config palette entries rather than hex literals.
-# `okabe_ito$yellow` is deliberately unused: at these point and text sizes it does not hold
-# against a white panel. Every series is also directly labelled, so shape carries the
-# disambiguation wherever two warm hues land near each other.
+# One colour and one point shape per focus TF, reused across figures so a factor keeps its
+# identity between panels, and named from the config palette. `okabe_ito$yellow` is left
+# out because it washes into a white panel at these point and text sizes. Every series is
+# directly labelled too, so shape carries the disambiguation where two warm hues land close.
 TF_PALETTE_KEYS <- c(HIF1A = "vermillion", NFKB1 = "blue", STAT3 = "bluish_green",
                      CREB1 = "reddish_purple", ATF3 = "sky_blue", HSF1 = "orange",
                      EPAS1 = "black")
@@ -80,7 +81,7 @@ tf_colors <- tf_colors[FOCUS]
 tf_shapes <- setNames(c(16, 17, 15, 18, 8, 4, 6, 3)[seq_along(FOCUS)], FOCUS)
 
 # =============================================================================
-# FIGURE 1 — the rank cascade
+# FIGURE 1: the rank cascade
 # =============================================================================
 
 message("[fig 1] rank cascade ...")
@@ -102,8 +103,8 @@ p1 <- ggplot(casc, aes(x = configuration, y = rank, colour = tf, group = tf)) +
   geom_point(aes(shape = tf), size = PT_SZ, stroke = 0.9) +
   geom_text_repel(data = casc_end, aes(label = tf), size = LBL_SZ,
                   nudge_x = 0.35, hjust = 0, direction = "y", segment.size = 0.3,
-                  min.segment.length = 0, show.legend = FALSE) +
-  # log scale so the top of the ranking is legible, reversed so rank 1 sits at the top
+                  min.segment.length = 0, seed = RPL_SEED, show.legend = FALSE) +
+  # Log scale keeps the top of the ranking legible, reversed so rank 1 sits at the top.
   scale_y_continuous(transform = scales::compose_trans("log10", "reverse"),
                      breaks = c(1, 3, 10, 30, 100, 300),
                      expand = expansion(mult = c(0.06, 0.06))) +
@@ -114,7 +115,7 @@ p1 <- ggplot(casc, aes(x = configuration, y = rank, colour = tf, group = tf)) +
        subtitle = "Rank by descending activity within a configuration; rank 1 is the most activated",
        x = "Network variant / estimator", y = "Rank (log scale, inverted)") +
   project_theme(config = CFG) +
-  # rotated tick labels need room on the left, or the first one is clipped by the canvas
+  # Rotated tick labels need left margin, or the canvas clips the first one.
   theme(axis.text.x = element_text(angle = 40, hjust = 1),
         legend.position = "none",
         plot.margin = margin(8, 12, 8, 58))
@@ -156,7 +157,7 @@ save_overview(
 )
 
 # =============================================================================
-# FIGURE 2 — target contribution against target promiscuity
+# FIGURE 2: target contribution against target promiscuity
 # =============================================================================
 
 message("[fig 2] target promiscuity ...")
@@ -182,7 +183,7 @@ p2 <- ggplot(dec, aes(x = n_regulons, y = contrib)) +
   geom_point(aes(colour = claimed), size = PT_SZ, alpha = 0.85) +
   geom_text_repel(data = lab2, aes(label = target), size = LBL_SZ,
                   max.overlaps = Inf, min.segment.length = 0, segment.size = 0.3,
-                  box.padding = 0.35, show.legend = FALSE) +
+                  box.padding = 0.35, seed = RPL_SEED, show.legend = FALSE) +
   geom_text(data = share, aes(x = 1, y = -Inf, label = txt), inherit.aes = FALSE,
             hjust = 0, vjust = -0.3, size = LBL_SZ * 0.85, colour = "grey25") +
   facet_wrap(~ tf, nrow = 1) +
@@ -231,7 +232,7 @@ save_overview(
 )
 
 # =============================================================================
-# FIGURE 3 — activity against regulon size, with the size-matched null
+# FIGURE 3: activity against regulon size, with the size-matched null
 # =============================================================================
 
 message("[fig 3] regulon-size calibration ...")
@@ -270,7 +271,7 @@ focus_pts <- cal_long %>% filter(focus_tf)
 p3 <- ggplot(cal_long, aes(x = regulon_size, y = score)) +
   geom_hline(yintercept = 0, linewidth = 0.4, colour = REFC) +
   geom_point(colour = "grey72", size = PT_SZ * 0.55, alpha = 0.7) +
-  # dashed neutral reference so the fitted expectation cannot read as a data series
+  # Dashed and neutral, so the fitted expectation reads as a reference rather than a series.
   geom_line(aes(y = size_expected), linewidth = LN_W, colour = REFC, linetype = "22") +
   geom_segment(data = nulls, aes(x = regulon_size, xend = regulon_size,
                                  y = null_q95, yend = obs),
@@ -282,8 +283,7 @@ p3 <- ggplot(cal_long, aes(x = regulon_size, y = score)) +
   geom_text_repel(data = focus_pts, aes(label = tf, colour = tf), size = LBL_SZ,
                   max.overlaps = Inf, min.segment.length = 0, segment.size = 0.3,
                   box.padding = 0.7, point.padding = 0.4, force = 8,
-                  seed = as.integer(CFG$thresholds$gsea_seed %||% 123L),
-                  show.legend = FALSE) +
+                  seed = RPL_SEED, show.legend = FALSE) +
   scale_shape_manual(values = tf_shapes, guide = "none") +
   geom_text(data = rho_lab, aes(x = Inf, y = -Inf, label = label), inherit.aes = FALSE,
             hjust = 1.02, vjust = -0.25, size = LBL_SZ * 0.85, colour = "grey25") +
