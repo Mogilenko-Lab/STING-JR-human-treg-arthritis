@@ -38,7 +38,6 @@ from __future__ import annotations
 
 import os
 import sys
-import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -54,7 +53,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PATHS, TISSUE_DEN, TISSUE_NUM  # noqa: E402
+from config import PATHS, TISSUE_COLORS, TISSUE_DEN, TISSUE_NUM  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG,
     purge_figures,
@@ -74,9 +73,8 @@ ARMS = [
     ("Interaction_up_AUCell", "Interaction_up", 7),
 ]
 CELL_STATES = ["Treg", "Tcon", "CD8"]
-# Warm for the inflamed joint, cool for paired blood, matching the rest of the bundle.
-TISSUES = [(TISSUE_NUM, "synovial fluid", "vermillion"),
-           (TISSUE_DEN, "paired blood", "blue")]
+# Display label per tissue; the hue comes from the one tissue palette below.
+TISSUES = [(TISSUE_NUM, "synovial fluid"), (TISSUE_DEN, "paired blood")]
 
 _F = FIG_CFG["figures"]
 _OI = FIG_CFG["colors"]["okabe_ito"]
@@ -89,13 +87,20 @@ SZ_LEGEND = float(_F["legend_text_size"])
 SZ_STRIP = float(_F["strip_size"])
 SZ_CAPTION = float(_F["caption_size"])
 LINE_W = float(_F["line_width"])
-FOOT_WRAP = 168
 
-TISSUE_COLOR = {key: _OI[colour] for key, _label, colour in TISSUES}
+# The one tissue palette, read from analysis_config.yaml::colors.tissue: warm for the
+# inflamed joint, cool for paired blood.
+TISSUE_COLOR = TISSUE_COLORS
 INK = _OI["black"]
 # Dodge of each tissue away from its cell-state centre, and the violin width.
 DODGE = 0.21
 VIOLIN_W = 0.36
+# Headroom at both ends of every panel's y axis, as a fraction of that panel's drawn
+# maximum. matplotlib evaluates a violin's kernel on linspace(data min, data max), so the
+# body's lower boundary lands exactly on the arm's minimum, and every arm here reaches
+# 0.0. A limit pinned at 0 therefore puts that boundary on the axis spine, where the fill
+# and its closing edge are cut by the axes edge. The pad puts the boundary inside the axes.
+Y_PAD_FRAC = 0.04
 
 
 def summary_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -109,7 +114,7 @@ def summary_table(df: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for col, arm, n_genes in ARMS:
         for state in CELL_STATES:
-            for tissue, tissue_label, _colour in TISSUES:
+            for tissue, tissue_label in TISSUES:
                 v = df.loc[df["coarse_label"].eq(state) & df["tissue"].eq(tissue), col].to_numpy()
                 rows.append({
                     "arm": arm,
@@ -132,14 +137,16 @@ def build_figure(df: pd.DataFrame, width: float, height: float):
     fig = plt.figure(figsize=(width, height))
     # Explicit rectangles so the three panels keep identical proportions after the
     # exporter fixes the canvas size.
-    left, bottom, hgt = 0.055, 0.235, 0.545
+    left, bottom, hgt = 0.055, 0.19, 0.615
     span, gap = 0.285, 0.045
     axes = [fig.add_axes((left + i * (span + gap), bottom, span, hgt)) for i in range(len(ARMS))]
 
     for ax, (col, arm, n_genes) in zip(axes, ARMS):
+        drawn_max = 0.0
         for xi, state in enumerate(CELL_STATES):
-            for sgn, (tissue, _label, _colour) in zip((-1, 1), TISSUES):
+            for sgn, (tissue, _label) in zip((-1, 1), TISSUES):
                 v = df.loc[df["coarse_label"].eq(state) & df["tissue"].eq(tissue), col].to_numpy()
+                drawn_max = max(drawn_max, float(np.max(v)))
                 pos = xi + sgn * DODGE
                 parts = ax.violinplot([v], positions=[pos], widths=VIOLIN_W,
                                       showextrema=False, showmedians=True)
@@ -157,11 +164,16 @@ def build_figure(df: pd.DataFrame, width: float, height: float):
         ax.set_xlim(-0.55, len(CELL_STATES) - 0.45)
         ax.tick_params(axis="y", labelsize=SZ_AXIS_TEXT)
         ax.set_title(f"{arm}  ({n_genes} genes)", fontsize=SZ_STRIP, fontweight="bold")
-        ax.set_ylim(bottom=0)
+        # Headroom at both ends, so the widest and the narrowest part of every body sits
+        # inside the axes. The tick the lower pad opens up below zero is then dropped:
+        # AUCell is bounded in [0, 1] and a negative label would misstate the scale.
+        pad = Y_PAD_FRAC * drawn_max
+        ax.set_ylim(-pad, drawn_max + pad)
+        ax.set_yticks([t for t in ax.get_yticks() if 0.0 <= t <= drawn_max + pad])
 
     axes[0].set_ylabel("AUCell score, per cell", fontsize=SZ_AXIS_TITLE)
     handles = [Patch(facecolor=TISSUE_COLOR[t], edgecolor=TISSUE_COLOR[t], alpha=0.72, label=lab)
-               for t, lab, _c in TISSUES]
+               for t, lab in TISSUES]
     axes[1].legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.115),
                    ncol=2, frameon=False, fontsize=SZ_LEGEND)
 
@@ -172,23 +184,15 @@ def build_figure(df: pd.DataFrame, width: float, height: float):
              "Each panel carries its own y axis.",
              ha="center", va="center", fontsize=SZ_SUBTITLE)
 
+    # One line, and only a glyph key plus the n it is drawn over. How the panel is read,
+    # which panel ranks the cell states, and why each panel keeps its own y axis all live in
+    # `how_to_read` and land in the stage README.
     n_cells = int(len(df))
     n_donors = int(df["donor"].nunique())
-    foot = "\n".join([
-        textwrap.fill(
-            f"{n_cells:,} sorted cells from {n_donors} donors, every cell one vote. Ranking the "
-            "cell states is the job of the donor-level pseudobulk panel at "
-            "03_results/14_unbiased_enrichment/figures/_overview/arm_nes_by_cell_state.png, "
-            "where each donor carries one vote inside a frozen label; here the donors that "
-            "contributed the most cells carry the most weight, so this panel shows the shape and "
-            "spread the donor-level aggregate is built from.", FOOT_WRAP),
-        textwrap.fill(
-            "The comparison this panel supports is the synovial-fluid-versus-blood offset inside "
-            "one cell state of one panel. Arm sizes span 7 to 218 genes and AUCell is "
-            "computed against each cell's own ranking, so levels are read within a panel. Black "
-            "line marks the median.", FOOT_WRAP),
-    ])
-    fig.text(0.055, 0.115, foot, ha="left", va="top", fontsize=SZ_CAPTION, linespacing=1.6)
+    fig.text(0.055, 0.048,
+             f"Black line marks the median. {n_cells:,} sorted cells from {n_donors} donors, "
+             "one vote per cell.",
+             ha="left", va="top", fontsize=SZ_CAPTION)
     return fig
 
 
@@ -208,7 +212,7 @@ def main() -> None:
         raise KeyError(f"[16_arms_viz] substrate is missing columns: {missing}")
 
     summary = summary_table(df)
-    width, height = 13.0, 7.2
+    width, height = 13.0, 6.8
     fig = build_figure(df, width, height)
 
     def offset(arm: str, state: str) -> float:
@@ -242,20 +246,23 @@ def main() -> None:
         ),
         script=SCRIPT, fn="build_figure",
         config_kv=("metric = AUCell (rank-based, 0 to 1); arms = WT_heat_up 199, KO_heat_up 218, "
-                   "Interaction_up 7 genes"),
+                   f"Interaction_up 7 genes; y_pad_frac = {Y_PAD_FRAC}"),
         input="03_results/interactive/16_narrative_embedding.parquet",
         how_to_read=(
             "Annotation tier. One panel per mouse-derived up arm, one violin pair per frozen sort "
             "label: warm is synovial fluid, cool is paired peripheral blood, black line at the "
             "median. AUCell is a rank-based score in 0 to 1, the area under a cell's "
             "gene-recovery curve for that arm, so it is robust to library size and composition. "
-            "Read the synovial-fluid-versus-blood offset inside one cell state of one panel. Each "
-            "panel has its own y axis because the arms are 199, 218 and 7 genes and AUCell is "
-            "computed against each cell's own ranking. Every cell casts one vote, and the "
-            f"{int(df['donor'].nunique())} donors contributed {donor_lo:,} to {donor_hi:,} cells "
-            "each, so a panel-level average follows the donors that contributed the most cells. "
-            "Ranking the cell states is the job of the donor-level pseudobulk panel "
-            "arm_nes_by_cell_state under 03_results/14_unbiased_enrichment/, "
+            "The comparison the panel supports is the synovial-fluid-versus-blood offset inside "
+            "one cell state of one panel. Each panel has its own y axis because the arms are 199, "
+            "218 and 7 genes and AUCell is computed against each cell's own ranking, so a level "
+            "in one panel means nothing against a level in another. Both ends of every y axis "
+            "carry headroom, so the score itself is bounded in [0, 1] and the axis is not. Every "
+            f"one of the {len(df):,} cells casts one vote, and the {int(df['donor'].nunique())} donors "
+            f"contributed {donor_lo:,} to {donor_hi:,} cells each, so a panel-level average "
+            "follows the donors that contributed the most cells. Ranking the cell states is the "
+            "job of the donor-level pseudobulk panel "
+            "03_results/14_unbiased_enrichment/figures/_overview/arm_nes_by_cell_state.png, "
             "where each donor carries one vote inside a frozen label and the enrichment is "
             "tested; this panel adds the shape and the spread the donor-level aggregate is built "
             "from. The same-stem source table gives the cell count, mean, median, quartiles and "

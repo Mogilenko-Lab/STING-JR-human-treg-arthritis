@@ -97,11 +97,56 @@ colors:
     reddish_purple: "#CC79A7"
     black: "#000000"
 
+  # ==========================================================================
+  # THE TWO CATEGORICAL AXES OF THIS COMPARTMENT, DECLARED TOGETHER.
+  # ==========================================================================
+  # Every figure that colours by sorted population or by tissue reads one of the two
+  # blocks below. Values name a key of `okabe_ito` above rather than a hex literal, so a
+  # hue can never drift from the categorical palette. They are declared side by side on
+  # purpose: the two axes must not share a hue, and that constraint is only visible if
+  # both assignments are read in one place. Editing one of them means checking the other.
+  #
+  # THE PRIMARY CONSTRAINT IS THAT THE TWO AXES STAY DISJOINT. Several figures draw both,
+  # and 10_umap_full_reference puts a tissue panel and a cell-state panel in the same row
+  # of one figure, so a hue shared between the blocks would make the two axes
+  # indistinguishable there. This is what fixes the assignments below: `populations` takes
+  # bluish_green / orange / reddish_purple, `tissue` takes vermillion / blue, and the five
+  # are distinct. It is also why populations may not take vermillion or blue.
+  #
+  # The assignment additionally matches what the collaborator bundle already draws
+  # (integration/03_results/paper_figures/figures/): the frozen-cell-state panel of
+  # 10_umap_full_reference, plus 14_arm_nes_by_cell_state and
+  # 16_program_nes_by_cell_state, all carry Treg green, Tcon orange, CD8 pink, so
+  # adopting it leaves those three figures uncut. That is a secondary convenience; the
+  # disjointness constraint above would hold either way.
+
+  # Read through `config.population_colors()` (Python) or `population_colors()` from the
+  # figure-style shim (R). Both also resolve the long FACS spellings `CD4_Treg` /
+  # `CD4_Tcon` to the same entries as `Treg` / `Tcon`.
+  populations:
+    Treg: bluish_green
+    Tcon: orange
+    CD8: reddish_purple
+
+  # Read through `config.tissue_colors()` (Python) or `tissue_colors()` from the
+  # figure-style shim (R). Keys must match `design.tissue_levels` above; both accessors
+  # raise if they drift, so renaming a tissue level cannot silently orphan its colour.
+  # Warm for the inflamed joint, cool for paired blood.
+  tissue:
+    synovial_fluid: vermillion
+    peripheral_blood: blue
+
   # Diverging scale for NES, logFC (blue = down, orange = up)
   diverging:
     down: "#2166AC"
     neutral: "#F7F7F7"
     up: "#B35806"
+
+  # Neutral dark grey for a REFERENCE annotation drawn on top of data: a fitted
+  # expectation curve, a null band, a zero rule. Deliberately outside `okabe_ito` and
+  # outside `diverging` so a reference line can never be mistaken for a data series in a
+  # panel where every series already carries a categorical hue.
+  reference_line: "#4D4D4D"
 
   # Group colors for sample comparisons
   groups:
@@ -243,6 +288,47 @@ unbiased_enrichment:
     - { category: "C5", subcategory: "GO:MF",           name: "GO_MF" }
     - { category: "C5", subcategory: "GO:CC",           name: "GO_CC" }
 
+  # Non-MSigDB reference databases shipped pre-converted per species by the toolkit
+  # under data/references/<db>/processed/<species>/, each run SEPARATELY with its own
+  # GSEA call and its own `database` tag, mirroring the mouse anchor's `databases.custom`.
+  #
+  # TWO OF THE MOUSE ANCHOR'S CUSTOM DATABASES ARE DELIBERATELY ABSENT HERE, AND THE GAP
+  # IS A DECISION RATHER THAN AN OVERSIGHT. The anchor's sweep carries TransportDB and
+  # MitoXplorer; this one does not, and the anchor is not wrong to carry them — that
+  # compartment is mouse and both databases have a genuine mouse build. This compartment
+  # is human and neither has a human build, nor is one reconstructible from the bundled
+  # raw files:
+  #   - TransportDB ships one raw file of 1,290 MOUSE RefSeq protein accessions (NP_...).
+  #     build_reference_databases.R will accept Homo_sapiens and substitute org.Hs.eg.db,
+  #     which is a trap rather than a build: none of those 1,290 accessions is a valid
+  #     human REFSEQ key, so the conversion returns zero genes. A genuine human build
+  #     needs the human TransportDB 2.0 export from membranetransport.org.
+  #   - MitoXplorer ships native mouse MGI symbols only, and build_reference_databases.R
+  #     skips Homo_sapiens explicitly ("mitoXplorer is mouse-only; no human data
+  #     available"). A genuine human build needs the human table from the mitoXplorer site.
+  # Ortholog-converting either mouse set is deliberately NOT done. Both are structural
+  # annotation catalogues whose content IS the species-specific assignment, so a set
+  # relabelled through an ortholog map is no longer the classification its name claims,
+  # and this project names a set by how it was derived. If either is wanted later, the
+  # honest form is a separate collection whose NAME says it is orthology-derived.
+  custom_rds:
+    # MitoPathways 3.0 from MitoCarta.
+    #
+    # THE DIRECTION OF DERIVATION RUNS OPPOSITE TO THE USUAL ONE IN THIS PROJECT, and that
+    # is the more useful fact about this entry than its presence. The raw source
+    # MitoPathways3.0.gmx is natively HUMAN; the mouse-anchor copy of this same database is
+    # the homologene conversion of that file. So the human sweep reads the less derived
+    # asset of the two, rather than a human rendering of a mouse set.
+    #
+    # 119 sets / 1,035 unique human symbols. The upstream catalogue holds 149 sets: the
+    # toolkit's build applies a 5-gene floor when it writes the RDS, so 30 sets of 1 to 4
+    # genes were already dropped before this compartment sees the file. That floor is the
+    # same value as thresholds.gsea_min_size, so this stage's own filter removes nothing
+    # further, and the 30 dropped sets are small nested leaves whose genes all survive in
+    # their parents: the unique-symbol count is 1,035 both before and after the drop.
+    - name: "MitoPathways"
+      path: "01_modules/RNAseq-toolkit/data/references/mitocarta3.0/processed/Homo_sapiens/mito_mitopathways.rds"
+
   # CollecTRI regulons -> one UNSIGNED gene set per TF, tagged database TF_Targets.
   # Unsigned (activating and repressing targets pooled) so the set is the TF's
   # transcriptional neighbourhood, the way MSigDB TFT sets are built; the signed use
@@ -299,6 +385,41 @@ unbiased_enrichment:
       - "../sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt"
       - "../sting_positive_control/03_results/06_reference_axis/signatures/ifn_only_up.txt"
 
+  # Curated heat-shock-response lens, as its own collection so the sweep carries the same
+  # named database the mouse anchor's sweep does. Two terms: HSR_core (56 human symbols,
+  # the cleaned cytosolic subset) and HSR_sensitivity (176, the full union). Both are
+  # frozen in this compartment by freeze_hsr_lens.R from the anchor's human lens under a
+  # SHA pin, and the human list is the curated source rather than a conversion: the lens
+  # is built from three human MSigDB sets and the anchor's mouse list is the ortholog
+  # derivative of it.
+  #
+  # DECLARED AFTER project_frozen ON PURPOSE. project_frozen already carries HSR_core as
+  # its seventh file, so HSR_core is a set id present in two collections. Section 2b of
+  # 14_unbiased_enrichment.R resolves that by declaration order, and declaring HSR_lens
+  # last leaves HSR_core canonical under project_frozen exactly as before, so its pooled
+  # adjusted p is unchanged by this collection existing. HSR_sensitivity is the one new
+  # hypothesis this collection contributes to the pooled family.
+  #
+  # Honest ceiling, carried from the freeze provenance: even the clean core is
+  # proteotoxic-stress-general, since HSF1 also fires on oxidative, proteasome and metal
+  # stress. Only the mouse anchor's 37/39 contrast measures anything about temperature.
+  hsr_lens:
+    name: "HSR_lens"
+    files:
+      - "00_data/references/temp_hsr_lens/HSR_core.txt"
+      - "00_data/references/temp_hsr_lens/HSR_sensitivity.txt"
+
+  # Curated TCR/IEG T-cell activation lens, the activation-pole comparator the mouse
+  # anchor's sweep also carries. 66 human symbols, frozen in this compartment by
+  # freeze_tcr_activation_lens.R from the anchor's human asset under a SHA pin. The human
+  # panel is the curated source; the anchor's mouse list is the ortholog conversion of it,
+  # so nothing here is orthology-derived. FOXP3 is deliberately absent from the panel as a
+  # lineage-identity marker rather than an activation marker.
+  tcr_activation:
+    name: "TCR_activation"
+    files:
+      - "00_data/references/tcr_activation_lens/TCR_activation.txt"
+
   # Pooled multiplicity correction is applied across the WHOLE family of tests
   # within one population, exactly as the mouse anchor's pooled pass does.
   padj_pooled_method: "BH"
@@ -310,6 +431,28 @@ unbiased_enrichment:
   # translation or ribosome set, leaving the downstream running-sum comparison with no
   # synovial-fluid-side curated comparator for the up-going mouse arms.
   runsum_top_curated: 6
+
+  # Curated sets that get a substrate table in EVERY population regardless of where they
+  # rank. Without this the emission list is "the mouse arms plus whatever ranked top-6",
+  # and a set the compartment's question turns on can have no curve at all: HALLMARK_HYPOXIA
+  # sits outside the top 6 by pooled p in every population, so the co-imposed niche stress —
+  # the one comparison a reader of the mouse-derived arm most wants — was the one curve that
+  # could not be drawn. HSR_core is the anchor-independent proteostasis lens and is named
+  # here for the same reason. Ids are matched against the CANONICAL collection each belongs
+  # to after alias resolution, so naming a re-pinned set cannot produce two identical curves.
+  # A named id that is not scorable in a population is reported and skipped, never silently
+  # dropped.
+  # The cross-population running-sum family draws only sets with a curve in ALL THREE
+  # populations, because a curve missing for one population there would read as "the set
+  # does not enrich in that cell type" when it in fact means "that set did not rank into
+  # that population's top-N quota, so no trace was written". Naming a set here is therefore
+  # also what makes it eligible for that family, and every comparator the niche question
+  # is read against is named rather than left to a per-population ranking.
+  runsum_always:
+    - "HALLMARK_HYPOXIA"      # the co-imposed niche stress, not separable from temperature here
+    - "HSR_core"              # the anchor-independent curated proteostasis lens
+    - "sting_specific_up"     # SAVI-derived, STING-attributable content
+    - "ifn_only_up"           # SAVI-derived, generic type-I interferon content
 
   # PROGENy (decoupleR MLM) — human model, mirroring the mouse anchor's top=500.
   progeny:
@@ -416,7 +559,7 @@ stages:
     purpose: "SECONDARY/annotation tier only, firewalled from the confirmatory donor-pseudobulk claim spine (no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator). Answers a MEMBERSHIP question and nothing else: which curated, versioned, anchor-independent programs CONTAIN the genes of each mouse-derived UP arm in human projection space — WT_heat_up (199 genes, gate fdr_logfc), KO_heat_up (218, fdr_logfc), Interaction_up (7, fdr_logfc) and Interaction_up_fdrOnly (18, the relaxed fdr_only gate, file Interaction_fdrOnly_up.txt) — against a nine-lens panel: the six frozen MSigDB Hallmark programs (HYPOXIA, TNFA_SIGNALING_VIA_NFKB, INFLAMMATORY_RESPONSE, IL2_STAT5_SIGNALING, INTERFERON_ALPHA_RESPONSE, UNFOLDED_PROTEIN_RESPONSE), the frozen curated HSR_core, the 21 published de Cevins IFN-independent STING-activation genes, and the 200-gene generic type-I interferon axis. Membership is not enrichment — containment is arithmetic over committed gene lists and carries no NES, no p-value and no effect size. Down arms are out of scope by design. Programs overlap and the arms are linearly dependent (WT_heat = KO_heat + Interaction by construction), so the emitted bands are not a partition of genes: per-gene multiplicity and fractional weights (1/n_programs_for_gene) are published so a downstream display can choose duplicated or fractional accounting without recomputing, and the genes no lens claims are reported as a first-class 'unassigned' remainder."
   - id: "14_unbiased_enrichment"
     title: "Unbiased multi-database enrichment and pathway activity"
-    purpose: "The unbiased counterpart to the targeted stage-05 test, on the same frozen donor-pseudobulk SF-vs-PB ranked lists (limma-voom moderated t, HGNC symbol) and the same run parameters. Instead of asking whether one named signature enriches, it asks what the synovial-fluid-versus-paired-blood contrast contains at all: pre-ranked fgsea of every set in seven human MSigDB collections (Hallmark, KEGG, Reactome, WikiPathways, GO_BP, GO_MF, GO_CC), CollecTRI TF regulons, this compartment's frozen curated lists, the mouse-derived projected UP arms and the frozen SAVI STING-versus-interferon axes, per sorted population, with no set privileged and Benjamini-Hochberg pooled across the whole family of tests within a population so a headline is read against how many hypotheses were asked. Complemented by decoupleR MLM on the human PROGENy model, run both on the moderated-t contrast statistics and on the donor-level pseudobulk, which scores fourteen signalling footprints without any gene-set list. Its purpose is calibration: it says whether the mouse-derived enrichment is a distinctive feature of this niche contrast or one of many co-enriching programs. Reproduction gate: WT_heat_up must land on the published stage-05 NES off the same ranked lists, or the sweep is on a different footing and nothing in it is comparable."
+    purpose: "The unbiased counterpart to the targeted stage-05 test, on the same frozen donor-pseudobulk SF-vs-PB ranked lists (limma-voom moderated t, HGNC symbol) and the same run parameters. Instead of asking whether one named signature enriches, it asks what the synovial-fluid-versus-paired-blood contrast contains at all: pre-ranked fgsea of every set in seven human MSigDB collections (Hallmark, KEGG, Reactome, WikiPathways, GO_BP, GO_MF, GO_CC), CollecTRI TF regulons, the toolkit's human MitoPathways build, this compartment's frozen curated lists (the frozen Hallmark re-pins, the curated heat-shock-response lens and the curated TCR activation lens), the mouse-derived projected UP arms and the frozen SAVI STING-versus-interferon axes, per sorted population, with no set privileged and Benjamini-Hochberg pooled across the whole family of tests within a population so a headline is read against how many hypotheses were asked. Complemented by decoupleR MLM on the human PROGENy model, run both on the moderated-t contrast statistics and on the donor-level pseudobulk, which scores fourteen signalling footprints without any gene-set list. Its purpose is calibration: it says whether the mouse-derived enrichment is a distinctive feature of this niche contrast or one of many co-enriching programs. Reproduction gate: WT_heat_up must land on the published stage-05 NES off the same ranked lists, or the sweep is on a different footing and nothing in it is comparable."
   - id: "15_coresh_search"
     title: "Co-regulation search of the public human compendium"
     purpose: "EXPLORATORY/hypothesis-generating tier only, firewalled from the confirmatory donor-pseudobulk claim spine (no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator). Asks the human counterpart of the mouse anchor's co-regulation question: across ~44k public human GEO datasets, in which ones do the genes that go up in the JIA synovial niche co-vary? The query is the UP arm of the frozen limma-voom SF-vs-PB contrast at two stringency gates (fdr_only, fdr_logfc) per sorted population, mapped from HGNC symbol to human Entrez id because the compendium is Entrez-keyed; the mapping loss is published as a first-class number. The top-ranked public datasets are then projected back into gene-level loadings to give data-driven co-regulation modules, which are scored by pre-ranked fgsea on the same ranked list they were seeded from. A module is a co-regulation neighbourhood mined from public variance structure, NOT a curated ontology term, and a module seeded from a query necessarily contains that query's genes, so its enrichment on the seeding ranked list is partly circular by construction and is read as a description of what public biology the niche signature co-moves with, never as independent evidence."
@@ -426,6 +569,81 @@ stages:
   - id: "17_treg_reembedding"
     title: "Treg-subset re-embedding of the same cells"
     purpose: "ANNOTATION/visualisation tier only, never pooled with the donor-pseudobulk NES spine and writing no effect-size row. Recomputes the embedding recipe of 01_qc_filter.py (highly_variable_genes -> subset to HVGs -> scale(max_value=10) -> pca -> neighbors -> umap, hvg_n_top and n_pcs read from the same thresholds block the full-object run read, random_state fixed) on the sorted Treg gate alone (coarse_label == 'Treg', 27,175 of 99,915 cells), so Treg substructure is laid out without the Tcon and CD8 gates taking up the variance. Because that recipe applies no batch correction and on this subset it resolves donor-by-tissue sample of origin, the stage emits TWO coordinate pairs off the same PCA: the uncorrected map, and a second map with Harmony over donor applied to the PCA before neighbours and UMAP, at harmonypy standard settings. Harmony here is a visualisation aid under the umbrella embeddings guardrail and supports no claim. Per-cell scores are NOT recomputed: every score column of 16_narrative_embedding.parquet is joined in on barcode, with the join asserted complete, so all maps can be coloured by identical values. Neighbourhood composition for donor and for tissue at k nearest neighbours is measured on the uncorrected Treg-only map, the Harmony-corrected Treg-only map and the full-object map restricted to the same cells, against the composition expected from the group proportions, and published as one table so the reader has the number before the map. Whether the corrected map is usable is decided from that table, and a negative is a valid outcome."
+  - id: "18_tf_activity"
+    title: "Inferred TF activity on the donor-paired niche contrast"
+    purpose: "ANNOTATION tier only, never pooled with the donor-pseudobulk claim spine and writing no effect-size row. decoupleR on the frozen limma-voom SF-vs-PB moderated-t vectors for the three sorted populations, using the human CollecTRI network read across the compartment boundary under a SHA-256 pin. An inferred TF activity is a statistic over the expression of the genes a network assigns to a transcription factor, so this stage measures target-gene behaviour rather than transcription-factor protein activity. Four forensics answer whether a high-ranking regulon is a regulatory signal or a property of which genes sit in it: a rank cascade over four network variants (signed as recorded, unsigned, literature-signed edges only, alias-recovered) crossed with three estimators (ULM primary, MLM and consensus as forensics) plus the committed unsigned-regulon fgsea rank; per-target decomposition of the score against how many other CollecTRI regulons contain each target; calibration of activity against regulon size across every TF tested, with size-matched and size-plus-expression-matched random-regulon nulls and a size-conditional residual taken over the real regulons; and a direction audit that reports whether the recorded per-edge signs change the answer and names the canonical HIF1A-selective targets with their direction in this contrast. A symbol-vocabulary check is run first and published: the JIA count matrix carries pre-2019 HGNC symbols while CollecTRI carries current ones, so every network target that fails to match is reported with its cause (absent from the matrix, dropped by the expression filter, or recoverable through an alias) rather than dropped in silence."
+
+# =============================================================================
+# INFERRED TF ACTIVITY FORENSICS (stage 18_tf_activity)
+# =============================================================================
+# The network is the same file the unbiased sweep reads as an UNSIGNED gene-set
+# collection (`unbiased_enrichment.tf_network`). Here it is used SIGNED, with the
+# recorded per-edge mode of regulation, which is what makes the direction audit and
+# the multivariate collinearity test possible. Run parameters that already exist in
+# `thresholds:` are NOT restated: minsize comes from gsea_min_size and the seed from
+# gsea_seed, so this stage and the sweep share one source of truth.
+
+tf_activity:
+  # Sorted populations, primary first. Tcon and CD8 are the controls for any claim
+  # that something is Treg-selective.
+  populations:
+    - { tag: "treg", label: "Treg" }
+    - { tag: "tcon", label: "Tcon" }
+    - { tag: "cd8",  label: "CD8" }
+
+  # Network variants. `signed` is primary; the other three isolate one property each.
+  #   unsigned          -- every edge forced to +1, so the score cannot use direction
+  #   literature_signed -- only edges whose sign CollecTRI records as evidence-based
+  #                        (sign_decision other than "default activation"), the tighter
+  #                        higher-confidence regulon
+  #   alias_recovered   -- signed, plus targets recovered by resolving a current HGNC
+  #                        symbol to the pre-2019 symbol the JIA matrix carries
+  network_variants: ["signed", "unsigned", "literature_signed", "alias_recovered"]
+  mor_col: "weight"                   # CollecTRI human table names the sign column `weight`
+  sign_decision_col: "sign_decision"
+  default_sign_decision: "default activation"
+
+  # Estimators. ULM is primary; MLM and consensus are the forensics that make the
+  # target-collinearity test possible.
+  methods: ["ulm", "mlm", "consensus"]
+  consensus_statistics: ["ulm", "mlm", "wsum"]
+
+  # The transcription factors carried through every forensic. HIF1A is the subject;
+  # the rest are the headline table's neighbours plus EPAS1 as the other HIF-axis member.
+  focus_tfs: ["HIF1A", "NFKB1", "STAT3", "CREB1", "ATF3", "REL", "HSF1", "EPAS1"]
+  # Decomposed target by target. HIF1A is the subject and NFKB1 the comparator a reader
+  # can hold it against on the same axis.
+  decompose_tfs: ["HIF1A", "NFKB1"]
+  primary_population: "treg"
+
+  # A target in this many or fewer CollecTRI regulons counts as low-promiscuity for the
+  # decomposition bands. `1` means the subject regulon is the only one that claims it.
+  selective_max_regulons: 1
+  promiscuity_bands: [1, 2, 5, 10, 25]
+
+  # Size calibration nulls. Random regulons match the observed regulon on size and on
+  # the fraction of repressing edges; the expression-matched draw additionally samples
+  # within the observed regulon's average-expression deciles.
+  null_draws: 1000
+  null_expression_deciles: 10
+
+  # Canonical HIF1A-selective targets, named so a reader sees their direction rather
+  # than inferring it from an aggregate. Reported whether or not they match.
+  canonical_hif1a_targets:
+    ["PDK1", "BNIP3", "BNIP3L", "CA9", "SLC2A1", "VEGFA", "EGLN3", "ADM", "HK2", "LDHA", "PGK1"]
+
+  # Pre-2019 symbol probes. The JIA matrix carries the left member of each pair; a
+  # lookup written against the right member silently returns nothing.
+  symbol_vocabulary_probes:
+    - { matrix_symbol: "MB21D1",  current_symbol: "CGAS" }
+    - { matrix_symbol: "TMEM173", current_symbol: "STING1" }
+    - { matrix_symbol: "MARCH5",  current_symbol: "MARCHF5" }
+    - { matrix_symbol: "MRE11A",  current_symbol: "MRE11" }
+
+  # The committed unsigned-regulon fgsea rows this stage calibrates. Read within the
+  # compartment, so no hash pin is required.
+  fgsea_sweep_table: "03_results/14_unbiased_enrichment/tables/gsea_all.csv"
+  fgsea_database: "TF_Targets"
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)

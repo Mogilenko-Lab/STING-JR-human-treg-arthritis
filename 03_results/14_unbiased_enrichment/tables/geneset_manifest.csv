@@ -1,8 +1,11 @@
 database,source,n_sets_in_source,n_sets_after_nominal_size_filter,nominal_size_filter_applied,n_sets_aliased_out_of_pooling,n_sets_offered_for_pooling,gsea_min_size,gsea_max_size,min_set_size,max_set_size
 mouse_projection,frozen gene lists: ../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_up.txt; ../mouse_anchor/03_results/human_projection/signatures/KO_heat/KO_heat_up.txt; ../mouse_anchor/03_results/human_projection/signatures/Interaction/Interaction_up.txt,3,3,FALSE,0,3,5,500,7,218
+TCR_activation,frozen gene lists: 00_data/references/tcr_activation_lens/TCR_activation.txt,1,1,FALSE,0,1,5,500,66,66
 sting_axes,frozen gene lists: ../sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt; ../sting_positive_control/03_results/06_reference_axis/signatures/ifn_only_up.txt,2,2,FALSE,0,2,5,500,21,200
+HSR_lens,frozen gene lists: 00_data/references/temp_hsr_lens/HSR_core.txt; 00_data/references/temp_hsr_lens/HSR_sensitivity.txt,2,2,FALSE,1,1,5,500,56,176
 project_frozen,frozen gene lists: 00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt; 00_data/references/msigdb_hallmark/HALLMARK_UNFOLDED_PROTEIN_RESPONSE.txt; 00_data/references/msigdb_hallmark/HALLMARK_TNFA_SIGNALING_VIA_NFKB.txt; 00_data/references/msigdb_hallmark/HALLMARK_INTERFERON_ALPHA_RESPONSE.txt; 00_data/references/msigdb_hallmark/HALLMARK_INFLAMMATORY_RESPONSE.txt; 00_data/references/msigdb_hallmark/HALLMARK_IL2_STAT5_SIGNALING.txt; 00_data/references/temp_hsr_lens/HSR_core.txt,7,7,FALSE,6,1,5,500,56,200
 Hallmark,"msigdbr 26.1.0 / MSigDB 2026.1.Hs, collection H",50,50,TRUE,0,50,5,500,32,200
+MitoPathways,MitoPathways3.0.gmx (01_modules/RNAseq-toolkit/data/references/mitocarta3.0/processed/Homo_sapiens/mito_mitopathways.rds),119,119,TRUE,0,119,5,500,5,461
 KEGG,"msigdbr 26.1.0 / MSigDB 2026.1.Hs, collection C2/CP:KEGG_LEGACY (config asked for CP:KEGG)",186,186,TRUE,0,186,5,500,10,389
 TF_Targets,"CollecTRI regulons, unsigned (../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv)",1186,763,TRUE,0,763,5,500,5,466
 WikiPathways,"msigdbr 26.1.0 / MSigDB 2026.1.Hs, collection C2/CP:WIKIPATHWAYS",925,924,TRUE,0,924,5,500,5,484

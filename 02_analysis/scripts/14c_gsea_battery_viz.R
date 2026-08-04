@@ -36,20 +36,20 @@
 # -------------------------------
 # `padj_pooled` from gsea_all.csv, the Benjamini-Hochberg correction across every
 # test asked of one population's ranked list, rather than the per-database `padj`.
-# Eleven collections interrogated with one ranking is one family of hypotheses, and
-# a battery that showed the per-database correction on eleven separate pages would
-# invite reading them as eleven independent studies. Within one database the two
+# Fourteen collections interrogated with one ranking is one family of hypotheses, and
+# a battery that showed the per-database correction on fourteen separate pages would
+# invite reading them as fourteen independent studies. Within one database the two
 # corrections induce the same ordering (both are monotone in the raw p-value), so
 # only the printed values, the point sizes and the significance flag change, all in
 # the conservative direction. The per-database value travels in every same-stem CSV
 # under `padj_in_database`.
 #
-# THREE COLLECTIONS ARE TOO SMALL FOR THE FULL BATTERY
-# ----------------------------------------------------
-# `project_frozen` offers 1 set to the pooled family, `sting_axes` 2 and
-# `mouse_projection` 3. A top-20 dotplot, a direction split, a significant-only
-# barplot and a top-5 running sum over a 2-set collection are the same two points
-# drawn four ways. The rule applied here, recorded in the README:
+# SOME COLLECTIONS ARE TOO SMALL FOR THE FULL BATTERY
+# ---------------------------------------------------
+# `project_frozen`, `HSR_lens` and `TCR_activation` each offer 1 set to the pooled
+# family, `sting_axes` 2 and `mouse_projection` 3. A top-20 dotplot, a direction split,
+# a significant-only barplot and a top-5 running sum over a 2-set collection are the
+# same two points drawn four ways. The rule applied here, recorded in the README:
 #   n_sets >= 6  -> dotplot, facet, barplot, running_sum
 #   3 <= n <= 5  -> dotplot, running_sum
 #   n <= 2       -> running_sum
@@ -148,6 +148,7 @@ FACET_TOPN <- 10L
 DOT_WRAP   <- 50L    # the toolkit dotplot default; measured against for canvas width
 FACET_WRAP <- 60L
 BAR_WRAP   <- 55L    # gsea_barplot applies no wrap of its own
+RS_WRAP    <- 46L    # running-sum legend: the set name, above its own statistics line
 TITLE_WRAP <- 62L
 SUB_WRAP   <- 92L
 
@@ -193,6 +194,19 @@ if (length(miss) > 0)
 MANIFEST <- readr::read_csv(file.path(TBL, "geneset_manifest.csv"),
                             show_col_types = FALSE, progress = FALSE)
 
+# The alias resolution, as the sweep recorded it: for a set id present in more than one
+# collection, which copy entered the pooled family (`kept_copy`) and which did not
+# (`dropped_copy`). A dropped copy carries no pooled adjusted p of its own, and this map
+# is what lets a cell draw it under the adjusted p it was actually pooled under.
+ALIAS <- readr::read_csv(file.path(TBL, "geneset_alias_map.csv"),
+                         show_col_types = FALSE, progress = FALSE)
+alias_req <- c("population", "pathway_id", "kept_copy", "dropped_copy",
+               "gene_content_identical")
+alias_miss <- setdiff(alias_req, colnames(ALIAS))
+if (length(alias_miss) > 0)
+  stop("[14c] geneset_alias_map.csv is missing required columns: ",
+       paste(alias_miss, collapse = ", "))
+
 DBS <- MANIFEST$database
 DBS <- DBS[order(-MANIFEST$n_sets_offered_for_pooling)]   # largest collection first
 
@@ -213,15 +227,26 @@ for (pop in names(POPS)) {
 ## ID/Description/NES/p.adjust/setSize/core_enrichment and whose @geneList and
 ## @geneSets drive the running-sum curve. The cached object already has all of it,
 ## so the only surgery is the adjusted-p column: @result$p.adjust and @result$qvalue
-## are replaced by the published `padj_pooled`, and the rows without one (the
-## project_frozen alias copies, pooled under Hallmark instead) are dropped. Every
-## other statistic is the cached object's own, so a panel cannot disagree with
-## gsea_all.csv.
+## are replaced by the published `padj_pooled`. Every other statistic is the cached
+## object's own, so a panel cannot disagree with gsea_all.csv.
+##
+## A CELL DRAWS ITS COLLECTION, INCLUDING SETS POOLED SOMEWHERE ELSE. A set id present
+## in two collections is pooled once, under whichever collection the config declared
+## first, and the copy in the other collection carries no pooled adjusted p of its own.
+## Dropping those rows made a collection's cell disagree with the collection: seven
+## frozen lists were configured under project_frozen and one set appeared in its
+## directory, which reads as six missing results rather than as six sets pooled under
+## Hallmark. The alias copy is therefore drawn with the adjusted p of the copy that WAS
+## pooled — legitimate because the alias map verifies the gene content is identical, so
+## the two copies are the same hypothesis and the borrowed value is that hypothesis's
+## own — and `pooled_under` records where it came from, on the panel and in every
+## same-stem CSV. DRAWING A SET IS NOT POOLING IT: the pooled family, its size and
+## every adjusted p in gsea_all.csv are untouched by this.
 
 .CELL_CACHE <- new.env(parent = emptyenv())
 
 #' Read one cached gseaResult and re-key its adjusted p to the pooled correction.
-#' Returns NULL when the cell has no cache file or no row in the pooled family.
+#' Returns NULL when the cell has no cache file or no drawable row.
 as_gsearesult <- function(pop, db) {
   key <- paste(pop, db)
   if (!is.null(.CELL_CACHE[[key]])) {
@@ -236,9 +261,39 @@ as_gsearesult <- function(pop, db) {
     return(NULL)
   }
   cached <- readRDS(fp)
-  pooled <- SWEEP %>%
-    dplyr::filter(population == pop, database == db, !is.na(padj_pooled)) %>%
-    dplyr::select(pathway_id, nes_published = nes, padj_pooled)
+
+  # gsea_all.csv holds the POOLED FAMILY, so an alias copy is absent from it entirely
+  # rather than present with a missing adjusted p. The collection's own per-database
+  # table is the one that lists every set the collection was scored with, alias copies
+  # included and flagged — that is the roster a cell of this collection should draw.
+  per_db_fp <- file.path(TBL, sprintf("gsea_%s_%s.csv", tag, db))
+  if (!file.exists(per_db_fp)) {
+    .CELL_CACHE[[key]] <- list(.absent = TRUE)
+    return(NULL)
+  }
+  roster <- readr::read_csv(per_db_fp, show_col_types = FALSE, progress = FALSE) %>%
+    dplyr::transmute(pathway_id, nes_published = nes,
+                     is_alias = if ("is_pooled_alias" %in% names(.)) is_pooled_alias else FALSE)
+
+  # This population's pooled values, keyed by (id, collection), so a borrowed adjusted p
+  # is READ from the published table rather than recomputed.
+  pop_pooled <- SWEEP %>%
+    dplyr::filter(population == pop, !is.na(padj_pooled)) %>%
+    dplyr::select(pathway_id, database, padj_pooled)
+  # Which of this collection's ids were pooled elsewhere, and under which collection.
+  borrow <- ALIAS %>%
+    dplyr::filter(population == pop, dropped_copy == db,
+                  is.na(gene_content_identical) | gene_content_identical) %>%
+    dplyr::select(pathway_id, pooled_under = kept_copy)
+
+  pooled <- roster %>%
+    dplyr::left_join(borrow, by = "pathway_id") %>%
+    # The collection this row's pooled value must be read from: its own, unless the row is
+    # an alias copy, in which case the identical-content canonical copy's.
+    dplyr::mutate(pooled_under = dplyr::if_else(is_alias & !is.na(pooled_under),
+                                                pooled_under, db)) %>%
+    dplyr::left_join(pop_pooled, by = c("pathway_id", "pooled_under" = "database")) %>%
+    dplyr::filter(!is.na(padj_pooled))
 
   r <- cached@result
   r <- r[r$ID %in% pooled$pathway_id, , drop = FALSE]
@@ -271,6 +326,10 @@ as_gsearesult <- function(pop, db) {
     leading_edge    = NA_character_,
     core_enrichment = as.character(r$core_enrichment),
     padj_in_database = as.numeric(r$p.adjust),
+    # Which collection this row's pooled adjusted p came from. Equal to `db` for every
+    # set pooled under its own collection; a different name means the row is an alias
+    # copy drawn with the identical-content canonical copy's value.
+    pooled_under     = as.character(pooled$pooled_under[m]),
     stringsAsFactors = FALSE
   )
   rownames(res) <- res$ID
@@ -388,6 +447,9 @@ panel_table <- function(g, ids, pop, db, panel, rule) {
     pvalue            = r$pvalue,
     padj_in_database  = r$padj_in_database,
     padj_pooled       = r$p.adjust,
+    # Where padj_pooled came from. Differs from `database` only for an alias copy, which
+    # is drawn with the pooled value of the identical-content copy that entered the family.
+    pooled_under      = r$pooled_under,
     set_size          = r$setSize,
     leading_edge_size = n_le,
     gene_ratio        = n_le / r$setSize)
@@ -404,6 +466,82 @@ write_panel_table <- function(tbl, pop, db, stem) {
 # ============================================================================
 
 EMITTED <- list()   # one row per panel written, for the run summary and the README
+
+# The named pair a collection holding both should draw on its own panel, in this order.
+RS_FOCUS_SETS <- c("HSR_core", "HALLMARK_HYPOXIA")
+
+#' Draw one running-sum panel for a named set of ids and write its same-stem table.
+#'
+#' EVERY NUMBER GOES ON THE FACE. The toolkit plotter carries no p-value table
+#' (`pvalue_table = FALSE`), so a curve drawn from it says where a set's genes sit and
+#' nothing about how strong or how significant that is — the reader had to leave the
+#' figure for the CSV to learn whether a tall curve was FDR 1e-14 or FDR 0.5, which for
+#' a set resting on six genes is the difference between a result and a shape. The legend
+#' label therefore carries NES, the pooled adjusted p, and how many of the set's genes
+#' reached the ranked list, on a second line so the label column does not grow wide.
+#' This matches the running-sum figures published by stage 05 and stage 10.
+emit_running_sum <- function(g, ids, pop, db, stem, rule, ttl, note) {
+  r <- g@result[match(ids, g@result$ID), , drop = FALSE]
+  disp <- display_labels(ids, RS_WRAP)
+  # `pooled_under` differs from the collection only for an alias copy; saying so on the
+  # face is what keeps a borrowed adjusted p from reading as this collection's own.
+  borrowed <- !is.na(r$pooled_under) & r$pooled_under != db
+  labs <- stats::setNames(
+    sprintf("%s\nNES %+.2f,  pooled FDR %s,  %d genes ranked%s",
+            disp, r$NES, fmt_p(r$p.adjust), as.integer(r$setSize),
+            ifelse(borrowed, sprintf(",  pooled under %s", r$pooled_under), "")),
+    ids)
+
+  # gseaplot2 draws its legend from @result$Description, so the display names are
+  # applied on a COPY. format_pathway_name() is not idempotent, and the panels above
+  # already ran on the raw-id Description and formatted it themselves.
+  g_rs <- g
+  g_rs@result$Description <- format_pathway_name(g_rs@result$ID, use_formatting = TRUE,
+                                                 strip_prefix = TRUE)
+  # max_name_length is raised past the longest label so the plotter's own strwrap cannot
+  # re-flow labels that already carry deliberate line breaks; the wrapping above owns it.
+  p_rs <- tryCatch(
+    gsea_running_sum_plot(g_rs, gene_set_ids = ids, labels = labs, title = ttl,
+                          max_name_length = max(nchar(labs)) + 1L),
+    error = function(e) {
+      message(sprintf("  [14c] %s skipped (%s / %s): %s", stem, pop, db,
+                      conditionMessage(e)))
+      NULL
+    })
+  if (is.null(p_rs)) return(invisible(NULL))
+
+  p_rs <- style_series(p_rs, ylim = RSYLIM, config = CFG)
+  # THE LEGEND GOES UNDERNEATH, not to the right. style_series collects one legend
+  # outside-right, which is correct for a two-curve figure and wrong here: each label is
+  # now a name plus a statistics line, five of them, and an outside-right legend that wide
+  # took three fifths of the canvas and squeezed the enrichment curve into the left
+  # third. Below the stack the label lines run along the axis they annotate and the curve
+  # panel keeps the full width. `&` reaches every panel without indexing into the
+  # patchwork, so the collected guide moves as one.
+  # BOTH the per-panel themes and the PLOT-LEVEL theme have to say "bottom". patchwork
+  # places a collected guide from the plot-level theme in plot_annotation(), so setting it
+  # only per-panel with `&` left the legend on the right — visibly, since the ES panel
+  # stayed squeezed into the left third while the labels re-justified.
+  LEGEND_BELOW <- ggplot2::theme(legend.position = "bottom",
+                                 legend.justification = "left",
+                                 legend.direction = "vertical",
+                                 legend.key.width = unit(1.6, "lines"))
+  p_rs <- p_rs & LEGEND_BELOW
+  p_rs <- p_rs + patchwork::plot_annotation(
+    caption = wrap_text(sprintf("%s Selection: %s. Running enrichment score clamped to [%.0f, %.0f], the range shared by every running sum of this battery",
+                                SIGN_LINE, rule, RSYLIM[1], RSYLIM[2]), SUB_WRAP),
+    theme = project_theme(config = CFG) + LEGEND_BELOW)
+  # Height grows with the legend, which is now a stack of two-line entries under the
+  # panels rather than a column beside them.
+  chars <- max(nchar(unlist(strsplit(labs, "\n", fixed = TRUE))))
+  geo <- c(width  = min(max(0.075 * chars + 3.0, 11), 15),
+           height = 7.2 + 0.62 * length(ids))
+  save_figure(p_rs, STAGE, file.path(db, stem), contrast = pop, config = CFG,
+              width = geo[["width"]], height = geo[["height"]])
+  write_panel_table(panel_table(g, ids, pop, db, stem, rule), pop, db, stem)
+  note(stem, rule, geo[["width"]], geo[["height"]], length(ids))
+  invisible(TRUE)
+}
 
 emit_cell <- function(pop, db) {
   g <- as_gsearesult(pop, db)
@@ -532,7 +670,7 @@ emit_cell <- function(pop, db) {
     note("barplot", rule, geo[["width"]], geo[["height"]], length(ids))
   }
 
-  # ---- 4. running sum: top N by |NES| --------------------------------------
+  # ---- 4. running sum(s) ----------------------------------------------------
   have <- g@result$ID %in% names(g@geneSets)
   cand <- g@result[have, , drop = FALSE]
   if (nrow(cand) > 0) {
@@ -540,31 +678,22 @@ emit_cell <- function(pop, db) {
               sprintf("every one of the %d set(s) in this collection", nrow(cand))
             else sprintf("top %d by |NES|", RSTOP)
     ids  <- cand$ID[order(abs(cand$NES), decreasing = TRUE)][seq_len(min(RSTOP, nrow(cand)))]
-    # gseaplot2 draws its legend from @result$Description, so the display names are
-    # applied on a COPY. format_pathway_name() is not idempotent, and the panels above
-    # already ran on the raw-id Description and formatted it themselves.
-    g_rs <- g
-    g_rs@result$Description <- format_pathway_name(g_rs@result$ID, use_formatting = TRUE,
-                                                   strip_prefix = TRUE)
-    p_rs <- tryCatch(
-      gsea_running_sum_plot(g_rs, gene_set_ids = ids, title = ttl, max_name_length = 40),
-      error = function(e) {
-        message(sprintf("  [14c] running_sum skipped (%s / %s): %s", pop, db,
-                        conditionMessage(e)))
-        NULL
-      })
-    if (!is.null(p_rs)) {
-      p_rs <- style_series(p_rs, ylim = RSYLIM, config = CFG)
-      p_rs <- p_rs + patchwork::plot_annotation(
-        caption = wrap_text(sprintf("%s Selection: %s. Running enrichment score clamped to [%.0f, %.0f]",
-                                    SIGN_LINE, rule, RSYLIM[1], RSYLIM[2]), SUB_WRAP),
-        theme = project_theme(config = CFG))
-      geo <- c(width = 11, height = 8)
-      save_figure(p_rs, STAGE, file.path(db, "running_sum"), contrast = pop, config = CFG,
-                  width = geo[["width"]], height = geo[["height"]])
-      write_panel_table(panel_table(g, ids, pop, db, "running_sum", rule), pop, db, "running_sum")
-      note("running_sum", rule, geo[["width"]], geo[["height"]], length(ids))
-    }
+    emit_running_sum(g, ids, pop, db, "running_sum", rule, ttl, note)
+
+    # A SECOND, NAMED PAIR where the collection holds one. Reading the curated
+    # heat-shock core against HALLMARK_HYPOXIA is the comparison this collection exists
+    # to make — the niche imposes both and cross-sectional human data cannot separate
+    # them — and on the collection-wide panel the two are two of seven curves whose
+    # ranking rule may not even select them. Named, not ranked, so it is stable across
+    # populations, and it claims nothing the collection panel does not already carry.
+    focus <- intersect(RS_FOCUS_SETS, cand$ID)
+    if (length(focus) >= 2)
+      emit_running_sum(
+        g, focus, pop, db, "running_sum_focus",
+        sprintf("named, not ranked: %s", paste(focus, collapse = " and ")),
+        wrap_text(sprintf("%s synovial fluid versus paired blood, %s against %s",
+                          pop, focus[1], focus[2]), TITLE_WRAP),
+        note)
   } else {
     message(sprintf("  [14c] running_sum skipped (%s / %s): no set carries a membership list",
                     pop, db))
@@ -637,7 +766,35 @@ DB_CONTENT <- c(
   sting_axes = paste(
     "The two frozen axes from the SAVI positive-control compartment, sting_specific_up",
     "and ifn_only_up, which separate STING-attributable content from generic type-I",
-    "interferon content.")
+    "interferon content."),
+  MitoPathways = paste(
+    "MitoPathways 3.0 from MitoCarta, 119 sets over 1,035 unique human symbols. The",
+    "human list is the SOURCE here and the mouse-anchor copy of this same database is the",
+    "homologene conversion of it, which is the opposite direction to every other",
+    "cross-species asset in this compartment: the sets scored here are the less derived",
+    "of the two. The catalogue is hierarchical and set names carry their depth, so",
+    "MITOPATHWAYS_Metabolism.Detoxification.ROS_and_glutathione_metabolism is a child of",
+    "MITOPATHWAYS_Metabolism.Detoxification and its genes are a subset of the parent's.",
+    "Parent and child are scored as separate sets and both enter the pooled family, so a",
+    "nested pair enriching together is one observation counted twice. The upstream",
+    "catalogue holds 149 sets: 30 of 1 to 4 genes fall under the 5-gene floor the toolkit",
+    "applies when it writes the file, and they are small nested leaves whose genes all",
+    "survive in their parents, so the unique-symbol count is 1,035 either way."),
+  HSR_lens = paste(
+    "The curated heat-shock-response lens, frozen in this compartment from human MSigDB",
+    "sets: HSR_core is the 56-symbol cleaned cytosolic subset, HSR_sensitivity the",
+    "176-symbol full union. HSR_core is also the seventh file of project_frozen, which is",
+    "where it is pooled, so HSR_sensitivity is the set drawn here. The lens is independent",
+    "of the mouse anchor and general to proteotoxic stress, since HSF1 also fires on",
+    "oxidative, proteasome and metal stress."),
+  TCR_activation = paste(
+    "The curated TCR and immediate-early T-cell activation lens, 66 human symbols",
+    "spanning TCR-proximal signalling, early costimulation, immediate-early",
+    "transcription factors and activation effectors, with FOXP3 absent because it marks",
+    "Treg lineage identity rather than activation. The curated panel is defined in human",
+    "symbols and the mouse-anchor list is the ortholog conversion of it, so the set scored",
+    "here carries no ortholog step. Held as the activation-pole comparator against the",
+    "heat-shock-response lens.")
 )
 DB_CONTENT_GENERIC <- paste(
   "Read each set's direction on its own. The panels rank sets within a cell and make",
@@ -699,7 +856,7 @@ for (db in DBS) {
     input     = sprintf("03_results/objects/14_gsea/{treg,tcon,cd8}__%s.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv", db),
     # Glyphs, sign convention and the pooled-correction note are stated once, in the
     # `figures/by_contrast/ (per-database GSEA battery)` section. Repeating them under
-    # eleven collections would bury the one thing that differs between them.
+    # fourteen collections would bury the one thing that differs between them.
     how_to_read = paste0(sprintf(paste0(
       "SELECTION RULES, which govern every absence: dotplot top %d by pooled adjusted p; ",
       "facet top %d per direction by pooled adjusted p; barplot sets at pooled FDR < %.2g only, ",
@@ -725,9 +882,11 @@ skipped <- EMIT %>% dplyr::group_by(database) %>%
                    n_sets = max(n_sets_in_cell), .groups = "drop") %>%
   dplyr::filter(n_panels < 4)
 skipped_txt <- if (nrow(skipped) == 0) "Every collection carries all four panels." else
-  sprintf(paste0("Three collections are too small for the full battery and carry fewer panels: %s. ",
+  sprintf(paste0("%d collection%s too small for the full battery and carr%s fewer panels: %s. ",
                  "The omission is a redundancy judgement recorded per collection above, and no ",
                  "statistic is withheld: every set of every collection is in gsea_all.csv."),
+          nrow(skipped), if (nrow(skipped) == 1) " is" else "s are",
+          if (nrow(skipped) == 1) "ies" else "y",
           paste(sprintf("%s (%d set(s), %d panel type(s))", skipped$database, skipped$n_sets,
                         skipped$n_panels), collapse = "; "))
 

@@ -14,7 +14,9 @@
 #
 # Two methods, deliberately different in what they need:
 #   (1) Pre-ranked fgsea over every set in seven human MSigDB collections, the
-#       CollecTRI TF regulons, this compartment's frozen curated lists, the
+#       CollecTRI TF regulons, the toolkit's human MitoPathways build, this
+#       compartment's frozen curated lists (the Hallmark re-pins, the curated
+#       heat-shock-response lens and the curated TCR activation lens), the
 #       mouse-derived projected UP arms, and the frozen SAVI axes. Benjamini-
 #       Hochberg is applied BOTH per database (comparable to a single-collection
 #       run) and POOLED across the whole family of tests within one population, so
@@ -62,7 +64,9 @@
 #   03_results/03_pseudobulk/tables/pseudobulk_coldata.csv
 #   03_results/03_pseudobulk/tables/gene_symbols.csv             the Ensembl->HGNC seam map
 #   03_results/05_scoring/tables/gsea_pseudobulk_{tag}.csv       the published NES (gate only)
-#   00_data/references/{msigdb_hallmark,temp_hsr_lens}/*.txt     frozen curated lists
+#   00_data/references/{msigdb_hallmark,temp_hsr_lens,tcr_activation_lens}/*.txt
+#                                                                frozen curated lists
+#   01_modules/RNAseq-toolkit/data/references/mitocarta3.0/processed/Homo_sapiens/mito_mitopathways.rds
 #   ../mouse_anchor/03_results/human_projection/signatures/*/*_up.txt
 #   ../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv
 #   ../sting_positive_control/03_results/06_reference_axis/signatures/{sting_specific,ifn_only}_up.txt
@@ -83,7 +87,11 @@
 #                                   n_tests_in_db is what that database contributes to
 #                                   the pooled family, n_tests_pooled the whole family.
 #   gsea_pooled_summary_by_db.csv   per database, significant before/after pooling
-#   runsum_interactive_<population>_<set>.csv  running-sum substrate (stage-05 schema)
+#   runsum_interactive_<population>_<set>.csv  running-sum substrate (stage-05 schema),
+#                                   for every mouse-derived arm, every set named in
+#                                   unbiased_enrichment.runsum_always, and the top-N
+#                                   curated per population; runsum_interactive_index.csv
+#                                   flags which of the two reasons emitted each curve
 #   progeny_activity.csv            PROGENy MLM on the moderated-t contrast statistics
 #   progeny_donor_activity.csv      PROGENy MLM per donor-pseudobulk sample
 #   progeny_sf_vs_pb.csv            donor-paired SF-vs-PB test per population x pathway
@@ -132,6 +140,7 @@ FDR      <- as.numeric(THR$gsea_fdr      %||% 0.05)
 POOL_M   <- UE$padj_pooled_method %||% "BH"
 SPECIES  <- CFG$project$species %||% "Homo sapiens"
 RUNSUM_N <- as.integer(UE$runsum_top_curated %||% 5L)
+RUNSUM_ALWAYS <- as.character(unlist(UE$runsum_always %||% character(0)))
 NES_TOL  <- as.numeric(UE$reproduction_check$nes_tolerance %||% 0.01)
 
 # Sorted populations: display name -> ranked-list tag -> contrast label. The contrast
@@ -145,7 +154,14 @@ contrast_label <- function(pop) sprintf("SF_vs_PB_%s", pop)
 # Named once because three separate rules key off the distinction — they are exempt
 # from the nominal size filter, they are the only collections eligible to be demoted
 # to a pooling alias (section 2b), and the manifest reports the exemption.
-FILE_BACKED_KEYS <- c("mouse_projection", "project_frozen", "sting_axes")
+#
+# ORDER IS LOAD-BEARING. It sets the declaration order these collections enter
+# COLLECTIONS in, and section 2b keys canonicality off declaration order. `hsr_lens`
+# comes after `project_frozen` because project_frozen already carries HSR_core as its
+# seventh file: putting hsr_lens later leaves HSR_core canonical where it already was,
+# so adding the collection does not move that set's pooled adjusted p.
+FILE_BACKED_KEYS <- c("mouse_projection", "project_frozen", "sting_axes",
+                      "hsr_lens", "tcr_activation")
 FILE_BACKED_DBS  <- unlist(lapply(FILE_BACKED_KEYS,
                                   function(k) UE[[k]]$name %||% character(0)))
 
@@ -303,8 +319,70 @@ load_collectri <- function(spec) {
   lapply(split(as.character(d[[tc]]), as.character(d[[sc]])), unique)
 }
 
+#' Read one toolkit reference-database RDS as a named list of gene-symbol vectors.
+#'
+#' The toolkit ships these pre-converted per species as a list carrying a T2G frame
+#' (gs_name, gene_symbol), so the species is a property of the FILE PATH and not of
+#' anything this function can see. That is the whole failure mode worth guarding: a
+#' Mus_musculus path silently substituted here would deliver Title-cased mouse symbols,
+#' intersect this compartment's HGNC-keyed ranked lists at approximately zero, and fgsea
+#' would report empty rather than wrong. So the loader asserts the symbols look human
+#' and stops with the path in the message when they do not.
+load_reference_rds <- function(spec) {
+  if (!file.exists(spec$path))
+    stop("[14] reference database RDS not found: ", spec$path)
+  obj <- readRDS(spec$path)
+  if (!is.list(obj) || !"T2G" %in% names(obj))
+    stop("[14] ", spec$path, " is not a toolkit reference database (no T2G element).")
+  t2g <- obj$T2G
+  if (ncol(t2g) < 2)
+    stop("[14] ", spec$path, " T2G needs a term column and a gene column.")
+  sets <- lapply(split(as.character(t2g[[2]]), as.character(t2g[[1]])), unique)
+  sets <- lapply(sets, function(g) g[!is.na(g) & nzchar(g)])
+  sets <- sets[lengths(sets) > 0]
+  if (length(sets) == 0) stop("[14] ", spec$path, " yielded no non-empty gene set.")
+  all_sym  <- unique(unlist(sets, use.names = FALSE))
+  frac_upr <- mean(all_sym == toupper(all_sym))
+  if (frac_upr < 0.9)
+    stop(sprintf(paste0("[14] %s carries symbols that are mostly not uppercase (%.0f%% are, ",
+                        "e.g. %s), so this is the mouse-symbol build. Every reference set in ",
+                        "this compartment must match the HGNC-keyed ranked lists, and a mouse ",
+                        "build would intersect them at approximately zero — which fgsea reports ",
+                        "as an empty result rather than as an error. Point `path` at the ",
+                        "processed/Homo_sapiens build."),
+                 spec$path, 100 * frac_upr,
+                 paste(utils::head(all_sym[all_sym != toupper(all_sym)], 4), collapse = ", ")))
+  attr(sets, "db_source") <- sprintf("%s (%s)",
+                                     as.character(obj$source %||% basename(spec$path)),
+                                     spec$path)
+  sets
+}
+
+# Every collection the CONFIG asks for, in declaration order. Computed before the cache
+# is consulted, because the cache is only valid if it holds exactly this set of names.
+CONFIGURED_DBS <- c(
+  vapply(UE$msigdb, function(m) as.character(m$name), character(1)),
+  UE$tf_network$name %||% character(0),
+  unlist(lapply(UE$custom_rds %||% list(), function(s) as.character(s$name))),
+  unlist(lapply(FILE_BACKED_KEYS, function(k) UE[[k]]$name %||% character(0))))
+
 genesets_path <- file.path(DIR_OBJ, "14_genesets.rds")
-if (file.exists(genesets_path)) {
+## THE CACHE IS VALIDATED AGAINST THE CONFIG, not merely tested for existence. Adding a
+## database to analysis_config.yaml with a cache already on disk used to load the old
+## collections and sweep those instead, and every table would then report the previous
+## family under the new config with nothing to say so. The mismatch is a rebuild, not an
+## error, because rebuilding is cheap and correct.
+or_none <- function(x) if (length(x) == 0) "none" else paste(x, collapse = ", ")
+cache_dbs <- if (file.exists(genesets_path)) names(readRDS(genesets_path)) else character(0)
+cache_ok  <- file.exists(genesets_path) && setequal(cache_dbs, CONFIGURED_DBS)
+if (file.exists(genesets_path) && !cache_ok)
+  message(sprintf(paste0("[2] gene-set cache is stale: it holds %d collection(s) and the config ",
+                         "asks for %d (added: %s; removed: %s). Rebuilding."),
+                  length(cache_dbs), length(CONFIGURED_DBS),
+                  or_none(setdiff(CONFIGURED_DBS, cache_dbs)),
+                  or_none(setdiff(cache_dbs, CONFIGURED_DBS))))
+
+if (cache_ok) {
   message("[2] gene-set collections: cache hit -> ", genesets_path)
   COLLECTIONS <- readRDS(genesets_path)
 } else {
@@ -332,6 +410,17 @@ if (file.exists(genesets_path)) {
                                                              UE$tf_network$path))
   message(sprintf("  %-14s %5d raw -> %5d kept", UE$tf_network$name, length(raw),
                   length(COLLECTIONS[[UE$tf_network$name]]$sets)))
+
+  # Toolkit reference databases shipped pre-converted per species. Nominal-size filtered
+  # like the msigdbr collections, because they are curated catalogues of comparable width
+  # rather than the handful of sets a reader came for.
+  for (spec in UE$custom_rds %||% list()) {
+    raw <- load_reference_rds(spec)
+    COLLECTIONS[[spec$name]] <- list(sets = filter_by_size(raw), n_raw = length(raw),
+                                     source = attr(raw, "db_source"))
+    message(sprintf("  %-14s %5d raw -> %5d kept   [%s]", spec$name, length(raw),
+                    length(COLLECTIONS[[spec$name]]$sets), attr(raw, "db_source")))
+  }
 
   # File-backed collections: mouse-derived UP arms, this compartment's frozen curated
   # lists, and the frozen SAVI axes. These are NOT nominal-size filtered — they are
@@ -636,8 +725,8 @@ for (pop in names(POPS)) {
 ## single-collection run would report and what makes a row comparable to a published
 ## per-collection result. `padj_pooled` is BH across EVERY test asked of that
 ## population's ranked list, which is the honest correction for a sweep this wide:
-## eleven databases interrogated with one ranking is one family of hypotheses, not
-## eleven independent studies. A row that survives only the per-database correction
+## fourteen databases interrogated with one ranking is one family of hypotheses, not
+## fourteen independent studies. A row that survives only the per-database correction
 ## is a row whose significance depends on not counting the rest of the sweep.
 ##
 ## The pooled family is DEDUPLICATED FIRST. Section 2b resolved which copy of a set that
@@ -832,14 +921,41 @@ runsum_table <- function(g, set_id, genes, pop) {
              stringsAsFactors = FALSE)
 }
 
-message(sprintf("[8] emitting running-sum substrate (mouse up arms + top %d curated per population) ...",
-                RUNSUM_N))
+message(sprintf("[8] emitting running-sum substrate (mouse up arms + %d named set(s) + top %d curated per population) ...",
+                length(RUNSUM_ALWAYS), RUNSUM_N))
 CURATED_DBS <- setdiff(DB_ORDER, GATE_DB)
 RUNSUM_HALF <- max(as.integer(RUNSUM_N / 2), 1L)
+
+## The canonical collection of a named set, resolved from the pooled table rather than by
+## searching the collections: an id re-pinned into two collections has a row in both, and
+## only the canonical one carries a pooled adjusted p (section 2b sets the alias copy's to
+## NA). Looking the id up here therefore CANNOT emit two identical curves under two
+## database names, which is the failure the alias resolution exists to prevent.
+canonical_db_of <- function(id, pop) {
+  hit <- sweep_df$database[sweep_df$population == pop & sweep_df$pathway_id == id &
+                           !is.na(sweep_df$padj_pooled)]
+  if (length(hit) == 0) NA_character_ else hit[1]
+}
+
 runsum_index <- list()
 for (pop in names(POPS)) {
   # Always: every mouse-derived up arm that was scorable.
   wanted <- lapply(names(COLLECTIONS[[GATE_DB]]$sets), function(s) list(db = GATE_DB, id = s))
+  # Plus the config's named sets, in every population regardless of rank. These are the
+  # comparators the compartment's question turns on, and a rank-based quota cannot
+  # guarantee them: HALLMARK_HYPOXIA sits outside the top-N by pooled p in all three
+  # populations, so the co-imposed niche stress had no curve to compare the mouse arm
+  # against. Naming them here is a REPORTING choice and touches no statistic — the
+  # trace is a deterministic walk of a ranking that is already fixed.
+  for (id in RUNSUM_ALWAYS) {
+    db <- canonical_db_of(id, pop)
+    if (is.na(db)) {
+      message(sprintf("    %s x %s: named in runsum_always but absent from the pooled family — no substrate",
+                      pop, id))
+      next
+    }
+    wanted <- c(wanted, list(list(db = db, id = id)))
+  }
   # Plus the top curated sets by pooled p-value, then |NES| — "top-enriching" read off
   # the pooled correction, so the choice is not made under a laxer test than the one
   # the tables report. Selecting from `sweep_df` also means an alias copy can never be
@@ -857,6 +973,10 @@ for (pop in names(POPS)) {
     dplyr::ungroup()
   wanted <- c(wanted, lapply(seq_len(nrow(top)),
                              function(i) list(db = top$database[i], id = top$pathway_id[i])))
+  # A named set can also rank into the top-N quota, and the write would then be issued
+  # twice: harmless on disk (the second overwrites the first) but it would put two rows
+  # for one curve into the index, and the downstream figure loop reads the index.
+  wanted <- wanted[!duplicated(vapply(wanted, function(w) paste(w$db, w$id), character(1)))]
 
   for (w in wanted) {
     g <- gsea_cells[[paste(pop, w$db)]]
@@ -882,7 +1002,11 @@ for (pop in names(POPS)) {
       nes = r$NES[1], padj_in_database = r$p.adjust[1],
       padj_pooled = sweep_df$padj_pooled[sweep_df$population == pop & sweep_df$pathway_id == w$id &
                                         sweep_df$database == w$db][1],
-      always_emitted = identical(w$db, GATE_DB))
+      # TRUE when this curve was emitted because the set was NAMED — every mouse-derived
+      # arm, plus the config's runsum_always list — rather than because it ranked into the
+      # top-N quota. A reader of the index can then tell a guaranteed comparator from one
+      # that happens to be top-ranked in this population and may vanish in the next.
+      always_emitted = identical(w$db, GATE_DB) || w$id %in% RUNSUM_ALWAYS)
   }
 }
 runsum_idx <- dplyr::bind_rows(runsum_index)

@@ -51,7 +51,6 @@ TDIR   <- file.path(FIG_CFG$paths$results %||% "03_results/", STAGE,
                     FIG_CFG$paths$stage_tables_subdir %||% "tables")
 
 FDR   <- as.numeric(FIG_CFG$thresholds$gsea_fdr %||% 0.05)
-OI    <- FIG_CFG$colors$okabe_ito
 PT    <- as.numeric(FIG_CFG$figures$point_size %||% 2.4)
 LW    <- as.numeric(FIG_CFG$figures$line_width %||% 1.0)
 THEME <- project_theme(config = FIG_CFG)
@@ -61,7 +60,9 @@ POP_LEVELS <- c("Treg", "Tcon", "CD8")
 ## shared y overlay each other and their intervals merge into one bar; 0.24 row units
 ## is the separation the rest of this project's per-pathway panels use.
 POP_DY <- c(Treg = 0.24, Tcon = 0.0, CD8 = -0.24)
-POP_COL <- c(Treg = OI$vermillion, Tcon = OI$blue, CD8 = OI$bluish_green)
+## The one population palette, read from analysis_config.yaml::colors.populations, so a
+## population keeps one colour across every figure this compartment ships.
+POP_COL <- population_colors(FIG_CFG)
 
 #' Render an FDR for prose: fixed above 0.01, else one-digit scientific. The cut sits at
 #' 0.01 rather than 0.001 because a fixed-decimal 0.00115 renders as "0.001" and loses

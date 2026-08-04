@@ -139,3 +139,100 @@ TISSUE_DEN = DESIGN.get("tissue_levels", {}).get("peripheral_blood", "peripheral
 
 # Short label map used in figures / frozen coarse labels.
 COARSE_LABEL = {"CD4_Treg": "Treg", "CD4_Tcon": "Tcon", "CD8": "CD8"}
+
+
+# --- one population palette for every figure ---------------------------------
+class _PopulationColors(dict):
+    """`{population: hex}` for the three sorted populations.
+
+    Iteration, `len()` and `.keys()` see ONLY the three canonical figure labels
+    (`Treg`, `Tcon`, `CD8`), so a script that builds a legend by walking the palette gets
+    three entries rather than one per spelling. The long FACS gate names (`CD4_Treg`,
+    `CD4_Tcon`) resolve on lookup instead, so a stage that carries them in an `obs` column
+    or a table needs no translation at the call site.
+    """
+
+    def __init__(self, canonical: Dict[str, str], aliases: Dict[str, str]) -> None:
+        super().__init__(canonical)
+        self._aliases = dict(aliases)
+
+    def __missing__(self, key: str) -> str:
+        target = self._aliases.get(key)
+        if target is None:
+            raise KeyError(
+                f"'{key}' is not a sorted population. Known: {sorted(self)} "
+                f"(also accepted: {sorted(self._aliases)}).")
+        return self[target]
+
+    def __contains__(self, key: object) -> bool:
+        return dict.__contains__(self, key) or key in self._aliases
+
+    def get(self, key, default=None):  # dict.get bypasses __missing__
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+
+def _resolve_named_hues(block: str) -> Dict[str, str]:
+    """`{level: hex}` for one `colors.<block>` mapping of level -> `okabe_ito` key.
+
+    Shared by the two categorical axes so both resolve identically and neither can be
+    given a hex literal in the config.
+    """
+    colors = CONFIG.get("colors", {}) or {}
+    okabe = colors.get("okabe_ito", {}) or {}
+    named = colors.get(block, {}) or {}
+    if not named:
+        raise KeyError(
+            f"analysis_config.yaml::colors.{block} is absent — every figure that colours "
+            f"by {block} reads it, so a missing block is a config error rather than "
+            "something to fall back from.")
+    out: Dict[str, str] = {}
+    for level, hue in named.items():
+        if hue not in okabe:
+            raise KeyError(
+                f"colors.{block}.{level} names '{hue}', which is not a key of "
+                f"colors.okabe_ito ({sorted(okabe)}). A level names a palette entry, "
+                "never a hex literal.")
+        out[level] = okabe[hue]
+    return out
+
+
+def population_colors() -> _PopulationColors:
+    """The one population palette, resolved from `colors.populations`."""
+    canonical = _resolve_named_hues("populations")
+    aliases = {long_name: short_name for long_name, short_name in COARSE_LABEL.items()
+               if short_name in canonical and long_name != short_name}
+    return _PopulationColors(canonical, aliases)
+
+
+def tissue_colors() -> Dict[str, str]:
+    """The one tissue palette, resolved from `colors.tissue`.
+
+    Keys are checked against `design.tissue_levels`, so renaming a tissue level cannot
+    silently leave its colour behind under the old name.
+    """
+    resolved = _resolve_named_hues("tissue")
+    levels = set((DESIGN.get("tissue_levels", {}) or {}).values())
+    if levels and set(resolved) != levels:
+        raise KeyError(
+            f"colors.tissue keys {sorted(resolved)} do not match design.tissue_levels "
+            f"{sorted(levels)}. The two axes of this compartment are declared together; "
+            "renaming a tissue level means renaming its colour.")
+    return resolved
+
+
+# The two categorical axes. They must stay disjoint: several figures draw both, and one
+# puts a tissue panel and a cell-state panel in the same row, where a shared hue would
+# make the two axes indistinguishable. Asserted at import so the constraint cannot be
+# broken by a config edit alone.
+POPULATION_COLORS = population_colors()
+TISSUE_COLORS: Dict[str, str] = tissue_colors()
+
+_shared_hues = set(POPULATION_COLORS.values()) & set(TISSUE_COLORS.values())
+if _shared_hues:
+    raise ValueError(
+        f"colors.populations and colors.tissue share {sorted(_shared_hues)}. The two "
+        "categorical axes of this compartment must stay disjoint, because figures draw "
+        "them side by side. Give one of the two axes a different okabe_ito entry.")

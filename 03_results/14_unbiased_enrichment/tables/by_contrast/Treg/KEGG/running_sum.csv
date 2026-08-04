@@ -1,6 +1,6 @@
-population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,set_size,leading_edge_size,gene_ratio
-Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,1,KEGG_RIBOSOME,Ribosome,down,-3.345842,-0.805688978,1.38746212e-30,2.56680491e-28,3.1179048700000002e-27,85,77,0.905882353
-Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,2,KEGG_GRAFT_VERSUS_HOST_DISEASE,Graft Versus Host Disease,up,2.51203802,0.77735197,2.82433276e-9,8.74526954e-8,2.70073793e-7,31,20,0.64516129
-Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,3,KEGG_TYPE_I_DIABETES_MELLITUS,Type I Diabetes Mellitus,up,2.50946524,0.756381202,1.33850883e-9,6.19060336e-8,1.44610435e-7,35,22,0.628571429
-Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,4,KEGG_AUTOIMMUNE_THYROID_DISEASE,Autoimmune Thyroid Disease,up,2.47925426,0.747275269,3.82879014e-9,1.01189454e-7,3.3874241e-7,35,20,0.571428571
-Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,5,KEGG_ALLOGRAFT_REJECTION,Allograft Rejection,up,2.47620214,0.755847399,6.29709395e-9,1.41719332e-7,5.28016027e-7,33,20,0.606060606
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
+Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,1,KEGG_RIBOSOME,Ribosome,down,-3.345842,-0.805688978,1.38746212e-30,2.56680491e-28,3.1481515400000002e-27,KEGG,85,77,0.905882353
+Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,2,KEGG_GRAFT_VERSUS_HOST_DISEASE,Graft Versus Host Disease,up,2.51203802,0.77735197,2.82433276e-9,8.74526954e-8,2.72693769e-7,KEGG,31,20,0.64516129
+Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,3,KEGG_TYPE_I_DIABETES_MELLITUS,Type I Diabetes Mellitus,up,2.50946524,0.756381202,1.33850883e-9,6.19060336e-8,1.46013295e-7,KEGG,35,22,0.628571429
+Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,4,KEGG_AUTOIMMUNE_THYROID_DISEASE,Autoimmune Thyroid Disease,up,2.47925426,0.747275269,3.82879014e-9,1.01189454e-7,3.42028537e-7,KEGG,35,20,0.571428571
+Treg,SF_vs_PB_Treg,KEGG,running_sum,top 5 by |NES|,5,KEGG_ALLOGRAFT_REJECTION,Allograft Rejection,up,2.47620214,0.755847399,6.29709395e-9,1.41719332e-7,5.3313829e-7,KEGG,33,20,0.606060606

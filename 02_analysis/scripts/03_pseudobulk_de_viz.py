@@ -26,13 +26,14 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PATHS, PARAMS  # noqa: E402
+from config import PATHS, PARAMS, POPULATION_COLORS  # noqa: E402
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
 
 STAGE = "03_pseudobulk"
 SCRIPT = "02_analysis/scripts/03_pseudobulk_de_viz.py"
 TISSUE_MARK = {"synovial_fluid": "o", "peripheral_blood": "s"}
-LABEL_COL = {"Treg": "#009E73", "Tcon": "#E69F00", "CD8": "#CC79A7"}
+# The one population palette, read from analysis_config.yaml::colors.populations.
+LABEL_COL = POPULATION_COLORS
 
 
 def main() -> None:

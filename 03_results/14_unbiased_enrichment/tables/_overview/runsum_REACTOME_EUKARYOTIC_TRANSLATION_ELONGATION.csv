@@ -1,0 +1,4 @@
+gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
+REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION,Eukaryotic translation elongation,Reactome,Treg,SF_vs_PB_Treg,-3.3930906,3.03177974e-33,4.76595775e-30,1.71977706e-29,down,92.0,80.0,13999.0,-0.803100388,11891.0,0.849417816,False
+REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION,Eukaryotic translation elongation,Reactome,Tcon,SF_vs_PB_Tcon,-3.66494491,2.2662597e-43,1.81300776e-40,1.31080461e-39,down,92.0,76.0,14411.0,-0.845680372,13229.0,0.917979321,False
+REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION,Eukaryotic translation elongation,Reactome,CD8,SF_vs_PB_CD8,-3.7634318,5.29111005e-50,4.16145805e-47,2.00197967e-46,down,92.0,80.0,14014.0,-0.882296005,13154.0,0.938632796,False

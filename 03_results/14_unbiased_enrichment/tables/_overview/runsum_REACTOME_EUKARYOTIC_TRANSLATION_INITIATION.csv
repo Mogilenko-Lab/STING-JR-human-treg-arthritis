@@ -1,0 +1,4 @@
+gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
+REACTOME_EUKARYOTIC_TRANSLATION_INITIATION,Eukaryotic translation initiation,Reactome,Treg,SF_vs_PB_Treg,-3.24608874,5.74824345e-31,4.51811935e-28,2.17379406e-27,down,118.0,86.0,13999.0,-0.738512478,12170.0,0.869347811,False
+REACTOME_EUKARYOTIC_TRANSLATION_INITIATION,Eukaryotic translation initiation,Reactome,Tcon,SF_vs_PB_Tcon,-3.64738368,3.60766387e-45,5.7722622e-42,4.17334557e-41,down,118.0,87.0,14411.0,-0.806225246,12845.0,0.89133301,False
+REACTOME_EUKARYOTIC_TRANSLATION_INITIATION,Eukaryotic translation initiation,Reactome,CD8,SF_vs_PB_CD8,-3.73708459,6.81394693e-51,1.07183385e-47,7.73451116e-47,down,118.0,88.0,14014.0,-0.840580569,12825.0,0.915156272,False

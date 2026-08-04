@@ -69,6 +69,9 @@ OI     <- FIG_CFG$colors$okabe_ito
 THEME  <- project_theme(config = FIG_CFG)
 
 POP_LEVELS <- c("Treg", "Tcon", "CD8")
+## The one population palette, read from analysis_config.yaml::colors.populations, so a
+## population keeps one colour across every figure this compartment ships.
+POP_COL    <- population_colors(FIG_CFG)
 GATE_DB    <- FIG_CFG$unbiased_enrichment$mouse_projection$name %||% "mouse_projection"
 
 read_tbl <- function(f) {
@@ -378,8 +381,7 @@ p3 <- ggplot(pg, aes(x = nes, y = pathway_name)) +
   geom_point(aes(colour = population, alpha = sig_contrast), size = 3.8) +
   geom_point(data = dplyr::filter(pg, sig_donor), shape = 21, size = 6.2,
              stroke = 1.2, colour = "black", fill = NA) +
-  scale_colour_manual(values = c(Treg = OI$vermillion, Tcon = OI$blue, CD8 = OI$bluish_green),
-                      name = "sorted population") +
+  scale_colour_manual(values = POP_COL, name = "sorted population") +
   scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = 0.32),
                      labels = c(`TRUE` = sprintf("FDR < %.2g", FDR),
                                 `FALSE` = "not significant"),

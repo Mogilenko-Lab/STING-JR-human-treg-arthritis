@@ -48,15 +48,16 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PATHS  # noqa: E402
+from config import PATHS, POPULATION_COLORS, TISSUE_COLORS  # noqa: E402
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
 
 STAGE = "07_embedding"
 SCRIPT = "02_analysis/scripts/07_embedding_viz.py"
 
-# Okabe-Ito categorical palette (colourblind-safe; matches analysis_config.yaml).
-LINEAGE_COL = {"Treg": "#009E73", "Tcon": "#E69F00", "CD8": "#CC79A7"}
-TISSUE_COL = {"synovial_fluid": "#D55E00", "peripheral_blood": "#0072B2"}
+# Okabe-Ito categorical palette (colourblind-safe), read from analysis_config.yaml.
+# Populations come from the one shared palette at colors.populations.
+LINEAGE_COL = POPULATION_COLORS
+TISSUE_COL = TISSUE_COLORS
 # Three canonical POI/disease genes for the quad-marker context patch (JIA sorted
 # Tregs): FOXP3 (master Treg-lineage TF), CTLA4 (suppressive effector molecule),
 # IKZF2/Helios (stable/tTreg identity + activation). Core Treg identity/activation
@@ -266,8 +267,9 @@ def main() -> None:
         how_to_read=("Left: each cell coloured by the hook(s) it satisfies (grey = not in union). Right: "
                      "the matched-lo baselines (heat-lo, effector-lo) that give every factorial contrast a "
                      "defined negative arm. The union is a BOUNDED minority of cells (fraction in the "
-                     "title + source table) — the PI's worry that OR sweeps in the whole dataset does not "
-                     "hold here. No cells are lassoed/subset; harvest selection is deferred. Correlative."),
+                     "title + source table), so an OR sweep over these hooks does not take in most of "
+                     "the dataset. No cells are lassoed/subset; harvest selection is deferred. "
+                     "Correlative."),
         width=15, height=7, config=FIG_CFG)
 
     # ================================================================== #

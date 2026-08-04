@@ -32,16 +32,25 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PATHS, PARAMS  # noqa: E402
+from config import PATHS, PARAMS, POPULATION_COLORS, TISSUE_COLORS  # noqa: E402
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
 
 STAGE = "01_qc"
 SCRIPT = "02_analysis/scripts/01_qc_mthi_characterize_viz.py"
 
-GROUP_COL = {"mt_hi_effector": "#D55E00", "mt_hi_noneffector": "#CC79A7", "normal_Treg": "#999999"}
+_OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
+
+# The mt-hi grouping is a second categorical axis, and the heat-honesty panel draws it in
+# the same axes as the sorted populations, so its hues are taken from the categorical
+# palette entries the population palette does not use. `normal_Treg` stays a neutral grey:
+# it is the baseline the two pockets are read against, not a fourth category.
+GROUP_COL = {"mt_hi_effector": _OKABE["vermillion"],
+             "mt_hi_noneffector": _OKABE["blue"],
+             "normal_Treg": "#999999"}
 GROUP_LAB = {"mt_hi_effector": "mt-hi effector (cl6)", "mt_hi_noneffector": "mt-hi non-eff (cl16)",
              "normal_Treg": "normal Treg"}
-POP_COL = {"Tcon": "#E69F00", "CD8": "#0072B2"}
+# The one population palette, read from analysis_config.yaml::colors.populations.
+POP_COL = POPULATION_COLORS
 
 
 def _read(name: str) -> pd.DataFrame:
@@ -64,7 +73,8 @@ def main() -> None:
     for _, r in clu.iterrows():
         eff = bool(r["is_mthi_effector"])
         mthi = bool(r["is_mthi_cluster"])
-        col = "#D55E00" if eff else ("#CC79A7" if mthi else "#BBBBBB")
+        col = (GROUP_COL["mt_hi_effector"] if eff
+               else (GROUP_COL["mt_hi_noneffector"] if mthi else "#BBBBBB"))
         size = 40 + 260 * (r["n_treg"] / clu["n_treg"].max())
         axl.scatter(r["median_pct_mt"], r["median_score_eTreg"], s=size, c=col,
                     edgecolors="black", linewidths=0.6, zorder=3 if mthi else 2)
@@ -80,7 +90,8 @@ def main() -> None:
                     cmap="Greys", bins="log", mincnt=1)
     fig.colorbar(hb, ax=axr, shrink=0.8, label="log10 cells")
     eff_cells = mem[mem["mthi_group"] == "mt_hi_effector"]
-    axr.scatter(eff_cells["pct_counts_mt"], eff_cells["score_eTreg"], s=10, c="#D55E00",
+    axr.scatter(eff_cells["pct_counts_mt"], eff_cells["score_eTreg"], s=10,
+                c=GROUP_COL["mt_hi_effector"],
                 linewidths=0, alpha=0.8, label="mt-hi effector (cl6)")
     axr.axhline(0, color="grey", lw=0.7, ls="--")
     axr.set_xlabel("% mito (per Treg cell)")
@@ -207,8 +218,8 @@ def main() -> None:
         finding=("WT_heat is quiet in the pocket. The balanced WT_heat_updown is essentially flat "
                  "(mt-hi effector median -0.082 vs normal -0.092); WT_heat_up shifts up but is "
                  "confounded (co-varies with the effector/depth axis). This is secondary_percell and "
-                 "must NOT be read as the pocket carrying the mouse 39C signal — the pseudobulk "
-                 "go/no-go NES (Treg 2.53 / Tcon 2.59 / CD8 2.07, pan-T) was unchanged when these "
+                 "must NOT be read as the pocket carrying the mouse 39 °C-derived signature. The "
+                 "pseudobulk NES (Treg 2.53 / Tcon 2.59 / CD8 2.07, pan-T) was unchanged when these "
                  "high-mito cells were recovered."),
         script=SCRIPT, fn="main",
         config_kv="decisions.go_no_go.primary_signature = WT_heat (pseudobulk, NOT per-cell)",
@@ -224,7 +235,7 @@ def main() -> None:
     fig, (axb, axe) = plt.subplots(1, 2, figsize=(13, 5.5))
     donors = sorted(comp["donor"].unique())
     tissues = ["synovial_fluid", "peripheral_blood"]
-    tcol = {"synovial_fluid": "#D55E00", "peripheral_blood": "#0072B2"}
+    tcol = TISSUE_COLORS
     bottom = np.zeros(len(donors))
     for t in tissues:
         vals = [comp[(comp.donor == d) & (comp.tissue == t)]["n_cells"].sum() for d in donors]

@@ -39,7 +39,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PARAMS, PATHS  # noqa: E402
+from config import PARAMS, PATHS, POPULATION_COLORS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG,
     purge_figures,
@@ -55,11 +55,9 @@ POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
 POP_ORDER = list(POP_TAG)
 
 # --- declared palette constants ---------------------------------------------
-# Population colours are resolved from `colors.okabe_ito` in the config and match
-# 10_hsr_lens_viz.py, so a population keeps one colour across the compartment.
-_OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
-POP_COL = {"Treg": _OKABE["bluish_green"], "Tcon": _OKABE["orange"],
-           "CD8": _OKABE["reddish_purple"]}
+# The one population palette, read from `colors.populations` in the config, so a
+# population keeps one colour across the compartment.
+POP_COL = POPULATION_COLORS
 # Mouse-arm diverging cue, IDENTICAL to 09_heat_hypoxia_viz.py: up = warm
 # brown, down = cool blue. Keyed by arm so the mapping can never come out of
 # a positional vector in the wrong order.

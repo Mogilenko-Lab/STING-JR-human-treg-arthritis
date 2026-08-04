@@ -1,0 +1,4 @@
+gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
+HSR_core,HSR_core,project_frozen,Treg,SF_vs_PB_Treg,1.4870032,0.0317585773,0.0317585773,0.146903534,up,43.0,20.0,13999.0,0.428242143,3284.0,0.234588185,True
+HSR_core,HSR_core,project_frozen,Tcon,SF_vs_PB_Tcon,-1.3436016,0.0782783384,0.0913247281,0.215952084,down,43.0,10.0,14411.0,-0.36037883,13050.0,0.905558254,True
+HSR_core,HSR_core,project_frozen,CD8,SF_vs_PB_CD8,-1.1514306,0.228915967,0.228915967,0.486664419,down,43.0,9.0,14014.0,-0.31406851,12792.0,0.912801484,True

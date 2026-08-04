@@ -33,7 +33,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PARAMS, PATHS  # noqa: E402
+from config import PARAMS, PATHS, POPULATION_COLORS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG,
     purge_figures,
@@ -47,13 +47,10 @@ SCRIPT = "02_analysis/scripts/10_hsr_lens_viz.py"
 POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
 POP_ORDER = list(POP_TAG)
 
-# Declared palette constants, all resolved from `colors.okabe_ito` in the config
-# so no hex literal appears in this script.
-_OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
-# Population colours match 05_score_signatures_viz.py, so a population keeps one
-# colour across the compartment.
-POP_COL = {"Treg": _OKABE["bluish_green"], "Tcon": _OKABE["orange"],
-           "CD8": _OKABE["reddish_purple"]}
+# Declared palette constants, all resolved from the config so no hex literal appears in
+# this script. The one population palette comes from `colors.populations`, so a population
+# keeps one colour across the compartment and no figure declares its own assignment.
+POP_COL = POPULATION_COLORS
 
 _F = FIG_CFG.get("figures", {}) or {}
 ANNOT_SIZE = float(_F["axis_text_size"])

@@ -28,56 +28,17 @@ differential expression.
 carries `published_WT_heat_up`, and that column is **not** AUCell — it is a stale
 mean-centred scanpy `score_genes` module score inherited by the published per-cell readout,
 and it is retained only so the discrepancy stays visible rather than being quietly dropped.
-The seam-check panel below is where that is established.
+Against a genuine AUCell reference for the same mouse arm, the column computed here
+reproduces at Pearson and Spearman r = 1.000000 over all 99,915 cells, while
+`published_WT_heat_up` reaches r = 0.755 because it is a different metric.
 
-## figures/_overview/narrative_score_seam_check.png
-
-Re-deriving the two genuine AUCell columns of the published per-cell
-readout reproduces them exactly (Pearson and Spearman r = 1.000000
-over all 99,915 cells), so this substrate sits on the published AUCell
-scale; the third comparison reaches only r = 0.755 because the
-published `WT_heat_up` column is a stale mean-centred scanpy
-score_genes module score rather than AUCell, and the same mouse up arm
-reproduces at r = 1.000000 against the canonical AUCell column for
-that arm.
-
-**How to read:** One grey point per cell: the published score on x, the score newly
-computed in this stage on y. Green statistics and a dashed blue
-identity line mark a same-metric comparison (AUCell vs AUCell), where
-landing on the line means the scorer reproduced the published column;
-vermillion statistics and a vermillion title mark a comparison between
-two DIFFERENT metrics, where no identity line applies and the scatter
-is expected to spread. Correlations are Pearson and Spearman over the
-shared barcodes, with the r >= 0.98 pass floor stated as a verdict in
-each box. This is a provenance panel and carries no biological claim;
-confirmatory claims are made by donor-level pseudobulk differential
-expression.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/16_narrative_scoring_viz.py` | `build_figure` | `percell_score_ncores = 8` | `03_results/interactive/16_narrative_embedding.parquet` |
-
-## tables/_overview/narrative_score_seam_check.csv
-
-The AUCell scorer used here reproduces both genuine AUCell columns of the published per-cell
-readout at Pearson and Spearman r = 1.000000 over all 99,915 cells, so this substrate sits on
-the published scale; the only comparison that misses the floor is the one whose reference
-column is a different metric altogether, and the mouse up arm it concerns reproduces at
-r = 1.000000 once compared against a genuine AUCell reference.
-
-**How to read:** One row per re-derivation check: `new_column` computed here,
-`reference_column` the published column it is checked against, `reference_source` where that
-reference lives. `comparison_kind` carries the row's interpretation. `same_metric` rows compare
-AUCell against AUCell and are the only rows that test drift; they must clear `r_floor` (0.98),
-and a failure there invalidates every colouring built on the substrate. The single
-`cross_metric` row compares AUCell against a scanpy `score_genes` score, so its low r measures a
-metric difference, not drift — it is retained to put on record why the mouse arm must be
-coloured with `WT_heat_up_AUCell`. `passes_floor` is `pearson_r >= r_floor`, so `False` there is
-expected by construction. No biological claim.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/16_narrative_scoring.py` | `seam_check` | `percell_score_ncores = 8` | `03_results/interactive/08_harvest_readout.parquet`, `03_results/05_scoring/tables/per_cell_scores.csv` |
+**Scale guard.** Three of the sets scored here already had a per-cell column, so re-deriving
+them checks the scale of the whole substrate. `assert_seam_reproduces` in
+`02_analysis/scripts/16_narrative_scoring.py` holds every same-metric comparison to
+r = 1 within 1e-06 and halts the run otherwise, so a substrate that stopped matching its
+references could not reach this directory. It is a run-time assertion and produces no
+artifact here: the comparison carries no biological reading, and nothing in this stage is
+read from it.
 
 ## tables/narrative_scoring_manifest.csv
 
@@ -231,25 +192,28 @@ ranking the cell states stays with the donor-level panel.
 per frozen sort label: warm is synovial fluid, cool is paired
 peripheral blood, black line at the median. AUCell is a rank-based
 score in 0 to 1, the area under a cell's gene-recovery curve for that
-arm, so it is robust to library size and composition. Read the
-synovial-fluid-versus-blood offset inside one cell state of one panel.
-Each panel has its own y axis because the arms are 199, 218 and 7
-genes and AUCell is computed against each cell's own ranking. Every
-cell casts one vote, and the 7 donors contributed 7,348 to 19,106
-cells each, so a panel-level average follows the donors that
+arm, so it is robust to library size and composition. The comparison
+the panel supports is the synovial-fluid-versus-blood offset inside
+one cell state of one panel. Each panel has its own y axis because the
+arms are 199, 218 and 7 genes and AUCell is computed against each
+cell's own ranking, so a level in one panel means nothing against a
+level in another. Both ends of every y axis carry headroom, so the
+score itself is bounded in [0, 1] and the axis is not. Every one of
+the 99,915 cells casts one vote, and the 7 donors contributed 7,348 to
+19,106 cells each, so a panel-level average follows the donors that
 contributed the most cells. Ranking the cell states is the job of the
-donor-level pseudobulk panel arm_nes_by_cell_state under
-03_results/14_unbiased_enrichment/, where each donor carries one vote
-inside a frozen label and the enrichment is tested; this panel adds
-the shape and the spread the donor-level aggregate is built from. The
-same-stem source table gives the cell count, mean, median, quartiles
-and range of all 18 violins. Naming follows how each arm was derived,
-from mouse iTreg 37 versus 39 °C contrasts, and the reading stays
-correlative.
+donor-level pseudobulk panel 03_results/14_unbiased_enrichment/figures
+/_overview/arm_nes_by_cell_state.png, where each donor carries one
+vote inside a frozen label and the enrichment is tested; this panel
+adds the shape and the spread the donor-level aggregate is built from.
+The same-stem source table gives the cell count, mean, median,
+quartiles and range of all 18 violins. Naming follows how each arm was
+derived, from mouse iTreg 37 versus 39 °C contrasts, and the reading
+stays correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/16_narrative_scoring_arms_viz.py` | `build_figure` | `metric = AUCell (rank-based, 0 to 1); arms = WT_heat_up 199, KO_heat_up 218, Interaction_up 7 genes` | `03_results/interactive/16_narrative_embedding.parquet` |
+| `02_analysis/scripts/16_narrative_scoring_arms_viz.py` | `build_figure` | `metric = AUCell (rank-based, 0 to 1); arms = WT_heat_up 199, KO_heat_up 218, Interaction_up 7 genes; y_pad_frac = 0.04` | `03_results/interactive/16_narrative_embedding.parquet` |
 
 ## tables/_overview/umap_full_reference.csv
 

@@ -26,13 +26,17 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PATHS, PARAMS, COARSE_LABEL  # noqa: E402
+from config import (PATHS, PARAMS, COARSE_LABEL, POPULATION_COLORS,  # noqa: E402
+                    TISSUE_COLORS)
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
 
 STAGE = "01_qc"
 SCRIPT = "02_analysis/scripts/01_qc_filter_viz.py"
-POP_COL = {"CD4_Treg": "#009E73", "CD4_Tcon": "#E69F00", "CD8": "#CC79A7"}
-TISSUE_COL = {"synovial_fluid": "#D55E00", "peripheral_blood": "#0072B2"}
+# The one population palette, read from analysis_config.yaml::colors.populations. It is
+# keyed by both the long FACS gate name this stage carries (`CD4_Treg`) and the short
+# figure label, so either spelling resolves to the same hue.
+POP_COL = POPULATION_COLORS
+TISSUE_COL = TISSUE_COLORS
 TREG_MARKERS = ["FOXP3", "IL2RA", "CTLA4", "IKZF2"]
 
 
@@ -120,8 +124,10 @@ def main() -> None:
     adata = sc.read_h5ad(PATHS.object(STAGE))
     xy = adata.obsm["X_umap_unsupervised"]
     fig3, axes = plt.subplots(2, 4, figsize=(16, 8))
+    # This panel colours the raw FACS gate column, so it walks the long spellings the
+    # column carries; the hues still come from the one population palette.
     _scatter(axes[0, 0], xy, adata.obs["population"].astype(str).values, True,
-             "sorted population", palette=POP_COL)
+             "sorted population", palette={p: POP_COL[p] for p in COARSE_LABEL})
     _scatter(axes[0, 1], xy, adata.obs["tissue"].astype(str).values, True,
              "tissue", palette=TISSUE_COL)
     donors = sorted(adata.obs["donor"].astype(str).unique())

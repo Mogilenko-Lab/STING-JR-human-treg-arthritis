@@ -48,7 +48,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PATHS  # noqa: E402
+from config import PATHS, TISSUE_COLORS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG, save_overview, set_paper_style, write_caption,
 )
@@ -80,7 +80,8 @@ CB_W_IN, CB_PAD_IN = 0.14, 0.11      # colourbar bar width and its gap from the 
 FOOTER_Y, FOOTER_STEP = 0.035, 0.040  # standing lines under the row
 
 _OI = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
-TISSUE_COL = {"synovial_fluid": _OI["vermillion"], "peripheral_blood": _OI["blue"]}
+# The one tissue palette, read from analysis_config.yaml::colors.tissue.
+TISSUE_COL = TISSUE_COLORS
 TISSUE_LABEL = {"synovial_fluid": "synovial fluid", "peripheral_blood": "paired blood"}
 
 COORD_LINE = ("Coordinates: Treg-only UMAP with Harmony over donor applied to the PCA "

@@ -31,10 +31,13 @@ pct_counts_mt` are taken verbatim from the published per-cell readout
 exactly the map the published figures use. Three already-published score columns
 ride along under a `published_` prefix so the notebook needs one file, not two.
 
-PROVENANCE SEAM CHECK — read this before trusting a colouring. Three of the sets
-scored here already have a per-cell column in the published readout, so
-re-deriving them is a scale check on this whole substrate. The check is written to
-`tables/_overview/narrative_score_seam_check.csv` and it does NOT come out clean:
+PROVENANCE SEAM GUARD — an in-run assertion, not a published artifact. Three of
+the sets scored here already have a per-cell column in the published readout, so
+re-deriving them is a scale check on this whole substrate. Recomputing AUCell over
+the same matrix with the same gene set is deterministic, so the guard demands
+r = 1.000000 to within SEAM_R_EXACT on every same-metric row and halts the run
+otherwise. It carries no biological reading, so it is asserted and printed here
+rather than written into `03_results/` as a table or a figure.
 
   * `HALLMARK_HYPOXIA` and `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` reproduce the
     published AUCell columns at r = 1.000000. The scorer is bit-for-bit stable.
@@ -42,20 +45,20 @@ re-deriving them is a scale check on this whole substrate. The check is written 
     **not AUCell**. It is a stale mean-centred scanpy `score_genes` module score,
     carried verbatim into the published readout from `05_gonogo_explore.parquet`,
     which predates the migration of stage 05 to AUCell. Its values run negative
-    (min -0.154, mean -0.052); AUCell is bounded in [0, 1].
+    (min -0.154, mean -0.052); AUCell is bounded in [0, 1]. That row is the one
+    `cross_metric` comparison and is exempt from the guard by construction.
 
-So the seam-check table carries a fourth row comparing the newly scored
-`WT_heat_up_AUCell` against stage 05's `per_cell_scores.csv` — the apples-to-apples
-anchor for the mouse arm, which does reproduce at r = 1.000000. **Colour the mouse
-up arm with `WT_heat_up_AUCell`, never with `published_WT_heat_up`.** The stale
-column is carried only so the discrepancy stays visible rather than being quietly
-dropped.
+A fourth row compares the newly scored `WT_heat_up_AUCell` against stage 05's
+`per_cell_scores.csv` — the apples-to-apples anchor for the mouse arm, which does
+reproduce at r = 1.000000, and which the guard therefore holds to. **Colour the
+mouse up arm with `WT_heat_up_AUCell`, never with `published_WT_heat_up`.** The
+stale column is carried only so the discrepancy stays visible rather than being
+quietly dropped.
 
 Outputs:
   03_results/interactive/16_narrative_embedding.parquet             (per-cell substrate)
   03_results/16_narrative_scoring/tables/narrative_scoring_manifest.csv
   03_results/16_narrative_scoring/tables/narrative_score_summary.csv
-  03_results/16_narrative_scoring/tables/_overview/narrative_score_seam_check.csv
 
 Run in-container from the compartment root:
     python 02_analysis/scripts/16_narrative_scoring.py
@@ -140,9 +143,14 @@ EXPECTED_N_CELLS = 99_915
 GATE_TESTABLE = 15
 GATE_UNDERPOWERED = 5
 
-# Seam-check pass threshold. Below this, the substrate is on a different scale from
-# the published readout and every colouring built on it would be misleading.
+# Seam-guard thresholds. SEAM_R_FLOOR is the loose question: is this substrate on the
+# published AUCell scale at all. Below it, every colouring built on the substrate would be
+# misleading. SEAM_R_EXACT is the strict one: recomputing AUCell over the same matrix with
+# the same gene set is deterministic, and both same-metric references land at r = 1.0
+# exactly, so a same-metric row that misses 1.0 by more than this tolerance is a real change
+# in the scorer rather than float noise, and the run must stop on it.
 SEAM_R_FLOOR = 0.98
+SEAM_R_EXACT = 1e-6
 
 
 def read_gene_list(path: Path) -> list[str]:
@@ -295,8 +303,9 @@ def seam_check(df: pd.DataFrame, stage05: pd.DataFrame) -> pd.DataFrame:
     expected at r = 1. Row 3 compares against `published_WT_heat_up`, which is a stale
     scanpy `score_genes` module score rather than AUCell, so it is expected to FAIL the
     floor; row 4 is the apples-to-apples anchor for the same mouse arm, against stage 05's
-    canonical AUCell. Row 3 is kept visible on purpose: a reader must be able to see why
-    the mouse arm has to be coloured with the new column."""
+    canonical AUCell. Row 3 is kept and printed on purpose: the log must state why the mouse
+    arm has to be coloured with the new column. The frame is consumed by
+    assert_seam_reproduces() and is not written to disk."""
     comparisons = [
         ("HALLMARK_HYPOXIA", "HALLMARK_HYPOXIA_AUCell",
          f"{CARRY_PREFIX}HALLMARK_HYPOXIA_AUCell", f"interactive/{PUBLISHED_PARQUET}",
@@ -326,21 +335,40 @@ def seam_check(df: pd.DataFrame, stage05: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def report_seam(seam: pd.DataFrame) -> None:
-    """Print the seam check and state plainly what a failure means. A cross-metric row is
-    not evidence that this scorer drifted — the same-metric rows are what test that."""
-    print(f"\n[{STAGE}] PROVENANCE SEAM CHECK (new vs already-published per-cell columns):")
+def assert_seam_reproduces(seam: pd.DataFrame) -> None:
+    """Halt the run unless every same-metric row reproduces its reference exactly.
+
+    This is the guard, not a result: it carries no biological reading and writes nothing to
+    `03_results/`. A cross-metric row is not evidence that this scorer drifted, so only the
+    same-metric rows are held to a threshold. Both thresholds are checked, the loose scale
+    floor first so its message is the one a genuinely rescaled substrate raises.
+    """
+    print(f"\n[{STAGE}] PROVENANCE SEAM GUARD (new vs already-published per-cell columns):")
     print(seam[["set_name", "reference_column", "reference_metric", "comparison_kind",
                 "n_shared_cells", "pearson_r", "spearman_r", "passes_floor"]]
           .to_string(index=False))
     same = seam[seam["comparison_kind"] == "same_metric"]
-    failed_same = same[~same["passes_floor"]]
-    if len(failed_same):
+    if not len(same):
         raise ValueError(
-            "SAME-METRIC seam check FAILED — this substrate is not on the published "
-            f"AUCell scale and nothing downstream may be built on it:\n{failed_same.to_string(index=False)}")
-    print(f"[{STAGE}] all same-metric seam rows reproduce at r >= {SEAM_R_FLOOR}: the AUCell "
-          "scorer is stable against the published readout.")
+            "seam guard found no same_metric row to check — the guard cannot pass vacuously; "
+            "inspect seam_check() before trusting this substrate.")
+    failed_floor = same[~same["passes_floor"]]
+    if len(failed_floor):
+        raise ValueError(
+            f"SAME-METRIC seam guard FAILED the r >= {SEAM_R_FLOOR} scale floor — this "
+            "substrate is not on the published AUCell scale and nothing downstream may be "
+            f"built on it:\n{failed_floor.to_string(index=False)}")
+    drifted = same[(1.0 - same["pearson_r"] > SEAM_R_EXACT)
+                   | (1.0 - same["spearman_r"] > SEAM_R_EXACT)]
+    if len(drifted):
+        raise ValueError(
+            "SAME-METRIC seam guard FAILED: recomputed AUCell no longer reproduces its "
+            f"reference to within {SEAM_R_EXACT:g} of r = 1. Scoring the same matrix with the "
+            "same gene set is deterministic, so this is a change in the scorer or in its "
+            f"input, reported and not reconciled:\n{drifted.to_string(index=False)}")
+    print(f"[{STAGE}] all {len(same)} same-metric seam rows reproduce at Pearson and Spearman "
+          f"r = 1 to within {SEAM_R_EXACT:g}: the AUCell scorer is stable against the published "
+          "readout.")
     for _, r in seam[seam["comparison_kind"] == "cross_metric"].iterrows():
         print(f"[{STAGE}] NOTE — `{r['reference_column']}` is a {r['reference_metric']} score, "
               f"NOT AUCell, so its r = {r['pearson_r']:.6f} against `{r['new_column']}` is a "
@@ -407,14 +435,10 @@ def main() -> None:
     summary.to_csv(tdir / "narrative_score_summary.csv", index=False)
     print(f"\n[{STAGE}] wrote narrative_score_summary.csv ({summary.shape[0]} rows)")
 
-    # --- seam check (writes to tables/_overview/, the figure's same-stem neighbour) ---
+    # --- seam guard: asserted in-run, published nowhere ---
     stage05 = pd.read_csv(PATHS.tables("05_scoring") / "per_cell_scores.csv", index_col=0)
     stage05.index = stage05.index.astype(str)
-    seam = seam_check(df, stage05)
-    odir = tdir / "_overview"
-    odir.mkdir(parents=True, exist_ok=True)
-    seam.to_csv(odir / "narrative_score_seam_check.csv", index=False)
-    report_seam(seam)
+    assert_seam_reproduces(seam_check(df, stage05))
 
     print(f"\n[{STAGE}] COMPUTE DONE. Secondary / annotation tier — never pooled with the "
           "donor-pseudobulk NES spine; no effect-size row written.")

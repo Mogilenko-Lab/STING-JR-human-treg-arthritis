@@ -1,0 +1,8 @@
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,1,HALLMARK_IL2_STAT5_SIGNALING,IL-2/STAT5 Signaling,up,2.54158723,0.56271082,2.56451686e-16,1.48873203e-15,2.1291765e-14,Hallmark,176,96,0.545454545
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,2,HALLMARK_INFLAMMATORY_RESPONSE,Inflammatory Response,up,2.57643525,0.582874893,5.51666343e-16,1.48873203e-15,1.42848731e-13,Hallmark,150,75,0.5
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,3,HALLMARK_TNFA_SIGNALING_VIA_NFKB,TNF-alpha Signaling via NF-kappaB,up,2.49926606,0.552217099,6.380280130000001e-16,1.48873203e-15,1.42848731e-13,Hallmark,179,80,0.446927374
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,4,HALLMARK_HYPOXIA,Hypoxia,up,2.21030668,0.499007926,2.22100282e-9,3.88675493e-9,7.91842718e-8,Hallmark,153,61,0.39869281
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,5,HALLMARK_INTERFERON_ALPHA_RESPONSE,Interferon-alpha Response,up,2.30621749,0.562711879,5.20827923e-9,7.29159093e-9,5.54972717e-7,Hallmark,91,40,0.43956044
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,6,HALLMARK_UNFOLDED_PROTEIN_RESPONSE,Unfolded Protein Response,up,1.09437203,0.261752118,0.283893204,0.283893204,0.491308813,Hallmark,103,19,0.184466019
+Tcon,SF_vs_PB_Tcon,project_frozen,facet,top 10 per direction by pooled FDR,7,HSR_core,Hsr Core,down,-1.3436016,-0.36037883,0.0782783384,0.0913247281,0.215952084,project_frozen,43,10,0.23255814

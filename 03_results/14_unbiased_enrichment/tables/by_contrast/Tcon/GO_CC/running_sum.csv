@@ -1,6 +1,6 @@
-population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,set_size,leading_edge_size,gene_ratio
-Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,1,GOCC_CYTOSOLIC_RIBOSOME,Cytosolic Ribosome,down,-3.46464508,-0.775442325,1.4865161299999999e-36,1.27989039e-33,1.89266537e-33,110,75,0.681818182
-Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,2,GOCC_CYTOSOLIC_LARGE_RIBOSOMAL_SUBUNIT,Cytosolic Large Ribosomal Subunit,down,-3.35302092,-0.864611768,5.97767027e-27,1.28669352e-24,3.8054513099999994e-24,52,44,0.846153846
-Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,3,GOCC_RIBOSOMAL_SUBUNIT,Ribosomal Subunit,down,-3.18414383,-0.66706569,2.7155735899999997e-32,1.16905443e-29,2.3936736699999997e-29,170,94,0.552941176
-Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,4,GOCC_CYTOSOLIC_SMALL_RIBOSOMAL_SUBUNIT,Cytosolic Small Ribosomal Subunit,down,-3.06579258,-0.847434399,1.4796844599999998e-18,2.5480166300000002e-16,5.469582e-16,38,31,0.815789474
-Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,5,GOCC_RIBOSOME,Ribosome,down,-2.93278351,-0.595930567,4.55536593e-28,1.30739002e-25,3.0705845999999997e-25,214,103,0.481308411
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
+Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,1,GOCC_CYTOSOLIC_RIBOSOME,Cytosolic Ribosome,down,-3.46464508,-0.775442325,1.4865161299999999e-36,1.27989039e-33,1.91066874e-33,GO_CC,110,75,0.681818182
+Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,2,GOCC_CYTOSOLIC_LARGE_RIBOSOMAL_SUBUNIT,Cytosolic Large Ribosomal Subunit,down,-3.35302092,-0.864611768,5.97767027e-27,1.28669352e-24,3.8416494199999995e-24,GO_CC,52,44,0.846153846
+Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,3,GOCC_RIBOSOMAL_SUBUNIT,Ribosomal Subunit,down,-3.18414383,-0.66706569,2.7155735899999997e-32,1.16905443e-29,2.41644271e-29,GO_CC,170,94,0.552941176
+Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,4,GOCC_CYTOSOLIC_SMALL_RIBOSOMAL_SUBUNIT,Cytosolic Small Ribosomal Subunit,down,-3.06579258,-0.847434399,1.4796844599999998e-18,2.5480166300000002e-16,5.52160961e-16,GO_CC,38,31,0.815789474
+Tcon,SF_vs_PB_Tcon,GO_CC,running_sum,top 5 by |NES|,5,GOCC_RIBOSOME,Ribosome,down,-2.93278351,-0.595930567,4.55536593e-28,1.30739002e-25,3.0997925299999997e-25,GO_CC,214,103,0.481308411

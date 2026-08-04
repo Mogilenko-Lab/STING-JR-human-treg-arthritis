@@ -1,0 +1,4 @@
+gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
+ifn_only_up,ifn_only_up,sting_axes,Treg,SF_vs_PB_Treg,2.31582852,2.40883101e-08,4.81766202e-08,1.74064891e-06,up,60.0,24.0,13999.0,0.623625097,1770.0,0.126437603,True
+ifn_only_up,ifn_only_up,sting_axes,Tcon,SF_vs_PB_Tcon,2.33505364,1.55644528e-08,3.11289056e-08,9.47629421e-07,up,71.0,30.0,14411.0,0.596305346,1947.0,0.135105128,True
+ifn_only_up,ifn_only_up,sting_axes,CD8,SF_vs_PB_CD8,2.60566947,2.04961642e-12,4.09923285e-12,5.05765131e-10,up,58.0,38.0,14014.0,0.716749618,2581.0,0.18417297,True

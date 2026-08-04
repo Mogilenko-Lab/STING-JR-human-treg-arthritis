@@ -60,7 +60,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PARAMS, PATHS  # noqa: E402
+from config import PARAMS, PATHS, POPULATION_COLORS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG,
     purge_figures,
@@ -98,11 +98,8 @@ LINE_W = float(_F["line_width"])
 # Footnote wrap width in characters, so a footnote never runs past the canvas edge.
 FOOT_WRAP = 138
 
-STATE_COLOR = {
-    "Treg": _OI["bluish_green"],
-    "Tcon": _OI["orange"],
-    "CD8": _OI["reddish_purple"],
-}
+# The one population palette, read from `colors.populations`.
+STATE_COLOR = POPULATION_COLORS
 GUIDE = _OI["black"]
 
 

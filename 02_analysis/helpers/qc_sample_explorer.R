@@ -40,6 +40,23 @@
 # area and top margin uncluttered so no control overlaps it.
 # =============================================================================
 
+#' The one population palette, read from analysis_config.yaml::colors.populations, so this
+#' widget shows Treg, Tcon and CD8 in the same hues as the static figures and cannot drift
+#' from them. Resolved here rather than sourced from the figure-style shim because this
+#' helper is designed to be sourced on its own from any qmd, and the shim pulls the whole
+#' plotting contract lib with it. Path is compartment-root relative, matching how a qmd
+#' sources this file.
+read_population_palette <- function(
+    path = "02_analysis/config/analysis_config.yaml") {
+  cfg   <- yaml::read_yaml(path)
+  okabe <- cfg$colors$okabe_ito
+  named <- cfg$colors$populations
+  if (is.null(named) || length(named) == 0)
+    stop("colors.populations absent from ", path,
+         " — the population palette has one home and this is it.", call. = FALSE)
+  vapply(named, function(hue) as.character(okabe[[hue]]), character(1))
+}
+
 build_qc_sample_explorer <- function(path) {
   suppressPackageStartupMessages({ library(plotly); library(dplyr) })
 
@@ -51,7 +68,7 @@ build_qc_sample_explorer <- function(path) {
     return(invisible(NULL))
   }
 
-  pop_col <- c(Treg = "#009E73", Tcon = "#E69F00", CD8 = "#CC79A7")
+  pop_col <- read_population_palette()
 
   cells <- read.csv(path, stringsAsFactors = FALSE)
   cells$excluded_gsm <- as.logical(cells$excluded_gsm)

@@ -1,5 +1,0 @@
-set_name,new_column,reference_column,reference_source,new_metric,reference_metric,comparison_kind,n_shared_cells,pearson_r,spearman_r,r_floor,passes_floor
-HALLMARK_HYPOXIA,HALLMARK_HYPOXIA_AUCell,published_HALLMARK_HYPOXIA_AUCell,interactive/08_harvest_readout.parquet,AUCell,AUCell,same_metric,99915.0,1.0,1.0,0.98,True
-HALLMARK_UNFOLDED_PROTEIN_RESPONSE,HALLMARK_UNFOLDED_PROTEIN_RESPONSE_AUCell,published_HALLMARK_UNFOLDED_PROTEIN_RESPONSE_AUCell,interactive/08_harvest_readout.parquet,AUCell,AUCell,same_metric,99915.0,1.0,1.0,0.98,True
-WT_heat_up,WT_heat_up_AUCell,published_WT_heat_up,interactive/08_harvest_readout.parquet,AUCell,scanpy_score_genes,cross_metric,99915.0,0.755394162,0.730197023,0.98,False
-WT_heat_up,WT_heat_up_AUCell,stage05_WT_heat_up_AUCell,05_scoring/tables/per_cell_scores.csv,AUCell,AUCell,same_metric,99915.0,1.0,1.0,0.98,True

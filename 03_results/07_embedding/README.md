@@ -31,8 +31,8 @@ file and not a statistical readout.
 **How to read:** Left: each cell coloured by the hook(s) it satisfies (grey = not in
 union). Right: the matched-lo baselines (heat-lo, effector-lo) that
 give every factorial contrast a defined negative arm. The union is a
-BOUNDED minority of cells (fraction in the title + source table) — the
-concern that OR sweeps in the whole dataset does not hold here. No
+BOUNDED minority of cells (fraction in the title + source table), so
+an OR sweep over these hooks does not take in most of the dataset. No
 cells are lassoed/subset; harvest selection is deferred. Correlative.
 
 | Script | Function | Config | Input |

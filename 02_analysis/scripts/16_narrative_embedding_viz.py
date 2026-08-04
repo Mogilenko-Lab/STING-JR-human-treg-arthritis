@@ -49,7 +49,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PATHS  # noqa: E402
+from config import PATHS, POPULATION_COLORS, TISSUE_COLORS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG, save_overview, set_paper_style, write_caption,
 )
@@ -79,8 +79,10 @@ FOOTER_Y, FOOTER_STEP = 0.035, 0.040  # standing lines under the row
 
 # Categorical palettes, read from the config Okabe-Ito block by NAME (no raw hex here).
 _OI = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
-TISSUE_COL = {"synovial_fluid": _OI["vermillion"], "peripheral_blood": _OI["blue"]}
-STATE_COL = {"Treg": _OI["bluish_green"], "Tcon": _OI["orange"], "CD8": _OI["reddish_purple"]}
+# The two categorical axes come from the one shared pair of config blocks,
+# `colors.tissue` and `colors.populations`, which are declared disjoint there.
+TISSUE_COL = TISSUE_COLORS
+STATE_COL = POPULATION_COLORS
 # Seven donors, seven Okabe-Ito hues. Orange is left out rather than yellow, because
 # orange and vermillion are the one confusable pair in this palette at scatter-point size.
 DONOR_HUES = ["vermillion", "sky_blue", "bluish_green", "yellow",

@@ -47,7 +47,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
 from config import (CONFIG, PATHS, PARAMS, TISSUE_KEY, DONOR_KEY, TISSUE_NUM,  # noqa: E402
-                    TISSUE_DEN)
+                    TISSUE_DEN, TISSUE_COLORS)
 from helpers.figure_style import FIG_CFG, save_overview, set_paper_style  # noqa: E402
 
 STAGE = "12_treg_localisation"
@@ -94,8 +94,11 @@ SIG_META = {
 def build_figure(per_cell: pd.DataFrame, summary: pd.DataFrame) -> plt.Figure:
     """Draw a 5-panel small-multiple figure comparing per-cell AUCell score distributions across niches."""
     palette = FIG_CFG["colors"]
-    color_sf = palette["okabe_ito"]["vermillion"]
-    color_pb = palette["okabe_ito"]["sky_blue"]
+    # The one tissue palette, read from analysis_config.yaml::colors.tissue. This panel
+    # previously took sky_blue for blood while every other figure took blue, which is the
+    # drift the shared block exists to stop.
+    color_sf = TISSUE_COLORS[TISSUE_NUM]
+    color_pb = TISSUE_COLORS[TISSUE_DEN]
     text_color = palette["okabe_ito"]["black"]
 
     tregs = per_cell[per_cell["coarse_label"] == "Treg"].copy()

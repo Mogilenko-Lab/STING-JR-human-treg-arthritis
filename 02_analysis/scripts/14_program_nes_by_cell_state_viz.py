@@ -71,7 +71,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PARAMS, PATHS  # noqa: E402
+from config import PARAMS, PATHS, POPULATION_COLORS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG,
     purge_figures,
@@ -124,12 +124,9 @@ MARKER_AREA = (float(_F["point_size"]) * 5.0) ** 2
 LINE_W = float(_F["line_width"])
 FOOT_WRAP = 150
 
-# Identical assignment to arm_nes_by_cell_state, so the two panels read as one pair.
-STATE_COLOR = {
-    "Treg": _OI["bluish_green"],
-    "Tcon": _OI["orange"],
-    "CD8": _OI["reddish_purple"],
-}
+# The one population palette from `colors.populations`, the same source
+# arm_nes_by_cell_state reads, so the two panels read as one pair.
+STATE_COLOR = POPULATION_COLORS
 GUIDE = _OI["black"]
 
 

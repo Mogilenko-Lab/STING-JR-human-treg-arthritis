@@ -111,11 +111,11 @@ The Hypoxia footprint rising alongside the inflammatory ones is worth stating ca
 ## figures/_overview/pooled_overview_by_population.png
 
 The synovial-fluid-versus-paired-blood contrast moves a great many
-curated programs at once — 1,490 of 11,236 tests reach FDR < 0.05 in
+curated programs at once — 1,491 of 11,345 tests reach FDR < 0.05 in
 Treg after pooling — and while 21 pooled-significant sets carry a
 larger absolute NES than the mouse-derived WT_heat_up arm (NES +2.59,
 pooled FDR 4e-12), 19 of those 21 are on the blood side, so among the
-1,423 sets moving toward synovial fluid the arm ranks 3.
+1,424 sets moving toward synovial fluid the arm ranks 3.
 
 **How to read:** Columns are the three sorted populations side by side. Below the
 dashed line each row is a collection, ordered by how many of its sets
@@ -404,19 +404,20 @@ expression.
 
 ## figures/by_contrast/ (per-database GSEA battery)
 
-The full browse surface for the unbiased sweep: 108 panels across 3
-sorted populations and 11 gene-set collections, one directory per
+The full browse surface for the unbiased sweep: 138 panels across 3
+sorted populations and 14 gene-set collections, one directory per
 (population, collection) cell. Read against the whole family, the
-Treg contrast carries 1,490 pooled-significant sets out of 11,236
+Treg contrast carries 1,491 pooled-significant sets out of 11,345
 tests, so the mouse-derived WT_heat_up arm (NES +2.5916, pooled FDR
 4e-12, 119 of 199 genes in the ranked list) and HALLMARK_HYPOXIA (NES
 +2.2563, pooled FDR 6e-08, 139 genes) both sit inside a broad
-co-enrichment rather than standing alone. Three collections are too
-small for the full battery and carry fewer panels: mouse_projection
-(3 set(s), 2 panel type(s)); project_frozen (1 set(s), 1 panel
-type(s)); sting_axes (2 set(s), 1 panel type(s)). The omission is a
-redundancy judgement recorded per collection above, and no statistic
-is withheld: every set of every collection is in gsea_all.csv.
+co-enrichment rather than standing alone. 4 collections are too small
+for the full battery and carry fewer panels: HSR_lens (2 set(s), 1
+panel type(s)); TCR_activation (1 set(s), 1 panel type(s));
+mouse_projection (3 set(s), 2 panel type(s)); sting_axes (2 set(s), 1
+panel type(s)). The omission is a redundancy judgement recorded per
+collection above, and no statistic is withheld: every set of every
+collection is in gsea_all.csv.
 
 **How to read:** LAYOUT.
 figures/by_contrast/&lt;population&gt;/&lt;COLLECTION&gt;/{dotplot,facet,barplot,running_sum}.{pdf,png},
@@ -826,13 +827,8 @@ records them as n_sets_aliased_out_of_pooling = 6. They are excluded
 here, so HALLMARK_HYPOXIA appears once in this battery and HSR_core
 is the only set drawn under this name. HSR_core is the curated
 heat-shock-response lens, held independent of the mouse anchor and
-general to proteotoxic stress. Panels drawn for this collection:
-running_sum. The collection offers 1 set(s) to the pooled family, and
-over a collection that small a dotplot, a direction split and a
-significant-only barplot are the same few points drawn several ways,
-so the redundant panels are left out. The running sum is kept at
-every size because it is the only panel that shows where in the
-ranking a set's genes sit.
+general to proteotoxic stress. All four panels are drawn for this
+collection (7 sets in the pooled family).
 
 **How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
 adjusted p; facet top 10 per direction by pooled adjusted p; barplot
@@ -899,4 +895,501 @@ correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14_program_nes_by_cell_state_viz.py` | `build_figure` | `thresholds.gsea_fdr = 0.05; gsea_min_size = 5; gsea_max_size = 500; row order = descending Treg NES within a group` | `03_results/14_unbiased_enrichment/tables/_overview/named_sets_in_sweep.csv, 03_results/14_unbiased_enrichment/tables/gsea_all.csv, 03_results/14_unbiased_enrichment/tables/sweep_setsize_baseline.csv` |
+
+
+## figures/by_contrast/&lt;population&gt;/MitoPathways/*.png
+
+MitoPathways GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. MitoPathways
+3.0 from MitoCarta, 119 sets over 1,035 unique human symbols. The
+human list is the SOURCE here and the mouse-anchor copy of this same
+database is the homologene conversion of it, which is the opposite
+direction to every other cross-species asset in this compartment: the
+sets scored here are the less derived of the two. The catalogue is
+hierarchical and set names carry their depth, so
+MITOPATHWAYS_Metabolism.Detoxification.ROS_and_glutathione_metabolism
+is a child of MITOPATHWAYS_Metabolism.Detoxification and its genes
+are a subset of the parent's. Parent and child are scored as separate
+sets and both enter the pooled family, so a nested pair enriching
+together is one observation counted twice. The upstream catalogue
+holds 149 sets: 30 of 1 to 4 genes fall under the 5-gene floor the
+toolkit applies when it writes the file, and they are small nested
+leaves whose genes all survive in their parents, so the unique-symbol
+count is 1,035 either way. All four panels are drawn for this
+collection (107 sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/MitoPathways/ listing the rows
+it drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__MitoPathways.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/TCR_activation/*.png
+
+TCR_activation GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. The curated
+TCR and immediate-early T-cell activation lens, 66 human symbols
+spanning TCR-proximal signalling, early costimulation,
+immediate-early transcription factors and activation effectors, with
+FOXP3 absent because it marks Treg lineage identity rather than
+activation. The curated panel is defined in human symbols and the
+mouse-anchor list is the ortholog conversion of it, so the set scored
+here carries no ortholog step. Held as the activation-pole comparator
+against the heat-shock-response lens. Panels drawn for this
+collection: running_sum. The collection offers 1 set(s) to the pooled
+family, and over a collection that small a dotplot, a direction split
+and a significant-only barplot are the same few points drawn several
+ways, so the redundant panels are left out. The running sum is kept
+at every size because it is the only panel that shows where in the
+ranking a set's genes sit.
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/TCR_activation/ listing the
+rows it drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__TCR_activation.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/HSR_lens/*.png
+
+HSR_lens GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. The curated
+heat-shock-response lens, frozen in this compartment from human
+MSigDB sets: HSR_core is the 56-symbol cleaned cytosolic subset,
+HSR_sensitivity the 176-symbol full union. HSR_core is also the
+seventh file of project_frozen, which is where it is pooled, so
+HSR_sensitivity is the set drawn here. The lens is independent of the
+mouse anchor and general to proteotoxic stress, since HSF1 also fires
+on oxidative, proteasome and metal stress. Panels drawn for this
+collection: running_sum. The collection offers 2 set(s) to the pooled
+family, and over a collection that small a dotplot, a direction split
+and a significant-only barplot are the same few points drawn several
+ways, so the redundant panels are left out. The running sum is kept
+at every size because it is the only panel that shows where in the
+ranking a set's genes sit.
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/HSR_lens/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__HSR_lens.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/_overview/runsum_HALLMARK_HYPOXIA.png
+
+On one fractional-rank axis, Hypoxia gives Treg NES +2.26 at pooled
+FDR 6e-08, Tcon NES +2.21 at pooled FDR 8e-08, CD8 NES +1.79 at pooled
+FDR 0.001, so all three populations carry the same sign and they reach
+pooled FDR < 0.05 in Treg, Tcon, CD8. Where a curve peaks is where the
+set's genes concentrate in that population's ranking; a difference in
+peak height between populations is a difference in concentration, not
+a measured difference in the program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_HALLMARK_HYPOXIA.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_HSR_core.png
+
+On one fractional-rank axis, HSR_core gives Treg NES +1.49 at pooled
+FDR 0.147, Tcon NES -1.34 at pooled FDR 0.216, CD8 NES -1.15 at pooled
+FDR 0.487, so the sign is not shared across the three populations and
+no population reaches pooled FDR < 0.05. Where a curve peaks is where
+the set's genes concentrate in that population's ranking; a difference
+in peak height between populations is a difference in concentration,
+not a measured difference in the program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_HSR_core.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_Interaction_up.png
+
+On one fractional-rank axis, Interaction_up gives Treg NES +1.47 at
+pooled FDR 0.236, Tcon NES +1.40 at pooled FDR 0.264, CD8 NES +1.54 at
+pooled FDR 0.172, so all three populations carry the same sign and no
+population reaches pooled FDR < 0.05. Where a curve peaks is where the
+set's genes concentrate in that population's ranking; a difference in
+peak height between populations is a difference in concentration, not
+a measured difference in the program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_Interaction_up.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_KO_heat_up.png
+
+On one fractional-rank axis, KO_heat_up gives Treg NES +2.56 at pooled
+FDR 1e-12, Tcon NES +2.65 at pooled FDR 2e-14, CD8 NES +2.08 at pooled
+FDR 1e-05, so all three populations carry the same sign and they reach
+pooled FDR < 0.05 in Treg, Tcon, CD8. Where a curve peaks is where the
+set's genes concentrate in that population's ranking; a difference in
+peak height between populations is a difference in concentration, not
+a measured difference in the program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_KO_heat_up.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION.png
+
+On one fractional-rank axis, Eukaryotic translation elongation gives
+Treg NES -3.39 at pooled FDR 2e-29, Tcon NES -3.66 at pooled FDR
+1e-39, CD8 NES -3.76 at pooled FDR 2e-46, so all three populations
+carry the same sign and they reach pooled FDR < 0.05 in Treg, Tcon,
+CD8. Where a curve peaks is where the set's genes concentrate in that
+population's ranking; a difference in peak height between populations
+is a difference in concentration, not a measured difference in the
+program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_REACTOME_EUKARYOTIC_TRANSLATION_INITIATION.png
+
+On one fractional-rank axis, Eukaryotic translation initiation gives
+Treg NES -3.25 at pooled FDR 2e-27, Tcon NES -3.65 at pooled FDR
+4e-41, CD8 NES -3.74 at pooled FDR 8e-47, so all three populations
+carry the same sign and they reach pooled FDR < 0.05 in Treg, Tcon,
+CD8. Where a curve peaks is where the set's genes concentrate in that
+population's ranking; a difference in peak height between populations
+is a difference in concentration, not a measured difference in the
+program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_REACTOME_EUKARYOTIC_TRANSLATION_INITIATION.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_WT_heat_up.png
+
+On one fractional-rank axis, WT_heat_up gives Treg NES +2.59 at pooled
+FDR 4e-12, Tcon NES +2.68 at pooled FDR 2e-14, CD8 NES +2.07 at pooled
+FDR 2e-05, so all three populations carry the same sign and they reach
+pooled FDR < 0.05 in Treg, Tcon, CD8. Where a curve peaks is where the
+set's genes concentrate in that population's ranking; a difference in
+peak height between populations is a difference in concentration, not
+a measured difference in the program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_WT_heat_up.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_ifn_only_up.png
+
+On one fractional-rank axis, ifn_only_up gives Treg NES +2.32 at
+pooled FDR 2e-06, Tcon NES +2.34 at pooled FDR 9e-07, CD8 NES +2.61 at
+pooled FDR 5e-10, so all three populations carry the same sign and
+they reach pooled FDR < 0.05 in Treg, Tcon, CD8. Where a curve peaks
+is where the set's genes concentrate in that population's ranking; a
+difference in peak height between populations is a difference in
+concentration, not a measured difference in the program the set is
+named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_ifn_only_up.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_sting_specific_up.png
+
+On one fractional-rank axis, sting_specific_up gives Treg NES +1.52 at
+pooled FDR 0.196, Tcon NES +1.87 at pooled FDR 0.018, CD8 NES +1.67 at
+pooled FDR 0.102, so all three populations carry the same sign and it
+reach pooled FDR < 0.05 in Tcon. Where a curve peaks is where the
+set's genes concentrate in that population's ranking; a difference in
+peak height between populations is a difference in concentration, not
+a measured difference in the program the set is named for.
+
+**How to read:** One set, three sorted populations, one axis. TOP: the weighted running
+enrichment score as each population's ranked list is walked from its
+most synovial-fluid-up gene (left) to its most blood-up gene (right).
+A positive, left-shifted excursion means the set's genes concentrate
+on the synovial-fluid side of that ranking; a negative trace the
+opposite. MIDDLE: where that population's members of the set sit in
+its own ranking, one named row per population in matching colour.
+BOTTOM: the three signed moderated-t rankings, which is what shows the
+three lists crossing zero at comparable fractions and so justifies the
+shared axis. X IS A FRACTION of each list's length, not a rank,
+because the three ranked lists differ in length; each curve's own
+length is in the legend and in the same-stem CSV. Y IS DATA-DRIVEN and
+symmetric, because all three curves already share one axis — it is not
+the fixed range the per-population figures elsewhere in this stage
+use, so do not compare curve heights between this panel and those. The
+legend carries each NES, the sweep-wide pooled adjusted p, how many of
+the set's genes reached that ranked list, and how many are in the
+leading edge, so a tall curve resting on few genes is visible as such.
+Correlative: a set enriching says where its gene content sits in a
+ranking, not that the program it is named for is present. Claim tier:
+L3 (enrichment statistics); no row here reaches an effect-size
+accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_sting_specific_up.csv, gsea_all.csv` |
+
+## figures/_overview/runsum_&lt;set&gt;.png (cross-population running-sum family)
+
+The transposed view of the sweep: 9 sets, each drawn once with all
+three sorted populations on one fractional-rank axis, so whether a
+set's enrichment is shared across Treg, Tcon and CD8 or specific to
+one of them is read off a single panel. 7 of them are in the family
+because they are named in unbiased_enrichment.runsum_always — the
+comparators this compartment's niche question is read against,
+including the mouse-derived arms, HALLMARK_HYPOXIA, the curated HSR
+core and the two SAVI-derived axes — and the rest because they ranked
+into the top-N curated quota in every population. Not drawn, because a
+trace exists in only some populations and a one-curve panel in this
+family would read as absence of enrichment rather than absence of a
+trace: GOBP_CYTOPLASMIC_TRANSLATION [GO_BP] (CD8);
+GOCC_TRANSPORT_VESICLE [GO_CC] (Treg);
+HALLMARK_INTERFERON_GAMMA_RESPONSE [Hallmark] (CD8 Tcon);
+REACTOME_NEUTROPHIL_DEGRANULATION [Reactome] (Tcon Treg);
+REACTOME_RHO_GTPASE_EFFECTORS [Reactome] (CD8);
+REACTOME_SIGNALING_BY_INTERLEUKINS [Reactome] (Tcon Treg);
+WP_CYTOPLASMIC_RIBOSOMAL_PROTEINS [WikiPathways] (Tcon Treg). Their
+statistics are all in gsea_all.csv, and any of them can be added to
+the family by naming it in unbiased_enrichment.runsum_always.
+
+**How to read:** LAYOUT. One figure per set,
+figures/_overview/runsum_&lt;set&gt;.{pdf,png}, with its three rows
+under tables/_overview/. This family is the transpose of
+figures/by_contrast/, where a panel holds one population and many
+sets. MEMBERSHIP IS A REPORTING CHOICE, NOT A RESULT: a set is here
+because it was named in the config or ranked top-N in all three
+populations, so the family is not a ranking and a set's presence in it
+privileges nothing. READ IT FOR SHARED VERSUS SELECTIVE. Three curves
+of similar shape and height mean the set's genes sit in a comparable
+part of all three rankings; one curve standing apart means it does
+not. Neither reading is evidence about the program a set is named for,
+and neither reaches the confirmatory spine, which stays the donor-
+pseudobulk effect sizes. Correlative. Claim tier: L3 (enrichment
+statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `load_family` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv + runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv` |
 

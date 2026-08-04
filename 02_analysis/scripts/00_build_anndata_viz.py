@@ -24,12 +24,13 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PATHS, COARSE_LABEL  # noqa: E402
+from config import PATHS, COARSE_LABEL, TISSUE_COLORS  # noqa: E402
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
 
 STAGE = "00_build"
 SCRIPT = "02_analysis/scripts/00_build_anndata_viz.py"
-TISSUE_COL = {"synovial_fluid": "#D55E00", "peripheral_blood": "#0072B2"}
+# The one tissue palette, read from analysis_config.yaml::colors.tissue.
+TISSUE_COL = TISSUE_COLORS
 
 
 def main() -> None:

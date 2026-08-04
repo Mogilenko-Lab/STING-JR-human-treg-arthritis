@@ -33,14 +33,15 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import PATHS, PARAMS  # noqa: E402
+from config import PATHS, PARAMS, POPULATION_COLORS  # noqa: E402
 from helpers.figure_style import set_paper_style, save_overview, FIG_CFG  # noqa: E402
 from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "05_scoring"
 SCRIPT = "02_analysis/scripts/05_score_signatures_viz.py"
 POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
-POP_COL = {"Treg": "#009E73", "Tcon": "#E69F00", "CD8": "#CC79A7"}
+# The one population palette, read from analysis_config.yaml::colors.populations.
+POP_COL = POPULATION_COLORS
 PRIMARY = "WT_heat"
 ARM_ORDER = ["up", "down"]
 

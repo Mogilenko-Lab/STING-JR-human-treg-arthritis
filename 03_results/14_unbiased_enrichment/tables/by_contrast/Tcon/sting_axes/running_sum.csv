@@ -1,3 +1,3 @@
-population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,set_size,leading_edge_size,gene_ratio
-Tcon,SF_vs_PB_Tcon,sting_axes,running_sum,every one of the 2 set(s) in this collection,1,ifn_only_up,IFN Only Up,up,2.33505364,0.596305346,1.55644528e-8,3.11289056e-8,9.3870034e-7,71,30,0.422535211
-Tcon,SF_vs_PB_Tcon,sting_axes,running_sum,every one of the 2 set(s) in this collection,2,sting_specific_up,Sting Specific Up,up,1.87446061,0.683797161,0.00227960686,0.00227960686,0.0180900381,15,8,0.533333333
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
+Tcon,SF_vs_PB_Tcon,sting_axes,running_sum,every one of the 2 set(s) in this collection,1,ifn_only_up,IFN Only Up,up,2.33505364,0.596305346,1.55644528e-8,3.11289056e-8,9.47629421e-7,sting_axes,71,30,0.422535211
+Tcon,SF_vs_PB_Tcon,sting_axes,running_sum,every one of the 2 set(s) in this collection,2,sting_specific_up,Sting Specific Up,up,1.87446061,0.683797161,0.00227960686,0.00227960686,0.0182242517,sting_axes,15,8,0.533333333

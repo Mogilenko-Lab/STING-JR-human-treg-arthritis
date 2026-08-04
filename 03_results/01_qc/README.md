@@ -52,14 +52,14 @@ x population cross-tab (contamination check).
 
 ## figures/_overview/mthi_cluster_mt_etreg.png
 
-Two Treg leiden clusters carry high %mt (~20% vs ~4% rest): cluster 3 is
-the effector-like pocket (eTreg-high, SF-restricted) and cluster 16 is
-mt-hi but eTreg-low. The pocket is a discrete, reproducibly-defined
-region, not scattered noise.
+Two Treg leiden clusters carry high %mt (~20% vs ~4% rest): cl6 is the
+effector-like pocket (eTreg-high, SF-restricted) and cl16 is mt-hi but
+eTreg-low. The pocket is a discrete, reproducibly-defined region, not
+scattered noise.
 
 **How to read:** Left: one dot per Treg leiden cluster (size ~ n cells), x = median
-%mt, y = median score_eTreg; orange = mt-hi effector pocket (cluster 3),
-purple = mt-hi non-effector (cluster 16). Right: per-Treg %mt vs eTreg
+%mt, y = median score_eTreg; orange = mt-hi effector pocket (cl6),
+purple = mt-hi non-effector (cl16). Right: per-Treg %mt vs eTreg
 hexbin (log density), pocket cells overlaid green. secondary_percell /
 EDA descriptive — not pseudobulk evidence.
 
@@ -69,8 +69,8 @@ EDA descriptive — not pseudobulk evidence.
 
 ## figures/_overview/mthi_identity_retention.png
 
-The mt-hi effector pocket (cluster 3) retains Treg identity: IKZF2 (rbc
-+0.60) and CTLA4 (+0.37) are UP vs normal Treg, IL2RA/TIGIT
+The mt-hi effector pocket (cl6) retains Treg identity: IKZF2 (rbc
++0.59) and CTLA4 (+0.38) are UP vs normal Treg, IL2RA/TIGIT
 comparable; FOXP3 is modestly lower (frac 0.55 vs 0.80) consistent
 with the lower sequencing depth of high-mito cells, NOT loss of Treg
 identity. These are still Tregs.
@@ -87,15 +87,15 @@ tier.
 
 ## figures/_overview/mthi_qc_discrimination.png
 
-The pocket is not debris/dying: median n_genes 1338 (>>200 QC floor),
+The pocket is not debris/dying: median n_genes 1339 (>>200 QC floor),
 i.e. real cells with lower depth (the expected corollary of high mito
 fraction). score_apoptosis and score_HSP are LOWER, not higher, than
-normal Treg (rbc -0.14, -0.22). Doublets: no cell in the pocket is
+normal Treg (rbc -0.09, -0.22). Doublets: no cell in the pocket is
 flagged predicted_doublet, but doublet_score was not populated this
 run (Scrublet gap — see reasoning note).
 
-**How to read:** Four bars per metric across groups (eff = mt-hi effector cluster 3,
-non = cluster 16, norm = normal Treg). rbc = rank-biserial vs normal Treg (Mann-
+**How to read:** Four bars per metric across groups (eff = mt-hi effector cl6, non =
+cl16, norm = normal Treg). rbc = rank-biserial vs normal Treg (Mann-
 Whitney, all BH-FDR<0.05). Red dashed = 200-gene QC floor.
 n_genes/total_counts are objective QC; score_apoptosis/HSP are Tier-3
 hand markers (QC-descriptive, NOT evidence). secondary_percell tier.
@@ -107,12 +107,12 @@ hand markers (QC-descriptive, NOT evidence). secondary_percell tier.
 ## figures/_overview/mthi_heat_honesty.png
 
 WT_heat is quiet in the pocket. The balanced WT_heat_updown is
-essentially flat, and if anything runs slightly the wrong way (mt-hi
-effector median -0.075 vs normal -0.060, rbc -0.17); WT_heat_up shifts
-up but is confounded (co-varies with the effector/depth axis). This is
-secondary_percell and must NOT be read as the pocket carrying the mouse
-39C signal — the pseudobulk primary-result NES (Treg 2.59 / Tcon 2.68 /
-CD8 2.07, pan-T) was unchanged when these high-mito cells were recovered.
+essentially flat (mt-hi effector median -0.082 vs normal -0.092);
+WT_heat_up shifts up but is confounded (co-varies with the
+effector/depth axis). This is secondary_percell and must NOT be read
+as the pocket carrying the mouse 39 °C-derived signature. The
+pseudobulk NES (Treg 2.53 / Tcon 2.59 / CD8 2.07, pan-T) was unchanged
+when these high-mito cells were recovered.
 
 **How to read:** Point = group median, bar = IQR, for WT_heat_up (left) and balanced
 WT_heat_updown (right), across the two mt-hi Treg groups, normal Treg,

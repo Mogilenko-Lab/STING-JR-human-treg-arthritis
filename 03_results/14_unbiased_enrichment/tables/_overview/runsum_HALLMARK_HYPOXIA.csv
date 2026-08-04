@@ -1,0 +1,4 @@
+gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
+HALLMARK_HYPOXIA,Hypoxia,Hallmark,Treg,SF_vs_PB_Treg,2.2562687,4.75409476e-10,2.37704738e-09,5.86252229e-08,up,139.0,63.0,13999.0,0.528952536,2290.0,0.163583113,True
+HALLMARK_HYPOXIA,Hypoxia,Hallmark,Tcon,SF_vs_PB_Tcon,2.21171713,9.12538434e-10,5.06965797e-09,7.91842718e-08,up,153.0,61.0,14411.0,0.499007926,2481.0,0.172160155,True
+HALLMARK_HYPOXIA,Hypoxia,Hallmark,CD8,SF_vs_PB_CD8,1.7908442,2.37955039e-05,0.00011897752,0.00111153401,up,141.0,47.0,14014.0,0.426433209,2244.0,0.160125589,True
