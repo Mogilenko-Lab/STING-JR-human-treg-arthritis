@@ -150,7 +150,22 @@ def main() -> None:
         if ranked_path.exists():
             gsea = run_fgsea(ranked_path, tdir / f"gsea_pseudobulk_{tag}.csv",
                              f"SF_vs_PB_{pop}", sig_dir)
-            append_master_table(gsea, database=f"WT_heat_{tag}", stage=STAGE,
+            # The frame arrives from run_fgsea carrying database="mouse_projection", the
+            # gene-set COLLECTION name. append_master_table treats `database` as the key
+            # naming the rows THIS CALL owns, and dedupes by comparing that argument
+            # against the column. While the two disagreed the filter matched nothing, so
+            # every run appended a fresh copy instead of replacing the previous one and
+            # the accumulator grew without bound. The column is therefore set to the
+            # per-call owner key before appending, which is the convention 10_hsr_lens.py
+            # already uses on this same accumulator. The collection name is kept in this
+            # stage's own gsea_pseudobulk_<tag>.csv, and `pathway_id` plus `stage`
+            # identify these rows in the master table.
+            # The key must be UNIQUE PER CALL: this loop appends once per population, so a
+            # key shared across the three calls (either "mouse_projection" for all, or the
+            # `stage` value) would have each call delete the previous population's rows.
+            gsea_master = gsea.copy()
+            gsea_master["database"] = f"WT_heat_{tag}"
+            append_master_table(gsea_master, database=f"WT_heat_{tag}", stage=STAGE,
                                 name="master_gsea_pseudobulk", config=FIG_CFG)
             # donors contributing to this pop's pseudobulk contrast
             dm = donor_means[donor_means["coarse_label"] == pop]
