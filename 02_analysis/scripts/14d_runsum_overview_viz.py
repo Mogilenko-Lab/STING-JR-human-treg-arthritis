@@ -61,6 +61,9 @@ _F = FIG_CFG.get("figures", {}) or {}
 ANNOT_SIZE = float(_F["axis_text_size"])
 LEGEND_SIZE = float(_F["legend_text_size"])
 RS_HEIGHTS = [float(h) for h in _F["running_sum_heights"]]
+# The shared enrichment-score range. The mouse anchor pins its running sums to the same
+# key, so a curve here and a curve there are read at one scale.
+RS_YLIM = [float(v) for v in _F["running_sum_ylim"]]
 FDR = float(PARAMS.gsea_fdr)
 
 # Each set this compartment owns, named by how it was derived. A set absent here keeps
@@ -216,18 +219,12 @@ def plot_set(set_id: str, per_pop: dict[str, pd.DataFrame], summary: pd.DataFram
         f"{display_name(set_id)} along the synovial-fluid-versus-paired-blood ranking"
         + (f"\n{note}" if note else f"\n{set_id}"))
 
-    # The y range is data-driven: the config's running_sum_ylim pins one range across a
-    # family of separate per-population figures, and here the three populations already
-    # share one axis. Zero stays in range so the sign is readable, and the padding goes
-    # to the side the curves leave empty so the three-line legend clears the traces.
-    hi = max(0.0, max(float(per_pop[p]["running_es"].max()) for p in POP_ORDER))
-    lo = min(0.0, min(float(per_pop[p]["running_es"].min()) for p in POP_ORDER))
-    rng = max(hi - lo, 1e-9)
+    # One enrichment-score range for every running sum in the project, mouse and human
+    # alike, so the height of a curve carries the same meaning wherever it is drawn. A
+    # range fitted to each panel makes a modest curve and a strong one look the same.
+    ax.set_ylim(*RS_YLIM)
     peak_positive = sub.loc[sub["peak_running_es"].abs().idxmax(), "peak_running_es"] > 0
-    if peak_positive:
-        ax.set_ylim(lo - 0.45 * rng, hi + 0.12 * rng)
-    else:
-        ax.set_ylim(lo - 0.12 * rng, hi + 0.45 * rng)
+    # The legend goes to the half the curves leave empty.
     ax.legend(frameon=False, fontsize=LEGEND_SIZE,
               loc="lower left" if peak_positive else "upper left")
 
@@ -264,7 +261,7 @@ def main() -> None:
         return
 
     CONFIG_KV = (f"figures.running_sum_heights={RS_HEIGHTS}; thresholds.gsea_fdr={FDR}; "
-                 f"x_axis=rank/n_ranked; y_range=data-driven symmetric; "
+                 f"x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; "
                  f"unbiased_enrichment.runsum_always="
                  f"{list((FIG_CFG.get('unbiased_enrichment', {}) or {}).get('runsum_always', []))}")
 

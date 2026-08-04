@@ -1088,7 +1088,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_HALLMARK_HYPOXIA.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_HALLMARK_HYPOXIA.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_HSR_core.png
 
@@ -1119,7 +1119,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_HSR_core.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_HSR_core.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_Interaction_up.png
 
@@ -1150,7 +1150,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_Interaction_up.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_Interaction_up.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_KO_heat_up.png
 
@@ -1181,7 +1181,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_KO_heat_up.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_KO_heat_up.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION.png
 
@@ -1213,7 +1213,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_REACTOME_EUKARYOTIC_TRANSLATION_INITIATION.png
 
@@ -1245,7 +1245,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_REACTOME_EUKARYOTIC_TRANSLATION_INITIATION.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_REACTOME_EUKARYOTIC_TRANSLATION_INITIATION.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_WT_heat_up.png
 
@@ -1276,7 +1276,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_WT_heat_up.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_WT_heat_up.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_ifn_only_up.png
 
@@ -1308,7 +1308,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_ifn_only_up.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_ifn_only_up.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_sting_specific_up.png
 
@@ -1339,7 +1339,7 @@ row reaches an effect-size accumulator.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_sting_specific_up.csv, gsea_all.csv` |
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_sting_specific_up.csv, gsea_all.csv` |
 
 ## figures/_overview/runsum_&lt;set&gt;.png (cross-population running-sum family)
 
@@ -1381,5 +1381,4 @@ statistics).
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/14d_runsum_overview_viz.py` | `load_family` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=data-driven symmetric; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv + runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv` |
-
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `load_family` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv + runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv` |
