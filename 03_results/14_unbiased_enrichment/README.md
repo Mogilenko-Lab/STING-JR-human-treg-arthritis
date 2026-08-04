@@ -1,4 +1,4 @@
-# 14_unbiased_enrichment — artifact captions
+# 14_unbiased_enrichment: artifact captions
 
 _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, FDR = Benjamini-Hochberg adjusted p-value, MLM = multivariate linear model._
 
@@ -330,3 +330,572 @@ The three source tables sitting beside the three figures, each holding exactly t
 |---|---|---|---|
 | `02_analysis/scripts/14_unbiased_enrichment_viz.R` | `save_overview` | `figures.top_n=20; gsea_fdr=0.05; nes_cap=3.5` | `03_results/14_unbiased_enrichment/tables/{gsea_all,gsea_pooled_summary_by_db,progeny_activity,progeny_sf_vs_pb}.csv` |
 
+## figures/_overview/arm_nes_by_cell_state.png
+
+The mouse 39 °C-derived up arm rises on the synovial-fluid side of the
+paired contrast in all three sorted cell states, at NES 2.5916 in Treg
+(119 of 199 arm genes reaching the ranked list), 2.6802 in Tcon (130)
+and 2.0712 in CD8 (113), every one below pooled FDR 1e-4. The Treg
+score sits between the Tcon and CD8 scores, so the separation reads as
+pan-T. KO_heat_up tracks it row for row (NES 2.5645 in Treg on 132 of
+218 genes). The 7-gene interaction arm reaches NES 1.4030 to 1.5425 on
+6 testable genes and clears pooled FDR 0.05 in none of the three cell
+states, so at that size it carries no direction here.
+
+**How to read:** One dot per mouse-derived up arm and cell state, at the confirmatory
+tier: donor-level pseudobulk within frozen sort labels, limma-voom
+moderated t, then pre-ranked fgsea. Rows are the three arms; inside a
+row the three cell states are offset vertically and coloured, each
+with its own annotation line. The x position is the normalised
+enrichment score for synovial fluid over paired blood. A filled dot
+clears the config FDR threshold of 0.05 and an open dot sits above it.
+The annotation column gives how many of the arm's genes reached that
+population's ranked list, against how many the frozen arm holds, then
+the adjusted p. Read that count with the score: an arm of 6 testable
+genes and one of 130 are not equally resolved. The adjusted p is
+Benjamini-Hochberg pooled across every set that population's sweep
+tested; the same-stem source table also carries the per-collection
+value over the three arms alone, and the two agree except for
+Interaction_up in CD8, 0.035 per-collection against 0.172 pooled. A
+score of this kind has no interval, so none is drawn. An arm rising
+here means its gene content moves with the synovial-fluid side of this
+ranking; naming follows how the arm was derived, from mouse iTreg 37
+versus 39 °C contrasts, and the reading stays correlative.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14_unbiased_enrichment_viz.py` | `build_figure` | `thresholds.gsea_fdr = 0.05; gsea_min_size = 5; gsea_max_size = 500` | `03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/_overview/progeny_paired_forest.png
+
+Tested one donor at a time, 10 of the fourteen PROGENy footprints
+separate the JIA synovial Treg pool from paired blood at FDR < 0.05.
+EGFR is the largest at +10.9 (FDR 2.7e-04), followed by NFkB at +8.3
+(FDR 9.9e-04) and Hypoxia at +7.4 (FDR 1.2e-03) across all six paired
+donors, while TNFa sits lower on the synovial-fluid side at -1.96
+(FDR 0.028), so the footprints that separate split across both
+directions.
+
+**How to read:** One row per PROGENy pathway, rows ordered by the Treg paired
+difference so the ordering belongs to one population. Inside a row
+the three sorted populations are offset vertically, Treg above, Tcon
+centre, CD8 below, so their markers and intervals stay separately
+readable; colour repeats the same key. Horizontal position is the
+mean within-donor difference in activity, synovial fluid minus that
+donor's own blood, and the bar through it is the 95% interval of the
+paired t-test. A filled marker reaches FDR < 0.05 in that population
+and an open marker sits above that threshold, so the distinction
+survives a greyscale print. Right of zero the footprint is higher in
+synovial fluid, left of it higher in blood. Two limits on the
+reading. The activity score is computed on expression centred within
+a population, so a difference is comparable between pathways of the
+same population and carries no meaning compared across populations; a
+Treg point sitting further right than a CD8 point on the same row is
+not a between-population effect size. And six pairs is a small n, so
+an open marker here leaves the question open rather than settling it.
+The six donors are the same count in every population but not the
+same six people: Treg pairs JIA_patient_3 and skips 5, Tcon and CD8
+do the reverse. Correlative; a footprint is inferred from target-gene
+expression.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14_progeny_paired_forest_viz.R` | `main` | `progeny.organism=Human; progeny.top=500; progeny.minsize=5; gsea_fdr=0.05; population_offset=0.24 row units` | `03_results/14_unbiased_enrichment/tables/progeny_sf_vs_pb.csv` |
+
+## figures/by_contrast/ (per-database GSEA battery)
+
+The full browse surface for the unbiased sweep: 108 panels across 3
+sorted populations and 11 gene-set collections, one directory per
+(population, collection) cell. Read against the whole family, the
+Treg contrast carries 1,490 pooled-significant sets out of 11,236
+tests, so the mouse-derived WT_heat_up arm (NES +2.5916, pooled FDR
+4e-12, 119 of 199 genes in the ranked list) and HALLMARK_HYPOXIA (NES
++2.2563, pooled FDR 6e-08, 139 genes) both sit inside a broad
+co-enrichment rather than standing alone. Three collections are too
+small for the full battery and carry fewer panels: mouse_projection
+(3 set(s), 2 panel type(s)); project_frozen (1 set(s), 1 panel
+type(s)); sting_axes (2 set(s), 1 panel type(s)). The omission is a
+redundancy judgement recorded per collection above, and no statistic
+is withheld: every set of every collection is in gsea_all.csv.
+
+**How to read:** LAYOUT.
+figures/by_contrast/&lt;population&gt;/&lt;COLLECTION&gt;/{dotplot,facet,barplot,running_sum}.{pdf,png},
+with the rows behind each panel in the mirrored path under
+tables/by_contrast/. Population directories are Treg, Tcon and CD8,
+and the contrast inside every one of them is the same donor-paired
+synovial fluid versus peripheral blood comparison, published in each
+CSV as SF_vs_PB_&lt;population&gt;. WHERE TO START. The three
+Hallmark dotplots, one per population: fifty named programs on a
+top-20 axis with both hypoxia and interferon among them. GLYPHS,
+shared by every cell of the battery. dotplot: x = GeneRatio
+(leading-edge genes divided by set size), point size = -log10(pooled
+adjusted p), fill = NES with orange #B35806 positive and blue #2166AC
+negative and the fill squished at plus or minus 3.5, black outline =
+pooled FDR < 0.05. The dotplot SELECTS by adjusted p and ORDERS its
+y-axis by GeneRatio descending, so vertical position there is a
+gene-ratio ranking. facet: the same dotplot split into an NES > 0
+block and an NES < 0 block. barplot: NES bars from zero, ordered by
+NES. running_sum: three stacked panels, the running enrichment score
+with its leading-edge peak on top, gene-hit ticks at each member's
+rank in the middle, and the ranked moderated t at the bottom, with
+the score clamped to [-1, 1] so curves stay comparable between
+collections. SIGN. NES > 0 means the set's genes concentrate on the
+synovial-fluid side of the ranking and NES < 0 on the paired-blood
+side. ADJUSTED P. Every panel uses the Benjamini-Hochberg correction
+across the whole family of tests asked of one population's ranked
+list, which is stricter than a single-collection correction; the
+per-collection value travels in each same-stem CSV under
+padj_in_database. RANKING. The four panel types rank by different
+metrics, adjusted p for dotplot and facet and |NES| for barplot and
+running_sum, so read an absence against the rule named in that
+panel's own subtitle before reading it as a null. This is a browse
+surface, wide on purpose and privileging no set, and the claim spine
+stays the donor-pseudobulk effect sizes. Correlative: enrichment
+describes where a set's genes sit in a ranking. Claim tier: L3
+(enrichment statistics), and no row of this battery reaches an
+effect-size accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `emit_cell` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/*.rds + 03_results/14_unbiased_enrichment/tables/{gsea_all,geneset_manifest}.csv` |
+
+## figures/_overview/named_sets_in_sweep.png
+
+Scored with no favourite against all 11,236 sets tested in the JIA
+Treg contrast, HALLMARK_HYPOXIA reaches NES +2.26 at pooled FDR
+5.8e-08, rank 92 of 11,236 by pooled FDR, while the best-placed of
+the six cGAS-STING sets reaches pooled FDR 0.195 at rank 2,934.
+sting_specific_up does reach pooled FDR 0.018 in Tcon on 15 genes, so
+the cGAS-STING reading turns on which population is read. Set size
+tracks the outcome closely: 46.8% of Treg sets of 130 to 150 genes
+reach pooled significance against 6.9% of sets of 10 to 22 genes, the
+band five of the six cGAS-STING sets fall in, and 1,490 of 11,236
+Treg tests are significant at all.
+
+**How to read:** Columns are the three sorted populations on one shared row axis. Each
+of the eleven upper rows is one named set, coloured by comparison
+thread and ordered inside a thread by its Treg NES. Below the dashed
+separator the bottom row is every set tested in that population, one
+grey point each, which is the distribution a marker is read against.
+Horizontal position is NES clamped to plus or minus 3.5; right of
+zero the set's genes concentrate on the synovial-fluid side of the
+ranking. A filled marker reaches pooled FDR < 0.05, an open marker
+sits above it. Marker area is genes reaching the ranked list, so a
+large NES on a small marker rests on few genes. Grey text gives
+pooled FDR and rank within that population's whole sweep, ranked on
+pooled FDR alone; by NES the same sets order differently, and the two
+orderings answer different questions. A cell reading 'not tested' had
+fewer than the minimum five of its genes in that ranked list, so it
+carries no result. Four bounds on the reading. This contrast moves
+many programs at once: 1,490 of 11,236 tests reach pooled FDR < 0.05
+in Treg, 2,165 of 11,459 in Tcon and 1,027 of 11,242 in CD8. Set size
+drives that rate: in Treg 73 of 156 sets of 130 to 150 genes are
+pooled-significant (46.8%) against 231 of 3,327 sets of 10 to 22
+genes (6.9%); five of the six cGAS-STING sets sit in that smaller
+band and the sixth at five genes, while HALLMARK_HYPOXIA carries 139
+testable genes. KO_heat_up is drawn beside WT_heat_up because that
+comparator reaches pooled FDR 1.1e-12 against 3.7e-12, ranks 29
+against 31, and the two lists share 182 genes. And the cGAS-STING
+family's own signs disagree: two regulation-of terms carry opposite
+sign and the positive-regulation term runs negative. The selection,
+its reason per row, and the two excluded substring matches are
+committed in tables/sweep_named_sets.csv. Correlative throughout.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14_sweep_named_sets_viz.R` | `main` | `gsea_min_size=5; gsea_max_size=500; gsea_fdr=0.05; nes_cap=3.5; padj_pooled_method=BH; set_selection=tables/sweep_named_sets.csv` | `03_results/14_unbiased_enrichment/tables/{gsea_all,sweep_named_sets,sweep_named_sets_stats,sweep_setsize_baseline}.csv` |
+
+
+## figures/by_contrast/&lt;population&gt;/GO_BP/*.png
+
+GO_BP GSEA of the donor-pseudobulk synovial-fluid-versus-paired-blood
+contrast in 3 sorted populations, drawn with the RNAseq-toolkit
+plotters on the cached gseaResult from 03_results/objects/14_gsea/
+with the adjusted p re-keyed to the sweep-wide pooled correction
+published in gsea_all.csv. Gene Ontology biological process terms
+from MSigDB C5, the largest collection in the battery. The gap
+between a per-database adjusted p and the pooled adjusted p is
+smallest here, because this collection supplies about half of the
+pooled family. All four panels are drawn for this collection (5902
+sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/GO_BP/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__GO_BP.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/GO_MF/*.png
+
+GO_MF GSEA of the donor-pseudobulk synovial-fluid-versus-paired-blood
+contrast in 3 sorted populations, drawn with the RNAseq-toolkit
+plotters on the cached gseaResult from 03_results/objects/14_gsea/
+with the adjusted p re-keyed to the sweep-wide pooled correction
+published in gsea_all.csv. Gene Ontology molecular function terms
+from MSigDB C5. All four panels are drawn for this collection (1407
+sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/GO_MF/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__GO_MF.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/Reactome/*.png
+
+Reactome GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. Reactome
+canonical pathways from MSigDB C2. Set names here are the longest in
+the battery and are wrapped rather than shortened, so the label
+column is wide. All four panels are drawn for this collection (1600
+sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/Reactome/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__Reactome.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/GO_CC/*.png
+
+GO_CC GSEA of the donor-pseudobulk synovial-fluid-versus-paired-blood
+contrast in 3 sorted populations, drawn with the RNAseq-toolkit
+plotters on the cached gseaResult from 03_results/objects/14_gsea/
+with the adjusted p re-keyed to the sweep-wide pooled correction
+published in gsea_all.csv. Gene Ontology cellular component terms
+from MSigDB C5. All four panels are drawn for this collection (861
+sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/GO_CC/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__GO_CC.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/WikiPathways/*.png
+
+WikiPathways GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. WikiPathways
+canonical pathways from MSigDB C2. All four panels are drawn for this
+collection (848 sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/WikiPathways/ listing the rows
+it drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__WikiPathways.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/TF_Targets/*.png
+
+TF_Targets GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. CollecTRI
+regulons, one unsigned gene set per transcription factor with
+activating and repressing targets pooled, so a set is that factor's
+transcriptional neighbourhood. A set enriching says the factor's
+targets move with one side of the contrast; it is a statement about
+target-gene expression and carries no measurement of the factor's
+activity. All four panels are drawn for this collection (600 sets in
+the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/TF_Targets/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__TF_Targets.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/KEGG/*.png
+
+KEGG GSEA of the donor-pseudobulk synovial-fluid-versus-paired-blood
+contrast in 3 sorted populations, drawn with the RNAseq-toolkit
+plotters on the cached gseaResult from 03_results/objects/14_gsea/
+with the adjusted p re-keyed to the sweep-wide pooled correction
+published in gsea_all.csv. KEGG canonical pathways from MSigDB C2.
+The configuration asks for CP:KEGG and msigdbr 26 resolves that to
+the CP:KEGG_LEGACY subcollection; the resolved name is recorded in
+geneset_manifest.csv. All four panels are drawn for this collection
+(185 sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/KEGG/ listing the rows it drew,
+in draw order, with the rule that picked them and the per-collection
+adjusted p under padj_in_database. A set enriching says its gene
+content moves with one side of this contrast. Correlative. Claim
+tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__KEGG.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/Hallmark/*.png
+
+Hallmark GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. Fifty broad
+MSigDB Hallmark programs, the collection a bench reader can name.
+HALLMARK_HYPOXIA and both interferon-response sets are members, so
+this is the one panel of the battery where the hypoxia and interferon
+readings sit on a single axis with everything else. All four panels
+are drawn for this collection (50 sets in the pooled family).
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/Hallmark/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. Worked example of
+the two rankings diverging: in the Treg Hallmark cell
+HALLMARK_HYPOXIA (NES +2.2563, pooled FDR 6e-08, 139 genes in the
+ranked list) is 12 by |NES| and 10 by pooled adjusted p, so it sits
+inside the dotplot's top 20 and outside the running sum's top 5. An
+absence from one panel is a statement about that panel's ranking
+metric. A set enriching says its gene content moves with one side of
+this contrast. Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__Hallmark.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/mouse_projection/*.png
+
+mouse_projection GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. The three
+mouse-derived up arms projected onto human symbols: WT_heat_up (199
+genes, 119 in the Treg ranked list), KO_heat_up and Interaction_up.
+They are ordinary members of the sweep with no privilege, and
+WT_heat_up doubles as the reproduction check against the published
+targeted result on the same ranked list. Panels drawn for this
+collection: dotplot, running_sum. The collection offers 3 set(s) to
+the pooled family, and over a collection that small a dotplot, a
+direction split and a significant-only barplot are the same few
+points drawn several ways, so the redundant panels are left out. The
+running sum is kept at every size because it is the only panel that
+shows where in the ranking a set's genes sit.
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/mouse_projection/ listing the
+rows it drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__mouse_projection.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/sting_axes/*.png
+
+sting_axes GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. The two
+frozen axes from the SAVI positive-control compartment,
+sting_specific_up and ifn_only_up, which separate STING-attributable
+content from generic type-I interferon content. Panels drawn for this
+collection: running_sum. The collection offers 2 set(s) to the pooled
+family, and over a collection that small a dotplot, a direction split
+and a significant-only barplot are the same few points drawn several
+ways, so the redundant panels are left out. The running sum is kept
+at every size because it is the only panel that shows where in the
+ranking a set's genes sit.
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/sting_axes/ listing the rows it
+drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__sting_axes.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/by_contrast/&lt;population&gt;/project_frozen/*.png
+
+project_frozen GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. The frozen
+curated lists this compartment owns. Six of the seven are re-pins of
+MSigDB Hallmark sets with identical gene content, already drawn in
+the Hallmark panel with the same statistics, and geneset_manifest.csv
+records them as n_sets_aliased_out_of_pooling = 6. They are excluded
+here, so HALLMARK_HYPOXIA appears once in this battery and HSR_core
+is the only set drawn under this name. HSR_core is the curated
+heat-shock-response lens, held independent of the mouse anchor and
+general to proteotoxic stress. Panels drawn for this collection:
+running_sum. The collection offers 1 set(s) to the pooled family, and
+over a collection that small a dotplot, a direction split and a
+significant-only barplot are the same few points drawn several ways,
+so the redundant panels are left out. The running sum is kept at
+every size because it is the only panel that shows where in the
+ranking a set's genes sit.
+
+**How to read:** SELECTION RULES, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/project_frozen/ listing the
+rows it drew, in draw order, with the rule that picked them and the
+per-collection adjusted p under padj_in_database. A set enriching
+says its gene content moves with one side of this contrast.
+Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__project_frozen.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/_overview/program_nes_by_cell_state.png
+
+All four oxygen-named sets rise on the synovial-fluid side of the
+paired contrast in Treg, and they spread across the panel:
+HALLMARK_HYPOXIA reaches NES 2.2563 at pooled FDR 6e-08 on 139 genes
+while GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS reaches 1.2172 at 0.334
+on 120, so a reading taken from one of the four would be a reading the
+other three do not reproduce. In the second group the two interferon
+sets carry the strongest rows in the figure, ifn_only_up reaching NES
+2.6057 at 5e-10 in CD8. sting_specific_up clears pooled FDR 0.05 in
+Tcon at NES 1.8745 on 15 genes and sits above the threshold in Treg
+(1.5187, 0.195) and CD8 (1.6700, 0.102), and the three pathway-
+database STING terms stay between NES -0.84 and 1.37 on 10 to 24
+genes.
+
+**How to read:** The companion to arm_nes_by_cell_state under
+03_results/14_unbiased_enrichment/, drawn to the same geometry so the
+two can be laid side by side. One dot per gene set and cell state, at
+the confirmatory tier: donor-level pseudobulk within frozen sort
+labels, limma-voom moderated t, then pre-ranked fgsea. Rows are gene
+sets in two labelled groups, ordered inside a group by descending Treg
+NES, and inside a row the three cell states are offset vertically and
+coloured, each with its own annotation line. The x position is the
+normalised enrichment score for synovial fluid over paired blood, with
+a vertical rule at zero. A filled dot clears the config FDR threshold
+of 0.05 and an open dot sits above it. A cell reading not tested had
+fewer genes in that population's ranked list than gsea_min_size, so
+the sweep never scored it and the cell carries an absence rather than
+a null. Read every score against the gene count beside it. In this
+sweep, size alone moves the odds a long way: in Treg a set of 130 to
+150 genes clears pooled FDR 0.05 in 46.8% of the 156 such sets tested,
+while a set of 10 to 22 genes clears it in 6.9% of 3,327. The four
+oxygen-named sets are four differently built sets for one named
+biology, and their scores differ, so the group is read as a family and
+a single member's score is read as that member's. The cGAS-STING group
+carries a positive result in Tcon, so the group is read set by set.
+The complete six-member cGAS-STING family of this sweep, including the
+two regulation-of terms whose signs disagree, is drawn in
+named_sets_in_sweep under the same stage. Temperature and hypoxia are
+both imposed by the inflamed joint and stay entangled in cross-
+sectional human data, so these rows describe what the niche contrast
+contains and the question of what drives which stays open. A score of
+this kind has no interval, so none is drawn, and the reading stays
+correlative.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14_program_nes_by_cell_state_viz.py` | `build_figure` | `thresholds.gsea_fdr = 0.05; gsea_min_size = 5; gsea_max_size = 500; row order = descending Treg NES within a group` | `03_results/14_unbiased_enrichment/tables/_overview/named_sets_in_sweep.csv, 03_results/14_unbiased_enrichment/tables/gsea_all.csv, 03_results/14_unbiased_enrichment/tables/sweep_setsize_baseline.csv` |

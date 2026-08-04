@@ -1,0 +1,15 @@
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,set_size,leading_edge_size,gene_ratio
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,1,HALLMARK_INTERFERON_GAMMA_RESPONSE,Interferon-gamma Response,up,2.75117581,0.605976294,2.1047386500000004e-21,1.05236932e-19,1.00492501e-18,183,85,0.464480874
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,2,HALLMARK_IL2_STAT5_SIGNALING,IL-2/STAT5 Signaling,up,2.54183941,0.56271082,6.810125399999999e-17,1.7025313500000002e-15,2.10911424e-14,176,96,0.545454545
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,3,HALLMARK_INFLAMMATORY_RESPONSE,Inflammatory Response,up,2.57596727,0.582874893,5.18641659e-16,6.483020740000001e-15,1.41502733e-13,150,75,0.5
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,4,HALLMARK_TNFA_SIGNALING_VIA_NFKB,TNF-alpha Signaling via NF-kappaB,up,2.49960205,0.552217099,5.14225592e-16,6.483020740000001e-15,1.41502733e-13,179,80,0.446927374
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,5,HALLMARK_ALLOGRAFT_REJECTION,Allograft Rejection,up,2.35791883,0.524510913,6.31418308e-13,6.31418308e-12,1.16700361e-10,170,57,0.335294118
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,6,HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION,Epithelial Mesenchymal Transition,up,2.48476006,0.592833335,5.67538949e-12,4.72949124e-11,8.02892447e-10,106,65,0.613207547
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,7,HALLMARK_COMPLEMENT,Complement,up,2.29386059,0.514195385,5.02969466e-11,3.59263904e-10,5.88115011e-9,160,60,0.375
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,8,HALLMARK_APOPTOSIS,Apoptosis,up,2.28611774,0.521814671,2.31193992e-10,1.44496245e-9,2.34447076e-8,141,60,0.425531915
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,9,HALLMARK_HYPOXIA,Hypoxia,up,2.21171713,0.499007926,9.12538434e-10,5.06965797e-9,7.84381545e-8,153,61,0.39869281
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,10,HALLMARK_MTORC1_SIGNALING,Mtorc1 Signaling,up,2.09988915,0.460303856,4.64746165e-9,2.32373083e-8,3.24727214e-7,190,90,0.473684211
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,11,HALLMARK_MYC_TARGETS_V1,Myc Targets V1,down,-1.61066375,-0.331696551,3.66486063e-4,8.72585865e-4,0.00468178796,192,58,0.302083333
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,12,HALLMARK_MYC_TARGETS_V2,Myc Targets V2,down,-1.61257152,-0.407627829,0.0071482495,0.0117820897,0.0414953349,57,16,0.280701754
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,13,HALLMARK_WNT_BETA_CATENIN_SIGNALING,Wnt beta Catenin Signaling,down,-1.22315336,-0.349259161,0.172049099,0.204820356,0.357676092,33,9,0.272727273
+Tcon,SF_vs_PB_Tcon,Hallmark,facet,top 10 per direction by pooled FDR,14,HALLMARK_SPERMATOGENESIS,Spermatogenesis,down,-0.731554948,-0.173911905,0.948344242,0.967698206,0.97665886,77,10,0.12987013

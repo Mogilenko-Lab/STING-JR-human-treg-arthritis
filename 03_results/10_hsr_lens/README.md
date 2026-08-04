@@ -1,4 +1,4 @@
-# 10_hsr_lens -- artifact captions
+# 10_hsr_lens: artifact captions
 
 _Abbreviations: SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, HSR = heat-shock response._
 

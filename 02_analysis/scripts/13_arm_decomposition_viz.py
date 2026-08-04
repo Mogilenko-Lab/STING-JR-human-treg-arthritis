@@ -1,24 +1,27 @@
 #!/usr/bin/env python
 """
-13_arm_decomposition_viz.py — VIZ ONLY. Which curated programs contain each mouse-derived
+13_arm_decomposition_viz.py: VIZ ONLY. Which curated programs contain each mouse-derived
 UP arm, and how much of each arm is left over?
 =========================================================================================
 One deliberately plain panel: a horizontal stacked bar per mouse-derived up arm, band per
 curated lens, plus the remainder no lens claims. No clustering, no ordination, no novel
-method — the only arithmetic on this face is a sum of the fractional weights already
+method. The only arithmetic on this face is a sum of the fractional weights already
 committed by 13_arm_decomposition.py.
 
 Band widths use the FRACTIONAL accounting, which is the only accounting under which
 "fraction of arm" is a true statement. A gene claimed by k lenses gives 1/k to each, so an
 arm's bands total exactly 1.0 and the remainder is a share a reader can trust. The number
-printed inside a band is the DUPLICATED count — how many of the arm's genes that lens
-contains — and those counts sum to more than the arm. Both readings are on the face because
+printed inside a band is the DUPLICATED count, how many of the arm's genes that lens
+contains, and those counts sum to more than the arm. Both readings are on the face because
 either one alone invites the wrong conclusion: the widths would hide how many genes a lens
 actually contains, and the counts would imply a partition that does not exist.
 
-What this panel does NOT show, stated on its face and in its caption: enrichment. A lens
-containing a gene is not that lens enriching in anything. There is no NES, FDR, direction
-or effect size anywhere in this stage.
+The canvas carries the geometry and one line of key. The three readings a reader needs
+before interpreting the geometry, that this is containment and carries no enrichment
+statistic, that the lenses overlap so the counts over-count, and that the four arms share
+structure by construction, live in `how_to_read=` and therefore in the stage README, with
+every number kept. Long prose on the canvas was what made this supplement unreadable when
+shrunk into a column.
 
 Reads only committed 13_arm_decomposition tables. Run from the compartment root, AFTER
 13_arm_decomposition.py:
@@ -111,13 +114,13 @@ PROGRAM_SHORT = {
 _F = FIG_CFG.get("figures", {}) or {}
 ANNOT_SIZE = float(_F["axis_text_size"])
 LEGEND_SIZE = float(_F["legend_text_size"])
-# A band narrower than this carries no in-band number — the digits would collide with the
+# A band narrower than this carries no in-band number: the digits would collide with the
 # band edges. Nothing is dropped: every count is in the sibling table and the caption names
 # the small ones explicitly.
 LABEL_FLOOR = 0.045
 # The canvas this panel is exported on. Read from the config's two-column preset because that
-# is what `save_overview(..., wide=True)` will set AFTER the figure is built — `fig.get_figwidth()`
-# at draw time still returns the rcParams default, so deriving the note's wrap column from it
+# is what `save_overview(..., wide=True)` will set AFTER the figure is built. At draw time
+# `fig.get_figwidth()` still returns the rcParams default, so deriving the note's wrap column from it
 # silently under-wraps to the floor. Wrapping to the wrong width is not cosmetic: `save_figure`
 # exports with `bbox_inches="tight"`, so a line past the right edge WIDENS the emitted canvas
 # and shrinks every font relative to the page.
@@ -126,12 +129,12 @@ AX_LEFT, AX_RIGHT = 0.155, 0.985
 
 
 # ===========================================================================
-# 1. The plotted table — a reshape of the committed membership tables
+# 1. The plotted table: a reshape of the committed membership tables
 # ===========================================================================
 def composition_table() -> pd.DataFrame:
     """One row per plotted band: the duplicated count and the fractional band width.
 
-    Both columns come from tables 13_arm_decomposition.py already wrote — `n_intersect` is
+    Both columns come from tables 13_arm_decomposition.py already wrote. `n_intersect` is
     copied from `arm_program_summary.csv`, and the band width is the sum of the
     `weight_fractional` column of `arm_program_gene.csv`. No statistic is computed here.
     """
@@ -188,7 +191,7 @@ def sub_floor_note(sub: pd.DataFrame, bands: list[str]) -> str:
     """The lenses whose band is too narrow to carry a printed number, with their counts.
 
     A band under `LABEL_FLOOR` is a hairline, so its number cannot go inside it. Dropping the
-    number instead would make the panel read as if those lenses contained nothing — the exact
+    number instead would make the panel read as if those lenses contained nothing, the exact
     silent truncation the remainder is reported to avoid. So they go to the right of the bar,
     outside the 0-1 share range, where they cost no width and distort no band.
     """
@@ -203,7 +206,7 @@ def sub_floor_note(sub: pd.DataFrame, bands: list[str]) -> str:
 
 def plot_composition(df: pd.DataFrame):
     fig, ax = plt.subplots()
-    fig.subplots_adjust(left=AX_LEFT, right=AX_RIGHT, top=0.94, bottom=0.50)
+    fig.subplots_adjust(left=AX_LEFT, right=AX_RIGHT, top=0.94, bottom=0.34)
     bands = band_order(df)
     n = len(ARM_ORDER)
 
@@ -220,7 +223,7 @@ def plot_composition(df: pd.DataFrame):
             ax.barh(y, w, left=left, height=0.62, color=PROGRAM_COL[program],
                     edgecolor="white", linewidth=0.8, zorder=2)
             if w >= LABEL_FLOOR:
-                # The DUPLICATED gene count, not the band width — the two differ wherever a
+                # The DUPLICATED gene count, not the band width. The two differ wherever a
                 # lens shares genes with another, and the reader needs the count.
                 txt = "white" if program in ("sting_specific_published", "hypoxia") else "black"
                 ax.text(left + w / 2, y, f"{int(sub.loc[program, 'n_intersect'])}",
@@ -242,7 +245,7 @@ def plot_composition(df: pd.DataFrame):
     ax.set_xlim(0, 1.75)
     ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax.set_xlabel("Share of the arm's genes (a gene in k lenses gives 1/k to each)")
-    ax.set_title("What the mouse 39 °C-derived up arms are made of, by curated-lens membership")
+    ax.set_title("Curated-lens membership of the mouse 39 °C-derived up arms")
     ax.spines[["top", "right"]].set_visible(False)
 
     handles = [Patch(facecolor=PROGRAM_COL[p], edgecolor="white",
@@ -250,40 +253,22 @@ def plot_composition(df: pd.DataFrame):
                            + ("" if p == RESIDUAL else
                               f"  ({int(df[df['program'] == p]['n_curated_set'].iloc[0])} genes)"))
                for p in bands]
-    fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(AX_LEFT, 0.43),
+    fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(AX_LEFT, 0.28),
                ncol=2, frameon=False, fontsize=LEGEND_SIZE)
 
-    # The three things this panel is most likely to be over-read as. Stated as counts on the
-    # face rather than as cautions in a caption nobody reaches, and placed under the legend so
-    # they cannot land on a band.
-    wt = df[df["arm"] == "WT_heat_up"].iloc[0]
-    paragraphs = [
-        "MEMBERSHIP, NOT ENRICHMENT — a lens containing a gene is arithmetic over frozen gene "
-        "lists. No NES, FDR, direction or effect size is on this face or anywhere in these "
-        "tables.",
-        "NOT A PARTITION OF GENES — the number in a band is how many of the arm's genes that "
-        f"lens contains, and the lenses overlap. Of the {int(wt['n_arm'])} WT_heat_up genes "
-        f"{int(wt['arm_n_claimed'])} are contained by any lens at all, carrying "
-        f"{int(wt['arm_n_claims_total'])} memberships between them (up to "
-        f"{int(wt['arm_max_lenses_per_gene'])} lenses on one gene), so the printed counts "
-        f"over-count by {int(wt['arm_n_excess_claims'])}. Band WIDTHS use 1/k weights and do "
-        "total 1.0; the printed COUNTS do not.",
-        "NOT FOUR INDEPENDENT ARMS — the mouse contrasts are linearly dependent by construction "
-        "(WT_heat = KO_heat + Interaction), and the two Interaction rows are one contrast read "
-        "at two gates, so agreement between rows is expected structure. That algebra is about "
-        "the model coefficients and does not carry to the thresholded lists, which are not set "
-        "sums of one another: WT_heat_up and KO_heat_up share 182 genes, Interaction_up shares "
-        "none with either, and Interaction_up_fdrOnly holds all 7 Interaction_up genes among "
-        "its 18.",
-    ]
+    # ONE line of key, and only what a reader needs to interpret the geometry. The readings
+    # that used to sit here as three paragraphs of capitals now live in `how_to_read=`, and so
+    # in the stage README, with every number kept.
+    #
     # Wrapped to the canvas, not to the sentence. `save_figure` exports with
     # `bbox_inches="tight"`, so a line running past the right edge silently WIDENS the emitted
-    # canvas — the figure stops being the declared 13 x 8.6 in and every font shrinks relative
-    # to the page. The wrap column is derived from the axes' own width so it tracks the config
+    # canvas, the figure stops being the declared geometry, and every font shrinks relative to
+    # the page. The wrap column is derived from the axes' own width so it tracks the config
     # geometry rather than a number guessed once.
     wrap_col = max(60, int(CANVAS_W_IN * (AX_RIGHT - AX_LEFT) / (ANNOT_SIZE * 0.0088)))
-    fig.text(AX_LEFT, 0.24,
-             "\n".join("\n".join(textwrap.wrap(p, width=wrap_col)) for p in paragraphs),
+    key = ("Band widths use 1/k weights and total 1.0; a band's number is how many of the arm's "
+           "genes that lens contains.")
+    fig.text(AX_LEFT, 0.055, "\n".join(textwrap.wrap(key, width=wrap_col)),
              ha="left", va="top", fontsize=ANNOT_SIZE)
     return fig
 
@@ -327,24 +312,33 @@ def main() -> None:
                "03_results/13_arm_decomposition/tables/arm_program_gene.csv, "
                "03_results/13_arm_decomposition/tables/arm_program_multiplicity.csv"),
         how_to_read=(
-            "ANSWERS a membership question only: which frozen curated programs CONTAIN the "
-            "genes of each mouse-derived up arm. Containment is arithmetic over committed gene "
-            "lists, never enrichment — no NES, FDR, direction or effect size appears here or "
-            "anywhere in these tables. One row per arm, named by how it was derived and "
-            "labelled with its gene count and the mouse anchor's gate (fdr_logfc; fdr_only is "
-            "the relaxed Interaction variant, frozen as Interaction_fdrOnly_up.txt). Band WIDTH "
-            "is the fractional share — a gene in k lenses gives 1/k to each, so widths total "
-            "exactly 1.0. The NUMBER in a band is the plain duplicated count of that arm's "
-            "genes the lens contains, and those counts total more than the arm, which is why "
-            "widths and numbers disagree. A band too narrow for a digit carries its count to "
-            "the right of the bar, so no lens is dropped. Grey is the remainder: unnamed on "
-            "purpose, and evidence for no mechanism. The bands are not a partition — the lenses "
-            "overlap, per-gene multiplicity is in arm_program_multiplicity.csv, and the per-arm "
-            "over-count is on the face. The arms are not independent: the mouse contrasts are "
-            "linearly dependent by construction, and by gene content WT_heat_up and KO_heat_up "
-            "share 182 genes while Interaction_up shares none with either. Annotation tier, "
-            "firewalled from the donor-pseudobulk claim spine; no effect-size row."),
-        config=FIG_CFG, wide=True, height=9.0,
+            "Each band counts how many of one arm's genes a frozen curated lens contains. That "
+            "is set arithmetic over committed gene lists, so no NES, FDR, direction or effect "
+            "size appears here or anywhere in these tables. One row per arm, named by how it was "
+            "derived and labelled with its gene count and the mouse anchor's gate (fdr_logfc, "
+            "with fdr_only the relaxed Interaction variant frozen as Interaction_fdrOnly_up.txt). "
+            "Band width is the fractional share: a gene in k lenses gives 1/k to each, so widths "
+            "total 1.0. The number in a band is the duplicated count of that arm's genes the lens "
+            "contains, so numbers and widths disagree. A band too narrow for a digit carries its "
+            "count to the right of the bar, so every lens keeps its number. Grey is the "
+            "remainder, the genes no lens contains, left unnamed on purpose. "
+            "The lenses overlap, so the bands are a containment tally: "
+            f"{int(wt.loc[RESIDUAL, 'arm_n_claimed'])} of the "
+            f"{int(wt.loc[RESIDUAL, 'n_arm'])} WT_heat_up genes are contained by at least one "
+            f"lens, and those {int(wt.loc[RESIDUAL, 'arm_n_claimed'])} carry "
+            f"{int(wt.loc[RESIDUAL, 'arm_n_claims_total'])} memberships, with up to "
+            f"{int(wt.loc[RESIDUAL, 'arm_max_lenses_per_gene'])} lenses on one gene, so the "
+            "printed counts exceed the claimed genes by "
+            f"{int(wt.loc[RESIDUAL, 'arm_n_excess_claims'])}. Per-gene multiplicity is in "
+            "arm_program_multiplicity.csv. The four rows share structure by construction: the "
+            "mouse contrasts are linearly dependent as model coefficients (WT_heat = KO_heat + "
+            "Interaction), and the two Interaction rows are one contrast at two gates, so "
+            "agreement between rows is expected. That algebra holds for the coefficients and "
+            "stops at the thresholded lists: WT_heat_up and KO_heat_up share 182 genes, "
+            "Interaction_up shares none with either, and Interaction_up_fdrOnly holds all 7 "
+            "Interaction_up genes among its 18. Annotation tier, firewalled from the "
+            "donor-pseudobulk claim spine; no effect-size row."),
+        config=FIG_CFG, wide=True, height=7.4,
     )
     plt.close(fig)
 

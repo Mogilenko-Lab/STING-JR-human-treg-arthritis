@@ -1,0 +1,6 @@
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,set_size,leading_edge_size,gene_ratio
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,1,HALLMARK_INTERFERON_GAMMA_RESPONSE,Interferon-gamma Response,up,2.35242978,0.542406107,7.22720092e-14,3.61360046e-12,1.98166324e-11,180,70,0.388888889
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,2,HALLMARK_INTERFERON_ALPHA_RESPONSE,Interferon-alpha Response,up,2.25270313,0.573099238,1.01375089e-8,1.01375089e-7,1.40698612e-6,91,37,0.406593407
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,3,HALLMARK_CHOLESTEROL_HOMEOSTASIS,Cholesterol Homeostasis,up,2.10754221,0.568753401,1.46964463e-6,9.18527893e-6,1.13943068e-4,64,29,0.453125
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,4,HALLMARK_E2F_TARGETS,E2f Targets,up,2.10645134,0.48077682,2.15553052e-10,5.38882631e-9,3.97253675e-8,195,100,0.512820513
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,5,HALLMARK_MITOTIC_SPINDLE,Mitotic Spindle,up,2.09469957,0.4826066,4.06123203e-9,6.76872005e-8,6.16977979e-7,181,95,0.524861878

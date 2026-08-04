@@ -1,4 +1,4 @@
-# 08_harvest_readout — artifact captions
+# 08_harvest_readout: artifact captions
 
 _**Abbreviations:** SF = synovial fluid (inflamed joint), PB = peripheral blood. The SF-vs-PB comparison is within the paired JIA donors of GSE160097. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory, Tcon = CD4⁺CD25⁻ conventional, CD8 = CD8⁺CD45RO⁺ memory._
 

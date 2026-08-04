@@ -1,4 +1,4 @@
-# 11_heat_decomposition — artifact captions
+# 11_heat_decomposition: artifact captions
 
 _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, FDR = BH-adjusted p-value._
 

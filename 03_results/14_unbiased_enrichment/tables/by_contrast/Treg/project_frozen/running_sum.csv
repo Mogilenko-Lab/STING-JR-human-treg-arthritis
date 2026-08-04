@@ -1,0 +1,2 @@
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,set_size,leading_edge_size,gene_ratio
+Treg,SF_vs_PB_Treg,project_frozen,running_sum,every one of the 1 set(s) in this collection,1,HSR_core,Hsr Core,up,1.4870032,0.428242143,0.0317585773,0.0317585773,0.145908492,43,20,0.465116279

@@ -1,4 +1,4 @@
-# 00_build — artifact captions
+# 00_build: artifact captions
 
 _**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The cohort contains 7 JIA donors; ingest includes SF+PB Treg samples for all 7, while the post-QC donor-level analysis retains 6 paired donors in each population. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
 

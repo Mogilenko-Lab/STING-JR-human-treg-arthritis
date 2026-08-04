@@ -1,4 +1,4 @@
-# 13_arm_decomposition — artifact captions
+# 13_arm_decomposition: artifact captions
 
 _**Abbreviations:** HGNC = HUGO Gene Nomenclature Committee symbol, HSR = heat-shock response, UPR = unfolded-protein response, IFN = interferon, SF = synovial fluid, PB = peripheral blood._
 
@@ -11,18 +11,18 @@ lens contains at all.
 
 ## Membership is not enrichment
 
-The whole point of keeping this apart from the scoring results is that containment and
-enrichment are different measurements with different failure modes. A lens containing a gene is
+Containment and enrichment are different measurements with different failure modes, which is
+why this sits apart from the scoring results. A lens containing a gene is
 arithmetic over two committed text files: it is exact, it has no p-value, and it cannot be
 underpowered. A lens *enriching* in a ranked list is a statistical claim about a contrast,
-answered on donor-level pseudobulk. Reading the first as evidence for the second is the error
-this stage exists to make impossible, so nothing here carries an NES, an FDR, a direction, a
+answered on donor-level pseudobulk. Reading the first as evidence for the second is an
+error, so nothing here carries an NES, an FDR, a direction, a
 confidence interval or an effect size, and no row reaches `effect_sizes_treg_arthritis.csv` or
 any `03_results/master/` accumulator. A band on the figure means "these genes are in that list",
 and it means nothing more.
 
-The corollary matters as much: a lens containing **few** genes of an arm is a fact about
-composition, and it is equally not a null enrichment result. I report the small containments
+The corollary matters as much: a lens containing **few** genes of an arm reports a small
+containment count, which is a fact about composition. I report the small containments
 with their genes named rather than folding them into an "other" bucket.
 
 ## What the four arms are
@@ -59,15 +59,14 @@ than restating a result. The first seven are byte-identical to the ones used for
 | `hsr_curated` | `HSR_core` | 56 | frozen curated HSR core, Reactome/GO-derived |
 | `sting_specific_published` | `de_Cevins_sting_specific_up` | 21 | published de Cevins et al. 2023 Table S6 |
 | `ifn_generic_axis` | `ifn_only_up` | 200 | the STING positive-control compartment's generic type-I IFN axis |
-| `unassigned` | the remainder, contained by none of the above | — | — |
+| `unassigned` | the remainder, contained by none of the above | n/a | n/a |
 
 The two axes from the STING positive-control compartment are the reason the panel widened, and
 what they are is load-bearing for how their counts read. `sting_specific_published` is the
-**published** 21-gene de Cevins Table S6 IFN-independent STING-activation signature — the genes
+**published** 21-gene de Cevins Table S6 IFN-independent STING-activation signature: the genes
 most specific to the SAVI disease-associated monocyte cluster after every type-I IFN transcript
-and every IFN-β-inducible gene was removed. It is a published gene list, not a validated
-discriminator: its own IFN-β time-course validation in that compartment is an objective failure
-at three donors, directionally separating and underpowered, so a positive read on it is
+and every IFN-β-inducible gene was removed. It is a published gene list whose own IFN-β
+time-course validation in that compartment is an objective failure at three donors, directionally separating and underpowered, so a positive read on it is
 consistent with STING pathway activity and is never proof of it.
 
 `ifn_generic_axis` is the 200-gene up half of the generic type-I interferon axis, the genes
@@ -79,8 +78,8 @@ label would be exactly the overclaim both were frozen to prevent.
 ## Three ways these tables can be misread
 
 **The bands are not a partition of genes.** The lenses overlap, so a gene can be contained by
-several of them. `arm_program_gene.csv` therefore emits one row per (arm, program, gene) — a
-gene in three lenses appears three times — and carries the multiplicity on every row so the
+several of them. `arm_program_gene.csv` therefore emits one row per (arm, program, gene), so a
+gene in three lenses appears three times, and it carries the multiplicity on every row so the
 sharing is never invisible. Of the 199 `WT_heat_up` genes, 67 are contained by at least one
 lens, and those 67 carry 100 memberships between them, with as many as four lenses on a single
 gene; adding the per-lens counts therefore over-counts by 33 and shrinks the 132-gene
@@ -99,11 +98,12 @@ prints the duplicated counts inside the bands, which is why the widths and the n
 **The arms are not independent.** The mouse anchor's contract records the three contrasts as
 linearly dependent by construction: WT_heat = KO_heat + Interaction. That algebra concerns the
 model coefficients and does not carry to the thresholded gene lists, so the arms are neither
-independent nor set sums of one another, and the only honest way to see the dependence is to
-count shared genes.
+independent nor set sums of one another, and the dependence is read by counting shared
+genes.
 
-`WT_heat_up` and `KO_heat_up` share 182 genes — 182 of 199 and 182 of 218 — so their
-near-identical composition is expected structure and not two agreeing observations.
+`WT_heat_up` and `KO_heat_up` share 182 genes, 182 of 199 and 182 of 218, so their
+near-identical composition is expected structure and the two rows carry one observation
+between them.
 `Interaction_up` shares **zero** genes with either, because a gene can pass the interaction
 gate while failing both main-effect gates; and `Interaction_up_fdrOnly` contains all 7
 `Interaction_up` genes among its 18, so those two rows are one contrast read at two gates.
@@ -114,13 +114,13 @@ printed by `02_analysis/scripts/13_arm_decomposition.py` on each run.
 
 The two large arms have the same shape and it is mostly unclaimed. Nine curated lenses contain
 67 of the 199 `WT_heat_up` genes and 68 of the 218 `KO_heat_up` genes, leaving remainders of 132
-and 150 — in both cases the largest single part. What the lenses do claim is dominated by
+and 150, in both cases the largest single part. What the lenses do claim is dominated by
 inflammatory gene content: 35 `WT_heat_up` genes sit in `HALLMARK_TNFA_SIGNALING_VIA_NFKB` and
 21 in `HALLMARK_INFLAMMATORY_RESPONSE`, against 18 in `HALLMARK_HYPOXIA` and 14 in
 `HALLMARK_IL2_STAT5_SIGNALING`.
 
 **Why this stage says 132 unassigned where `11_heat_decomposition` says 137.** Both numbers are
-correct and they are not in tension — they are the same arm measured against different lens
+correct: they are the same arm measured against different lens
 panels. `11_heat_decomposition` reads `WT_heat_up` against **seven** lenses and leaves 137 genes
 unclaimed. This stage adds two more, the 21 published IFN-independent STING genes and the
 200-gene generic type-I interferon axis, and those two claim exactly **5 further genes**
@@ -145,7 +145,7 @@ note about them. In the 7-gene `Interaction_up`, `HALLMARK_INTERFERON_ALPHA_RESP
 4 (`IRF7`, `MX1`, `RTP4`, `TRIM5`) and the generic type-I interferon axis 2, while
 `HALLMARK_INFLAMMATORY_RESPONSE` contains 2 and every hypoxia, activation, proteostasis and
 published-STING lens contains none. At the relaxed `fdr_only` gate the pattern holds and
-sharpens — 10 of 18 in Hallmark type-I interferon, 6 in the generic axis, still 0 in the
+sharpens: 10 of 18 in Hallmark type-I interferon, 6 in the generic axis, still 0 in the
 published IFN-independent STING set.
 
 Read as composition and nothing else, that says the genes the mouse interaction contrast
@@ -157,8 +157,8 @@ that question belongs to the donor-pseudobulk panels.
 
 ## tables/arm_program_gene.csv
 
-One row per (arm, program, gene) shows that the 199 `WT_heat_up` genes generate 232 rows — 100
-memberships across nine curated lenses plus 132 unclaimed genes — so the arm's curated
+One row per (arm, program, gene) shows that the 199 `WT_heat_up` genes generate 232 rows, 100
+memberships across nine curated lenses plus 132 unclaimed genes, so the arm's curated
 composition is dominated by genes no lens names.
 
 **How to read:** The alluvial substrate: `arm` → `program` → `gene`, one row per membership. A
@@ -169,7 +169,7 @@ exactly one row with `program = unassigned`, `curated_set = (none)`,
 `n_programs_for_gene = 0` and `weight_fractional = 1`, so the remainder is a first-class member
 of the same table rather than an absence from it. `gate` repeats the mouse anchor's gate for
 that arm (`fdr_logfc`, or `fdr_only` for the relaxed Interaction variant). Rows are ordered by
-arm, then by the declared lens order, then by symbol. Membership only — containment of a gene
+arm, then by the declared lens order, then by symbol. Membership only: containment of a gene
 by a lens, with no NES, direction or effect size anywhere in the file. Annotation tier.
 
 | Script | Function | Config | Input |
@@ -187,8 +187,8 @@ no published-STING gene at all.
 how many of that arm's genes the curated set contains and `frac_of_arm` its share of `n_arm`;
 `n_curated_set` is the lens size, so a small `n_intersect` against a large lens is a statement
 about the arm and not about the lens. `genes` is the semicolon-delimited, alphabetically sorted
-membership, empty where the lens contains nothing of that arm — an empty field is the correct
-frozen state, not a missing computation. Rows within an arm **overlap**, so `n_intersect` does
+membership, and it is empty where the lens contains nothing of that arm, which is the frozen
+state for that pair. Rows within an arm **overlap**, so `n_intersect` does
 not sum to `n_arm`; use `weight_fractional` in `arm_program_gene.csv` for an accounting that
 does. Membership only: no NES, no p-value, no effect size. Annotation tier.
 
@@ -198,11 +198,11 @@ does. Membership only: no NES, no p-value, no effect size. Annotation tier.
 
 ## tables/arm_program_multiplicity.csv
 
-26 of the 67 claimed `WT_heat_up` genes are contained by two or more curated lenses — 21 by two,
-3 by three, and `ATF3` and `PLAUR` by four each — which is precisely why the per-lens counts
+26 of the 67 claimed `WT_heat_up` genes are contained by two or more curated lenses: 21 by two,
+3 by three, and `ATF3` and `PLAUR` by four each, which is why the per-lens counts
 cannot be summed.
 
-**How to read:** One row per (arm, gene) — every gene of every arm, whether or not a lens
+**How to read:** One row per (arm, gene): every gene of every arm, whether or not a lens
 contains it. `n_programs` counts the lenses containing that gene and `programs` names them,
 semicolon-delimited in the declared lens order; a gene no lens contains reads `n_programs = 0`
 and `programs = unassigned`, so the remainder is visible here as rows rather than as silence.
@@ -218,8 +218,8 @@ Annotation tier.
 ## tables/source_hash_manifest.csv
 
 All fourteen inputs are recorded by SHA-256, and the published de Cevins STING gene set matches
-the hash this compartment already committed for it — so the STING containment counts here and
-the STING tally in the `11_heat_decomposition` tables are demonstrably reading the same 21 genes.
+the hash this compartment already committed for it, so the STING containment counts here and
+the STING tally in the `11_heat_decomposition` tables read the same 21 genes.
 
 **How to read:** One row per input file. `source_label` names the role (`arm_*`, `lens_*`, or
 the projection manifest), `source_path` is the path relative to the super-repo root, and
@@ -244,9 +244,9 @@ and so contribute a fraction of a gene each.
 
 **How to read:** One row per plotted band, ordered by arm and then by `band_order` (lenses by
 total fractional share across all arms, widest first, remainder always last). `n_intersect` and
-`frac_of_arm` are the duplicated accounting copied from `arm_program_summary.csv` — the numbers
+`frac_of_arm` are the duplicated accounting copied from `arm_program_summary.csv`, the numbers
 printed inside the bands. `weight_fractional_sum` and `frac_of_arm_fractional` are the fractional
-accounting summed from `arm_program_gene.csv` — the band widths, which total exactly 1.0 per
+accounting summed from `arm_program_gene.csv`, the band widths, which total exactly 1.0 per
 arm. The `arm_*` columns repeat that arm's not-a-partition counts on every row so a caption can
 quote them without a second file: `arm_n_claimed`, `arm_n_unassigned`, `arm_n_claims_total`,
 `arm_n_excess_claims` (how much summing the per-lens counts over-counts) and
@@ -271,26 +271,31 @@ invert that shape: Hallmark type-I interferon contains 4 of the 7
 genes at the fdr_logfc gate and 10 of the 18 at the relaxed fdr_only
 gate.
 
-**How to read:** ANSWERS a membership question only: which frozen curated programs
-CONTAIN the genes of each mouse-derived up arm. Containment is
-arithmetic over committed gene lists, never enrichment — no NES, FDR,
-direction or effect size appears here or anywhere in these tables. One
-row per arm, named by how it was derived and labelled with its gene
-count and the mouse anchor's gate (fdr_logfc; fdr_only is the relaxed
-Interaction variant, frozen as Interaction_fdrOnly_up.txt). Band WIDTH
-is the fractional share — a gene in k lenses gives 1/k to each, so
-widths total exactly 1.0. The NUMBER in a band is the plain duplicated
-count of that arm's genes the lens contains, and those counts total
-more than the arm, which is why widths and numbers disagree. A band
-too narrow for a digit carries its count to the right of the bar, so
-no lens is dropped. Grey is the remainder: unnamed on purpose, and
-evidence for no mechanism. The bands are not a partition — the lenses
-overlap, per-gene multiplicity is in arm_program_multiplicity.csv, and
-the per-arm over-count is on the face. The arms are not independent:
-the mouse contrasts are linearly dependent by construction, and by
-gene content WT_heat_up and KO_heat_up share 182 genes while
-Interaction_up shares none with either. Annotation tier, firewalled
-from the donor-pseudobulk claim spine; no effect-size row.
+**How to read:** Each band counts how many of one arm's genes a frozen curated lens
+contains. That is set arithmetic over committed gene lists, so no NES,
+FDR, direction or effect size appears here or anywhere in these
+tables. One row per arm, named by how it was derived and labelled with
+its gene count and the mouse anchor's gate (fdr_logfc, with fdr_only
+the relaxed Interaction variant frozen as Interaction_fdrOnly_up.txt).
+Band width is the fractional share: a gene in k lenses gives 1/k to
+each, so widths total 1.0. The number in a band is the duplicated
+count of that arm's genes the lens contains, so numbers and widths
+disagree. A band too narrow for a digit carries its count to the right
+of the bar, so every lens keeps its number. Grey is the remainder, the
+genes no lens contains, left unnamed on purpose. The lenses overlap,
+so the bands are a containment tally: 67 of the 199 WT_heat_up genes
+are contained by at least one lens, and those 67 carry 100
+memberships, with up to 4 lenses on one gene, so the printed counts
+exceed the claimed genes by 33. Per-gene multiplicity is in
+arm_program_multiplicity.csv. The four rows share structure by
+construction: the mouse contrasts are linearly dependent as model
+coefficients (WT_heat = KO_heat + Interaction), and the two
+Interaction rows are one contrast at two gates, so agreement between
+rows is expected. That algebra holds for the coefficients and stops at
+the thresholded lists: WT_heat_up and KO_heat_up share 182 genes,
+Interaction_up shares none with either, and Interaction_up_fdrOnly
+holds all 7 Interaction_up genes among its 18. Annotation tier,
+firewalled from the donor-pseudobulk claim spine; no effect-size row.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

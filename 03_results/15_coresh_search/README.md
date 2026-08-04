@@ -1,4 +1,4 @@
-# 15_coresh_search — artifact captions
+# 15_coresh_search: artifact captions
 
 _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, GEO = Gene Expression Omnibus, NES = normalized enrichment score, FDR = BH-adjusted p-value, pctVar = the CoReSh co-regulation score (percent of a dataset's variance explained by the query genes)._
 

@@ -1,4 +1,4 @@
-# 07_embedding — artifact captions
+# 07_embedding: artifact captions
 
 ## figures/_overview/umap_signatures_treg.png
 

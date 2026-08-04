@@ -132,3 +132,58 @@ a sample; on `x`/`y` that falls to 1.38x chance. Annotation tier throughout.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/17_treg_reembedding.py` | `build_substrate` | `subset_key = coarse_label`, `subset_value = Treg`, `harmony_batch_key = donor`, `source_parquet = 16_narrative_embedding.parquet`, `output_parquet = 17_treg_reembedding.parquet` | `03_results/objects/02_annotation.h5ad`, `03_results/interactive/16_narrative_embedding.parquet` |
+
+## figures/_overview/umap_treg_reembedding.png
+
+On the Treg-only map, drawn on the Harmony-corrected coordinates, the
+synovial-fluid and paired-blood cells still occupy distinct territory
+(0.923 same-tissue neighbours at k = 30 against 0.500 expected) after
+the same-donor neighbour fraction has dropped from 0.661 to 0.201
+against 0.146 expected, and both the mouse WT 39 °C-derived up arm and
+the curated Hallmark hypoxia lens colour the synovial-fluid territory
+brighter (per-cell AUCell mean 0.0112 to 0.0190 for WT_heat_up and
+0.0736 to 0.0974 for the hypoxia lens).
+
+**How to read:** Three panels over ONE frame of the same 27,175 sorted Treg cells at
+the same coordinates, sharing one square bounding box. Left is tissue
+of origin, synovial fluid in vermillion and paired blood in blue,
+drawn in shuffled order. Middle and right colour every cell by per-
+cell AUCell of one gene set, on the scale the full-object figures use,
+clipped to the 2nd and 98th percentile with the highest-scoring cells
+drawn last. Panel titles carry the set identifier and its size:
+WT_heat_up is the up arm of the mouse WT iTreg 39 versus 37 °C
+contrast in human projection, HALLMARK_HYPOXIA the curated MSigDB
+Hallmark program. The two sets are unrelated and their ranges differ,
+so each keeps its own colour scale. The coordinates are the Harmony-
+corrected pair, because at k = 30 the same-donor neighbour fraction is
+0.661 on the uncorrected Treg-only map and 0.201 after Harmony over
+donor against 0.146 expected, while same-tissue neighbours hold at
+0.923 against 0.500 expected. Harmony reshapes the space it corrects,
+so this map is annotation, and cells are pooled across donors, making
+a tissue difference read off the colouring pseudoreplicated and
+descriptive. Claims in this compartment rest on donor-level pseudobulk
+differential expression within the frozen cell states.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `figure_treg` | `coordinates = x / y (Harmony over donor), all 27,175 cells drawn, point_size = 2.4, cmap = viridis, clip_percentiles = [2, 98], figures.dpi = 300, figures.rasterized_dpi = 600, columns = WT_heat_up_AUCell, HALLMARK_HYPOXIA_AUCell` | `03_results/interactive/17_treg_reembedding.parquet, 03_results/16_narrative_scoring/tables/narrative_score_summary.csv, 03_results/17_treg_reembedding/tables/treg_reembedding_mixing.csv` |
+
+## tables/_overview/umap_treg_reembedding.csv
+
+Per-cell AUCell summaries of the two sets drawn on the Treg-only map,
+WT_heat_up and HALLMARK_HYPOXIA, restricted to the Treg gate, one row
+per tissue, so the colouring can be read as numbers.
+
+**How to read:** A restriction of the narrative scoring summary table to the Treg gate
+and the two sets this figure draws. One row per (`set_name` x
+`tissue`) with the mean, median and standard deviation of the per-cell
+AUCell score and the cell and donor counts behind it. AUCell is
+bounded in [0, 1] and its scale depends on set size, so values compare
+across tissue within a `set_name`. Cells are pooled across donors, so
+the unit of replication is the cell and the tissue difference here is
+pseudoreplicated. `evidence_tier` reads `secondary_percell`
+throughout.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `score_table` | `rows = 2 sets x Treg x 2 tissues, metric = AUCell` | `03_results/16_narrative_scoring/tables/narrative_score_summary.csv` |

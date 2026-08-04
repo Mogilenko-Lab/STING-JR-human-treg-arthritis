@@ -1,4 +1,4 @@
-# 09_heat_hypoxia -- artifact captions
+# 09_heat_hypoxia: artifact captions
 
 _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, FDR = BH-adjusted p-value._
 
