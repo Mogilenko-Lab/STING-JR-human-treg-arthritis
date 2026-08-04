@@ -899,3 +899,4 @@ correlative.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14_program_nes_by_cell_state_viz.py` | `build_figure` | `thresholds.gsea_fdr = 0.05; gsea_min_size = 5; gsea_max_size = 500; row order = descending Treg NES within a group` | `03_results/14_unbiased_enrichment/tables/_overview/named_sets_in_sweep.csv, 03_results/14_unbiased_enrichment/tables/gsea_all.csv, 03_results/14_unbiased_enrichment/tables/sweep_setsize_baseline.csv` |
+

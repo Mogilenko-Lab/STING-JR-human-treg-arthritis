@@ -128,8 +128,8 @@ p <- ggplot(pg, aes(x = mean_difference, y = y, colour = population)) +
     x = "mean paired difference in PROGENy activity score",
     y = NULL,
     caption = wrap_at(paste("Six paired donors per population. A footprint is inferred from",
-                            "target-gene expression, so this is a correlative readout of",
-                            "downstream transcription and not a measurement of pathway activity."),
+                            "target-gene expression, so it reads downstream transcription and",
+                            "the reading stays correlative."),
                       118)) +
   THEME +
   theme(legend.position = "bottom", legend.box = "horizontal",
