@@ -1,0 +1,14 @@
+"population","tf","variant","method","configuration","regulon_size","score","padj","rank","n_tfs_scored","pct_rank","n_ranked_genes"
+"Treg","HIF1A","unsigned_geneset","fgsea","unsigned_geneset / fgsea",293,2.32893136,4.93463495e-14,4,592,0.675675676,13999
+"Treg","HIF1A","signed","ulm","signed / ulm",293,8.29858018,1.09184291e-14,6,601,0.998336106,13999
+"Treg","HIF1A","signed","mlm","signed / mlm",293,3.50044612,0.0560120347,4,601,0.665557404,13999
+"Treg","HIF1A","signed","consensus","signed / consensus",293,3.41786495,0.0541882342,6,601,0.998336106,13999
+"Treg","HIF1A","unsigned","ulm","unsigned / ulm",293,9.50914522,2.23408973e-19,6,601,0.998336106,13999
+"Treg","HIF1A","unsigned","mlm","unsigned / mlm",293,4.10164634,0.0119939945,2,601,0.332778702,13999
+"Treg","HIF1A","unsigned","consensus","unsigned / consensus",293,3.56140544,0.04433877,5,601,0.831946755,13999
+"Treg","HIF1A","literature_signed","ulm","literature_signed / ulm",138,5.76142799,2.75350201e-07,12,388,3.09278351,13999
+"Treg","HIF1A","literature_signed","mlm","literature_signed / mlm",138,1.7582031,0.428263113,42,388,10.8247423,13999
+"Treg","HIF1A","literature_signed","consensus","literature_signed / consensus",138,2.2701437,0.692396915,10,388,2.57731959,13999
+"Treg","HIF1A","alias_recovered","ulm","alias_recovered / ulm",296,8.37407636,5.24624165e-15,7,603,1.16086235,13999
+"Treg","HIF1A","alias_recovered","mlm","alias_recovered / mlm",296,3.50342662,0.0555738726,4,603,0.663349917,13999
+"Treg","HIF1A","alias_recovered","consensus","alias_recovered / consensus",296,3.4080651,0.0563592092,6,603,0.995024876,13999

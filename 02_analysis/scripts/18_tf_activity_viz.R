@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# 18_tf_activity_viz.R: VIZ. Three figures off the tables 18_tf_activity.R wrote.
+# 18_tf_activity_viz.R: VIZ. Four figures off the tables 18_tf_activity.R wrote.
 # =============================================================================
 #   tf_rank_cascade              rank of each focus TF across every network variant
 #                                crossed with every estimator, plus the committed
@@ -9,6 +9,9 @@
 #   tf_activity_vs_regulon_size  activity against regulon size across every TF tested,
 #                                with the size-conditional expectation and the
 #                                size-and-expression-matched random-regulon null
+#   hif1a_rank_cascade_linear    the HIF1A line of the first figure alone, on a linear
+#                                rank axis, in the panel grammar the mouse anchor's
+#                                Hif1a cascade uses
 #
 # One claim each, and no statistics here. Every figure goes through save_overview(), which
 # emits the vector PDF, the raster PNG, the same-stem source CSV and the stage README
@@ -16,7 +19,8 @@
 #
 # Reads 03_results/18_tf_activity/tables/:
 #   hif1a_rank_cascade.csv, target_decomposition.csv, target_decomposition_summary.csv,
-#   regulon_size_calibration.csv, regulon_size_spearman.csv, size_matched_null.csv
+#   regulon_size_calibration.csv, regulon_size_spearman.csv, size_matched_null.csv,
+#   ranked_list_keycheck.csv
 #
 # Run from the compartment root:
 #   Rscript 02_analysis/scripts/18_tf_activity_viz.R
@@ -60,6 +64,7 @@ TBL <- file.path(CFG$paths$results %||% "03_results/", STAGE,
 rd <- function(f) readr::read_csv(file.path(TBL, f), show_col_types = FALSE)
 
 CASCADE <- rd("hif1a_rank_cascade.csv")
+KEYCHK  <- rd("ranked_list_keycheck.csv")
 DEC     <- rd("target_decomposition.csv")
 DECSUM  <- rd("target_decomposition_summary.csv")
 CAL     <- rd("regulon_size_calibration.csv")
@@ -335,6 +340,80 @@ save_overview(
     "between them. The unsigned-regulon facet omits the regulons above the sweep's size cap.",
     "Annotation tier."),
   config = CFG, wide = TRUE
+)
+
+# =============================================================================
+# FIGURE 4: HIF1A alone, on a linear rank axis, in the mouse anchor's grammar
+# =============================================================================
+# The anchor draws its Hif1a cascade on a linear rank axis, where a rank move is a distance
+# on the page. Redrawing the HIF1A line of `tf_rank_cascade` that way gives that panel a
+# same-grammar sibling, and leaves `tf_rank_cascade` the log axis its eight factors need.
+
+message("[fig 4] HIF1A rank cascade on a linear axis ...")
+
+# Read from the stage's own key check so the ranked-list length in the subtitle is the one
+# the sweep actually scored.
+N_RANKED <- KEYCHK$n_genes[KEYCHK$population == PRIMARY_LABEL]
+
+casc_hif <- casc %>%
+  filter(tf == "HIF1A") %>%
+  mutate(n_ranked_genes = N_RANKED,
+         lab = sprintf("#%d / %d\nscore=%.2f", rank, n_tfs_scored, score))
+
+p4 <- ggplot(casc_hif, aes(x = configuration, y = rank, colour = score, group = 1)) +
+  geom_line(colour = "grey55", linewidth = LN_W * 0.6) +
+  geom_point(size = PT_SZ * 2) +
+  geom_text(aes(label = lab), vjust = -0.6, size = LBL_SZ * 0.75, colour = "grey15",
+            lineheight = 0.9, show.legend = FALSE) +
+  scale_colour_gradient2(low = DIV[["down"]], mid = DIV[["neutral"]], high = DIV[["up"]],
+                         midpoint = 0, name = "Activity\nscore") +
+  # Linear and reversed: rank 1 at the top, and a rank move reads as its own size.
+  scale_y_reverse(expand = expansion(mult = c(0.10, 0.22))) +
+  labs(title = sprintf("HIF1A rank across network variant and estimator, %s synovial fluid versus paired blood",
+                       PRIMARY_LABEL),
+       subtitle = sprintf(paste("Rank 1 is the most activated; every score is computed over the same",
+                                "%s-gene ranked list.\nEach point is labelled with the rank and the score behind it."),
+                          format(N_RANKED, big.mark = ",")),
+       x = "Network variant / estimator",
+       y = "HIF1A rank among the TFs scored (lower = higher activity)") +
+  project_theme(config = CFG) +
+  # Rotated tick labels, as in the eight-factor panel, since a configuration name is two
+  # words long; they need the same left margin, or the canvas clips the first one.
+  theme(axis.text.x = element_text(angle = 40, hjust = 1),
+        plot.margin = margin(8, 12, 8, 58))
+
+fig4_tbl <- casc_hif %>%
+  select(population, tf, variant, method, configuration, regulon_size, score, padj,
+         rank, n_tfs_scored, pct_rank, n_ranked_genes)
+
+save_overview(
+  p4, STAGE, "hif1a_rank_cascade_linear", table = fig4_tbl,
+  finding = paste(
+    sprintf("Across the thirteen network-by-estimator configurations, HIF1A's inferred-activity rank on the sorted-%s",
+            PRIMARY_LABEL),
+    "synovial-fluid-versus-paired-blood contrast stays between rank 2 and rank 12 in twelve of them and reaches",
+    "rank 42 of 388 in the thirteenth, the literature-signed network scored multivariately.",
+    "On the linear rank axis the mouse anchor uses for its Hif1a cascade, that traverse is nearly flat, where the",
+    "murine one on the same kind of axis runs rank 1 to rank 12 to rank 142 and back to rank 8.",
+    "The two panels are comparable in shape only: the ranked lists differ in length",
+    sprintf("(%s genes here) and the number of factors scored differs between configurations, both of which sit in the",
+            format(N_RANKED, big.mark = ",")),
+    "source table."),
+  script = SCRIPT, fn = "save_overview",
+  config_kv = paste0("tf_activity.primary_population=", TA$primary_population,
+                     "; tf_activity.network_variants=[signed, unsigned, literature_signed, ",
+                     "alias_recovered]; tf_activity.methods=[ulm, mlm, consensus]"),
+  input = paste("03_results/18_tf_activity/tables/hif1a_rank_cascade.csv +",
+                "ranked_list_keycheck.csv"),
+  how_to_read = paste(
+    "One factor, one line, on the configuration axis and order `tf_rank_cascade` uses, so a column",
+    "means the same in both. The y axis is HIF1A's rank by descending activity among the factors",
+    "scored in that configuration, linear and inverted, so rank 1 is at the top and the height of a step is the",
+    "size of the rank move rather than its logarithm. Labels give the rank, the factors scored and the score",
+    "behind it. Point colour is that score; the four estimators share no scale, so colour compares within an",
+    "estimator and not across them. Annotation tier: an inferred activity is a statistic over target-gene",
+    "expression, and nothing here pools with the donor-pseudobulk claim spine."),
+  config = CFG, wide = TRUE, height = 8.5
 )
 
 message("\n[DONE] 18_tf_activity_viz complete.")

@@ -575,3 +575,33 @@ cap. Annotation tier.
 |---|---|---|---|
 | `02_analysis/scripts/18_tf_activity_viz.R` | `save_overview` | `tf_activity.null_draws=1000; tf_activity.null_expression_deciles=10; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500` | `03_results/18_tf_activity/tables/regulon_size_calibration.csv + regulon_size_spearman.csv + size_matched_null.csv` |
 
+## figures/_overview/hif1a_rank_cascade_linear.png
+
+Across the thirteen network-by-estimator configurations, HIF1A's
+inferred-activity rank on the sorted-Treg
+synovial-fluid-versus-paired-blood contrast stays between rank 2 and
+rank 12 in twelve of them and reaches rank 42 of 388 in the
+thirteenth, the literature-signed network scored multivariately. On
+the linear rank axis the mouse anchor uses for its Hif1a cascade,
+that traverse is nearly flat, where the murine one on the same kind
+of axis runs rank 1 to rank 12 to rank 142 and back to rank 8. The
+two panels are comparable in shape only: the ranked lists differ in
+length (13,999 genes here) and the number of factors scored differs
+between configurations, both of which sit in the source table.
+
+**How to read:** One factor, one line, on the configuration axis and order
+`tf_rank_cascade` uses, so a column means the same in both. The y
+axis is HIF1A's rank by descending activity among the factors scored
+in that configuration, linear and inverted, so rank 1 is at the top
+and the height of a step is the size of the rank move rather than its
+logarithm. Labels give the rank, the factors scored and the score
+behind it. Point colour is that score; the four estimators share no
+scale, so colour compares within an estimator and not across them.
+Annotation tier: an inferred activity is a statistic over target-gene
+expression, and nothing here pools with the donor-pseudobulk claim
+spine.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/18_tf_activity_viz.R` | `save_overview` | `tf_activity.primary_population=treg; tf_activity.network_variants=[signed, unsigned, literature_signed, alias_recovered]; tf_activity.methods=[ulm, mlm, consensus]` | `03_results/18_tf_activity/tables/hif1a_rank_cascade.csv + ranked_list_keycheck.csv` |
+
