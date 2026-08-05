@@ -136,10 +136,18 @@ three significant figures on both statistics and share their largest contributor
 that singles out one of them is reading noise between them.
 
 **A random-gene-set null is the weaker of the two nulls here.** HIF1A's observed ULM score of
-+8.30 sits far above the 95th percentile (+1.62) of 1,000 random regulons matched on size, on
-repressing-edge fraction and on expression-decile composition, so its targets are not an
-arbitrary bag of 293 genes. The informative comparison is against other *real* regulons of the
-same size, which is what the size-conditional residual reports, and there HIF1A is ordinary.
++8.30 sits far above the 95th percentile of 1,000 random regulons matched on size and on
+repressing-edge fraction (+1.62), and above the 95th percentile of the stricter draw that also
+reproduces its expression-decile composition (+2.10), so its targets are not an arbitrary bag of
+293 genes. The informative comparison is against other *real* regulons of the same size, which is
+what the size-conditional residual reports, and there HIF1A is ordinary.
+
+Neither of these draws holds target promiscuity fixed, which is the property the decomposition
+above shows carries the score, and both permute the annotation rather than the design.
+`03_results/19_regulon_nulls/` closes those two gaps and is where a reader should go before
+reading any p-value on this page as strong: against regulons that preserve every target's
+in-degree the null's centre sits at +5.54 rather than near zero, so HIF1A clears it by about one
+unit instead of six.
 
 ## tables/source_hash_manifest.csv
 
@@ -391,8 +399,8 @@ rather than on magnitude alone.
 
 Every focus regulon beats a random regulon matched to it on size, on repressing-edge fraction
 and on expression-decile composition, with HIF1A's observed ULM score of +8.30 far above the
-+1.62 that the 95th percentile of 1,000 such draws reaches, so these regulons are not
-arbitrary bags of genes of the right size.
+95th percentile of 1,000 such draws — +1.62 matching on size alone and +2.10 under the stricter
+expression-matched draw — so these regulons are not arbitrary bags of genes of the right size.
 
 **How to read:** One row per (factor, statistic, null-match mode). `obs` is the observed value
 and `null_mean`, `null_sd`, `null_q95` and `null_max` describe the draws. `pct_of_null` is the
@@ -646,11 +654,12 @@ edge sign, so length is magnitude and side is direction. Colour
 restates that direction. A filled point means CollecTRI records
 literature evidence for the edge's direction and an open point means
 the direction was assumed activating by default, which is the case
-for 14 of HIF1A's 27. One bar is dashed: TM9SF4 is the single target
-here carried on a repressing edge, so its positive contribution comes
-from a gene that goes down in synovial fluid. Row pitch is equal in
-both panels, so a bar length means the same thing in each. In-panel
-text gives the set's size, its up/down split, and its share of the
+for 14 of HIF1A's 27. A dashed bar marks a repressing edge, which
+flips the contribution's sign away from the gene's own direction;
+TM9SF4 is the only one here, so its positive contribution comes from
+a gene that goes down in synovial fluid. Row pitch is equal in both
+panels, so a bar length means the same thing in each. In-panel text
+gives the set's size, its up/down split, and its share of the
 factor's signed total in magnitude and net, which differ because the
 set nearly cancels. Annotation tier: a contribution is arithmetic on
 the committed ranked list and carries no separate test.
@@ -658,7 +667,6 @@ the committed ranked list and carries no separate test.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/18_tf_activity_viz.R` | `save_overview` | `tf_activity.decompose_tfs=[HIF1A, NFKB1]; tf_activity.selective_max_regulons=1; tf_activity.primary_population=treg; tf_activity.default_sign_decision=default activation` | `03_results/18_tf_activity/tables/target_decomposition.csv` |
-
 
 ## figures/_overview/tf_selective_targets_volcano.png
 

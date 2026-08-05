@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# 18_tf_activity_viz.R: VIZ. Four figures off the tables 18_tf_activity.R wrote.
+# 18_tf_activity_viz.R: VIZ. Five figures off the tables 18_tf_activity.R wrote.
 # =============================================================================
 #   tf_rank_cascade              rank of each focus TF across every network variant
 #                                crossed with every estimator, plus the committed
@@ -304,7 +304,11 @@ sel_named <- sel %>%
                             "down on the synovial-fluid side"),
          edge = ifelse(sign_decision == (TA$default_sign_decision %||% "default activation"),
                        "sign assumed activating", "sign recorded from literature"),
-         edge_line = ifelse(mor < 0, "22", "solid")) %>%
+         # The dashed bar is the counterintuitive one — a repressing edge flips the sign of the
+         # contribution relative to the gene's own direction — so it takes a legend key rather
+         # than living in the caption alone.
+         edge_dir = ifelse(mor < 0, "repressing edge (contribution sign flipped)",
+                           "activating edge")) %>%
   arrange(contrib) %>%
   mutate(target = factor(target, levels = unique(target)))
 
@@ -320,7 +324,7 @@ sel_txt <- share %>%
 p2b <- ggplot(sel_named, aes(x = contrib, y = target)) +
   geom_vline(xintercept = 0, linewidth = 0.4, colour = REFC) +
   geom_segment(aes(x = 0, xend = contrib, yend = target, colour = direction,
-                   linetype = edge_line), linewidth = LN_W * 0.7) +
+                   linetype = edge_dir), linewidth = LN_W * 0.7) +
   geom_point(aes(colour = direction, shape = edge), size = PT_SZ * 1.4, stroke = 1.1) +
   # space = "free_y" gives HIF1A's 27 rows and NFKB1's 2 the same row pitch, so a bar length
   # means the same thing in both panels and neither is stretched to fill equal height.
@@ -330,15 +334,20 @@ p2b <- ggplot(sel_named, aes(x = contrib, y = target)) +
                       name = NULL) +
   scale_shape_manual(values = c("sign recorded from literature" = 16,
                                 "sign assumed activating" = 1), name = NULL) +
-  scale_linetype_identity(guide = "none") +
+  scale_linetype_manual(values = c("activating edge" = "solid",
+                                   "repressing edge (contribution sign flipped)" = "22"),
+                        name = NULL) +
   scale_x_continuous(expand = expansion(mult = c(0.08, 0.16))) +
   labs(title = "Every target claimed by this regulon alone",
        subtitle = paste(c("Signed contribution = sign(mode of regulation) x moderated t; positive is synovial-fluid-side",
                           sel_txt$line), collapse = "\n"),
        x = "Signed contribution", y = NULL) +
   project_theme(config = CFG) +
-  # Stacked, not side by side: the four keys spelled out on one row overrun a 9-inch canvas.
+  # Stacked, not side by side: the keys spelled out on one row overrun a 9-inch canvas.
+  # The strip label is unrotated because NFKB1's panel is two rows tall, and a rotated
+  # "NFKB1" needs more vertical space than two rows of pitch give it — it rendered clipped.
   theme(legend.position = "bottom", legend.box = "vertical",
+        strip.text.y = element_text(angle = 0),
         panel.grid.major.y = element_blank())
 
 fig2b_tbl <- sel_named %>%
@@ -367,14 +376,15 @@ save_overview(
     "moderated t multiplied by the edge sign, so length is magnitude and side is direction.",
     "Colour restates that direction. A filled point means CollecTRI records literature evidence",
     "for the edge's direction and an open point means the direction was assumed activating by",
-    "default, which is the case for 14 of HIF1A's 27. One bar is dashed: TM9SF4 is the single",
-    "target here carried on a repressing edge, so its positive contribution comes from a gene that",
-    "goes down in synovial fluid. Row pitch is equal in both panels, so a bar length means the",
+    "default, which is the case for 14 of HIF1A's 27. A dashed bar marks a repressing edge, which",
+    "flips the contribution's sign away from the gene's own direction; TM9SF4 is the only one here,",
+    "so its positive contribution comes from a gene that goes down in synovial fluid. Row pitch is",
+    "equal in both panels, so a bar length means the",
     "same thing in each. In-panel text gives the set's size, its up/down split, and its share of",
     "the factor's signed total in magnitude and net, which differ because the set nearly cancels.",
     "Annotation tier: a contribution is arithmetic on the committed ranked list and carries no",
     "separate test."),
-  config = CFG, width = 9, height = 10
+  config = CFG, width = 9, height = 10.5
 )
 
 # =============================================================================

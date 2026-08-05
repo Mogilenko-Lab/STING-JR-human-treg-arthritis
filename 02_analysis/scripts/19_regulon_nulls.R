@@ -45,7 +45,9 @@
 #   signflip_null.csv          signflip_null_draws.csv
 #   null_ladder.csv
 #
-# Compute only. Figures live in 19_regulon_nulls_viz.R.
+# Compute only, and there is no paired viz script yet: the ladder and the EPAS1 null are the
+# obvious figures, but the numbers are read from the tables until one is written. Do not add a
+# figure here — a viz script is where it belongs.
 #
 # Run from the compartment root:
 #   Rscript 02_analysis/scripts/19_regulon_nulls.R
