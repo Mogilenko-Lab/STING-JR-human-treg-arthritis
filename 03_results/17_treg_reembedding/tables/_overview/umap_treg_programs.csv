@@ -1,0 +1,7 @@
+set_name,coarse_label,tissue,n_cells,n_donors,mean,median,sd,metric,evidence_tier
+HALLMARK_HYPOXIA,Treg,peripheral_blood,13603.0,7.0,0.0735839162,0.0732080925,0.0138024237,AUCell,secondary_percell
+HALLMARK_HYPOXIA,Treg,synovial_fluid,13572.0,6.0,0.0973590685,0.0970520231,0.0147380496,AUCell,secondary_percell
+sting_specific_published,Treg,peripheral_blood,13603.0,7.0,0.0186178767,0.0,0.0247709408,AUCell,secondary_percell
+sting_specific_published,Treg,synovial_fluid,13572.0,6.0,0.0366160892,0.0416348358,0.0322655912,AUCell,secondary_percell
+ifn_generic_axis,Treg,peripheral_blood,13603.0,7.0,0.0176080771,0.0150537274,0.0132740689,AUCell,secondary_percell
+ifn_generic_axis,Treg,synovial_fluid,13572.0,6.0,0.0297546611,0.0244790706,0.0203602832,AUCell,secondary_percell

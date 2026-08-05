@@ -11,6 +11,24 @@ the committed per-cell substrate `03_results/interactive/17_treg_reembedding.par
                           so every panel holds the identical cells at identical
                           coordinates.
 
+Plus a Treg-only COUNTERPART of every program row drawn on the full object, so a
+program's apparent structure on the map can be checked against a map where the
+Treg/Tcon/CD8 split is not what sets the axes:
+
+  umap_treg_arms:       counterpart of `16_narrative_scoring/umap_full_arms`.
+  umap_treg_programs:   counterpart of `16_narrative_scoring/umap_full_programs`.
+  umap_treg_signatures: counterpart of `07_embedding/umap_signatures_treg`.
+
+ONE SCALE ACROSS THE PAIR. Each counterpart panel is clipped to the limits of its
+full-object twin, never to its own percentiles. A Treg-only panel that rescaled
+itself would look brighter or flatter than the full-object panel for a reason that
+is a drawing decision rather than a score difference, which is the false
+comparison the counterpart exists to rule out. The limits are therefore derived
+from the full-object substrate on the same sampled frame the full-object figures
+draw, and the arm pair's shared limits are asserted against the value the
+`16_narrative_scoring` README already records so the two cannot drift apart
+silently.
+
 WHICH COORDINATES. `x`/`y` in this substrate are the HARMONY-CORRECTED Treg-only
 coordinates and `x_uncorrected`/`y_uncorrected` are the raw pair, which is the
 opposite of the convention in `16_narrative_embedding.parquet`. The corrected
@@ -98,6 +116,51 @@ PANELS = [
 ]
 PANEL_SETS = ["WT_heat_up", "HALLMARK_HYPOXIA"]
 
+# --- the full-object twins each counterpart is scaled against ----------------
+# The frame is stage 16's, cell for cell: same substrate, same size, same seed, so the
+# limits derived here are the limits its colourbars carry rather than an approximation of
+# them.
+FULL_SUBSTRATE = "16_narrative_embedding.parquet"
+FULL_SUBSTRATE_REL = f"03_results/interactive/{FULL_SUBSTRATE}"
+FULL_SAMPLE_N = 60_000
+FULL_SAMPLE_SEED = 0
+# The shared arm scale `03_results/16_narrative_scoring/README.md` records for
+# umap_full_arms, to 4 decimals. Reproducing it is the check that this script is reading
+# the same frame; a drift here means the pair has stopped sharing a scale.
+FULL_ARM_SCALE_COMMITTED = (0.0023, 0.0336)
+
+ARM_PANELS = [
+    ("WT_heat_up_AUCell", "WT_heat_up (199 genes)"),
+    ("KO_heat_up_AUCell", "KO_heat_up (218 genes)"),
+    ("Interaction_up_AUCell", "Interaction_up (7 genes)"),
+]
+ARM_SHARED_SCALE = ["WT_heat_up_AUCell", "KO_heat_up_AUCell"]
+ARM_SETS = ["WT_heat_up", "KO_heat_up", "Interaction_up"]
+
+PROGRAM_PANELS = [
+    ("HALLMARK_HYPOXIA_AUCell", "HALLMARK_HYPOXIA (200 genes)"),
+    ("sting_specific_published_AUCell", "sting_specific_published (21 genes)"),
+    ("ifn_generic_axis_AUCell", "ifn_generic_axis (200 genes)"),
+]
+PROGRAM_SETS = ["HALLMARK_HYPOXIA", "sting_specific_published", "ifn_generic_axis"]
+
+# The three continuous channels of 07_embedding/umap_signatures_treg. These are scanpy
+# `score_genes` module scores, mean-centred and on a different scale from AUCell, and they
+# live in the 07_embedding substrate rather than in this stage's. The fourth panel of the
+# full-object figure is a Treg/Tcon/CD8 reference, which is one category here, so the
+# counterpart carries the three scores and the tissue reference stays where it already is,
+# on umap_treg_reembedding.
+HOOK_SUBSTRATE_REL = "03_results/07_embedding/tables/hook_factor_substrate.parquet"
+SIGNATURE_PANELS = [
+    ("WT_heat_up", "WT_heat_up (mouse anchor annotation)"),
+    ("score_eTreg", "score_eTreg (effector-Treg)"),
+    ("score_HSP", "score_HSP (heat-shock / stress)"),
+]
+SIGNATURE_CHANNELS = [c for c, _ in SIGNATURE_PANELS]
+
+COUNTERPART_LINE = ("Colour limits are the full-object figure's, not this panel's, so the "
+                    "pair is comparable panel for panel.")
+
 
 # =============================================================================
 # Shared panel primitives, same behaviour as the embedding-atlas primitives in
@@ -146,27 +209,32 @@ def _frame_panel(ax, xlim, ylim, title: str):
     ax.set_title(title, fontsize=_fs("base_size"), pad=10)
 
 
-def _colorbar(fig, ax, sc):
+def _colorbar(fig, ax, sc, unit: str = "AUCell"):
     """A colourbar in the slack beside its panel, labelled by the unit it carries."""
     band = ROW_TOP - ROW_BOTTOM
     pos = ax.get_position()
     cax = fig.add_axes([pos.x1 + CB_PAD_IN / FIG_W, ROW_BOTTOM + 0.08 * band,
                         CB_W_IN / FIG_W, 0.84 * band])
     cb = fig.colorbar(sc, cax=cax)
-    cb.set_label("AUCell", fontsize=_fs("axis_title_size"))
+    cb.set_label(unit, fontsize=_fs("axis_title_size"))
     cb.ax.tick_params(labelsize=_fs("axis_text_size"))
     cb.outline.set_visible(False)
 
 
-def scatter_cont(ax, d: pd.DataFrame, col: str, title: str, xlim, ylim):
-    """Continuous AUCell panel: robust clip, high values drawn last, colourbar reads AUCell."""
+def scatter_cont(ax, d: pd.DataFrame, col: str, title: str, xlim, ylim,
+                 vlim=None, unit: str = "AUCell"):
+    """Continuous score panel: robust clip, high values drawn last, colourbar reads its unit.
+
+    `vlim` replaces this panel's own percentiles with limits supplied from elsewhere, which
+    is what makes a Treg-only panel readable against its full-object twin.
+    """
     _frame_panel(ax, xlim, ylim, title)
     v = d[col].to_numpy(dtype=float)
-    lo, hi = np.nanpercentile(v, list(CLIP))
+    lo, hi = vlim if vlim is not None else np.nanpercentile(v, list(CLIP))
     order = np.argsort(v)
     sc = ax.scatter(d["x"].to_numpy()[order], d["y"].to_numpy()[order], c=v[order],
                     s=PT, cmap=CMAP, vmin=lo, vmax=hi, linewidths=0, rasterized=True)
-    _colorbar(ax.figure, ax, sc)
+    _colorbar(ax.figure, ax, sc, unit=unit)
 
 
 def scatter_cat(ax, d: pd.DataFrame, col: str, palette: dict, title: str,
@@ -228,6 +296,122 @@ def _expected(mix: pd.DataFrame, embedding: str, key: str) -> float:
     hit = mix[(mix["embedding"] == embedding) & (mix["grouping_key"] == key)
               & (mix["group"] == "_all_")]
     return float(hit["expected_same_frac"].iloc[0])
+
+
+# =============================================================================
+# The full-object twin's colour limits, and the columns a counterpart needs
+# =============================================================================
+def full_object_frame() -> pd.DataFrame:
+    """The frame the full-object figures draw, reproduced cell for cell.
+
+    Same substrate, size and seed as `16_narrative_embedding_viz.py`, because a clip taken
+    from a different frame is a different clip and the pair would stop sharing a scale.
+    """
+    full = pd.read_parquet(PATHS.interactive / FULL_SUBSTRATE)
+    d = full.sample(n=FULL_SAMPLE_N, random_state=FULL_SAMPLE_SEED)
+    return d.sample(frac=1.0, random_state=FULL_SAMPLE_SEED).reset_index(drop=True)
+
+
+def clip_of(frame: pd.DataFrame, cols: list) -> "tuple[float, float]":
+    """One 2nd-to-98th percentile clip over the pooled values of one or more columns."""
+    pooled = np.concatenate([frame[c].to_numpy(dtype=float) for c in cols])
+    lo, hi = np.nanpercentile(pooled, list(CLIP))
+    return float(lo), float(hi)
+
+
+def arm_clips(frame: pd.DataFrame) -> dict:
+    """Per-column limits for the arm row, with WT and KO pooled onto one scale.
+
+    The pooled pair is checked against the number the full-object stage's README already
+    records. That assertion is the whole guarantee the pair shares a scale: without it a
+    changed substrate or a changed sample size would quietly produce a second scale and the
+    two figures would still look like a matched set.
+    """
+    shared = clip_of(frame, ARM_SHARED_SCALE)
+    want = FULL_ARM_SCALE_COMMITTED
+    if (round(shared[0], 4), round(shared[1], 4)) != want:
+        raise AssertionError(
+            f"the WT_heat_up + KO_heat_up shared scale reproduces as "
+            f"{shared[0]:.4f}-{shared[1]:.4f}, but 03_results/16_narrative_scoring/README.md "
+            f"records {want[0]:.4f}-{want[1]:.4f} for umap_full_arms. The counterpart would "
+            "no longer share a colour scale with its full-object twin; reconcile the frame "
+            "before drawing.")
+    return {col: (shared if col in ARM_SHARED_SCALE else clip_of(frame, [col]))
+            for col, _ in ARM_PANELS}
+
+
+def join_hook_scores(treg: pd.DataFrame) -> pd.DataFrame:
+    """Add the 07_embedding module-score columns to the Treg frame, matched on barcode.
+
+    A join, never a recomputation: the counterpart has to colour by the SAME values the
+    full-object figure colours by, so the score has to come from the same file. An
+    incomplete join is a hard stop, because a silently reindexed column would put one
+    cell's score at another cell's coordinates.
+    """
+    hook = pd.read_parquet(COMPARTMENT_ROOT / HOOK_SUBSTRATE_REL)
+    scores = hook[SIGNATURE_CHANNELS].copy()
+    scores.index = hook.index.astype(str)
+    out = treg.join(scores, on="barcode")
+    missing = int(out[SIGNATURE_CHANNELS].isna().any(axis=1).sum())
+    if missing:
+        raise AssertionError(
+            f"{missing} of {len(out)} Treg cells carry no {HOOK_SUBSTRATE_REL} score; the "
+            "two substrates disagree on barcodes, so the counterpart cannot be drawn.")
+    print(f"[17_treg_reembedding_viz] joined {len(SIGNATURE_CHANNELS)} module-score columns "
+          f"onto all {len(out):,} Treg cells from {HOOK_SUBSTRATE_REL}")
+    return out
+
+
+def figure_counterpart(drawn: pd.DataFrame, xlim, ylim, panels: list, clips: dict,
+                       suptitle: str, subtitle: str, unit: str = "AUCell",
+                       footer: list | None = None) -> plt.Figure:
+    """One three-panel row on the Treg-only frame, each panel on its twin's colour limits."""
+    fig = plt.figure(figsize=(FIG_W, FIG_H))
+    axes = row_axes(fig, len(panels))
+    for ax, (col, title) in zip(axes, panels):
+        scatter_cont(ax, drawn, col, title, xlim, ylim, vlim=clips[col], unit=unit)
+    _dress(fig, suptitle, subtitle,
+           footer or [COORD_LINE, COUNTERPART_LINE, TIER_LINE])
+    return fig
+
+
+def signature_table(drawn: pd.DataFrame) -> pd.DataFrame:
+    """Per (channel x tissue) descriptive summary of the three module scores in the Treg gate.
+
+    Mirrors the shape of `narrative_score_summary.csv` so the two counterparts' source
+    tables read the same way, and carries `metric` because these are scanpy module scores
+    rather than AUCell and the two do not share a scale.
+    """
+    rows = []
+    for channel in SIGNATURE_CHANNELS:
+        for tissue, grp in drawn.groupby("tissue", observed=True):
+            v = grp[channel].to_numpy(dtype=float)
+            rows.append({
+                "set_name": channel,
+                "coarse_label": "Treg",
+                "tissue": tissue,
+                "n_cells": len(grp),
+                "n_donors": int(grp["donor"].nunique()),
+                "mean": float(np.nanmean(v)),
+                "median": float(np.nanmedian(v)),
+                "sd": float(np.nanstd(v, ddof=1)),
+                "metric": "scanpy_score_genes_module_score",
+                "evidence_tier": "secondary_percell",
+            })
+    out = pd.DataFrame(rows)
+    out["set_name"] = pd.Categorical(out["set_name"], categories=SIGNATURE_CHANNELS,
+                                     ordered=True)
+    return out.sort_values(["set_name", "tissue"]).reset_index(drop=True)
+
+
+def _tissue_shift(tbl: pd.DataFrame, name: str) -> str:
+    """`name blood-mean to synovial-mean`, read off a summary table."""
+    def m(tissue: str) -> float:
+        hit = tbl[(tbl["set_name"] == name) & (tbl["tissue"] == tissue)]
+        if hit.empty:
+            raise ValueError(f"no summary row for {name} / {tissue}")
+        return float(hit["mean"].iloc[0])
+    return f"{name} {m('peripheral_blood'):.4f} to {m('synovial_fluid'):.4f}"
 
 
 # =============================================================================
@@ -327,7 +511,234 @@ def main() -> None:
                      "`evidence_tier` reads `secondary_percell` throughout."),
         config=FIG_CFG)
 
-    print("[17_treg_reembedding_viz] wrote 1 overview (umap_treg_reembedding) + 1 table caption")
+    # --- Treg-only counterparts of the full-object program rows --------------
+    full = full_object_frame()
+    a_clips = arm_clips(full)
+    p_clips = {col: clip_of(full, [col]) for col, _ in PROGRAM_PANELS}
+    print(f"[17_treg_reembedding_viz] full-object frame {len(full):,} cells; arm shared scale "
+          f"{a_clips['WT_heat_up_AUCell'][0]:.4f} to {a_clips['WT_heat_up_AUCell'][1]:.4f} "
+          "reproduces the value 16_narrative_scoring/README.md records")
+
+    cfg_common = (f"coordinates = x / y (Harmony over donor), all {len(drawn):,} cells drawn, "
+                  f"point_size = {PT}, cmap = {CMAP}, figures.dpi = 300, "
+                  "figures.rasterized_dpi = 600, colour limits from "
+                  f"{FULL_SUBSTRATE_REL} at sample_n = {FULL_SAMPLE_N}, "
+                  f"sample_seed = {FULL_SAMPLE_SEED}, clip_percentiles = {list(CLIP)}")
+    pair_line = (
+        "Every colour limit is the full-object figure's, from the same frame and seed, so "
+        "the pair compares brightness for brightness rather than each panel rescaling to "
+        "itself. A washed-out counterpart panel is therefore a real statement about the "
+        "Treg gate's range, not a rendering fault. The pair shares its cells and its "
+        "colour scale and NOT its coordinates: these are a re-embedding of the Treg cells "
+        "alone, so a point does not sit where it sits on the full-object map. Cells are "
+        "pooled across donors, making a tissue difference read off the colouring "
+        "pseudoreplicated, and Harmony reshapes the space it corrects, so this is a map. "
+        "Claims in this compartment rest on donor-level pseudobulk differential expression "
+        "within the frozen cell states.")
+
+    # --- counterpart 1: the mouse-derived up arms ----------------------------
+    fig = figure_counterpart(
+        drawn, xlim, ylim, ARM_PANELS, a_clips,
+        "Mouse 39 °C-derived up arms on the Treg-only map",
+        f"{len(drawn):,} sorted Treg cells, one frame shared by all three panels. "
+        f"WT_heat_up and KO_heat_up share the full-object scale "
+        f"({a_clips['WT_heat_up_AUCell'][0]:.3f} to {a_clips['WT_heat_up_AUCell'][1]:.3f}).")
+    arm_tbl = score_table(summary, ARM_SETS)
+    save_overview(
+        fig, STAGE, "umap_treg_arms",
+        table=arm_tbl,
+        finding=("Read on the Treg gate's own map and on the full object's colour scale, all "
+                 "three mouse 39 °C-derived up arms still colour the synovial-fluid territory "
+                 "brighter than the paired-blood territory, so the tissue contrast the "
+                 "full-object row shows is not an artifact of viewing Treg alongside Tcon and "
+                 "CD8 (per-cell AUCell means "
+                 f"{_mean_of(summary, 'WT_heat_up', 'peripheral_blood'):.4f} to "
+                 f"{_mean_of(summary, 'WT_heat_up', 'synovial_fluid'):.4f} for WT_heat_up, "
+                 f"{_mean_of(summary, 'KO_heat_up', 'peripheral_blood'):.4f} to "
+                 f"{_mean_of(summary, 'KO_heat_up', 'synovial_fluid'):.4f} for KO_heat_up and "
+                 f"{_mean_of(summary, 'Interaction_up', 'peripheral_blood'):.4f} to "
+                 f"{_mean_of(summary, 'Interaction_up', 'synovial_fluid'):.4f} for the 7-gene "
+                 "Interaction_up)."),
+        script=SCRIPT, fn="figure_counterpart",
+        config_kv=(f"{cfg_common}, columns = " + ", ".join(c for c, _ in ARM_PANELS)
+                   + f", shared_scale = WT_heat_up + KO_heat_up at "
+                     f"{a_clips['WT_heat_up_AUCell'][0]:.4f}-"
+                     f"{a_clips['WT_heat_up_AUCell'][1]:.4f}"),
+        input=f"{SUBSTRATE_REL}, {FULL_SUBSTRATE_REL}, {SUMMARY_REL}",
+        how_to_read=(
+            "The Treg-only counterpart of `16_narrative_scoring/figures/_overview/"
+            "umap_full_arms.png`: same three sets, same order, same panel geometry, same "
+            "sequential colormap, drawn on the 27,175 sorted Treg cells alone. Panel titles "
+            "carry the set identifier and its size. WT_heat_up is the up arm of the mouse WT "
+            "iTreg 39 versus 37 °C contrast in human projection, 199 symbols; KO_heat_up the "
+            "same contrast in cGAS-knockout iTregs, 218 symbols; Interaction_up the mouse "
+            "genotype-by-temperature up arm, 7 symbols, small enough that one gene moves the "
+            "score, so read it for location and treat its spread as noise. WT_heat_up and "
+            "KO_heat_up share 182 genes and share one colour scale so the two panels can be "
+            "compared directly; Interaction_up spans a range an order of magnitude wider and "
+            "keeps its own bar. AUCell is bounded in [0, 1] and scales with set size, so the "
+            "source table carries mean, median, standard deviation and cell and donor counts "
+            f"for any comparison the colour cannot make. {pair_line}"),
+        width=FIG_W, height=FIG_H, config=FIG_CFG)
+    plt.close(fig)
+
+    # --- counterpart 2: the curated program lenses ---------------------------
+    fig = figure_counterpart(
+        drawn, xlim, ylim, PROGRAM_PANELS, p_clips,
+        "Curated program lenses on the Treg-only map",
+        f"{len(drawn):,} sorted Treg cells, one frame shared by all three panels. Each "
+        "panel carries its full-object twin's colour limits.")
+    prog_tbl = score_table(summary, PROGRAM_SETS)
+    save_overview(
+        fig, STAGE, "umap_treg_programs",
+        table=prog_tbl,
+        finding=("All three curated lenses colour synovial-fluid territory brighter than paired "
+                 "blood on the Treg gate's own map, so none of that structure needs the other "
+                 "two sort gates to appear (per-cell AUCell means "
+                 f"{_mean_of(summary, 'HALLMARK_HYPOXIA', 'peripheral_blood'):.4f} to "
+                 f"{_mean_of(summary, 'HALLMARK_HYPOXIA', 'synovial_fluid'):.4f} for hypoxia, "
+                 f"{_mean_of(summary, 'ifn_generic_axis', 'peripheral_blood'):.4f} to "
+                 f"{_mean_of(summary, 'ifn_generic_axis', 'synovial_fluid'):.4f} for the "
+                 "generic interferon axis and "
+                 f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood'):.4f} to "
+                 f"{_mean_of(summary, 'sting_specific_published', 'synovial_fluid'):.4f} for "
+                 "the 21 published IFN-independent STING genes); what the shared scale adds is "
+                 "the LEVEL, and the published STING panel sits in the lower part of its bar "
+                 "across the whole Treg map because Treg blood carries roughly a third of what "
+                 "the other gates do "
+                 f"({_mean_of(summary, 'sting_specific_published', 'peripheral_blood'):.4f} "
+                 "against "
+                 f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood', 'Tcon'):.4f} "
+                 "in Tcon and "
+                 f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood', 'CD8'):.4f} "
+                 "in CD8), which a self-scaled panel would have hidden."),
+        script=SCRIPT, fn="figure_counterpart",
+        config_kv=(f"{cfg_common}, columns = "
+                   + ", ".join(c for c, _ in PROGRAM_PANELS)
+                   + "; per-panel full-object limits, no pooling across sets"),
+        input=f"{SUBSTRATE_REL}, {FULL_SUBSTRATE_REL}, {SUMMARY_REL}",
+        how_to_read=(
+            "The Treg-only counterpart of `16_narrative_scoring/figures/_overview/"
+            "umap_full_programs.png`: same three sets, same order, same panel geometry, same "
+            "colormap, on the 27,175 sorted Treg cells alone. Every set here is curated, "
+            "versioned and derived without reference to the mouse anchor — HALLMARK_HYPOXIA "
+            "from MSigDB Hallmark, sting_specific_published the 21 published "
+            "IFN-independent STING-activation genes, ifn_generic_axis a 200-gene generic "
+            "type-I interferon axis — so a colouring here is not a restatement of the "
+            "anchor. The three sets are unrelated to each other and their ranges differ, so "
+            "each panel keeps its OWN set's limits; what is shared is the OBJECT the limits "
+            "come from, which makes each panel comparable to its own twin and not to its "
+            "neighbours. Brightness therefore compares tissue within a panel, and the source "
+            "table carries the cross-panel numbers. The published STING set is 21 genes and "
+            "its own IFN-β validation in the positive-control compartment is underpowered at "
+            "three donors, so a dim or bright panel there is consistent with STING pathway "
+            "activity and never proof of it. Hypoxia and temperature are both imposed by the "
+            "inflamed joint and stay entangled in cross-sectional human data, so the hypoxia "
+            f"panel is one lens on that niche and not a HIF claim. {pair_line}"),
+        width=FIG_W, height=FIG_H, config=FIG_CFG)
+    plt.close(fig)
+
+    # --- counterpart 3: the 07_embedding candidate signatures ----------------
+    with_hooks = join_hook_scores(drawn)
+    s_clips = {c: clip_of(pd.read_parquet(COMPARTMENT_ROOT / HOOK_SUBSTRATE_REL), [c])
+               for c in SIGNATURE_CHANNELS}
+    fig = figure_counterpart(
+        with_hooks, xlim, ylim, SIGNATURE_PANELS, s_clips,
+        "Candidate harvest signatures on the Treg-only map",
+        f"{len(with_hooks):,} sorted Treg cells, one frame shared by all three panels. "
+        "Colour is the scanpy module score, on the full-object figure's limits.",
+        unit="module score")
+    sig_tbl = signature_table(with_hooks)
+    save_overview(
+        fig, STAGE, "umap_treg_signatures",
+        table=sig_tbl,
+        finding=("The three candidate harvest signatures drawn on the Treg gate's own map and "
+                 "on the full-object figure's limits: within the Treg gate the effector-Treg "
+                 "and heat-shock scores still separate synovial fluid from paired blood "
+                 f"({_tissue_shift(sig_tbl, 'score_eTreg')}, "
+                 f"{_tissue_shift(sig_tbl, 'score_HSP')}) alongside the mouse anchor "
+                 f"annotation ({_tissue_shift(sig_tbl, 'WT_heat_up')}), so the structure the "
+                 "full-object figure shows for these three channels is not produced by "
+                 "viewing the Treg gate against Tcon and CD8."),
+        script=SCRIPT, fn="figure_counterpart",
+        config_kv=(f"{cfg_common}, columns = " + ", ".join(SIGNATURE_CHANNELS)
+                   + f"; joined on barcode from {HOOK_SUBSTRATE_REL}; limits from all "
+                     "99,915 cells of that substrate, which is the frame "
+                     "07_embedding_viz.py draws; metric = scanpy score_genes module score"),
+        input=f"{SUBSTRATE_REL}, {HOOK_SUBSTRATE_REL}",
+        how_to_read=(
+            "The Treg-only counterpart of `07_embedding/figures/_overview/"
+            "umap_signatures_treg.png`, which draws these same three channels across all "
+            "three sort gates. Two differences from the other counterparts on this page are "
+            "worth having before reading it. First, the unit: these are scanpy "
+            "`score_genes` MODULE SCORES, mean-centred against a sampled background and "
+            "signed, not AUCell, so they do not share a scale with the AUCell panels here or "
+            "with each other and a value near zero means 'at background', not 'absent'. The "
+            "AUCell reading of the same mouse arm is the WT_heat_up panel of "
+            "`umap_treg_arms`. Second, the full-object twin carries a FOURTH panel, a "
+            "Treg/Tcon/CD8 sort-gate reference, which is a single category on a Treg-only "
+            "object and is therefore omitted rather than drawn as one flat colour; the "
+            "tissue reference for this map is the left panel of `umap_treg_reembedding`. "
+            "WT_heat_up here is the mouse WT 39-versus-37 °C up arm carried as ANNOTATION "
+            "ONLY — it is never a selection predicate, and the harvest design it was "
+            "previewed for is frozen as implemented. score_eTreg is the effector-Treg score "
+            "and score_HSP the heat-shock/stress score, both curated in this compartment "
+            "independently of the anchor. Colour limits come from all 99,915 cells of the "
+            "07_embedding substrate, which is the frame that figure draws, so the pair is "
+            f"comparable panel for panel. {pair_line}"),
+        width=FIG_W, height=FIG_H, config=FIG_CFG)
+    plt.close(fig)
+
+    for stem, sets in (("umap_treg_arms", ARM_SETS), ("umap_treg_programs", PROGRAM_SETS)):
+        write_caption(
+            STAGE, f"tables/_overview/{stem}.csv",
+            finding=(f"Per-cell AUCell summaries of the {len(sets)} sets drawn in "
+                     f"`figures/_overview/{stem}.png` ({', '.join(sets)}), restricted to the "
+                     "Treg gate, one row per tissue, so the colouring can be read as numbers "
+                     "rather than inferred from brightness."),
+            script=SCRIPT, fn="score_table",
+            config_kv=f"rows = {len(sets)} sets x Treg x 2 tissues, metric = AUCell",
+            input=SUMMARY_REL,
+            how_to_read=("A restriction of the narrative scoring summary table to the Treg "
+                         "gate and the sets this figure draws. One row per (`set_name` x "
+                         "`tissue`) with the mean, median and standard deviation of the "
+                         "per-cell AUCell score and the cell and donor counts behind it. "
+                         "These are the values the FULL-OBJECT figure's Treg rows carry too, "
+                         "because the scores are joined on barcode and not recomputed for "
+                         "the re-embedding, so a difference between the paired figures is a "
+                         "difference of layout and nothing else. AUCell is bounded in [0, 1] "
+                         "and its scale depends on set size, so values compare across tissue "
+                         "within a `set_name`. Cells are pooled across donors, so the unit "
+                         "of replication is the cell and every tissue difference here is "
+                         "pseudoreplicated. `evidence_tier` reads `secondary_percell`."),
+            config=FIG_CFG)
+
+    write_caption(
+        STAGE, "tables/_overview/umap_treg_signatures.csv",
+        finding=("Per (channel x tissue) summaries of the three candidate harvest signatures "
+                 "within the Treg gate, giving the numbers behind the counterpart figure's "
+                 "colouring: all three channels sit higher in synovial fluid than in paired "
+                 "blood."),
+        script=SCRIPT, fn="signature_table",
+        config_kv=(f"rows = {len(SIGNATURE_CHANNELS)} channels x Treg x 2 tissues, "
+                   "metric = scanpy score_genes module score"),
+        input=HOOK_SUBSTRATE_REL,
+        how_to_read=("One row per (`set_name` x `tissue`) over the 27,175 Treg cells, with "
+                     "the mean, median and standard deviation of the module score and the "
+                     "cell and donor counts behind it. `metric` reads "
+                     "`scanpy_score_genes_module_score`, not AUCell: these values are "
+                     "mean-centred against a sampled background and signed, so zero means "
+                     "'at background' and a negative mean is not an absence. They therefore "
+                     "do not compare with the AUCell tables beside them, nor across "
+                     "channels, only across tissue within a `set_name`. `WT_heat_up` is the "
+                     "mouse anchor arm carried as annotation only and never as a selection "
+                     "predicate. Cells are pooled across donors, so the unit of replication "
+                     "is the cell and every tissue difference here is pseudoreplicated and "
+                     "descriptive. Annotation tier; no test, no effect size."),
+        config=FIG_CFG)
+
+    print("[17_treg_reembedding_viz] wrote 4 overviews (umap_treg_reembedding, "
+          "umap_treg_arms, umap_treg_programs, umap_treg_signatures) + 4 table captions")
 
 
 if __name__ == "__main__":

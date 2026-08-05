@@ -1,0 +1,7 @@
+set_name,coarse_label,tissue,n_cells,n_donors,mean,median,sd,metric,evidence_tier
+WT_heat_up,Treg,peripheral_blood,13603.0,7.0,0.0112171403,0.0108445027,0.00544791279,AUCell,secondary_percell
+WT_heat_up,Treg,synovial_fluid,13572.0,6.0,0.0190402515,0.0186673797,0.00719392168,AUCell,secondary_percell
+KO_heat_up,Treg,peripheral_blood,13603.0,7.0,0.0111038163,0.0107100188,0.00534825387,AUCell,secondary_percell
+KO_heat_up,Treg,synovial_fluid,13572.0,6.0,0.019229176,0.0186385262,0.00746846972,AUCell,secondary_percell
+Interaction_up,Treg,peripheral_blood,13603.0,7.0,0.0716562626,0.0524996702,0.0831208549,AUCell,secondary_percell
+Interaction_up,Treg,synovial_fluid,13572.0,6.0,0.12453881,0.0987996307,0.114826393,AUCell,secondary_percell

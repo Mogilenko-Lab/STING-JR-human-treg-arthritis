@@ -1,0 +1,7 @@
+set_name,coarse_label,tissue,n_cells,n_donors,mean,median,sd,metric,evidence_tier
+WT_heat_up,Treg,peripheral_blood,13603.0,7.0,-0.0699079436,-0.0703488966,0.0203333587,scanpy_score_genes_module_score,secondary_percell
+WT_heat_up,Treg,synovial_fluid,13572.0,6.0,-0.0475220616,-0.0490099263,0.0251841801,scanpy_score_genes_module_score,secondary_percell
+score_eTreg,Treg,peripheral_blood,13603.0,7.0,-0.053879418,-0.0559185973,0.0330841649,scanpy_score_genes_module_score,secondary_percell
+score_eTreg,Treg,synovial_fluid,13572.0,6.0,0.102069926,0.0970510612,0.0748246051,scanpy_score_genes_module_score,secondary_percell
+score_HSP,Treg,peripheral_blood,13603.0,7.0,0.0269801722,0.0201832775,0.153436904,scanpy_score_genes_module_score,secondary_percell
+score_HSP,Treg,synovial_fluid,13572.0,6.0,0.0805623569,0.069402315,0.188282291,scanpy_score_genes_module_score,secondary_percell

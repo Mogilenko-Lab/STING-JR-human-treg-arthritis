@@ -36,10 +36,27 @@ are nested at the sample level. The corrected coordinates are usable for reading
 substructure. A small tight cluster still deserves a donor-composition check, and Harmony
 reshapes the space it corrects, so this map remains a map.
 
+**Counterparts, and why they share a colour scale.** Three of the figures here are Treg-only
+counterparts of program rows drawn on the full object: `umap_treg_arms` against
+`16_narrative_scoring/umap_full_arms`, `umap_treg_programs` against
+`16_narrative_scoring/umap_full_programs`, and `umap_treg_signatures` against
+`07_embedding/umap_signatures_treg`. Each exists to answer one question — whether a program's
+apparent structure needs the Tcon and CD8 gates to appear — and the answer is only readable if
+the two halves of the pair are on one colour scale. So every counterpart panel is clipped to its
+full-object twin's limits rather than its own, and the arm pair's shared limits are asserted at
+run time against the value the `16_narrative_scoring` README records, because a pair that has
+silently stopped sharing a scale still looks like a matched set. The consequence to hold onto is
+that a washed-out counterpart panel is a statement about the Treg gate's range and not a
+rendering fault; the published IFN-independent STING panel is the clear case.
+
+What the pair does **not** share is coordinates. These are a re-embedding of the Treg cells
+alone, so a cell does not sit where it sits on the full-object map. The pair shares its cells and
+its colour scale; the layout is the thing that differs, which is the point.
+
 **Tier.** Annotation / visualisation only. An embedding places cells; it tests nothing. Nothing
 here is pooled with the donor-level pseudobulk spine and this stage writes no effect-size row.
 Confirmatory claims are carried by donor-level pseudobulk differential expression within the
-frozen labels.
+frozen labels. Proximity on any of these maps is not a result.
 
 ## tables/treg_reembedding_mixing.csv
 
@@ -187,3 +204,216 @@ throughout.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/17_treg_reembedding_viz.py` | `score_table` | `rows = 2 sets x Treg x 2 tissues, metric = AUCell` | `03_results/16_narrative_scoring/tables/narrative_score_summary.csv` |
+
+## figures/_overview/umap_treg_arms.png
+
+Read on the Treg gate's own map and on the full object's colour scale,
+all three mouse 39 °C-derived up arms still colour the synovial-fluid
+territory brighter than the paired-blood territory, so the tissue
+contrast the full-object row shows is not an artifact of viewing Treg
+alongside Tcon and CD8 (per-cell AUCell means 0.0112 to 0.0190 for
+WT_heat_up, 0.0111 to 0.0192 for KO_heat_up and 0.0717 to 0.1245 for
+the 7-gene Interaction_up).
+
+**How to read:** The Treg-only counterpart of
+`16_narrative_scoring/figures/_overview/umap_full_arms.png`: same
+three sets, same order, same panel geometry, same sequential colormap,
+drawn on the 27,175 sorted Treg cells alone. Panel titles carry the
+set identifier and its size. WT_heat_up is the up arm of the mouse WT
+iTreg 39 versus 37 °C contrast in human projection, 199 symbols;
+KO_heat_up the same contrast in cGAS-knockout iTregs, 218 symbols;
+Interaction_up the mouse genotype-by-temperature up arm, 7 symbols,
+small enough that one gene moves the score, so read it for location
+and treat its spread as noise. WT_heat_up and KO_heat_up share 182
+genes and share one colour scale so the two panels can be compared
+directly; Interaction_up spans a range an order of magnitude wider and
+keeps its own bar. AUCell is bounded in [0, 1] and scales with set
+size, so the source table carries mean, median, standard deviation and
+cell and donor counts for any comparison the colour cannot make. Every
+colour limit is the full-object figure's, from the same frame and
+seed, so the pair compares brightness for brightness rather than each
+panel rescaling to itself. A washed-out counterpart panel is therefore
+a real statement about the Treg gate's range, not a rendering fault.
+The pair shares its cells and its colour scale and NOT its
+coordinates: these are a re-embedding of the Treg cells alone, so a
+point does not sit where it sits on the full-object map. Cells are
+pooled across donors, making a tissue difference read off the
+colouring pseudoreplicated, and Harmony reshapes the space it
+corrects, so this is a map. Claims in this compartment rest on donor-
+level pseudobulk differential expression within the frozen cell
+states.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `figure_counterpart` | `coordinates = x / y (Harmony over donor), all 27,175 cells drawn, point_size = 2.4, cmap = viridis, figures.dpi = 300, figures.rasterized_dpi = 600, colour limits from 03_results/interactive/16_narrative_embedding.parquet at sample_n = 60000, sample_seed = 0, clip_percentiles = [2, 98], columns = WT_heat_up_AUCell, KO_heat_up_AUCell, Interaction_up_AUCell, shared_scale = WT_heat_up + KO_heat_up at 0.0023-0.0336` | `03_results/interactive/17_treg_reembedding.parquet, 03_results/interactive/16_narrative_embedding.parquet, 03_results/16_narrative_scoring/tables/narrative_score_summary.csv` |
+
+## figures/_overview/umap_treg_programs.png
+
+All three curated lenses colour synovial-fluid territory brighter than
+paired blood on the Treg gate's own map, so none of that structure
+needs the other two sort gates to appear (per-cell AUCell means 0.0736
+to 0.0974 for hypoxia, 0.0176 to 0.0298 for the generic interferon
+axis and 0.0186 to 0.0366 for the 21 published IFN-independent STING
+genes); what the shared scale adds is the LEVEL, and the published
+STING panel sits in the lower part of its bar across the whole Treg
+map because Treg blood carries roughly a third of what the other gates
+do (0.0186 against 0.0532 in Tcon and 0.0647 in CD8), which a self-
+scaled panel would have hidden.
+
+**How to read:** The Treg-only counterpart of
+`16_narrative_scoring/figures/_overview/umap_full_programs.png`: same
+three sets, same order, same panel geometry, same colormap, on the
+27,175 sorted Treg cells alone. Every set here is curated, versioned
+and derived without reference to the mouse anchor — HALLMARK_HYPOXIA
+from MSigDB Hallmark, sting_specific_published the 21 published IFN-
+independent STING-activation genes, ifn_generic_axis a 200-gene
+generic type-I interferon axis — so a colouring here is not a
+restatement of the anchor. The three sets are unrelated to each other
+and their ranges differ, so each panel keeps its OWN set's limits;
+what is shared is the OBJECT the limits come from, which makes each
+panel comparable to its own twin and not to its neighbours. Brightness
+therefore compares tissue within a panel, and the source table carries
+the cross-panel numbers. The published STING set is 21 genes and its
+own IFN-β validation in the positive-control compartment is
+underpowered at three donors, so a dim or bright panel there is
+consistent with STING pathway activity and never proof of it. Hypoxia
+and temperature are both imposed by the inflamed joint and stay
+entangled in cross-sectional human data, so the hypoxia panel is one
+lens on that niche and not a HIF claim. Every colour limit is the
+full-object figure's, from the same frame and seed, so the pair
+compares brightness for brightness rather than each panel rescaling to
+itself. A washed-out counterpart panel is therefore a real statement
+about the Treg gate's range, not a rendering fault. The pair shares
+its cells and its colour scale and NOT its coordinates: these are a
+re-embedding of the Treg cells alone, so a point does not sit where it
+sits on the full-object map. Cells are pooled across donors, making a
+tissue difference read off the colouring pseudoreplicated, and Harmony
+reshapes the space it corrects, so this is a map. Claims in this
+compartment rest on donor-level pseudobulk differential expression
+within the frozen cell states.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `figure_counterpart` | `coordinates = x / y (Harmony over donor), all 27,175 cells drawn, point_size = 2.4, cmap = viridis, figures.dpi = 300, figures.rasterized_dpi = 600, colour limits from 03_results/interactive/16_narrative_embedding.parquet at sample_n = 60000, sample_seed = 0, clip_percentiles = [2, 98], columns = HALLMARK_HYPOXIA_AUCell, sting_specific_published_AUCell, ifn_generic_axis_AUCell; per-panel full-object limits, no pooling across sets` | `03_results/interactive/17_treg_reembedding.parquet, 03_results/interactive/16_narrative_embedding.parquet, 03_results/16_narrative_scoring/tables/narrative_score_summary.csv` |
+
+## figures/_overview/umap_treg_signatures.png
+
+The three candidate harvest signatures drawn on the Treg gate's own
+map and on the full-object figure's limits: within the Treg gate the
+effector-Treg and heat-shock scores still separate synovial fluid from
+paired blood (score_eTreg -0.0539 to 0.1021, score_HSP 0.0270 to
+0.0806) alongside the mouse anchor annotation (WT_heat_up -0.0699 to
+-0.0475), so the structure the full-object figure shows for these
+three channels is not produced by viewing the Treg gate against Tcon
+and CD8.
+
+**How to read:** The Treg-only counterpart of
+`07_embedding/figures/_overview/umap_signatures_treg.png`, which draws
+these same three channels across all three sort gates. Two differences
+from the other counterparts on this page are worth having before
+reading it. First, the unit: these are scanpy `score_genes` MODULE
+SCORES, mean-centred against a sampled background and signed, not
+AUCell, so they do not share a scale with the AUCell panels here or
+with each other and a value near zero means 'at background', not
+'absent'. The AUCell reading of the same mouse arm is the WT_heat_up
+panel of `umap_treg_arms`. Second, the full-object twin carries a
+FOURTH panel, a Treg/Tcon/CD8 sort-gate reference, which is a single
+category on a Treg-only object and is therefore omitted rather than
+drawn as one flat colour; the tissue reference for this map is the
+left panel of `umap_treg_reembedding`. WT_heat_up here is the mouse WT
+39-versus-37 °C up arm carried as ANNOTATION ONLY — it is never a
+selection predicate, and the harvest design it was previewed for is
+frozen as implemented. score_eTreg is the effector-Treg score and
+score_HSP the heat-shock/stress score, both curated in this
+compartment independently of the anchor. Colour limits come from all
+99,915 cells of the 07_embedding substrate, which is the frame that
+figure draws, so the pair is comparable panel for panel. Every colour
+limit is the full-object figure's, from the same frame and seed, so
+the pair compares brightness for brightness rather than each panel
+rescaling to itself. A washed-out counterpart panel is therefore a
+real statement about the Treg gate's range, not a rendering fault. The
+pair shares its cells and its colour scale and NOT its coordinates:
+these are a re-embedding of the Treg cells alone, so a point does not
+sit where it sits on the full-object map. Cells are pooled across
+donors, making a tissue difference read off the colouring
+pseudoreplicated, and Harmony reshapes the space it corrects, so this
+is a map. Claims in this compartment rest on donor-level pseudobulk
+differential expression within the frozen cell states.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `figure_counterpart` | `coordinates = x / y (Harmony over donor), all 27,175 cells drawn, point_size = 2.4, cmap = viridis, figures.dpi = 300, figures.rasterized_dpi = 600, colour limits from 03_results/interactive/16_narrative_embedding.parquet at sample_n = 60000, sample_seed = 0, clip_percentiles = [2, 98], columns = WT_heat_up, score_eTreg, score_HSP; joined on barcode from 03_results/07_embedding/tables/hook_factor_substrate.parquet; limits from all 99,915 cells of that substrate, which is the frame 07_embedding_viz.py draws; metric = scanpy score_genes module score` | `03_results/interactive/17_treg_reembedding.parquet, 03_results/07_embedding/tables/hook_factor_substrate.parquet` |
+
+## tables/_overview/umap_treg_arms.csv
+
+Per-cell AUCell summaries of the 3 sets drawn in
+`figures/_overview/umap_treg_arms.png` (WT_heat_up, KO_heat_up,
+Interaction_up), restricted to the Treg gate, one row per tissue, so
+the colouring can be read as numbers rather than inferred from
+brightness.
+
+**How to read:** A restriction of the narrative scoring summary table to the Treg gate
+and the sets this figure draws. One row per (`set_name` x `tissue`)
+with the mean, median and standard deviation of the per-cell AUCell
+score and the cell and donor counts behind it. These are the values
+the FULL-OBJECT figure's Treg rows carry too, because the scores are
+joined on barcode and not recomputed for the re-embedding, so a
+difference between the paired figures is a difference of layout and
+nothing else. AUCell is bounded in [0, 1] and its scale depends on set
+size, so values compare across tissue within a `set_name`. Cells are
+pooled across donors, so the unit of replication is the cell and every
+tissue difference here is pseudoreplicated. `evidence_tier` reads
+`secondary_percell`.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `score_table` | `rows = 3 sets x Treg x 2 tissues, metric = AUCell` | `03_results/16_narrative_scoring/tables/narrative_score_summary.csv` |
+
+## tables/_overview/umap_treg_programs.csv
+
+Per-cell AUCell summaries of the 3 sets drawn in
+`figures/_overview/umap_treg_programs.png` (HALLMARK_HYPOXIA,
+sting_specific_published, ifn_generic_axis), restricted to the Treg
+gate, one row per tissue, so the colouring can be read as numbers
+rather than inferred from brightness.
+
+**How to read:** A restriction of the narrative scoring summary table to the Treg gate
+and the sets this figure draws. One row per (`set_name` x `tissue`)
+with the mean, median and standard deviation of the per-cell AUCell
+score and the cell and donor counts behind it. These are the values
+the FULL-OBJECT figure's Treg rows carry too, because the scores are
+joined on barcode and not recomputed for the re-embedding, so a
+difference between the paired figures is a difference of layout and
+nothing else. AUCell is bounded in [0, 1] and its scale depends on set
+size, so values compare across tissue within a `set_name`. Cells are
+pooled across donors, so the unit of replication is the cell and every
+tissue difference here is pseudoreplicated. `evidence_tier` reads
+`secondary_percell`.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `score_table` | `rows = 3 sets x Treg x 2 tissues, metric = AUCell` | `03_results/16_narrative_scoring/tables/narrative_score_summary.csv` |
+
+## tables/_overview/umap_treg_signatures.csv
+
+Per (channel x tissue) summaries of the three candidate harvest
+signatures within the Treg gate, giving the numbers behind the
+counterpart figure's colouring: all three channels sit higher in
+synovial fluid than in paired blood.
+
+**How to read:** One row per (`set_name` x `tissue`) over the 27,175 Treg cells, with
+the mean, median and standard deviation of the module score and the
+cell and donor counts behind it. `metric` reads
+`scanpy_score_genes_module_score`, not AUCell: these values are mean-
+centred against a sampled background and signed, so zero means 'at
+background' and a negative mean is not an absence. They therefore do
+not compare with the AUCell tables beside them, nor across channels,
+only across tissue within a `set_name`. `WT_heat_up` is the mouse
+anchor arm carried as annotation only and never as a selection
+predicate. Cells are pooled across donors, so the unit of replication
+is the cell and every tissue difference here is pseudoreplicated and
+descriptive. Annotation tier; no test, no effect size.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/17_treg_reembedding_viz.py` | `signature_table` | `rows = 3 channels x Treg x 2 tissues, metric = scanpy score_genes module score` | `03_results/07_embedding/tables/hook_factor_substrate.parquet` |
