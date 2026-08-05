@@ -4,11 +4,9 @@ _**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized
 
 This stage asks one bounded question of the JIA SF-vs-PB `WT_heat` enrichment: is it reducible to the set's own `HALLMARK_HYPOXIA`-overlap gene content? That is a membership question, and it is answered by deleting those genes and re-running the same donor-pseudobulk fgsea. It is deliberately not a question about temperature, and it is not a question about whether hypoxia is a confound or a co-exposure — those are not separable in cross-sectional human data, and nothing here licenses a statement about either. Hypoxia is a transcriptional readout throughout, never a HIF-causality claim.
 
-The figures walk that in order. The first answers the membership question at confirmatory tier and stops there. The second corroborates and cannot answer whether the two per-cell scores mark the same cells. The reader sequence then moves directly to the curated whole-arm coverage panel in `11_heat_decomposition`, which alone answers what the set contains: 137 of 199 up-arm genes belong to no named program, the curated HSR core contains 2, and type-I interferon contains 1.
+One figure carries that question: the paired full-versus-purged NES panel, which answers it at confirmatory tier and stops there. The reader sequence then moves directly to the curated whole-arm coverage panel in `11_heat_decomposition`, which alone answers what the set contains: 137 of 199 up-arm genes belong to no named program, the curated HSR core contains 2, and type-I interferon contains 1.
 
-I withdrew the former leading-edge composition figure for redundancy and denominator risk, not because it re-tested selected subsets. It only described the genes at the synovial-fluid end of each ranking. Its model-assigned taxonomy (`agy_gemini_3.1_pro_2026-07-14`) put 55% to 61% of those selected leading-edge genes in immediate-early or effector/activation categories, a memorable fraction that is not comparable to the curated whole-arm activation counts of 5.6% in mouse and 6.0% after human projection. I retain `leadingedge_composition.csv` as an exploratory compute resource and notebook input, but no visualization of it remains in the published overview.
-
-Two further figures put the mouse sets back into the plain Treg SF-vs-PB volcano, so a reader can see how much of the differential-expression response the signature accounts for, and how little it shares with the published IFN-independent STING-activation signature of de Cevins et al. 2023 (Cell Rep Med, PMID 38118407) that the STING positive-control compartment carries as a reference axis.
+Several tables here remain compute resources without a published panel of their own. `heat_hypoxia_colocalization.csv` carries the per-cell agreement between the heat and hypoxia scores and is read by the reactive review notebook and by the cross-dataset layer. `leadingedge_composition.csv` carries the model-assigned taxonomy (`agy_gemini_3.1_pro_2026-07-14`) of the genes at the synovial-fluid end of each ranking; it put 55% to 61% of those selected leading-edge genes in immediate-early or effector/activation categories, a memorable fraction that is not comparable to the curated whole-arm activation counts of 5.6% in mouse and 6.0% after human projection, which is why the whole-arm curated panel and not this table carries the composition reading.
 
 ## gene_purge_nes_comparison.csv
 
@@ -90,36 +88,6 @@ One row per population and mouse arm, pairing the full and hypoxia-purged NES si
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia_viz.py` | `purge_paired_table` | `thresholds.gsea_fdr=0.05` | `03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` |
 
-## tables/_overview/heat_hypoxia_colocalization.csv
-
-The plotted cell-level rows only: within-SF correlation of the per-cell heat and hypoxia scores, Spearman and Pearson, per population.
-
-**How to read:** `r` is the bar height and `n` the cell count printed under each population. The unpowered donor-level rows are deliberately absent and stay in the full stage table. Secondary per-cell tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `colocalization_table` | `level=cell; tissue=synovial_fluid` | `03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv` |
-
-## tables/_overview/heat_treg_volcano_signature.csv
-
-Every mouse `WT_heat` gene with a testable Treg SF-vs-PB result, 103 up-arm and 55 down-arm, carrying the fold change and FDR that place it on the volcano.
-
-**How to read:** `log2FoldChange` and `neg_log10_padj` are the plotted coordinates and `passes_de_gates` is the config gate decision, so every tally printed in the figure is recoverable by counting rows. `arm` gives signature membership, `hypoxia_purged` flags the 18 genes the purge removes, and `label_drawn` marks the ten genes named in the figure. `n_genes_tested` and the two `n_gates_*_all_genes` columns repeat the whole-transcriptome denominators on every row. Primary donor-pseudobulk tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `volcano_source_table` | `thresholds.de_fdr=0.05; de_logfc=1.0` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv` |
-
-## tables/_overview/heat_treg_volcano_programs.csv
-
-The 103 testable mouse up-arm genes together with every testable member of the two reference axes, 11 STING-specific and 61 generic type-I IFN, at the same volcano coordinates.
-
-**How to read:** `le_program` carries the frozen leading-edge annotation and reads `not_annotated` for the up-arm genes it leaves uncovered, which is why the panel colours are an annotation rather than a decomposition of the 199-gene set. `reference_axis` names the axis a gene belongs to, and a row with both an `arm` and a `reference_axis` value is one of the few genes the mouse signature and an axis share. `label_drawn` marks the genes named in the figure. Primary donor-pseudobulk tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `volcano_source_table` | `thresholds.de_fdr=0.05; de_logfc=1.0; taxonomy=00_data/references/heat_leadingedge_taxonomy` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv`, `00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv`, `../sting_positive_control/03_results/06_reference_axis/signatures/` |
-
 ## figures/_overview/heat_purge_nes_paired.png
 
 Deleting the 18 HALLMARK_HYPOXIA-overlap genes from the mouse 39
@@ -146,77 +114,13 @@ up arm's sign. This licenses a membership statement. Correlative.
 |---|---|---|---|
 | `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_purge_paired` | `thresholds.gsea_fdr=0.05; gsea_min_size=5; gsea_nperm=100000` | `03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` |
 
-## figures/_overview/heat_hypoxia_colocalization.png
-
-Within synovial-fluid cells the per-cell WT_heat_up score and the
-HALLMARK_HYPOXIA score correlate weakly, Spearman 0.08 to 0.20, so
-largely different cells carry the two scores. This is the per-cell
-tier; it corroborates the membership result.
-
-**How to read:** This per-cell tier corroborates; the confirmatory result is the paired
-purge panel. Bars show within-SF cell-level correlation between
-WT_heat_up and HALLMARK_HYPOXIA AUCell scores, with Spearman dark and
-Pearson light; cell counts sit below each population. The y-axis spans
--0.05 to 1, so bar height is the readable quantity. Positive r means
-the scores tend to coincide. Donor-level SF means rest on 6 to 7
-donors and sit in the stage table. Keep this diagnostic separate from
-the pseudobulk NES; it carries no direction.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_colocalization` | `level=cell; tissue=synovial_fluid; evidence_tier=secondary_percell` | `03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv` |
-
-## figures/_overview/heat_treg_volcano_signature.png
-
-48 of the 119 testable mouse 39 °C up-arm genes clear the Treg SF-vs-
-PB significance gates on the synovial-fluid side against 7 on the
-blood side, so the enrichment is visible in the plain differential-
-expression view, while accounting for 5.6% of the SF-high response.
-
-**How to read:** Every tested Treg gene, x = log2 fold change synovial fluid over
-paired blood, y = -log10 FDR, dashed lines = the config gates. Warm
-brown = mouse up-arm member, cool blue = down-arm member, grey = every
-other gene, triangle = an up-arm gene the hypoxia purge removes.
-Membership is the only thing added to the committed DE table, and the
-printed tallies are counts of it. Gene names are capped at the top 10
-up-arm genes by FDR and the rest are in the source table. The down arm
-scatters both ways, which is the caveat to carry. Primary donor-
-pseudobulk tier, correlative.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_signature_volcano` | `thresholds.de_fdr=0.05; de_logfc=1.0; figures.volcano_label_top=10` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv` |
-
-## figures/_overview/heat_treg_volcano_programs.png
-
-2 of the 21 published IFN-independent STING-activation genes and 6 of
-200 generic type-I IFN genes sit in the mouse 39 °C up-arm, so the SF-
-high program the purge leaves standing is an effector and activation
-program with minimal overlap with the STING reference axis.
-
-**How to read:** Two views of one volcano, same axes as the signature volcano. Left
-colours the up-arm genes by leading-edge program, with the 66-gene
-annotation covering the leading edge only and pale brown marking the
-up-arm genes it leaves unlabelled. It is an annotation of that leading
-edge; the unlabelled remainder is the measure of what it leaves out.
-Right draws the two frozen reference axes: black squares are the
-published IFN-independent STING-activation genes, all named, blue
-circles the generic type-I IFN program, and a brown outline means the
-gene is also a mouse signature member. The heat-shock trio is named in
-the left panel note rather than at its markers. Primary donor-
-pseudobulk tier, correlative.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_programs_axes_volcano` | `thresholds.de_fdr=0.05; de_logfc=1.0; taxonomy=00_data/references/heat_leadingedge_taxonomy` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv, 00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv, ../sting_positive_control/03_results/06_reference_axis/signatures/` |
-
 ## tables/source_hash_manifest.csv
 
-The stage-09 mouse-signature and SAVI-axis reads are pinned to the source files used for this render.
+The stage-09 mouse-signature reads are pinned to the source files used for this render.
 
 **How to read:** `source_label` names the dependency, `source_path` is relative to the umbrella
-checkout, and `sha256` is the required byte hash. The compute and viz scripts stop if the mouse
-projection or SAVI reference-axis files drift.
+checkout, and `sha256` is the required byte hash. The compute script stops if the mouse
+projection files drift.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

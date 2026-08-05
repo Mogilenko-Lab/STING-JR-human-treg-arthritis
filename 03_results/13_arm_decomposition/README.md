@@ -239,26 +239,6 @@ Annotation tier.
 |---|---|---|---|
 | `02_analysis/scripts/13_arm_decomposition.py` | `arm_program_multiplicity` | `arms = 4 mouse-derived up arms; lenses = 9 frozen curated sets; evidence_tier=secondary_annotation` | `../mouse_anchor/03_results/human_projection/signatures/{WT_heat/WT_heat_up.txt,KO_heat/KO_heat_up.txt,Interaction/Interaction_up.txt,Interaction/Interaction_fdrOnly_up.txt}`, `00_data/references/msigdb_hallmark/HALLMARK_*.txt`, `00_data/references/temp_hsr_lens/HSR_core.txt`, `../sting_positive_control/03_results/06_reference_axis/signatures/{sting_specific_up.txt,ifn_only_up.txt}` |
 
-## tables/source_hash_manifest.csv
-
-All fourteen inputs are recorded by SHA-256, and the published de Cevins STING gene set matches
-the hash this compartment already committed for it, so the STING containment counts here and
-the STING tally in the `11_heat_decomposition` tables read the same 21 genes.
-
-**How to read:** One row per input file. `source_label` names the role (`arm_*`, `lens_*`, or
-the projection manifest), `source_path` is the path relative to the super-repo root, and
-`sha256` is the digest read on this run. `pin_status` is the column that matters and it
-distinguishes two different strengths of guarantee:
-`verified_against_11_heat_decomposition` means the digest was checked against a hash already
-committed in this compartment, so a changed source is a hard stop that halts the run; `recorded`
-means the digest is a provenance record of this run only, which a reviewer can diff against a
-later run but which nothing enforced here. Reading a `recorded` row as a pin would overstate
-what it does.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/13_arm_decomposition.py` | `write_source_hashes` | `pinned lens = sting_specific_published (verified against the committed savi_sting_specific_up hash); all other inputs recorded` | `03_results/11_heat_decomposition/tables/source_hash_manifest.csv`, `../mouse_anchor/03_results/human_projection/{manifest.csv,signatures/**}`, `00_data/references/{msigdb_hallmark,temp_hsr_lens}/*.txt`, `../sting_positive_control/03_results/06_reference_axis/signatures/{sting_specific_up.txt,ifn_only_up.txt}` |
-
 ## tables/_overview/arm_program_composition.csv
 
 The plotted table pairs each band's duplicated gene count with its fractional width, which is
@@ -377,7 +357,7 @@ data. Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/13_arm_decomposition_viz.py` | `plot_arm_hypoxia_euler` | `arm = WT_heat_up; lens = HALLMARK_HYPOXIA (gene_sets.project_frozen); vocabulary = symbol_alias.ranked_list at population=treg; alias pairs from symbol_alias.map_path, accepted only; colours = colors.okabe_ito.orange + the hypoxia band hue of this stage's program palette; fill_alpha=0.45; evidence_tier=secondary_annotation` | `03_results/13_arm_decomposition/tables/arm_program_summary.csv, 03_results/13_arm_decomposition/tables/arm_program_gene.csv, 03_results/13_arm_decomposition/tables/source_hash_manifest.csv, 00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, 00_data/references/symbol_alias/symbol_alias_map.csv, 03_results/03_pseudobulk/tables/ranked_treg.tsv, 03_results/03_pseudobulk/tables/gene_symbols.csv, 03_results/00_build/tables/reference_feature_symbols.csv` |
+| `02_analysis/scripts/13_arm_decomposition_viz.py` | `plot_arm_hypoxia_euler` | `arm = WT_heat_up; lens = HALLMARK_HYPOXIA (gene_sets.project_frozen); vocabulary = symbol_alias.ranked_list at population=treg; alias pairs from symbol_alias.map_path, accepted only; colours = colors.okabe_ito.orange + the hypoxia band hue of this stage's program palette; fill_alpha=0.45; evidence_tier=secondary_annotation` | `03_results/13_arm_decomposition/tables/arm_program_summary.csv, 03_results/13_arm_decomposition/tables/arm_program_gene.csv, 00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, 00_data/references/symbol_alias/symbol_alias_map.csv, 03_results/03_pseudobulk/tables/ranked_treg.tsv, 03_results/03_pseudobulk/tables/gene_symbols.csv, 03_results/00_build/tables/reference_feature_symbols.csv` |
 
 ## tables/_overview/arm_hypoxia_euler.csv
 

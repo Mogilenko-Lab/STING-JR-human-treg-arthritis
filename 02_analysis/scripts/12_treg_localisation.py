@@ -20,7 +20,6 @@ structurally absent at nominal zero (a property of the mouse contrast, not of JI
 Outputs:
   03_results/12_treg_localisation/tables/treg_per_cell_scores.csv
   03_results/12_treg_localisation/tables/treg_localisation_summary.csv
-  03_results/12_treg_localisation/tables/_overview/treg_localisation.csv
 """
 from __future__ import annotations
 
@@ -212,13 +211,6 @@ def main() -> None:
     summary_path = out_dir / "treg_localisation_summary.csv"
     summary_df.to_csv(summary_path, index=False)
     print(f"[12_treg_localisation] Saved summary statistics to {summary_path}")
-
-    # Mirror to _overview directory for save_overview() consumption
-    overview_dir = out_dir / "_overview"
-    overview_dir.mkdir(parents=True, exist_ok=True)
-    overview_csv = overview_dir / "treg_localisation.csv"
-    summary_df.to_csv(overview_csv, index=False)
-    print(f"[12_treg_localisation] Mirrored summary table to {overview_csv}")
     print("[12_treg_localisation] COMPUTE DONE.")
 
 

@@ -1,7 +1,0 @@
-population,level,method,r,pvalue,n,evidence_tier
-Treg,cell,pearson,0.220788828,1.68842532e-149,13572.0,secondary_percell
-Treg,cell,spearman,0.196071744,1.05821803e-117,13572.0,secondary_percell
-Tcon,cell,pearson,0.16858313,2.78087965e-124,19502.0,secondary_percell
-Tcon,cell,spearman,0.163164067,1.93255753e-116,19502.0,secondary_percell
-CD8,cell,pearson,0.083768797,5.89284458e-31,19010.0,secondary_percell
-CD8,cell,spearman,0.0751242925,3.32942055e-25,19010.0,secondary_percell

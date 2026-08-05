@@ -53,7 +53,6 @@ from matplotlib.patches import Circle, Patch  # noqa: E402
 from scipy.optimize import brentq  # noqa: E402
 
 COMPARTMENT_ROOT = Path(__file__).resolve().parents[2]
-REPO_ROOT = COMPARTMENT_ROOT.parent
 sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
@@ -68,7 +67,6 @@ from helpers.figure_style import (  # noqa: E402
     write_caption,
 )
 from helpers.geneset_utils import load_alias_map, resolve_symbols  # noqa: E402
-from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "13_arm_decomposition"
 SCRIPT = "02_analysis/scripts/13_arm_decomposition_viz.py"
@@ -480,8 +478,6 @@ def euler_universes() -> list[dict]:
     committed_both = sorted(str(row["genes"]).split(";")) if str(row["genes"]) else []
 
     lens_path = frozen_lens_path(EULER_LENS_SET)
-    verify_source_hash(lens_path, f"lens_{EULER_LENS}",
-                       tdir / "source_hash_manifest.csv", root=REPO_ROOT)
     lens = read_gene_list(lens_path)
     if len(lens) != int(row["n_curated_set"]):
         raise AssertionError(
@@ -793,7 +789,6 @@ def main() -> None:
                    f"evidence_tier={TIER}"),
         input=("03_results/13_arm_decomposition/tables/arm_program_summary.csv, "
                "03_results/13_arm_decomposition/tables/arm_program_gene.csv, "
-               "03_results/13_arm_decomposition/tables/source_hash_manifest.csv, "
                "00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, "
                "00_data/references/symbol_alias/symbol_alias_map.csv, "
                "03_results/03_pseudobulk/tables/ranked_treg.tsv, "

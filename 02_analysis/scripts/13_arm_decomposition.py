@@ -55,7 +55,6 @@ Outputs (all under 03_results/13_arm_decomposition/tables/):
   - arm_program_gene.csv          one row per (arm, program, gene) — the alluvial substrate
   - arm_program_summary.csv       one row per (arm, program) — the tallies
   - arm_program_multiplicity.csv  one row per (arm, gene) — the double-counting, inspectable
-  - source_hash_manifest.csv      SHA-256 of every input actually read
 
 Run from the compartment root, before 13_arm_decomposition_viz.py:
   python 02_analysis/scripts/13_arm_decomposition.py
@@ -77,7 +76,7 @@ sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
 from config import PATHS  # noqa: E402
-from helpers.source_hash_manifest import sha256_file, verify_source_hash  # noqa: E402
+from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "13_arm_decomposition"
 SCRIPT = "02_analysis/scripts/13_arm_decomposition.py"
@@ -89,7 +88,7 @@ RESIDUAL_SET = "(none)"
 # `arm` is the label carried in every output; `contrast` and `gate` are the mouse anchor's own
 # manifest keys, so the size guard reads the contract rather than a number retyped here.
 # The `Interaction_up_fdrOnly` label names the arm as "the Interaction up arm at the relaxed
-# gate"; its frozen file is `Interaction_fdrOnly_up.txt`, recorded in source_hash_manifest.csv.
+# gate"; its frozen file is `Interaction_fdrOnly_up.txt`.
 PROJECTION_DIR = REPO_ROOT / "mouse_anchor/03_results/human_projection"
 PROJECTION_MANIFEST = PROJECTION_DIR / "manifest.csv"
 
@@ -344,46 +343,22 @@ def arm_program_multiplicity(tables_dir: Path, arms: dict[str, list[str]],
 
 
 # ===========================================================================
-# 3. Provenance — what was actually read
+# 3. Provenance — the one source that is pinned
 # ===========================================================================
-def write_source_hashes(tables_dir: Path) -> pd.DataFrame:
-    """SHA-256 of every input read, plus the one hash that is a VERIFIED pin.
+def verify_pinned_sources() -> None:
+    """Hard-check the one input this stage pins, against a hash already committed.
 
-    `pin_status` distinguishes the two honestly. `verified_against_11_heat_decomposition`
-    means the value was checked against a hash this compartment already committed, so a
-    changed source is a hard stop. `recorded` means the hash is a provenance record of this
-    run only — a reviewer can diff it against a later run, but nothing enforced it here.
+    Only the published STING lens is pinned, and it is checked against the hash
+    `11_heat_decomposition` carries, so a changed source stops the run. The other
+    inputs are read as-is. Recording their hashes beside this one produced a table
+    of provenance that nothing enforced, which reads as a guarantee it does not
+    give; the enforced check is kept and the record is not.
     """
-    rows = [{
-        "source_label": "mouse_projection_manifest",
-        "source_path": _rel(PROJECTION_MANIFEST),
-        "sha256": sha256_file(PROJECTION_MANIFEST),
-        "pin_status": "recorded",
-    }]
-    for arm, _, _, path in ARMS:
-        rows.append({
-            "source_label": f"arm_{arm}",
-            "source_path": _rel(path),
-            "sha256": sha256_file(path),
-            "pin_status": "recorded",
-        })
     for key, _, path in PROGRAMS:
-        pin = "recorded"
         if key == "sting_specific_published":
-            # Hard check against the pin the 11_heat_decomposition tables already carry.
             verify_source_hash(path, STING_PIN_LABEL, STING_PIN_MANIFEST, root=REPO_ROOT)
-            pin = "verified_against_11_heat_decomposition"
             print(f"[{STAGE}] {key}: SHA-256 matches the committed pin in "
                   f"{_rel(STING_PIN_MANIFEST)}")
-        rows.append({
-            "source_label": f"lens_{key}",
-            "source_path": _rel(path),
-            "sha256": sha256_file(path),
-            "pin_status": pin,
-        })
-    out = pd.DataFrame(rows)
-    out.to_csv(tables_dir / "source_hash_manifest.csv", index=False)
-    return out
 
 
 # ===========================================================================
@@ -520,7 +495,7 @@ def main() -> None:
     gene = arm_program_gene(tables_dir, arms, claimed)
     summary = arm_program_summary(tables_dir, arms, programs, claimed)
     mult = arm_program_multiplicity(tables_dir, arms, claimed)
-    write_source_hashes(tables_dir)
+    verify_pinned_sources()
 
     check_invariants(gene, summary, mult, arms)
     check_against_11(summary, mult)
