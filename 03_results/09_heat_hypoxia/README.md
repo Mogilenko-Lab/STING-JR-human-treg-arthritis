@@ -124,24 +124,23 @@ The 103 testable mouse up-arm genes together with every testable member of the t
 
 Deleting the 18 HALLMARK_HYPOXIA-overlap genes from the mouse 39
 °C-derived up-set takes 12 to 15 testable genes out of the arm and
-costs 0.129 to 0.165 NES — 2.5915 to 2.4268 in Treg, 2.6809 to 2.5516
-in Tcon, 2.0710 to 1.9261 in CD8 — leaving all three significant, so
-the synovial-fluid enrichment is not reducible to its
-HALLMARK_HYPOXIA-overlap gene content. That is a statement about gene
-content and nothing else: it says nothing about temperature, and
-nothing about whether hypoxia is a confound or a co-exposure, which
-are not separable in cross-sectional human data.
+costs 0.126 to 0.164 NES — 2.5914 to 2.4271 in Treg, 2.6826 to 2.5565
+in Tcon, 2.0614 to 1.9181 in CD8 — leaving all three significant. The
+synovial-fluid enrichment therefore survives the removal of its
+HALLMARK_HYPOXIA-overlap gene content. This is a statement about gene
+content. Temperature is untested here, and cross-sectional human data
+leave hypoxia's status as confound or co-exposure undetermined.
 
-**How to read:** ANSWERS at confirmatory tier: donor-level pseudobulk within frozen
+**How to read:** This is the confirmatory tier: donor-level pseudobulk within frozen
 sort labels, limma-voom then fgsea. Positive NES points toward
 synovial fluid. Each row pairs the full set (large diamond) with its
 purged form (small circle); the connecting bar is the NES cost. Warm
 brown is the up arm and cool blue the down arm. A dark outline marks
 FDR below 0.05. Right-hand text reports effective and nominal set
-sizes, the NES cost, and purged FDR. Distinguish the 18 genes removed
-from the frozen set from the 12 to 15 present in a ranked list. The
-Tcon down arm remains significant at the up arm's sign. This licenses
-a membership statement only. Correlative.
+sizes, the NES cost, and purged FDR. Two gene counts differ and both
+are given: 18 genes come out of the frozen set, of which 12 to 15 were
+present in a ranked list. The Tcon down arm stays significant at the
+up arm's sign. This licenses a membership statement. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -150,19 +149,18 @@ a membership statement only. Correlative.
 ## figures/_overview/heat_hypoxia_colocalization.png
 
 Within synovial-fluid cells the per-cell WT_heat_up score and the
-HALLMARK_HYPOXIA score correlate only weakly (Spearman 0.08 to 0.20),
-so the two scores are carried by largely different cells rather than
-reading out one shared cell state. Per-cell tier: this corroborates
-the membership result and cannot answer anything on its own.
+HALLMARK_HYPOXIA score correlate weakly, Spearman 0.08 to 0.20, so
+largely different cells carry the two scores. This is the per-cell
+tier; it corroborates the membership result.
 
-**How to read:** CORROBORATES and never answers: this per-cell tier cannot support a
-claim. Bars show within-SF cell-level correlation between WT_heat_up
-and HALLMARK_HYPOXIA AUCell scores, with Spearman dark and Pearson
-light; cell counts sit below each population. The y-axis spans -0.05
-to 1, so read bar height rather than rank. Positive r means the scores
-tend to coincide. Donor-level SF means rest on 6 to 7 donors and
-remain in the stage table. Never pool this diagnostic with pseudobulk
-NES or read it as directional evidence.
+**How to read:** This per-cell tier corroborates; the confirmatory result is the paired
+purge panel. Bars show within-SF cell-level correlation between
+WT_heat_up and HALLMARK_HYPOXIA AUCell scores, with Spearman dark and
+Pearson light; cell counts sit below each population. The y-axis spans
+-0.05 to 1, so bar height is the readable quantity. Positive r means
+the scores tend to coincide. Donor-level SF means rest on 6 to 7
+donors and sit in the stage table. Keep this diagnostic separate from
+the pseudobulk NES; it carries no direction.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -182,8 +180,8 @@ other gene, triangle = an up-arm gene the hypoxia purge removes.
 Membership is the only thing added to the committed DE table, and the
 printed tallies are counts of it. Gene names are capped at the top 10
 up-arm genes by FDR and the rest are in the source table. The down arm
-scattering both ways is the honest caveat. Primary donor-pseudobulk
-tier, correlative.
+scatters both ways, which is the caveat to carry. Primary donor-
+pseudobulk tier, correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -191,22 +189,22 @@ tier, correlative.
 
 ## figures/_overview/heat_treg_volcano_programs.png
 
-Only 2 of the 21 published IFN-independent STING-activation genes and
-6 of 200 generic type-I IFN genes are in the mouse 39 °C up-arm, so
-the SF-high program the purge leaves standing is an effector and
-activation program that shares almost nothing with the STING reference
-axis.
+2 of the 21 published IFN-independent STING-activation genes and 6 of
+200 generic type-I IFN genes sit in the mouse 39 °C up-arm, so the SF-
+high program the purge leaves standing is an effector and activation
+program with minimal overlap with the STING reference axis.
 
 **How to read:** Two views of one volcano, same axes as the signature volcano. Left
 colours the up-arm genes by leading-edge program, with the 66-gene
 annotation covering the leading edge only and pale brown marking the
-up-arm genes it leaves unlabelled, so read it as an annotation and not
-a decomposition of the 199-gene set. Right draws the two frozen
-reference axes: black squares are the published IFN-independent STING-
-activation genes, all named, blue circles the generic type-I IFN
-program, and a brown outline means the gene is also a mouse signature
-member. The heat-shock trio is named in the left panel note rather
-than at its markers. Primary donor-pseudobulk tier, correlative.
+up-arm genes it leaves unlabelled. It is an annotation of that leading
+edge; the unlabelled remainder is the measure of what it leaves out.
+Right draws the two frozen reference axes: black squares are the
+published IFN-independent STING-activation genes, all named, blue
+circles the generic type-I IFN program, and a brown outline means the
+gene is also a mouse signature member. The heat-shock trio is named in
+the left panel note rather than at its markers. Primary donor-
+pseudobulk tier, correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

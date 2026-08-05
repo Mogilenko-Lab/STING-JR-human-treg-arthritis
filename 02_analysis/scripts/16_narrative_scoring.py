@@ -134,8 +134,8 @@ CURATED = {
 # Expected nominal set sizes — reproduction checks, NOT targets. A disagreement is
 # reported and raised, never reconciled to.
 EXPECTED_SIZES = {
-    "WT_heat_up": 199, "KO_heat_up": 218, "Interaction_up": 7,
-    "Interaction_fdrOnly_up": 18, "HSR_core": 56,
+    "WT_heat_up": 202, "KO_heat_up": 221, "Interaction_up": 7,
+    "Interaction_fdrOnly_up": 19, "HSR_core": 56,
     "sting_specific_published": 21, "ifn_generic_axis": 200,
 }
 EXPECTED_N_CELLS = 99_915

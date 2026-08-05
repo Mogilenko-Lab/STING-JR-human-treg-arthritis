@@ -62,6 +62,7 @@ NRGN,WT_heat_down,0,unassigned
 NSG2,WT_heat_down,0,unassigned
 NTN5,WT_heat_down,0,unassigned
 NUAK2,WT_heat_down,0,unassigned
+OR2V1,WT_heat_down,0,unassigned
 PDE2A,WT_heat_down,0,unassigned
 PDE4A,WT_heat_down,0,unassigned
 PIGR,WT_heat_down,0,unassigned
@@ -90,6 +91,7 @@ SPIN2A,WT_heat_down,0,unassigned
 ST8SIA1,WT_heat_down,0,unassigned
 STAP2,WT_heat_down,0,unassigned
 TAC3,WT_heat_down,0,unassigned
+TASL,WT_heat_down,0,unassigned
 TLR7,WT_heat_down,1,t_activation
 TSPAN7,WT_heat_down,0,unassigned
 UPK1B,WT_heat_down,0,unassigned
@@ -149,6 +151,7 @@ DAGLA,WT_heat_up,0,unassigned
 DENND3,WT_heat_up,0,unassigned
 DMWD,WT_heat_up,0,unassigned
 DNAH7,WT_heat_up,0,unassigned
+DYNLT2B,WT_heat_up,0,unassigned
 EBF1,WT_heat_up,0,unassigned
 EGFR,WT_heat_up,1,hypoxia
 EGR1,WT_heat_up,1,nfkb_tnfa
@@ -166,9 +169,11 @@ FAH,WT_heat_up,1,t_activation
 FAM110C,WT_heat_up,0,unassigned
 FAM83G,WT_heat_up,0,unassigned
 FASLG,WT_heat_up,0,unassigned
+FHIP1A,WT_heat_up,0,unassigned
 FOSL1,WT_heat_up,1,nfkb_tnfa
 FOSL2,WT_heat_up,2,hypoxia;nfkb_tnfa
 GAP43,WT_heat_up,0,unassigned
+GARIN3,WT_heat_up,0,unassigned
 GATM,WT_heat_up,0,unassigned
 GDF6,WT_heat_up,0,unassigned
 GFI1,WT_heat_up,0,unassigned

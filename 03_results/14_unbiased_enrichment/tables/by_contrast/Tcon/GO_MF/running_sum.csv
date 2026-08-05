@@ -1,6 +1,6 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,1,GOMF_STRUCTURAL_CONSTITUENT_OF_RIBOSOME,Structural Constituent of Ribosome,down,-3.1730959,-0.672298964,2.11598171e-30,2.9771862700000002e-27,1.74840546e-27,GO_MF,156,92,0.58974359
-Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,2,GOMF_CHEMOKINE_RECEPTOR_BINDING,Chemokine Receptor Binding,up,2.4495746,0.756448884,1.44069102e-8,5.06763068e-6,8.96016869e-7,GO_MF,29,20,0.689655172
-Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,3,GOMF_CYTOKINE_RECEPTOR_BINDING,Cytokine Receptor Binding,up,2.40894583,0.543660019,4.30070405e-13,3.0255453e-10,8.43229567e-11,GO_MF,153,73,0.477124183
-Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,4,GOMF_MHC_PROTEIN_COMPLEX_BINDING,MHC Protein Complex Binding,up,2.40196675,0.723568809,7.73201196e-8,1.81315681e-5,3.76063421e-6,GO_MF,32,22,0.6875
-Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,5,GOMF_MHC_CLASS_II_PROTEIN_COMPLEX_BINDING,MHC Class II Protein Complex Binding,up,2.39715815,0.766925569,1.14190402e-7,2.00832369e-5,5.18021399e-6,GO_MF,25,15,0.6
+Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,1,GOMF_STRUCTURAL_CONSTITUENT_OF_RIBOSOME,Structural Constituent of Ribosome,down,-3.18471616,-0.672776167,1.8994928800000002e-30,2.7295712700000002e-27,1.59435291e-27,GO_MF,158,93,0.588607595
+Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,2,GOMF_CHEMOKINE_RECEPTOR_BINDING,Chemokine Receptor Binding,up,2.50660514,0.75974068,1.72965815e-9,6.21379691e-7,1.45180092e-7,GO_MF,31,21,0.677419355
+Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,3,GOMF_MHC_CLASS_II_PROTEIN_COMPLEX_BINDING,MHC Class II Protein Complex Binding,up,2.40203644,0.766925569,7.33801442e-8,1.75745445e-5,3.90032306e-6,GO_MF,25,15,0.6
+Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,4,GOMF_CCR_CHEMOKINE_RECEPTOR_BINDING,Ccr Chemokine Receptor Binding,up,2.40127175,0.811349391,9.33654847e-8,1.91666002e-5,4.83320621e-6,GO_MF,20,15,0.75
+Tcon,SF_vs_PB_Tcon,GO_MF,running_sum,top 5 by |NES|,5,GOMF_MHC_PROTEIN_COMPLEX_BINDING,MHC Protein Complex Binding,up,2.39805188,0.716174423,4.2482872e-8,1.22095774e-5,2.36595369e-6,GO_MF,33,22,0.666666667

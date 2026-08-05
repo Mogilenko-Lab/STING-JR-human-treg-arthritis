@@ -1,6 +1,6 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,1,KEGG_RIBOSOME,Ribosome,down,-3.64572091,-0.851906397,8.51841773e-41,1.57590728e-38,2.46352641e-37,KEGG,85,75,0.882352941
-Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,2,KEGG_ALLOGRAFT_REJECTION,Allograft Rejection,up,2.52598211,0.749974839,1.58338535e-9,5.85852579e-8,1.26321391e-7,KEGG,34,18,0.529411765
-Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,3,KEGG_ASTHMA,Asthma,up,2.5175605,0.839296101,1.50608416e-9,5.85852579e-8,1.20988761e-7,KEGG,21,13,0.619047619
-Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,4,KEGG_SYSTEMIC_LUPUS_ERYTHEMATOSUS,Systemic Lupus Erythematosus,up,2.4251097,0.702355327,2.42892177e-8,6.41929326e-7,1.36725687e-6,KEGG,38,22,0.578947368
-Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,5,KEGG_AUTOIMMUNE_THYROID_DISEASE,Autoimmune Thyroid Disease,up,2.39482271,0.711033053,7.06455023e-8,1.63367724e-6,3.49242381e-6,KEGG,34,17,0.5
+Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,1,KEGG_RIBOSOME,Ribosome,down,-3.64388582,-0.851906397,2.6904180999999997e-41,4.97727349e-39,8.87110608e-38,KEGG,85,75,0.882352941
+Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,2,KEGG_ALLOGRAFT_REJECTION,Allograft Rejection,up,2.52281902,0.749974839,5.40477012e-10,2.49970618e-8,5.62048263e-8,KEGG,34,18,0.529411765
+Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,3,KEGG_ASTHMA,Asthma,up,2.51772063,0.839296101,1.21353489e-9,4.49007908e-8,1.0563147e-7,KEGG,21,13,0.619047619
+Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,4,KEGG_AUTOIMMUNE_THYROID_DISEASE,Autoimmune Thyroid Disease,up,2.39182385,0.711033053,3.28338198e-8,1.01237611e-6,1.90128421e-6,KEGG,34,17,0.5
+Tcon,SF_vs_PB_Tcon,KEGG,running_sum,top 5 by |NES|,5,KEGG_TYPE_I_DIABETES_MELLITUS,Type I Diabetes Mellitus,up,2.36363155,0.697897904,1.66005108e-7,3.0710945e-6,7.92978059e-6,KEGG,35,17,0.485714286

@@ -3,11 +3,11 @@
 12_treg_localisation.py -- COMPUTE ONLY (no plotting).
 =============================================================================
 Per-cell AUCell scoring of five gene signatures on the sorted JIA dataset:
-1. WT_heat_up (199 genes nominal, 174 in dataset)
+1. WT_heat_up (202 genes nominal, 177 in dataset)
 2. Interaction_up (7 genes nominal, 7 in dataset)
-3. Interaction_fdrOnly_up (18 genes nominal, 18 in dataset)
-4. HALLMARK_HYPOXIA (200 genes nominal, 173 in dataset)
-5. WT_heat_up_purged_hypoxia (181 genes nominal, 158 in dataset)
+3. Interaction_fdrOnly_up (19 genes nominal, 19 in dataset)
+4. HALLMARK_HYPOXIA (200 genes nominal, 178 in dataset)
+5. WT_heat_up_purged_hypoxia (184 genes nominal, 161 in dataset)
 
 Subsets the 99,915-cell substrate by sort gate coarse_label == 'Treg' (FACS-sorted,
 not score-selected) and calculates per score x tissue summary statistics and
@@ -154,8 +154,8 @@ def main() -> None:
     r_sp, p_sp = stats.spearmanr(sf_tregs["WT_heat_up_AUCell"], sf_tregs["HALLMARK_HYPOXIA_AUCell"])
     r_pe, p_pe = stats.pearsonr(sf_tregs["WT_heat_up_AUCell"], sf_tregs["HALLMARK_HYPOXIA_AUCell"])
     print(f"[12_treg_localisation] SF Treg per-cell colocalization reproduction check:")
-    print(f"  Spearman r = {r_sp:.6f} (target in 09_heat_hypoxia: ~0.197042), N = {len(sf_tregs)}")
-    print(f"  Pearson r  = {r_pe:.6f} (target in 09_heat_hypoxia: ~0.221767), N = {len(sf_tregs)}")
+    print(f"  Spearman r = {r_sp:.6f} (target in 09_heat_hypoxia: ~0.196072), N = {len(sf_tregs)}")
+    print(f"  Pearson r  = {r_pe:.6f} (target in 09_heat_hypoxia: ~0.220789), N = {len(sf_tregs)}")
 
     # 6. Save full per-cell scores table
     out_dir = PATHS.tables(STAGE)

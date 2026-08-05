@@ -161,32 +161,31 @@ The annotated numbers behind each running-sum figure: one part's NES, FDR, testa
 
 ## figures/_overview/heatdecomp_arm_coverage.png
 
-Curated public gene sets claim only 62 of the 199 mouse 39 C-derived
-up genes and 11 of the 94 down genes, so the largest part of the
-projected signature — 137 up genes — belongs to no named program, and
-the curated HSR core (Reactome/GO) contributes 2 genes. The bars are
-not a partition: 25 of those 62 claimed up genes belong to two or
-three curated sets at once, so the 62 carry 92 claims and summing the
-named bars double-counts 30 of them.
+Curated public gene sets claim 62 of the 202 mouse 39 C-derived up
+genes and 11 of the 96 down genes, so the largest part of the
+projected signature — 140 up genes — belongs to no named program, and
+the curated HSR core (Reactome/GO) contributes 2 genes. The bars
+overlap: 25 of the claimed up genes belong to up to 3 curated sets at
+once, so they carry 92 claims and summing the named bars double-counts
+30 of them.
 
-**How to read:** ANSWERS what the projected set is made of, by membership over frozen
-versioned gene lists — arithmetic over committed files, not an effect
-estimate, and no NES on the face. One bar per mouse arm and curated
-presumption; length is how many of that arm's genes the curated set
-contains. Warm brown = the 199-gene up arm, cool blue = the 94-gene
-down arm. The right-hand text gives the count, then the testability:
-parts reaching 5 genes in the ranked lists are tested, smaller parts
-are marked under the floor, and a part with no gene in that arm says
-so. **Do not sum the bars.** The assignment is not a partition — 25 of
-the 62 claimed up-arm genes sit in two or three sets, so adding the
-named bars double-counts 30 claims and shrinks the 137-gene remainder,
+**How to read:** This gives the composition of the projected set by membership over
+frozen versioned gene lists: arithmetic over committed files. It
+carries no effect estimate and no NES on the face. One bar per mouse
+arm and curated presumption; length is how many of that arm's genes
+the curated set contains. Warm brown is the 202-gene up arm, cool blue
+the 96-gene down arm. The right-hand text gives the count, then the
+testability: parts reaching 5 genes in the ranked lists are tested,
+smaller parts are marked under the floor, and a part with no gene in
+that arm says so. **Read each bar on its own.** The bars overlap — 25
+of the 62 claimed up-arm genes sit in up to 3 sets — so adding the
+named bars double-counts 30 claims and shrinks the 140-gene remainder,
 the largest single part. That count is on the face, per arm in
 decomposition_assignment_multiplicity.csv, and per gene in
 decomposition_gene_assignment.csv. The remainder is reported as a
-remainder: it is not named, and is evidence for no mechanism. The
-published 21-gene interferon-independent STING signature contributes
-only PLAUR and PTGS2 here, tallied in sting_axis_overlap.csv.
-Annotation tier.
+remainder: it is unnamed, and it supports no mechanism. The published
+21-gene interferon-independent STING signature contributes PLAUR and
+PTGS2 here, tallied in sting_axis_overlap.csv. Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -194,10 +193,10 @@ Annotation tier.
 
 ## figures/_overview/heatdecomp_runsum_up_unassigned.png
 
-The 137 up-arm genes that no curated presumption claims give the
+The 140 up-arm genes that no curated presumption claims give the
 strongest synovial-fluid enrichment of any part in CD8 (+2.10) and
-remain strongly enriched in Treg (+2.21) and Tcon (+2.27), so the
-shift is not carried by any single named program.
+stay strongly enriched in Treg (+2.21) and Tcon (+2.27), so the shift
+spreads across the arm rather than concentrating in one named program.
 
 **How to read:** This part is the residual: the up-arm genes belonging to none of the
 curated presumptions. Top panel: the weighted running enrichment score
@@ -208,10 +207,11 @@ panel: where this part's genes sit in each ranking, in matching
 colour. Legend labels carry the testable gene count, the NES and the
 FDR, and no other glyph marks significance. The y-range is shared
 across the whole decomposition family, so curve heights compare
-between figures. CORROBORATES; does not answer the niche question —
-annotation tier, firewalled from the confirmatory WT_heat spine, no
-effect-size row. The parts overlap, so their NES may not be added or
-ranked as shares of the whole.
+between figures. This corroborates; the whole-set panels answer the
+niche question. Annotation tier, firewalled from the confirmatory
+WT_heat spine, and it writes no effect-size row. The parts overlap, so
+read each NES on its own; adding them or ranking them as shares of the
+whole would double-count genes.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -220,9 +220,9 @@ ranked as shares of the whole.
 ## figures/_overview/heatdecomp_runsum_up_nfkb_tnfa.png
 
 The 35 TNFA/NF-kB up-arm genes enrich toward synovial fluid strongly
-in Treg (+2.24) and Tcon (+2.32) and only weakly in CD8 (+1.23, FDR
-0.22), making the inflammatory-signalling part the most CD4-selective
-of the decomposition.
+in Treg (+2.24) and Tcon (+2.32) and weakly in CD8 (+1.23, FDR 0.22),
+making the inflammatory-signalling part the most CD4-selective of the
+decomposition.
 
 **How to read:** This part is the up-arm genes that also sit in
 HALLMARK_TNFA_SIGNALING_VIA_NFKB. Top panel: the weighted running
@@ -233,10 +233,11 @@ opposite. Bottom panel: where this part's genes sit in each ranking,
 in matching colour. Legend labels carry the testable gene count, the
 NES and the FDR, and no other glyph marks significance. The y-range is
 shared across the whole decomposition family, so curve heights compare
-between figures. CORROBORATES; does not answer the niche question —
-annotation tier, firewalled from the confirmatory WT_heat spine, no
-effect-size row. The parts overlap, so their NES may not be added or
-ranked as shares of the whole.
+between figures. This corroborates; the whole-set panels answer the
+niche question. Annotation tier, firewalled from the confirmatory
+WT_heat spine, and it writes no effect-size row. The parts overlap, so
+read each NES on its own; adding them or ranking them as shares of the
+whole would double-count genes.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -246,12 +247,11 @@ ranked as shares of the whole.
 
 The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in
 all three populations (+1.81 to +2.07), so this part carries a shift
-of its own — which is a separate question from whether the whole set's
-enrichment is reducible to it, and that one is answered by the
-deletion panel rather than here.
+of its own. Whether the whole set's enrichment is reducible to it is a
+separate question, and the deletion panel answers that one.
 
 **How to read:** This part is the up-arm genes that also sit in HALLMARK_HYPOXIA, the
-same 18 the whole-signature purge removes. Top panel: the weighted
+same genes the whole-signature purge removes. Top panel: the weighted
 running enrichment score as each population's ranked list is walked
 from synovial-fluid-up (left) to blood-up (right); a positive, left-
 shifted excursion is synovial-fluid enrichment and a negative trace
@@ -259,10 +259,11 @@ the opposite. Bottom panel: where this part's genes sit in each
 ranking, in matching colour. Legend labels carry the testable gene
 count, the NES and the FDR, and no other glyph marks significance. The
 y-range is shared across the whole decomposition family, so curve
-heights compare between figures. CORROBORATES; does not answer the
-niche question — annotation tier, firewalled from the confirmatory
-WT_heat spine, no effect-size row. The parts overlap, so their NES may
-not be added or ranked as shares of the whole.
+heights compare between figures. This corroborates; the whole-set
+panels answer the niche question. Annotation tier, firewalled from the
+confirmatory WT_heat spine, and it writes no effect-size row. The
+parts overlap, so read each NES on its own; adding them or ranking
+them as shares of the whole would double-count genes.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -271,8 +272,8 @@ not be added or ranked as shares of the whole.
 ## figures/_overview/heatdecomp_runsum_up_inflammatory.png
 
 The 21 inflammatory-response up-arm genes track the whole up-arm
-(+1.48 to +2.11), adding no separation of their own beyond the broad
-synovial-fluid shift.
+(+1.48 to +2.11), so their separation is the broad synovial-fluid
+shift itself.
 
 **How to read:** This part is the up-arm genes that also sit in
 HALLMARK_INFLAMMATORY_RESPONSE. Top panel: the weighted running
@@ -283,10 +284,11 @@ opposite. Bottom panel: where this part's genes sit in each ranking,
 in matching colour. Legend labels carry the testable gene count, the
 NES and the FDR, and no other glyph marks significance. The y-range is
 shared across the whole decomposition family, so curve heights compare
-between figures. CORROBORATES; does not answer the niche question —
-annotation tier, firewalled from the confirmatory WT_heat spine, no
-effect-size row. The parts overlap, so their NES may not be added or
-ranked as shares of the whole.
+between figures. This corroborates; the whole-set panels answer the
+niche question. Annotation tier, firewalled from the confirmatory
+WT_heat spine, and it writes no effect-size row. The parts overlap, so
+read each NES on its own; adding them or ranking them as shares of the
+whole would double-count genes.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -295,8 +297,8 @@ ranked as shares of the whole.
 ## figures/_overview/heatdecomp_runsum_up_t_activation.png
 
 The 14 IL2-STAT5 activation up-arm genes are the weakest testable part
-in Treg (+1.32, FDR 0.22) while reaching +1.89 in Tcon, so a curated
-T-cell activation program does not account for the Treg shift.
+in Treg (+1.32, FDR 0.22) while reaching +1.89 in Tcon, so the Treg
+shift rests on more than a curated T-cell activation program.
 
 **How to read:** This part is the up-arm genes that also sit in
 HALLMARK_IL2_STAT5_SIGNALING, read as a curated proxy for T-cell
@@ -307,11 +309,12 @@ enrichment and a negative trace the opposite. Bottom panel: where this
 part's genes sit in each ranking, in matching colour. Legend labels
 carry the testable gene count, the NES and the FDR, and no other glyph
 marks significance. The y-range is shared across the whole
-decomposition family, so curve heights compare between figures.
-CORROBORATES; does not answer the niche question — annotation tier,
-firewalled from the confirmatory WT_heat spine, no effect-size row.
-The parts overlap, so their NES may not be added or ranked as shares
-of the whole.
+decomposition family, so curve heights compare between figures. This
+corroborates; the whole-set panels answer the niche question.
+Annotation tier, firewalled from the confirmatory WT_heat spine, and
+it writes no effect-size row. The parts overlap, so read each NES on
+its own; adding them or ranking them as shares of the whole would
+double-count genes.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -319,13 +322,12 @@ of the whole.
 
 ## figures/_overview/heatdecomp_runsum_down_unassigned.png
 
-The 83 down-arm genes no presumption claims sit nowhere in particular
+The 85 down-arm genes no presumption claims sit nowhere in particular
 — NES +0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them
-significant — so this remainder does not separate synovial fluid from
-blood in either direction. Read that as a statement about the
-remainder and not about the arm — the whole 94-gene down arm does
-reach significance in Tcon, at the same sign as the up arm, and that
-result belongs to the whole-set panels rather than to this one.
+significant — so this remainder separates synovial fluid from blood in
+neither direction. That is a statement about the remainder. The whole
+96-gene down arm does reach significance in Tcon, at the same sign as
+the up arm, and the whole-set panels carry that result.
 
 **How to read:** This part is the residual of the mouse down arm: the genes belonging
 to none of the curated presumptions. Top panel: the weighted running
@@ -336,10 +338,11 @@ opposite. Bottom panel: where this part's genes sit in each ranking,
 in matching colour. Legend labels carry the testable gene count, the
 NES and the FDR, and no other glyph marks significance. The y-range is
 shared across the whole decomposition family, so curve heights compare
-between figures. CORROBORATES; does not answer the niche question —
-annotation tier, firewalled from the confirmatory WT_heat spine, no
-effect-size row. The parts overlap, so their NES may not be added or
-ranked as shares of the whole.
+between figures. This corroborates; the whole-set panels answer the
+niche question. Annotation tier, firewalled from the confirmatory
+WT_heat spine, and it writes no effect-size row. The parts overlap, so
+read each NES on its own; adding them or ranking them as shares of the
+whole would double-count genes.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

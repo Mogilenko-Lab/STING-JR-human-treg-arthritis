@@ -84,7 +84,7 @@ HSR_DIR = Path("00_data/references/temp_hsr_lens")
 # The mouse arms exactly as handed to fgsea for the whole-signature run, so this
 # decomposition and the whole-signature NES share one gene universe.
 MOUSE_ARM_DIR = PATHS.tables("09_heat_hypoxia") / "_signatures_full"
-MOUSE_ARM_SIZE = {"up": 199, "down": 94}
+MOUSE_ARM_SIZE = {"up": 202, "down": 96}
 
 # The published de Cevins Table S6 IFN-independent STING signature, from the STING
 # positive-control compartment. Carried as a gene-overlap TALLY only: its overlap with

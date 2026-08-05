@@ -1,4 +1,4 @@
 population,signature,contrast,nes,pvalue,padj,set_size,n_nominal,testability,n_ranked_genes,evidence_tier
-Treg,HSR_core,SF_vs_PB,1.48893564,0.0318622135,0.0637244271,43.0,56.0,testable,13999.0,secondary_annotation
-Tcon,HSR_core,SF_vs_PB,-1.34255177,0.0787076344,0.157415269,43.0,56.0,testable,14411.0,secondary_annotation
-CD8,HSR_core,SF_vs_PB,-1.15071349,0.230794443,0.375310307,43.0,56.0,testable,14014.0,secondary_annotation
+Treg,HSR_core,SF_vs_PB,1.48516121,0.0325286489,0.0650572978,44.0,56.0,testable,13999.0,secondary_annotation
+Tcon,HSR_core,SF_vs_PB,-1.32838769,0.0843991551,0.16879831,44.0,56.0,testable,14411.0,secondary_annotation
+CD8,HSR_core,SF_vs_PB,-1.1296366,0.254695073,0.427931407,44.0,56.0,testable,14014.0,secondary_annotation

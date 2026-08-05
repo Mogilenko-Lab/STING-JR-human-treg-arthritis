@@ -55,6 +55,7 @@ WT_heat_up,DAGLA,0,unassigned
 WT_heat_up,DENND3,0,unassigned
 WT_heat_up,DMWD,0,unassigned
 WT_heat_up,DNAH7,0,unassigned
+WT_heat_up,DYNLT2B,0,unassigned
 WT_heat_up,EBF1,0,unassigned
 WT_heat_up,EGFR,1,hypoxia
 WT_heat_up,EGR1,1,nfkb_tnfa
@@ -72,9 +73,11 @@ WT_heat_up,FAH,1,t_activation
 WT_heat_up,FAM110C,0,unassigned
 WT_heat_up,FAM83G,0,unassigned
 WT_heat_up,FASLG,0,unassigned
+WT_heat_up,FHIP1A,0,unassigned
 WT_heat_up,FOSL1,1,nfkb_tnfa
 WT_heat_up,FOSL2,2,hypoxia;nfkb_tnfa
 WT_heat_up,GAP43,0,unassigned
+WT_heat_up,GARIN3,0,unassigned
 WT_heat_up,GATM,0,unassigned
 WT_heat_up,GDF6,0,unassigned
 WT_heat_up,GFI1,0,unassigned
@@ -260,6 +263,7 @@ KO_heat_up,DAGLA,0,unassigned
 KO_heat_up,DENND3,0,unassigned
 KO_heat_up,DMWD,0,unassigned
 KO_heat_up,DNAH7,0,unassigned
+KO_heat_up,DYNLT2B,0,unassigned
 KO_heat_up,EBF1,0,unassigned
 KO_heat_up,EFNA2,0,unassigned
 KO_heat_up,EGFR,1,hypoxia
@@ -279,9 +283,11 @@ KO_heat_up,FAM43A,0,unassigned
 KO_heat_up,FAM83G,0,unassigned
 KO_heat_up,FASLG,0,unassigned
 KO_heat_up,FAT2,0,unassigned
+KO_heat_up,FHIP1A,0,unassigned
 KO_heat_up,FOSL1,1,nfkb_tnfa
 KO_heat_up,FOSL2,2,hypoxia;nfkb_tnfa
 KO_heat_up,GAP43,0,unassigned
+KO_heat_up,GARIN3,0,unassigned
 KO_heat_up,GATM,0,unassigned
 KO_heat_up,GDF6,0,unassigned
 KO_heat_up,GFI1,0,unassigned
@@ -434,6 +440,7 @@ Interaction_up_fdrOnly,IRF7,3,inflammatory;ifn_type_i;ifn_generic_axis
 Interaction_up_fdrOnly,LGALS3BP,1,ifn_type_i
 Interaction_up_fdrOnly,LGALS9,0,unassigned
 Interaction_up_fdrOnly,MX1,2,ifn_type_i;ifn_generic_axis
+Interaction_up_fdrOnly,RIGI,1,nfkb_tnfa
 Interaction_up_fdrOnly,RNF213,0,unassigned
 Interaction_up_fdrOnly,RTP4,2,inflammatory;ifn_type_i
 Interaction_up_fdrOnly,SAMD9L,1,ifn_type_i

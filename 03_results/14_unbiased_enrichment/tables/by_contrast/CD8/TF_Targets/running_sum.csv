@@ -1,6 +1,6 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,1,RFXAP,Rfxap,up,2.36363246,0.86994777,1.44122352e-8,8.48880654e-6,1.92462685e-6,TF_Targets,16,12,0.75
-CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,2,RFXANK,Rfxank,up,2.33753205,0.834710179,6.79490037e-8,1.33406544e-5,7.7907994e-6,TF_Targets,18,12,0.666666667
-CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,3,RFX5,Rfx5,up,2.20850111,0.741488001,4.05368536e-6,3.97936779e-4,2.72268535e-4,TF_Targets,23,12,0.52173913
-CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,4,ATF3,Atf3,up,2.08844111,0.556126286,3.10086678e-6,3.65282106e-4,2.13320841e-4,TF_Targets,69,36,0.52173913
-CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,5,IRF2,IRF-2,up,2.01484869,0.585096614,3.15633168e-5,0.00125395954,0.00137270195,TF_Targets,44,21,0.477272727
+CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,1,RFXAP,Rfxap,up,2.36809012,0.86994777,2.22764638e-8,1.3209943e-5,2.98685935e-6,TF_Targets,16,12,0.75
+CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,2,RFXANK,Rfxank,up,2.34396964,0.834710179,7.00277261e-8,1.38421472e-5,8.49989168e-6,TF_Targets,18,12,0.666666667
+CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,3,RFX5,Rfx5,up,2.20951034,0.741488001,5.04530875e-6,3.32429788e-4,3.38241019e-4,TF_Targets,23,12,0.52173913
+CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,4,ATF3,Atf3,up,2.08153442,0.552471566,1.59508467e-6,1.57647534e-4,1.29527615e-4,TF_Targets,70,36,0.514285714
+CD8,SF_vs_PB_CD8,TF_Targets,running_sum,top 5 by |NES|,5,IRF3,IRF3,up,2.00915482,0.552026536,1.81199867e-5,9.76832012e-4,9.71821242e-4,TF_Targets,58,19,0.327586207

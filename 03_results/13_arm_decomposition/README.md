@@ -167,8 +167,9 @@ nomenclature.
 Both losses are large enough to change a number a reader would quote. `HALLMARK_HYPOXIA` is 200
 genes as curated; against the Treg ranked list 139 match by exact symbol and 4 more only after
 their current symbols are resolved into the vintage the matrix carries (`CAVIN1` as `PTRF`,
-`CAVIN3` as `PRKCDBP`, `ERO1A` as `ERO1L`, `NOCT` as `CCRN4L`), giving 143. `WT_heat_up` is 199
-as curated and 119 against the same ranking, recovering nothing by alias. The 18-gene containment
+`CAVIN3` as `PRKCDBP`, `ERO1A` as `ERO1L`, `NOCT` as `CCRN4L`), giving 143. `WT_heat_up` is 202
+as curated; against the same ranking 119 match by exact symbol and one more only by alias
+(`DYNLT2B` as `TCTEX1D2`), giving 120. The 18-gene containment
 above is therefore 12 on that ranking, and the six genes that fall out — `ADM`, `ADORA2B`,
 `CCN1`, `EGFR`, `F3`, `TGM2` — are absent for reasons the tables separate rather than pool.
 
@@ -283,30 +284,29 @@ Annotation tier.
 
 ## figures/_overview/arm_program_composition.png
 
-Nine curated anchor-independent lenses contain 67 of the 199
-WT_heat_up genes and 68 of the 218 KO_heat_up genes, leaving
-remainders of 132 and 150 genes as the largest single part of each
-large arm, while what the lenses do claim is dominated by inflammatory
-gene content (35 TNFA/NF-kB and 21 inflammatory-response genes in
-WT_heat_up) against 2 in the curated HSR core and 2 of the 21
-published IFN-independent STING genes. The thin Interaction arms
-invert that shape: Hallmark type-I interferon contains 4 of the 7
-genes at the fdr_logfc gate and 10 of the 18 at the relaxed fdr_only
-gate.
+9 curated anchor-independent lenses contain 67 of the 202 WT_heat_up
+genes and 68 of the 221 KO_heat_up genes, leaving remainders of 135
+and 153 genes as the largest single part of each large arm.
+Inflammatory gene content dominates what the lenses do claim: 35
+TNFA/NF-kB and 21 inflammatory-response genes in WT_heat_up, against 2
+in the curated HSR core and 2 of the 21 published IFN-independent
+STING genes. The thin Interaction arms invert that shape: Hallmark
+type-I interferon contains 4 of the 7 genes at the fdr_logfc gate and
+10 of the 19 at the relaxed fdr_only gate.
 
 **How to read:** Each band counts how many of one arm's genes a frozen curated lens
 contains. That is set arithmetic over committed gene lists, so no NES,
-FDR, direction or effect size appears here or anywhere in these
-tables. One row per arm, named by how it was derived and labelled with
-its gene count and the mouse anchor's gate (fdr_logfc, with fdr_only
-the relaxed Interaction variant frozen as Interaction_fdrOnly_up.txt).
-Band width is the fractional share: a gene in k lenses gives 1/k to
-each, so widths total 1.0. The number in a band is the duplicated
-count of that arm's genes the lens contains, so numbers and widths
-disagree. A band too narrow for a digit carries its count to the right
+FDR, direction or effect size appears here or in these tables. One row
+per arm, named by how it was derived and labelled with its gene count
+and the mouse anchor's gate (fdr_logfc, with fdr_only the relaxed
+Interaction variant frozen as Interaction_fdrOnly_up.txt). Band width
+is the fractional share: a gene in k lenses gives 1/k to each, so
+widths total 1.0. The number in a band is the duplicated count of that
+arm's genes the lens contains, so numbers and widths measure different
+things. A band too narrow for a digit carries its count to the right
 of the bar, so every lens keeps its number. Grey is the remainder, the
 genes no lens contains, left unnamed on purpose. The lenses overlap,
-so the bands are a containment tally: 67 of the 199 WT_heat_up genes
+so the bands are a containment tally: 67 of the 202 WT_heat_up genes
 are contained by at least one lens, and those 67 carry 100
 memberships, with up to 4 lenses on one gene, so the printed counts
 exceed the claimed genes by 33. Per-gene multiplicity is in
@@ -315,10 +315,10 @@ construction: the mouse contrasts are linearly dependent as model
 coefficients (WT_heat = KO_heat + Interaction), and the two
 Interaction rows are one contrast at two gates, so agreement between
 rows is expected. That algebra holds for the coefficients and stops at
-the thresholded lists: WT_heat_up and KO_heat_up share 182 genes,
-Interaction_up shares none with either, and Interaction_up_fdrOnly
-holds all 7 Interaction_up genes among its 18. Annotation tier,
-firewalled from the donor-pseudobulk claim spine; no effect-size row.
+the thresholded lists: WT_heat_up and KO_heat_up share 185 genes,
+Interaction_up shares 0 with either, and Interaction_up_fdrOnly holds
+all 7 Interaction_up genes among its 19. Annotation tier, firewalled
+from the donor-pseudobulk claim spine; no effect-size row.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -328,51 +328,52 @@ firewalled from the donor-pseudobulk claim spine; no effect-size row.
 
 Curated hypoxia accounts for a small minority of the mouse 39
 °C-derived up arm in either vocabulary, and the vocabulary decides how
-small: the frozen lists share 18 genes of the arm's 199 against 182
+small: the frozen lists share 18 genes of the arm's 202 against 182
 hypoxia genes the arm does not carry, while restricting both to the
-Treg donor-pseudobulk ranked list leaves only 119 of the arm's 199
+Treg donor-pseudobulk ranked list leaves only 120 of the arm's 202
 genes testable and drops the shared count to 12 — so the arm's hypoxia
 content is 9% of the curated arm but 10% of the part of it this
 contrast can actually test, and 4 of the 143 testable hypoxia genes
 are visible only because alias resolution recovered them.
 
 **How to read:** The same two gene lists, read in two vocabularies. Every area equals
-its gene count, solved numerically rather than approximated; the
-largest residual across both panels is 1.4e-13 genes. A two-set Euler
-is exactly solvable for every valid configuration, because the shared
-area falls continuously from the smaller set's size to zero as the
-circles part, so nothing here is an approximation; the configurations
-with no exact solution begin at three sets. Both panels share one
-area-per-gene scale and one bounding box, so the right panel is
-smaller because it holds fewer genes. Orange is the mouse WT iTreg
-39-versus-37 °C up arm in human projection; blue is frozen MSigDB
-Hallmark hypoxia, curated without reference to the anchor, so the
-overlap measures something rather than restating a result. Each region
-carries its count, the shared one inside the lens with its name above
-on a grey leader because the lens is too narrow for both. LEFT is the
-frozen lists in full, 199 and 200 genes, the universe the composition
-bar and the committed membership tables report. RIGHT keeps only what
-the Treg donor-pseudobulk ranked list carries, the universe an
-enrichment statistic on that ranking is computed over: the arm falls
-to 119 and hypoxia to 143. So the panels report 18 and 12 shared genes
-and BOTH are correct — quoting either without its vocabulary is the
-misreading this figure exists to prevent. The 6 shared genes on the
-left and not the right are ADM, ADORA2B, CCN1, EGFR, F3, TGM2. Absence
-is not one thing and the source table splits it: present in the count
-matrix but not the ranking means dropped by filterByExpr, present in
-the CellRanger reference but not the matrix means never detected in
-sorted T cells, absent from the reference means a vocabulary miss.
-Alias resolution runs first and only ever adds, so 139 hypoxia genes
-match exactly and 4 more only once their current symbols resolve into
-the hg19-vintage vocabulary this matrix carries (CAVIN1->PTRF,
-CAVIN3->PRKCDBP, ERO1A->ERO1L, NOCT->CCRN4L) — which is why the
-testable size is 143 and not 139. The arm recovers none. Membership,
-not enrichment: no NES, FDR, direction or effect size, and no row
-reaches effect_sizes_treg_arthritis.csv or any 03_results/master/
-accumulator. A small overlap bounds how much of the arm is hypoxia
-GENE CONTENT and says nothing about whether temperature and hypoxia
-are separable in this niche, which cross-sectional human data cannot
-decide. Annotation tier.
+its gene count, solved numerically; the largest residual across both
+panels is 9.9e-14 genes. A two-set Euler is exactly solvable for every
+valid configuration, because the shared area falls continuously from
+the smaller set's size to zero as the circles part, so every area here
+is exact; the configurations with no exact solution begin at three
+sets. Both panels share one area-per-gene scale and one bounding box,
+so the right panel is smaller because it holds fewer genes. Orange is
+the mouse WT iTreg 39-versus-37 °C up arm in human projection; blue is
+frozen MSigDB Hallmark hypoxia, curated independently of the anchor,
+so the overlap is an independent measurement. Each region carries its
+count, the shared one inside the lens with its name above on a grey
+leader because the lens is too narrow for both. Left is the frozen
+lists in full, 202 and 200 genes, the universe the composition bar and
+the committed membership tables report. Right keeps only what the Treg
+donor-pseudobulk ranked list carries, the universe an enrichment
+statistic on that ranking is computed over: the arm falls to 120 and
+hypoxia to 143. So the panels report 18 and 12 shared genes and both
+are correct, each within its own vocabulary; quoting either without
+its vocabulary is the misreading this figure exists to prevent. The 6
+shared genes the left panel carries and the right panel drops are ADM,
+ADORA2B, CCN1, EGFR, F3, TGM2. Absence has three causes and the source
+table splits them: a symbol in the count matrix and outside the
+ranking was dropped by filterByExpr, a symbol in the CellRanger
+reference and outside the matrix was never detected in sorted T cells,
+and a symbol outside the reference is a vocabulary miss. Alias
+resolution runs first and only ever adds, so 139 hypoxia genes match
+exactly and 4 more only once their current symbols resolve into the
+hg19-vintage vocabulary this matrix carries (CAVIN1->PTRF,
+CAVIN3->PRKCDBP, ERO1A->ERO1L, NOCT->CCRN4L) — which is what lifts the
+testable size from 139 to 143. The arm recovers 1 of its own the same
+way (DYNLT2B->TCTEX1D2), which is what lifts it from 119 to 120. This
+is membership: the figure and its table carry no NES, FDR, direction
+or effect size, and no row reaches effect_sizes_treg_arthritis.csv or
+any 03_results/master/ accumulator. A small overlap bounds how much of
+the arm is hypoxia gene content. Whether temperature and hypoxia are
+separable in this niche is undecidable from cross-sectional human
+data. Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -406,10 +407,9 @@ rows the ledger columns are trivial by construction, since that
 universe applies no restriction. `circle_radius_*`, `centre_distance`
 and `shared_area_solved` are the geometry the figure drew, and
 `shared_area_residual_genes` is how far the drawn shared area misses
-the count in gene units — read it as the proof that
-`is_area_proportional` is a fact and not a label. Membership, not
-enrichment: no NES, p-value or effect size in the file. Annotation
-tier.
+the count in gene units — the proof behind `is_area_proportional`.
+This is membership: the file carries no NES, p-value or effect size.
+Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

@@ -5,23 +5,20 @@ _**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood.
 ## figures/_overview/wt_heat_nes_forest.png
 
 The mouse 39 °C-derived up arm separates synovial fluid from paired
-blood in every sorted population — NES 2.5915 in Treg (119 of 199
-genes ranked), 2.6809 in Tcon (130) and 2.0710 in CD8 (113), all at
-FDR below 1e-6 — so the answer to Treg preference is NO: the result is
-pan-T, and Tregs are in it rather than privileged in it. The down arm
-is not silent either, reaching NES 1.4718 at FDR 0.026 in Tcon, the
-same sign as the up arm, while carrying no direction in Treg (0.9676)
-or CD8 (1.0943).
+blood in every sorted population: NES 2.5914 in Treg (120 of 202 genes
+ranked), 2.6826 in Tcon (131) and 2.0614 in CD8 (114), all at FDR
+below 7e-07. The result is pan-T, and Tregs are one of the three
+populations carrying it. The down arm reaches NES 1.4322 at FDR 0.035
+in Tcon, the same sign as the up arm, and carries no direction in Treg
+(1.0386) or CD8 (1.1331).
 
-**How to read:** ANSWERS, at the only tier that may: donor-level pseudobulk within
-frozen sort labels, limma-voom then fgsea, using the 6 donors
-represented in both arms. Points are NES for the up (circle) and down
-(diamond) arms, coloured by population; the asterisk marks FDR below
-0.05. Labels give effective and nominal set sizes plus FDR. All three
-up arms are significant, so the result is pan-T. The down arm also
-reaches significance in Tcon at the up arm's sign. Effective size
-tracks the NES ordering, which therefore is not a biological ranking.
-Ordered NES dot plot with FDR encoding and no interval. Correlative.
+**How to read:** This is the confirmatory tier: donor-level pseudobulk within frozen
+sort labels, limma-voom then fgsea, on the 6 donors present in both
+arms. Points are NES for the up (circle) and down (diamond) arms,
+coloured by population; the asterisk marks FDR below 0.05. Labels give
+effective and nominal set sizes plus FDR. Effective size tracks the
+NES ordering, so the ordering is a size effect. Ordered NES dot plot
+with FDR encoding; the rows carry no interval. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -31,21 +28,20 @@ Ordered NES dot plot with FDR encoding and no interval. Correlative.
 
 Donor-mean WT_heat_up AUCell sits higher in synovial fluid than in
 paired blood in all three sorted populations, so the per-cell channel
-shadows the pseudobulk answer in the same direction. It corroborates
-and cannot answer: a per-cell score is a different estimand on a
-secondary tier, and the shift it shows is not confined to Tregs
-either.
+shadows the pseudobulk result in the same direction. This
+corroborates. A per-cell score is a different estimand on a secondary
+tier, and the shift it shows spans all three populations.
 
-**How to read:** This panel CORROBORATES and never answers — per-cell scores are not a
-tier that may support a claim. Each dot is one donor's mean WT_heat_up
-AUCell score for that state×tissue, and the violins summarise across
-donors. AUCell is a rank-based score in [0,1], the area under each
-cell's gene-recovery curve for the up-set, robust to library size and
-composition. Read the RELATIVE SF-vs-PB shift within each population
-(Treg SF vs Treg PB), not the absolute level. This is a different
-estimand from the pseudobulk NES dot plot and shares no axis with it;
-NEVER pooled with it. Down arm omitted because up and down co-shift in
-SF. Correlative.
+**How to read:** This panel corroborates; the confirmatory answer is the pseudobulk NES
+dot plot. Each dot is one donor's mean WT_heat_up AUCell score for
+that state × tissue, and the violins summarise across donors. AUCell
+is a rank-based score in [0, 1], the area under each cell's gene-
+recovery curve for the up set, robust to library size and composition.
+Read the SF-versus-PB shift within a population (Treg SF against Treg
+PB); the absolute level carries no reading. This is a different
+estimand from the pseudobulk NES dot plot and shares no axis with it.
+The down arm is omitted because up and down co-shift in synovial
+fluid. Correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -53,13 +49,13 @@ SF. Correlative.
 
 ## figures/_overview/wt_heat_running_sum_treg.png
 
-In Treg the up arm reaches NES +2.5915 at FDR 3e-14 with 119 of its
-199 genes in the ranked list, and the down arm reaches NES +0.9676 at
-FDR 0.512 with 56 of its 94 genes in the ranked list. The curve shows
-WHERE along this population's synovial-fluid-versus-blood ranking
-each arm concentrates; whether one sorted population separates more
-than another is a cross-population comparison and is read off the
-ordered NES dot plot, not off this panel.
+In Treg the up arm reaches NES +2.5914 at FDR 1e-14 with 120 of its
+202 genes in the ranked list, and the down arm reaches NES +1.0386 at
+FDR 0.385 with 59 of its 96 genes in the ranked list. The curve gives
+the place along this population's synovial-fluid-versus-blood ranking
+where each arm concentrates. The cross-population comparison —
+whether one sorted population separates more than another — is read
+off the ordered NES dot plot.
 
 **How to read:** One population per panel, showing the donor-pseudobulk fgsea result
 behind the confirmatory answer. The top trace walks from SF-enriched
@@ -78,13 +74,13 @@ correlative.
 
 ## figures/_overview/wt_heat_running_sum_tcon.png
 
-In Tcon the up arm reaches NES +2.6809 at FDR 8e-17 with 130 of its
-199 genes in the ranked list, and the down arm reaches NES +1.4718 at
-FDR 0.026 with 61 of its 94 genes in the ranked list. The curve shows
-WHERE along this population's synovial-fluid-versus-blood ranking
-each arm concentrates; whether one sorted population separates more
-than another is a cross-population comparison and is read off the
-ordered NES dot plot, not off this panel.
+In Tcon the up arm reaches NES +2.6826 at FDR 1e-16 with 131 of its
+202 genes in the ranked list, and the down arm reaches NES +1.4322 at
+FDR 0.035 with 64 of its 96 genes in the ranked list. The curve gives
+the place along this population's synovial-fluid-versus-blood ranking
+where each arm concentrates. The cross-population comparison —
+whether one sorted population separates more than another — is read
+off the ordered NES dot plot.
 
 **How to read:** One population per panel, showing the donor-pseudobulk fgsea result
 behind the confirmatory answer. The top trace walks from SF-enriched
@@ -103,13 +99,13 @@ correlative.
 
 ## figures/_overview/wt_heat_running_sum_cd8.png
 
-In CD8 the up arm reaches NES +2.0710 at FDR 4e-07 with 113 of its
-199 genes in the ranked list, and the down arm reaches NES +1.0943 at
-FDR 0.308 with 57 of its 94 genes in the ranked list. The curve shows
-WHERE along this population's synovial-fluid-versus-blood ranking
-each arm concentrates; whether one sorted population separates more
-than another is a cross-population comparison and is read off the
-ordered NES dot plot, not off this panel.
+In CD8 the up arm reaches NES +2.0614 at FDR 7e-07 with 114 of its
+202 genes in the ranked list, and the down arm reaches NES +1.1331 at
+FDR 0.256 with 60 of its 96 genes in the ranked list. The curve gives
+the place along this population's synovial-fluid-versus-blood ranking
+where each arm concentrates. The cross-population comparison —
+whether one sorted population separates more than another — is read
+off the ordered NES dot plot.
 
 **How to read:** One population per panel, showing the donor-pseudobulk fgsea result
 behind the confirmatory answer. The top trace walks from SF-enriched
@@ -220,3 +216,4 @@ instead of silently changing the JIA result.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/05_score_signatures.py` | `verify_source_hashes()` | pinned SHA-256 | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/` |
+

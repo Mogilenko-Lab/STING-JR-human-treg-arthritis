@@ -1,4 +1,4 @@
 gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
-WT_heat_up,WT_heat_up,mouse_projection,Treg,SF_vs_PB_Treg,2.59163282,1.01402716e-14,1.52104074e-14,3.71101231e-12,up,119.0,65.0,13999.0,0.621783978,2634.0,0.188156297,True
-WT_heat_up,WT_heat_up,mouse_projection,Tcon,SF_vs_PB_Tcon,2.68020613,7.58365842e-17,1.13754876e-16,2.30862528e-14,up,130.0,71.0,14411.0,0.619241202,2972.0,0.206231351,True
-WT_heat_up,WT_heat_up,mouse_projection,CD8,SF_vs_PB_CD8,2.07119654,1.48791087e-07,2.2318663e-07,1.59332795e-05,up,113.0,49.0,14014.0,0.50844947,2315.0,0.165191951,True
+WT_heat_up,WT_heat_up,mouse_projection,Treg,SF_vs_PB_Treg,2.59184639,1.01678976e-14,1.52518465e-14,3.77622598e-12,up,120.0,65.0,13999.0,0.621168415,2634.0,0.188156297,True
+WT_heat_up,WT_heat_up,mouse_projection,Tcon,SF_vs_PB_Tcon,2.68228025,4.16926573e-17,6.2538986e-17,1.36091782e-14,up,131.0,71.0,14411.0,0.619020524,2972.0,0.206231351,True
+WT_heat_up,WT_heat_up,mouse_projection,CD8,SF_vs_PB_CD8,2.06248042,1.77204274e-07,2.65806411e-07,1.98382766e-05,up,114.0,49.0,14014.0,0.505790096,2315.0,0.165191951,True

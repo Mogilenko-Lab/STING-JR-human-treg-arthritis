@@ -638,14 +638,22 @@ def plot_arm_hypoxia_euler(universes: list[dict]):
                  "drawn to scale in two vocabularies", fontsize=float(_F["title_size"]))
 
     led = universes[-1]["ledger_lens"]
+    led_a = universes[-1]["ledger_arm"]
+    # Both recovery counts are read from the ledgers rather than asserted, so a change in
+    # either frozen list cannot leave this sentence stating a number the figure disproves.
+    arm_recovery = (
+        "and the arm recovers none" if not led_a["n_via_alias"] else
+        f"and the arm recovers {led_a['n_via_alias']} of its own "
+        f"({', '.join(p.replace('->', ' as ') for p in led_a['alias_pairs'])})"
+    )
     key = ("Every area is exactly proportional to its gene count and both panels share one "
            "area-per-gene scale, so the right panel is smaller because fewer genes are "
            "testable in this contrast. Right is the "
            f"vocabulary an enrichment statistic on the {EULER_POPULATION.capitalize()} "
            f"ranking is computed over; {led['n_via_alias']} of its "
            f"{len(universes[-1]['lens'])} hypoxia genes match only after alias resolution "
-           f"({', '.join(p.replace('->', ' as ') for p in led['alias_pairs'])}), and the arm "
-           "recovers none. This is membership: no NES, FDR or effect size here.")
+           f"({', '.join(p.replace('->', ' as ') for p in led['alias_pairs'])}), "
+           f"{arm_recovery}. This is membership: no NES, FDR or effect size here.")
     wrap_col = max(60, int(CANVAS_W_IN * 0.97 / (ANNOT_SIZE * 0.0088)))
     fig.text(0.015, EULER_KEY_Y, "\n".join(textwrap.wrap(key, width=wrap_col)),
              ha="left", va="top", fontsize=ANNOT_SIZE)
@@ -748,6 +756,13 @@ def main() -> None:
     n_arm_rank = _n(ranked, "arm_only") + _n(ranked, "shared")
     n_lens_rank = _n(ranked, "lens_only") + _n(ranked, "shared")
     led = universes[-1]["ledger_lens"]
+    led_a = universes[-1]["ledger_arm"]
+    arm_recovery_long = (
+        "The arm recovers none of them." if not led_a["n_via_alias"] else
+        f"The arm recovers {led_a['n_via_alias']} of its own the same way "
+        f"({', '.join(led_a['alias_pairs'])}), which is what lifts it from "
+        f"{led_a['n_exact']} to {n_arm_rank}."
+    )
     lost_shared = sorted(set(str(euler[(euler["universe"] == nominal)
                                        & (euler["region"] == "shared")]["genes"].iloc[0]).split(";"))
                          - set(str(euler[(euler["universe"] == ranked)
@@ -815,7 +830,7 @@ def main() -> None:
             f"genes match exactly and {led['n_via_alias']} more only once their current "
             "symbols resolve into the hg19-vintage vocabulary this matrix carries "
             f"({', '.join(led['alias_pairs'])}) — which is what lifts the testable size from "
-            f"{led['n_exact']} to {n_lens_rank}. The arm recovers none of them. This is "
+            f"{led['n_exact']} to {n_lens_rank}. {arm_recovery_long} This is "
             "membership: the figure and its table carry no NES, FDR, direction or effect size, "
             "and no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ "
             "accumulator. A small overlap bounds how much of the arm is hypoxia gene content. "

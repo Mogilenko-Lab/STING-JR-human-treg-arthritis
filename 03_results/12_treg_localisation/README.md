@@ -5,19 +5,18 @@ Secondary and corroborative tier evaluation of per-cell AUCell score distributio
 ## figures/_overview/treg_localisation.png
 
 Across sorted JIA Tregs, per-cell AUCell scores for WT_heat_up,
-HALLMARK_HYPOXIA, and WT_heat_up_purged_hypoxia are consistently
-higher in synovial fluid than in peripheral blood; the cGAS-dependent
-Interaction_fdrOnly_up (18-gene gate) shows modest SF elevation,
-whereas the 7-gene Interaction_up gate is underpowered and dominated
-by detection noise at per-cell resolution.
+HALLMARK_HYPOXIA and WT_heat_up_purged_hypoxia run higher in synovial
+fluid than in peripheral blood. The cGAS-dependent
+Interaction_fdrOnly_up gate (18 genes) shows modest synovial-fluid
+elevation. The 7-gene Interaction_up gate is underpowered, and
+detection noise dominates it at per-cell resolution.
 
-**How to read:** Box plots show per-cell AUCell score distributions for sorted CD4_Treg
-cells in peripheral blood (PB, blue) versus synovial fluid (SF,
-vermillion). Solid lines indicate medians; dashed red lines indicate
-means. Set sizes (nominal and in-dataset effective) and power-band
-classifications are declared for each panel. This panel is hypothesis-
-generating tier; primary statistical claims are carried by donor-level
-pseudobulk DE.
+**How to read:** Box plots give per-cell AUCell score distributions for sorted CD4_Treg
+cells in peripheral blood (PB, blue) against synovial fluid (SF,
+vermillion). Solid lines are medians, dashed red lines means. Each
+panel declares its set sizes, nominal and in-dataset effective, and
+its power band. This panel is hypothesis-generating tier; donor-level
+pseudobulk DE carries the statistical claims.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

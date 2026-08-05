@@ -138,6 +138,7 @@ WT_heat_up,fdr_logfc,unassigned,(none),DAGLA,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),DENND3,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),DMWD,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),DNAH7,0,1.0
+WT_heat_up,fdr_logfc,unassigned,(none),DYNLT2B,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),EBF1,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),EHD2,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),EMILIN2,0,1.0
@@ -148,7 +149,9 @@ WT_heat_up,fdr_logfc,unassigned,(none),ESYT3,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),FAM110C,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),FAM83G,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),FASLG,0,1.0
+WT_heat_up,fdr_logfc,unassigned,(none),FHIP1A,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),GAP43,0,1.0
+WT_heat_up,fdr_logfc,unassigned,(none),GARIN3,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),GATM,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),GDF6,0,1.0
 WT_heat_up,fdr_logfc,unassigned,(none),GFI1,0,1.0
@@ -372,6 +375,7 @@ KO_heat_up,fdr_logfc,unassigned,(none),DAGLA,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),DENND3,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),DMWD,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),DNAH7,0,1.0
+KO_heat_up,fdr_logfc,unassigned,(none),DYNLT2B,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),EBF1,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),EFNA2,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),EHD2,0,1.0
@@ -384,7 +388,9 @@ KO_heat_up,fdr_logfc,unassigned,(none),FAM43A,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),FAM83G,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),FASLG,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),FAT2,0,1.0
+KO_heat_up,fdr_logfc,unassigned,(none),FHIP1A,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),GAP43,0,1.0
+KO_heat_up,fdr_logfc,unassigned,(none),GARIN3,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),GATM,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),GDF6,0,1.0
 KO_heat_up,fdr_logfc,unassigned,(none),GFI1,0,1.0
@@ -489,6 +495,7 @@ Interaction_up,fdr_logfc,ifn_generic_axis,ifn_only_up,MX1,2,0.5
 Interaction_up,fdr_logfc,unassigned,(none),IFI16,0,1.0
 Interaction_up,fdr_logfc,unassigned,(none),IFIT1B,0,1.0
 Interaction_up,fdr_logfc,unassigned,(none),XAF1,0,1.0
+Interaction_up_fdrOnly,fdr_only,nfkb_tnfa,HALLMARK_TNFA_SIGNALING_VIA_NFKB,RIGI,1,1.0
 Interaction_up_fdrOnly,fdr_only,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,EIF2AK2,3,0.3333333333333333
 Interaction_up_fdrOnly,fdr_only,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,IRF7,3,0.3333333333333333
 Interaction_up_fdrOnly,fdr_only,inflammatory,HALLMARK_INFLAMMATORY_RESPONSE,RTP4,2,0.5

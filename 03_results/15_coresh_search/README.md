@@ -154,8 +154,8 @@ synovial-fluid-versus-blood up-arm reaches a best co-regulation score
 of pctVar 15.6% under the stringent FDR-plus-log2FC gate (GSE102751)
 and 20.7% under the relaxed FDR-only gate (GSE118383); the relaxed
 gate scores higher throughout on a query roughly three times larger,
-so pctVar is comparable only within a gate and the two rankings are
-read as separate searches rather than as one league table.
+so pctVar is comparable within a gate and the two rankings are read
+as two separate searches.
 
 **How to read:** One panel per query: a sorted population's up arm at one significance
 gate. Each bar is one public human GEO dataset; length is pctVar, the
@@ -164,9 +164,9 @@ co-regulation score, unsigned and always positive, higher meaning
 tighter co-movement. The row label gives the accession and how many
 query Entrez ids that dataset measures, because pctVar is normalised
 by that count. Orange bars became modules; grey were ranked only.
-Panels have independent x ranges: pctVar is not comparable across
-query sizes, and the relaxed gate's query is far larger. Exploratory
-tier: a ranking of public datasets, not a test.
+Panels have independent x ranges, because pctVar is comparable within
+a query size and the relaxed gate's query is far larger. Exploratory
+tier: this is a ranking of public datasets.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -176,24 +176,23 @@ tier: a ranking of public datasets, not a test.
 
 In the Treg synovial-fluid-versus-blood ranking the 21 modules split
 both ways (NES -2.64 to 2.71; 10 up and 4 down at FDR < 0.05), and
-which way a module goes tracks how much of it is the query that
-seeded it rather than anything it newly recruited: Spearman rho =
-0.70 between NES and seed fraction, on a median seed fraction of only
-30%. The enrichment is therefore reporting seed content back to
-itself as much as it is reporting public biology, which is why
-nothing here is read as evidence.
+which way a module goes tracks much of it is the query that seeded
+it: Spearman rho = 0.70 between NES and seed fraction, on a median
+seed fraction of only 30%. The enrichment therefore reports seed
+content back to itself as much as it reports public biology, which is
+why this tier supports no claim.
 
 **How to read:** Each row is one co-regulation module: the genes loading most strongly
 onto the query direction inside one public human GEO dataset. The row
 label gives that dataset's accession, the population and gate whose
 up arm seeded it, and the compendium's own sample-metadata terms
-tracking the query axis there — a descriptor of the public dataset,
-not of the JIA data. Columns are the three sorted populations, each
-scored on its own synovial-fluid-versus-blood ranked list. Fill is
-NES, orange positive and blue negative, clamped. Size is -log10 FDR.
-A black outline marks the circular cells, where a module is scored on
-the list that seeded it; grey outlines are the informative
-comparison. Exploratory tier.
+tracking the query axis there — a descriptor of the public dataset
+itself. Columns are the three sorted populations, each scored on its
+own synovial-fluid-versus-blood ranked list. Fill is NES, orange
+positive and blue negative, clamped. Size is -log10 FDR. A black
+outline marks the circular cells, where a module is scored on the
+list that seeded it; grey outlines are the informative comparison.
+Exploratory tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

@@ -1,2 +1,2 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Tcon,SF_vs_PB_Tcon,TCR_activation,running_sum,every one of the 1 set(s) in this collection,1,TCR_activation,TCR Activation,up,1.44521395,0.376496186,0.0320427697,0.0320427697,0.119764381,TCR_activation,64,26,0.40625
+Tcon,SF_vs_PB_Tcon,TCR_activation,running_sum,every one of the 1 set(s) in this collection,1,TCR_activation,TCR Activation,up,1.38853293,0.36035707300000003,0.0505709906,0.0505709906,0.16692793,TCR_activation,65,26,0.4

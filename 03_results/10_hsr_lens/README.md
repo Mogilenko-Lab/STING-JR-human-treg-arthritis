@@ -150,25 +150,31 @@ The annotated numbers behind the HSR_core running-sum figure: each population's 
 
 ## figures/_overview/hsr_core_running_sum.png
 
-The curated HSR core changes sign at trend level: Treg NES +1.4889 at
-FDR 0.0637, Tcon -1.3426 at 0.1574, and CD8 -1.1507 at 0.3753, with 43
-of 56 genes testable in every ranking. No population clears FDR 0.05,
-so this secondary annotation is directional context rather than
-evidence of a Treg-selective effect.
+The curated HSR core changes sign at trend level: Treg NES +1.4852 at
+FDR 0.0651, Tcon NES -1.3284 at FDR 0.1688, CD8 NES -1.1296 at FDR
+0.4279, with 44 of 56 genes testable in every ranking. Every
+population sits above FDR 0.05, so this secondary annotation supplies
+directional context. A Treg-selective effect is untested here.
 
-**How to read:** Top panel: the weighted running enrichment score as each ranked list
-is walked from synovial-fluid-up (left) to blood-up (right); a
+**How to read:** Three stacked panels sharing one x axis, which is each gene's position
+in its own population's ranked list as a FRACTION of that list's
+length, most synovial-fluid-up at 0 and most blood-up at 1, because
+the three rankings differ in length. Top panel: the weighted running
+enrichment score as each ranked list is walked left to right; a
 positive, left-shifted excursion is synovial-fluid enrichment, a
-negative trace the opposite. Bottom panel: where each population's HSR
-core genes sit in its ranking, in matching colour. Legend labels carry
-each NES and FDR, so read the Treg trace as a trend at FDR 0.064, not
-a significant enrichment. Ranked-list lengths differ slightly, so
-compare shapes rather than x positions; the y range is data-driven
-because all three curves share one axis. The legend also gives
-effective size against the 56-gene nominal set and its testability
-band. Secondary annotation tier; no row supports a Treg-selective
-claim.
+negative trace the opposite. Its y range is pinned to [-1.0, 1.0], the
+one range every running sum in this project is drawn on, so the height
+of a curve means the same thing here as anywhere else. Middle panel:
+where each population's HSR core genes sit in its ranking, one
+labelled row per population in matching colour. Bottom panel: the
+ranked moderated t each curve above was computed on, which shows how
+much signal each rank carries and where the three rankings cross zero
+— the assumption the shared fractional axis rests on. Legend labels
+carry each NES and FDR; the Treg trace is a trend at FDR 0.065. The
+legend also gives effective size against the 56-gene nominal set and
+its testability band. Secondary annotation tier; the confirmatory
+spine carries any Treg-selective claim.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/10_hsr_lens_viz.py` | `plot_running_sum` | `figures.running_sum_heights=[2.4, 0.7]; thresholds.gsea_fdr=0.05; evidence_tier=secondary_annotation` | `03_results/10_hsr_lens/tables/runsum_interactive_hsr_gsea_{treg,tcon,cd8}_HSR_core.csv, 03_results/10_hsr_lens/tables/hsr_lens_nes.csv` |
+| `02_analysis/scripts/10_hsr_lens_viz.py` | `plot_running_sum` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; figures.running_sum_ylim=[-1.0, 1.0]; running_sum_x=rank/n_ranked; thresholds.gsea_fdr=0.05; evidence_tier=secondary_annotation` | `03_results/10_hsr_lens/tables/runsum_interactive_hsr_gsea_{treg,tcon,cd8}_HSR_core.csv, 03_results/10_hsr_lens/tables/hsr_lens_nes.csv` |

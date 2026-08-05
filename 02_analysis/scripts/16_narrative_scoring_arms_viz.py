@@ -68,8 +68,8 @@ SUBSTRATE_PARQUET = "16_narrative_embedding.parquet"
 
 # Panel order, and the nominal gene count of each arm as a display label only.
 ARMS = [
-    ("WT_heat_up_AUCell", "WT_heat_up", 199),
-    ("KO_heat_up_AUCell", "KO_heat_up", 218),
+    ("WT_heat_up_AUCell", "WT_heat_up", 202),
+    ("KO_heat_up_AUCell", "KO_heat_up", 221),
     ("Interaction_up_AUCell", "Interaction_up", 7),
 ]
 CELL_STATES = ["Treg", "Tcon", "CD8"]

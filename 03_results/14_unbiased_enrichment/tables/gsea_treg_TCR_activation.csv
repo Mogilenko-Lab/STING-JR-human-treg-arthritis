@@ -1,2 +1,2 @@
 pathway_id,pathway_name,database,population,contrast,nes,enrichment_score,pvalue,padj,set_size,leading_edge_size,core_enrichment,direction,is_pooled_alias
-TCR_activation,TCR_activation,TCR_activation,Treg,SF_vs_PB_Treg,1.87660127,0.500753692,3.15839343e-4,3.15839343e-4,63,25,TNFRSF4/TNFRSF18/IL2RA/IL10/CD2/BATF/TNF/NR4A1/LTA/EGR3/CD226/FOS/ATF3/DUSP2/EGR1/TNFRSF9/DUSP5/TRAF3/ICOS/EGR2/CBLB/NR4A3/JUND/CD3D/CD27,up,FALSE
+TCR_activation,TCR_activation,TCR_activation,Treg,SF_vs_PB_Treg,1.84345676,0.490663804,4.0455209e-4,4.0455209e-4,64,25,TNFRSF4/TNFRSF18/IL2RA/IL10/CD2/BATF/TNF/NR4A1/LTA/EGR3/CD226/FOS/ATF3/DUSP2/EGR1/TNFRSF9/DUSP5/TRAF3/ICOS/EGR2/CBLB/NR4A3/JUND/CD3D/CD27,up,FALSE
