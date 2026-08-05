@@ -74,6 +74,22 @@ largest contributors are the same genes for both factors (NAMPT, SDC4, CCL4). On
 measured the two are close enough to be interchangeable: ULM 8.299 against 8.286, NES 2.329
 against 2.348, size residual rank 20 against 17.
 
+**That 0.14% is a cancellation, not an absence.** The 27 exclusively-claimed targets are 15% of
+HIF1A's signed total in *magnitude* — 72.6 of 474.6 units — and net to 0.65 only because 13 go up
+on the synovial-fluid side and 14 go down. Twelve of the 27 clear the compartment's FDR cut and
+those twelve split six each way, so the set has evidence and no direction rather than neither.
+Counted on fold change instead of signed contribution the split reads 12 and 15: TM9SF4 sits on a
+repressing edge, so it contributes positively while going down. And 14 of the 27 carry
+`default activation` rather than a recorded sign, so for half of them the direction the arithmetic
+applies is assumed. What this licenses is narrow, and it is about the regulon rather than the
+factor: the *direction* of HIF1A's CollecTRI-ULM score comes from targets other regulons also
+claim. That is the bound `tf_activity_vs_regulon_size` reaches by another route.
+
+Three figures carry it, in this order: `tf_target_promiscuity` names the extremes of the strip and
+gives both shares, `tf_selective_targets` names all 29 across the two factors on an axis that fits
+them, and `tf_selective_targets_volcano` returns the same genes to the contrast, where the
+two-sidedness is position rather than arithmetic.
+
 **The canonical targets do not move as one block.** All eleven named HIF1A-selective targets
 carry a recorded activating edge. The glycolytic members go up on the synovial-fluid side
 (PGK1 t = +9.76, LDHA +6.58, SLC2A1 +3.69, HK2 +3.16), BNIP3L (+3.18) and VEGFA (+2.97) go up,
@@ -516,14 +532,16 @@ nothing here pools with the donor-pseudobulk claim spine.
 
 ## figures/_overview/tf_target_promiscuity.png
 
-The synovial-fluid-side contribution to HIF1A's CollecTRI-ULM score
-is carried by targets that many other regulons also contain: the 27
-of 293 targets HIF1A alone claims sum to 0.14% of its signed total,
-while the 73 targets sitting in more than 25 regulons carry 35%.
-NFKB1 decomposes the same way (2 exclusive targets, 0.07% of its
-signed total; 30% from targets in more than 25 regulons), so joint
-ownership of the high-t genes is a property the two regulons share
-and it bounds both of them equally.
+The direction of HIF1A's CollecTRI-ULM score comes from targets many
+other regulons also contain, and its exclusively-claimed targets
+carry magnitude without direction: the 27 of 293 targets HIF1A alone
+claims hold 15% of its signed total in magnitude but net only 0.14%,
+because 13 of them go up on the synovial-fluid side and 14 go down,
+while the 73 targets sitting in more than 25 regulons carry 35% net.
+NFKB1 has only 2 exclusive targets, which split the same way (one up,
+one down, 0.07% net), so joint ownership of the directional high-t
+genes is a property the two regulons share and it bounds both of them
+equally.
 
 **How to read:** One point per regulon target, faceted by factor. The x axis counts
 how many CollecTRI regulons contain that target, on a log scale, so
@@ -532,11 +550,16 @@ this regulon alone. The y axis is the target's signed contribution,
 its moderated t multiplied by the sign of the edge, so positive means
 the target moves with the synovial-fluid side and the zero rule
 separates the directions. Orange marks the exclusively-claimed
-targets. The ten largest positive contributors per facet are named.
-The in-panel text gives each factor's share of its signed total from
-exclusively-claimed targets and from targets in more than 25
-regulons. Annotation tier: a contribution is arithmetic on the
-committed ranked list and carries no separate test.
+targets. The ten largest positive contributors per facet are named in
+black, and the three largest exclusively-claimed targets in each
+direction are named in orange, placed in the empty space above and
+below the x = 1 strip because 27 labels do not fit inside it;
+`tf_selective_targets` names every one of them. The in-panel text
+gives the exclusively-claimed share of the signed total twice, once
+in magnitude and once net, with the up/down split that makes the two
+differ, and then the share from targets in more than 25 regulons.
+Annotation tier: a contribution is arithmetic on the committed ranked
+list and carries no separate test.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -604,4 +627,68 @@ spine.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/18_tf_activity_viz.R` | `save_overview` | `tf_activity.primary_population=treg; tf_activity.network_variants=[signed, unsigned, literature_signed, alias_recovered]; tf_activity.methods=[ulm, mlm, consensus]` | `03_results/18_tf_activity/tables/hif1a_rank_cascade.csv + ranked_list_keycheck.csv` |
+
+## figures/_overview/tf_selective_targets.png
+
+Named one by one, the targets HIF1A alone claims carry magnitude
+without direction: 13 of the 27 go up on the synovial-fluid side and
+14 go down, so they hold 15% of the regulon's signed total in
+magnitude and net 0.14% of it. Glycolytic members fall on both sides
+(PGAM1 +5.68 and GBE1 +3.93 up against PFKL -2.55 and TKTL1 -4.25
+down), and 14 of the 27 carry no recorded evidence for the edge
+direction the contribution is computed with. NFKB1 has 2 such targets
+and they split one each way (GCA +2.80, BST1 -2.47).
+
+**How to read:** One row per target that no other CollecTRI regulon contains, faceted
+by factor, ordered by signed contribution. The bar runs from zero to
+the target's signed contribution, its moderated t multiplied by the
+edge sign, so length is magnitude and side is direction. Colour
+restates that direction. A filled point means CollecTRI records
+literature evidence for the edge's direction and an open point means
+the direction was assumed activating by default, which is the case
+for 14 of HIF1A's 27. One bar is dashed: TM9SF4 is the single target
+here carried on a repressing edge, so its positive contribution comes
+from a gene that goes down in synovial fluid. Row pitch is equal in
+both panels, so a bar length means the same thing in each. In-panel
+text gives the set's size, its up/down split, and its share of the
+factor's signed total in magnitude and net, which differ because the
+set nearly cancels. Annotation tier: a contribution is arithmetic on
+the committed ranked list and carries no separate test.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/18_tf_activity_viz.R` | `save_overview` | `tf_activity.decompose_tfs=[HIF1A, NFKB1]; tf_activity.selective_max_regulons=1; tf_activity.primary_population=treg; tf_activity.default_sign_decision=default activation` | `03_results/18_tf_activity/tables/target_decomposition.csv` |
+
+
+## figures/_overview/tf_selective_targets_volcano.png
+
+Placed on the contrast they were scored on, the 27 targets HIF1A
+alone claims sit on both sides of it: 12 go up in synovial fluid and
+15 go down, 12 of the 27 clear FDR 0.05, and those twelve split six
+up against six down, so the set carries evidence without carrying a
+direction. That is what makes its 0.14% share of HIF1A's signed
+contribution a cancellation rather than an absence: in magnitude the
+same 27 targets are 15% of that total. NFKB1's two
+exclusively-claimed targets split one each way and neither clears the
+FDR cut.
+
+**How to read:** The standard volcano of the committed donor-pseudobulk contrast: x is
+log2 fold change, synovial fluid over paired blood, y is raw p on a
+-log10 scale, and colour is the significance category, decided on FDR
+while the axis keeps raw p for resolution. The dashed horizontal rule
+is the raw p that realises the FDR cut; the vertical rules are the
+fold-change cut. Only the targets no other CollecTRI regulon claims
+are ringed and named, circles for HIF1A and triangles for NFKB1, and
+the ring is unfilled so the point inside keeps its own category
+colour. Nothing else is labelled, because the spread of the named
+genes across both halves is the point: count how many sit either side
+of zero and how many clear the rules. The split here is by fold
+change; by signed contribution it reads 13 up and 14 down, since
+TM9SF4 sits on a repressing edge and contributes positively while
+going down. Annotation tier: this restates a committed DE table and a
+set membership, so nothing here is a new test.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/18_tf_selective_volcano_viz.R` | `save_overview` | `thresholds.de_fdr=0.05; thresholds.de_logfc=1; tf_activity.decompose_tfs=[HIF1A, NFKB1]; tf_activity.selective_max_regulons=1; tf_activity.primary_population=treg` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv, 03_results/18_tf_activity/tables/target_decomposition.csv` |
 

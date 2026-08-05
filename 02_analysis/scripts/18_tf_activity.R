@@ -49,6 +49,7 @@ options(stringsAsFactors = FALSE)
 
 source("02_analysis/helpers/figure_style.R")          # FIG_CFG, round_numeric_cols
 source("02_analysis/helpers/source_hash_manifest.R")  # source_sha256, verify_source_hash
+source("02_analysis/helpers/symbol_alias.R")          # build_alias_map, ALIAS_RESOLUTIONS
 
 STAGE  <- "18_tf_activity"
 SCRIPT <- "02_analysis/scripts/18_tf_activity.R"
@@ -216,76 +217,47 @@ message(sprintf("  CollecTRI: %d unique edges, %d TFs, %d repressing edges",
                 nrow(net_base), length(unique(net_base$source)), sum(net_base$mor < 0)))
 
 # ---- HGNC alias resolution: current network symbol -> the symbol the matrix carries ----
-# org.Hs.eg.db is the arbiter. A target is recoverable when it is absent from the ranked
-# list, its symbol resolves to exactly one Entrez id, and exactly one alias of that same
-# Entrez id is present in the ranked list.
+# The machinery is shared rather than private to this stage: helpers/symbol_alias.R holds
+# one ownership guard and one rejection ledger for every consumer in the compartment, and
+# this stage's two published ledger tables are the regression test that the lift changed
+# nothing (02_analysis/scripts/00_symbol_alias_validate.R).
 #
-# The hazard: many old symbols were reassigned as the official symbol of a different gene.
-# PGF carries the alias PIGF, and PIGF now names a GPI-anchor biosynthesis gene; THPO
-# carries TPO, and TPO now names thyroid peroxidase. Accepting either attaches one gene's
-# expression to another gene's regulon edge, so a candidate that is the official symbol of
-# any other Entrez id is rejected, counted and reported.
-build_alias_map <- function(missing_symbols, universe) {
-  empty <- tibble(network_symbol = character(), matrix_symbol = character(),
-                  entrez_id = character(), n_aliases_in_universe = integer())
-  if (!requireNamespace("org.Hs.eg.db", quietly = TRUE) ||
-      !requireNamespace("AnnotationDbi", quietly = TRUE)) {
-    message("  org.Hs.eg.db unavailable, alias recovery skipped and 0 edges recovered.")
-    return(structure(empty, n_rejected_ambiguous = 0L, rejected = empty))
-  }
-  db <- org.Hs.eg.db::org.Hs.eg.db
-  eg <- suppressMessages(AnnotationDbi::select(
-    db, keys = missing_symbols, keytype = "SYMBOL", columns = "ENTREZID"))
-  eg <- eg[!is.na(eg$ENTREZID), , drop = FALSE]
-  # one Entrez id per network symbol, or the symbol is dropped
-  eg <- eg[!(eg$SYMBOL %in% eg$SYMBOL[duplicated(eg$SYMBOL)]), , drop = FALSE]
-  if (!nrow(eg)) return(structure(empty, n_rejected_ambiguous = 0L, rejected = empty))
-
-  al <- suppressMessages(AnnotationDbi::select(
-    db, keys = unique(eg$ENTREZID), keytype = "ENTREZID", columns = "ALIAS"))
-  al <- al[al$ALIAS %in% universe, , drop = FALSE]
-  if (!nrow(al)) return(structure(empty, n_rejected_ambiguous = 0L, rejected = empty))
-  cand <- al %>% group_by(ENTREZID) %>%
-    summarise(matrix_symbol = if (n_distinct(ALIAS) == 1L) ALIAS[1] else NA_character_,
-              n_aliases_in_universe = n_distinct(ALIAS), .groups = "drop") %>%
-    filter(!is.na(matrix_symbol))
-  hits <- eg %>% inner_join(cand, by = "ENTREZID") %>%
-    transmute(network_symbol = SYMBOL, matrix_symbol, entrez_id = ENTREZID,
-              n_aliases_in_universe = as.integer(n_aliases_in_universe))
-  if (!nrow(hits)) return(structure(empty, n_rejected_ambiguous = 0L, rejected = empty))
-
-  # the guard: is the candidate the official symbol of some other gene?
-  own <- suppressMessages(AnnotationDbi::select(
-    db, keys = unique(hits$matrix_symbol), keytype = "SYMBOL", columns = "ENTREZID"))
-  own <- own[!is.na(own$ENTREZID), , drop = FALSE]
-  owner <- setNames(own$ENTREZID, own$SYMBOL)
-  taken <- !is.na(owner[hits$matrix_symbol]) &
-           owner[hits$matrix_symbol] != hits$entrez_id
-  taken[is.na(taken)] <- FALSE
-  rejected <- hits[taken, , drop = FALSE]
-  keep <- hits[!taken, , drop = FALSE]
-  structure(keep, n_rejected_ambiguous = nrow(rejected), rejected = rejected)
-}
+# What it decides. org.Hs.eg.db is the arbiter, and a target is recoverable when it is
+# absent from the ranked list, its symbol resolves to exactly one Entrez id, and exactly
+# one alias of that same Entrez id is present in the ranked list. The hazard the guard
+# exists for: many retired symbols were reassigned as the official symbol of a DIFFERENT
+# gene. PGF carries the alias PIGF, and PIGF now names a GPI-anchor biosynthesis gene;
+# THPO carries TPO, and TPO now names thyroid peroxidase. Accepting either attaches one
+# gene's expression to another gene's regulon edge, so a candidate that is the official
+# symbol of any other Entrez id is rejected, counted and reported.
+#
+# The map the helper returns carries EVERY candidate with its resolution, so the two
+# withholding classes the private copy returned silently — a reference symbol with two
+# aliases in the universe, and one that is ambiguous in org.Hs.eg.db — are now rows rather
+# than a shrug. Only `accepted` is ever applied to an edge.
 
 make_variants <- function(universe) {
   signed <- net_base %>% filter(target %in% universe)
   unsigned <- signed %>% mutate(mor = 1)
   lit <- net_base %>% filter(target %in% universe, sign_decision != SD_DEF)
   missing_sym <- sort(setdiff(unique(net_base$target), universe))
-  amap <- build_alias_map(missing_sym, universe)
+  amap <- build_alias_map(missing_sym, universe, db = org.Hs.eg.db::org.Hs.eg.db)
+  accepted <- amap %>% filter(resolution == "accepted")
+  withheld <- amap %>% filter(resolution != "accepted")
   recovered <- net_base %>%
     filter(!target %in% universe) %>%
-    rename(network_symbol = target) %>%
-    inner_join(as_tibble(amap), by = "network_symbol") %>%
+    rename(reference_symbol = target) %>%
+    inner_join(accepted, by = "reference_symbol") %>%
     transmute(source, target = matrix_symbol, mor, sign_decision,
-              recovered_from = network_symbol)
+              recovered_from = reference_symbol)
   alias_net <- bind_rows(signed %>% mutate(recovered_from = NA_character_), recovered) %>%
     distinct(source, target, .keep_all = TRUE)
   list(signed = signed, unsigned = unsigned, literature_signed = lit,
        alias_recovered = alias_net %>% select(source, target, mor, sign_decision),
-       .alias_map = amap, .recovered_edges = recovered,
-       .n_rejected_ambiguous = attr(amap, "n_rejected_ambiguous"),
-       .rejected = attr(amap, "rejected"))
+       .alias_map = amap, .accepted = accepted, .recovered_edges = recovered,
+       .n_rejected_ambiguous = sum(
+         amap$resolution == "rejected_symbol_belongs_to_another_gene"),
+       .rejected = withheld)
 }
 
 NETS <- lapply(names(POPS), function(tag) make_variants(names(STATS[[tag]])))
@@ -295,36 +267,39 @@ alias_recovery <- bind_rows(lapply(names(POPS), function(tag) {
   r <- NETS[[tag]]$.recovered_edges
   if (!nrow(r)) return(NULL)
   r %>% transmute(population = POPS[[tag]], tf = source,
-                  network_symbol = recovered_from, matrix_symbol = target, mor,
+                  reference_symbol = recovered_from, matrix_symbol = target, mor,
                   resolution = "accepted", focus_tf = source %in% FOCUS)
 }))
-# The rejected resolutions are published beside the accepted ones, at symbol level, so the
-# guard is auditable.
+# The withheld resolutions are published beside the accepted ones, at symbol level, so the
+# guard is auditable and so a withholding never has to be inferred from an absence.
 alias_rejected <- bind_rows(lapply(names(POPS), function(tag) {
   rj <- NETS[[tag]]$.rejected
   if (is.null(rj) || !nrow(rj)) return(NULL)
-  net_base %>% filter(target %in% rj$network_symbol) %>%
-    transmute(population = POPS[[tag]], tf = source, network_symbol = target,
-              matrix_symbol = rj$matrix_symbol[match(target, rj$network_symbol)], mor,
-              resolution = "rejected_symbol_belongs_to_another_gene",
+  net_base %>% filter(target %in% rj$reference_symbol) %>%
+    transmute(population = POPS[[tag]], tf = source, reference_symbol = target,
+              matrix_symbol = rj$matrix_symbol[match(target, rj$reference_symbol)], mor,
+              resolution = rj$resolution[match(target, rj$reference_symbol)],
               focus_tf = source %in% FOCUS)
 }))
 alias_recovery <- bind_rows(alias_recovery, alias_rejected)
 if (!nrow(alias_recovery))
   alias_recovery <- tibble(population = character(), tf = character(),
-                           network_symbol = character(), matrix_symbol = character(),
+                           reference_symbol = character(), matrix_symbol = character(),
                            mor = numeric(), resolution = character(), focus_tf = logical())
 emit(alias_recovery, "alias_recovery.csv")
 acc <- alias_recovery %>% filter(resolution == "accepted")
-message(sprintf("  alias recovery: %d edges accepted over %d TFs (%d on a focus TF); %d edges rejected because the pre-2019 symbol is now another gene's official symbol",
+message(sprintf("  alias recovery: %d edges accepted over %d TFs (%d on a focus TF); %d edges withheld, %d of them because the candidate is now another gene's official symbol",
                 nrow(acc), length(unique(acc$tf)), sum(acc$focus_tf),
-                sum(alias_recovery$resolution != "accepted")))
+                sum(alias_recovery$resolution != "accepted"),
+                sum(alias_recovery$resolution ==
+                      "rejected_symbol_belongs_to_another_gene")))
 message("  accepted resolutions on the focus TFs:")
 print(as.data.frame(acc %>% filter(focus_tf, population == POPS[[PRIMARY]]) %>%
-                      select(tf, network_symbol, matrix_symbol)), row.names = FALSE)
-message("  rejected resolutions (a sample of the distinct symbol pairs):")
+                      select(tf, reference_symbol, matrix_symbol)), row.names = FALSE)
+message("  withheld resolutions (a sample of the distinct symbol pairs):")
 print(as.data.frame(alias_recovery %>% filter(resolution != "accepted") %>%
-                      distinct(network_symbol, matrix_symbol) %>% head(15)), row.names = FALSE)
+                      distinct(reference_symbol, matrix_symbol, resolution) %>% head(15)),
+      row.names = FALSE)
 
 variant_summary <- bind_rows(lapply(names(POPS), function(tag) {
   bind_rows(lapply(VARIANTS, function(v) {
@@ -345,14 +320,14 @@ emit(variant_summary, "network_variants.csv")
 # ---- per-focus-TF accounting: the cause behind every unmatched target ----
 vocab <- bind_rows(lapply(names(POPS), function(tag) {
   universe <- names(STATS[[tag]])
-  amap <- NETS[[tag]]$.alias_map
+  amap <- NETS[[tag]]$.accepted
   bind_rows(lapply(FOCUS, function(tf) {
     t <- unique(net_base$target[net_base$source == tf])
     matched <- intersect(t, universe)
     unmatched <- setdiff(t, universe)
     expr_filtered <- intersect(unmatched, MATRIX_SYMBOLS)
     absent <- setdiff(unmatched, MATRIX_SYMBOLS)
-    rec <- intersect(unmatched, amap$network_symbol)
+    rec <- intersect(unmatched, amap$reference_symbol)
     tibble(population = POPS[[tag]], tf = tf,
            n_targets_in_network = length(t),
            n_matched = length(matched),
@@ -766,8 +741,8 @@ message(sprintf("  across all %d TFs: Spearman(signed rank, unsigned rank) = %.4
 #     is reported with the cause when it fails to match, and with an alias probe, since a
 #     silently dropped target is the failure mode under investigation.
 alias_of <- function(sym) {
-  m <- NETS[[pop_tag]]$.alias_map
-  hit <- m$matrix_symbol[m$network_symbol == sym]
+  m <- NETS[[pop_tag]]$.accepted
+  hit <- m$matrix_symbol[m$reference_symbol == sym]
   if (length(hit)) hit[1] else NA_character_
 }
 CANON_TBL <- bind_rows(lapply(CANON, function(g) {

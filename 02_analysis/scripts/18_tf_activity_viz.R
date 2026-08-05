@@ -6,6 +6,8 @@
 #                                unsigned-regulon fgsea rank
 #   tf_target_promiscuity        per-target signed contribution against how many other
 #                                CollecTRI regulons claim the same target
+#   tf_selective_targets         every exclusively-claimed target named, because the x = 1
+#                                strip of the previous figure cannot hold 27 labels
 #   tf_activity_vs_regulon_size  activity against regulon size across every TF tested,
 #                                with the size-conditional expectation and the
 #                                size-and-expression-matched random-regulon null
@@ -175,13 +177,55 @@ dec <- DEC %>%
 
 lab2 <- dec %>% group_by(tf) %>% slice_max(contrib, n = LBL_N, with_ties = FALSE) %>% ungroup()
 
-share <- DECSUM %>%
+# The exclusively-claimed targets all sit at x = 1, so their strip spans a quarter of the
+# panel height and cannot hold 27 labels at the font floor — tf_selective_targets names all
+# of them on an axis that fits. Here only the extremes are named, and they go into the empty
+# vertical gutter above and below the strip, where there IS room. SEL_EXTREME_N per direction.
+SEL_EXTREME_N <- 3L
+sel <- dec %>% filter(n_regulons <= SEL_MAX)
+sel_ends <- bind_rows(
+  sel %>% group_by(tf) %>% slice_max(contrib, n = SEL_EXTREME_N, with_ties = FALSE) %>%
+    mutate(gutter = "up") %>% ungroup(),
+  sel %>% group_by(tf) %>% slice_min(contrib, n = SEL_EXTREME_N, with_ties = FALSE) %>%
+    mutate(gutter = "down") %>% ungroup()
+) %>% distinct(tf, target, .keep_all = TRUE)
+
+# Placed by hand, not by repel. Every one of these labels shares x = 1, so repel has a single
+# axis of freedom and resolves the overlap by reseating a label back onto the strip or clipping
+# it off the panel — it did both here. Explicit positions also make the render deterministic.
+# No leader lines: the x = 1 points are an undifferentiated column, so a leader to one of them
+# would identify nothing, and the stack is read in descending order of contribution instead.
+SEL_LAB_TOP  <- 20.5   # first label of the upper stack, above every x = 1 point
+SEL_LAB_BOT  <- -10.5  # first label of the lower stack, below every x = 1 point
+SEL_LAB_STEP <- 2.6    # vertical pitch: over the label height at LBL_SZ, and tight enough that
+                       # the third label of the lower stack still clears the in-panel text block
+sel_ends <- sel_ends %>%
+  group_by(tf, gutter) %>%
+  arrange(desc(abs(contrib)), .by_group = TRUE) %>%
+  mutate(lab_y = ifelse(gutter == "up",
+                        SEL_LAB_TOP - SEL_LAB_STEP * (row_number() - 1),
+                        SEL_LAB_BOT - SEL_LAB_STEP * (row_number() - 1))) %>%
+  ungroup()
+
+# Net share alone reads as "these genes contribute nothing". They contribute magnitude and no
+# direction, which is a different statement, so the panel carries both numbers plus the
+# up/down split that produces the cancellation.
+share <- dec %>%
   group_by(tf) %>%
-  summarise(pct_selective = sum(pct_of_total_contrib[promiscuity_band == "<=1"]),
-            pct_over_25 = sum(pct_of_total_contrib[promiscuity_band == ">25"]), .groups = "drop") %>%
+  summarise(n_sel = sum(n_regulons <= SEL_MAX),
+            pct_net = 100 * sum(contrib[n_regulons <= SEL_MAX]) / sum(contrib),
+            pct_abs = 100 * sum(abs(contrib[n_regulons <= SEL_MAX])) / sum(contrib),
+            n_sel_up = sum(n_regulons <= SEL_MAX & contrib > 0),
+            n_sel_down = sum(n_regulons <= SEL_MAX & contrib < 0), .groups = "drop") %>%
+  left_join(DECSUM %>% filter(promiscuity_band == ">25") %>%
+              select(tf, pct_over_25 = pct_of_total_contrib), by = "tf") %>%
   mutate(tf = factor(tf, levels = DECOMP),
-         txt = sprintf("%.2f%% of the signed total from targets this regulon alone claims\n%.0f%% from targets in more than 25 regulons",
-                       pct_selective, pct_over_25))
+         # Three short lines rather than two long ones: at this text size a line wider than the
+         # facet runs off the canvas, and the panel is half of a 13-inch wide figure.
+         txt = sprintf(paste0("%d targets this regulon alone claims, %d up and %d down\n",
+                              "%.0f%% of the signed total in magnitude, %.2f%% net\n",
+                              "%.0f%% of the signed total from targets in more than 25 regulons"),
+                       n_sel, n_sel_up, n_sel_down, pct_abs, pct_net, pct_over_25))
 
 p2 <- ggplot(dec, aes(x = n_regulons, y = contrib)) +
   geom_hline(yintercept = 0, linewidth = 0.4, colour = REFC) +
@@ -189,6 +233,8 @@ p2 <- ggplot(dec, aes(x = n_regulons, y = contrib)) +
   geom_text_repel(data = lab2, aes(label = target), size = LBL_SZ,
                   max.overlaps = Inf, min.segment.length = 0, segment.size = 0.3,
                   box.padding = 0.35, seed = RPL_SEED, show.legend = FALSE) +
+  geom_text(data = sel_ends, aes(x = 1, y = lab_y, label = target), inherit.aes = FALSE,
+            colour = unname(DIV["up"]), size = LBL_SZ, hjust = 0, nudge_x = 0.02) +
   geom_text(data = share, aes(x = 1, y = -Inf, label = txt), inherit.aes = FALSE,
             hjust = 0, vjust = -0.3, size = LBL_SZ * 0.85, colour = "grey25") +
   facet_wrap(~ tf, nrow = 1) +
@@ -211,12 +257,13 @@ fig2_tbl <- dec %>%
 save_overview(
   p2, STAGE, "tf_target_promiscuity", table = fig2_tbl,
   finding = paste(
-    "The synovial-fluid-side contribution to HIF1A's CollecTRI-ULM score is carried by targets",
-    "that many other regulons also contain: the 27 of 293 targets HIF1A alone claims sum to 0.14%",
-    "of its signed total, while the 73 targets sitting in more than 25 regulons carry 35%.",
-    "NFKB1 decomposes the same way (2 exclusive targets, 0.07% of its signed total; 30% from",
-    "targets in more than 25 regulons), so joint ownership of the high-t genes is a property",
-    "the two regulons share and it bounds both of them equally."),
+    "The direction of HIF1A's CollecTRI-ULM score comes from targets many other regulons also",
+    "contain, and its exclusively-claimed targets carry magnitude without direction: the 27 of",
+    "293 targets HIF1A alone claims hold 15% of its signed total in magnitude but net only 0.14%,",
+    "because 13 of them go up on the synovial-fluid side and 14 go down, while the 73 targets",
+    "sitting in more than 25 regulons carry 35% net. NFKB1 has only 2 exclusive targets, which",
+    "split the same way (one up, one down, 0.07% net), so joint ownership of the directional",
+    "high-t genes is a property the two regulons share and it bounds both of them equally."),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("tf_activity.decompose_tfs=[", paste(DECOMP, collapse = ", "),
                      "]; tf_activity.selective_max_regulons=", SEL_MAX,
@@ -230,10 +277,104 @@ save_overview(
     "contribution, its moderated t multiplied by the sign of the edge, so positive means the",
     "target moves with the synovial-fluid side and the zero rule separates the directions. Orange",
     "marks the exclusively-claimed targets. The ten largest positive contributors per facet are",
-    "named. The in-panel text gives each factor's share of its signed total from",
-    "exclusively-claimed targets and from targets in more than 25 regulons. Annotation tier: a",
-    "contribution is arithmetic on the committed ranked list and carries no separate test."),
+    "named in black, and the three largest exclusively-claimed targets in each direction are named",
+    "in orange, placed in the empty space above and below the x = 1 strip because 27 labels do not",
+    "fit inside it; `tf_selective_targets` names every one of them. The in-panel text gives the",
+    "exclusively-claimed share of the signed total twice, once in magnitude and once net, with the",
+    "up/down split that makes the two differ, and then the share from targets in more than 25",
+    "regulons. Annotation tier: a contribution is arithmetic on the committed ranked list and",
+    "carries no separate test."),
   config = CFG, wide = TRUE
+)
+
+# =============================================================================
+# FIGURE 2b: every exclusively-claimed target, named
+# =============================================================================
+# The previous figure stacks all of these at x = 1, where 27 labels cannot fit at the font
+# floor. One row per target on a free y axis is the only layout that names them all, and
+# naming them is what shows the set splitting nearly evenly in direction rather than being
+# small.
+
+message("[fig 2b] exclusively-claimed targets ...")
+
+# Two decomposed factors, no shared exclusive target between them, so one global ordering by
+# contribution serves both panels — free_y drops the levels a panel does not carry.
+sel_named <- sel %>%
+  mutate(direction = ifelse(contrib > 0, "up on the synovial-fluid side",
+                            "down on the synovial-fluid side"),
+         edge = ifelse(sign_decision == (TA$default_sign_decision %||% "default activation"),
+                       "sign assumed activating", "sign recorded from literature"),
+         edge_line = ifelse(mor < 0, "22", "solid")) %>%
+  arrange(contrib) %>%
+  mutate(target = factor(target, levels = unique(target)))
+
+# NFKB1's panel is two rows tall, so it has no in-panel whitespace for an annotation to sit in
+# without landing on its own bars. The per-factor numbers therefore go in the subtitle, one line
+# each, where both are legible regardless of how many rows a panel carries.
+sel_txt <- share %>%
+  arrange(tf) %>%
+  transmute(line = sprintf(paste0("%s: %d targets, %d up and %d down — %.0f%% of the signed total ",
+                                  "in magnitude, %.2f%% net"),
+                           tf, n_sel, n_sel_up, n_sel_down, pct_abs, pct_net))
+
+p2b <- ggplot(sel_named, aes(x = contrib, y = target)) +
+  geom_vline(xintercept = 0, linewidth = 0.4, colour = REFC) +
+  geom_segment(aes(x = 0, xend = contrib, yend = target, colour = direction,
+                   linetype = edge_line), linewidth = LN_W * 0.7) +
+  geom_point(aes(colour = direction, shape = edge), size = PT_SZ * 1.4, stroke = 1.1) +
+  # space = "free_y" gives HIF1A's 27 rows and NFKB1's 2 the same row pitch, so a bar length
+  # means the same thing in both panels and neither is stretched to fill equal height.
+  facet_grid(tf ~ ., scales = "free_y", space = "free_y") +
+  scale_colour_manual(values = c("up on the synovial-fluid side" = unname(DIV["up"]),
+                                 "down on the synovial-fluid side" = unname(DIV["down"])),
+                      name = NULL) +
+  scale_shape_manual(values = c("sign recorded from literature" = 16,
+                                "sign assumed activating" = 1), name = NULL) +
+  scale_linetype_identity(guide = "none") +
+  scale_x_continuous(expand = expansion(mult = c(0.08, 0.16))) +
+  labs(title = "Every target claimed by this regulon alone",
+       subtitle = paste(c("Signed contribution = sign(mode of regulation) x moderated t; positive is synovial-fluid-side",
+                          sel_txt$line), collapse = "\n"),
+       x = "Signed contribution", y = NULL) +
+  project_theme(config = CFG) +
+  # Stacked, not side by side: the four keys spelled out on one row overrun a 9-inch canvas.
+  theme(legend.position = "bottom", legend.box = "vertical",
+        panel.grid.major.y = element_blank())
+
+fig2b_tbl <- sel_named %>%
+  select(population, tf, target, mor, sign_decision, stat, contrib, n_regulons,
+         n_other_regulons, promiscuity_band, avg_expr, padj_gene) %>%
+  arrange(tf, desc(contrib))
+
+save_overview(
+  p2b, STAGE, "tf_selective_targets", table = fig2b_tbl,
+  finding = paste(
+    "Named one by one, the targets HIF1A alone claims carry magnitude without direction: 13 of",
+    "the 27 go up on the synovial-fluid side and 14 go down, so they hold 15% of the regulon's",
+    "signed total in magnitude and net 0.14% of it. Glycolytic members fall on both sides",
+    "(PGAM1 +5.68 and GBE1 +3.93 up against PFKL -2.55 and TKTL1 -4.25 down), and 14 of the 27",
+    "carry no recorded evidence for the edge direction the contribution is computed with.",
+    "NFKB1 has 2 such targets and they split one each way (GCA +2.80, BST1 -2.47)."),
+  script = SCRIPT, fn = "save_overview",
+  config_kv = paste0("tf_activity.decompose_tfs=[", paste(DECOMP, collapse = ", "),
+                     "]; tf_activity.selective_max_regulons=", SEL_MAX,
+                     "; tf_activity.primary_population=", TA$primary_population,
+                     "; tf_activity.default_sign_decision=", TA$default_sign_decision),
+  input = "03_results/18_tf_activity/tables/target_decomposition.csv",
+  how_to_read = paste(
+    "One row per target that no other CollecTRI regulon contains, faceted by factor, ordered by",
+    "signed contribution. The bar runs from zero to the target's signed contribution, its",
+    "moderated t multiplied by the edge sign, so length is magnitude and side is direction.",
+    "Colour restates that direction. A filled point means CollecTRI records literature evidence",
+    "for the edge's direction and an open point means the direction was assumed activating by",
+    "default, which is the case for 14 of HIF1A's 27. One bar is dashed: TM9SF4 is the single",
+    "target here carried on a repressing edge, so its positive contribution comes from a gene that",
+    "goes down in synovial fluid. Row pitch is equal in both panels, so a bar length means the",
+    "same thing in each. In-panel text gives the set's size, its up/down split, and its share of",
+    "the factor's signed total in magnitude and net, which differ because the set nearly cancels.",
+    "Annotation tier: a contribution is arithmetic on the committed ranked list and carries no",
+    "separate test."),
+  config = CFG, width = 9, height = 10
 )
 
 # =============================================================================
