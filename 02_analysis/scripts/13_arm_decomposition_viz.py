@@ -3,10 +3,20 @@
 13_arm_decomposition_viz.py: VIZ ONLY. Which curated programs contain each mouse-derived
 UP arm, and how much of each arm is left over?
 =========================================================================================
-One deliberately plain panel: a horizontal stacked bar per mouse-derived up arm, band per
+Two panels of set arithmetic over committed gene lists.
+
+`arm_program_composition` — a horizontal stacked bar per mouse-derived up arm, band per
 curated lens, plus the remainder no lens claims. No clustering, no ordination, no novel
 method. The only arithmetic on this face is a sum of the fractional weights already
 committed by 13_arm_decomposition.py.
+
+`arm_hypoxia_euler` — the WT_heat_up-versus-HALLMARK_HYPOXIA overlap drawn instead of
+quoted, area-proportional, in TWO vocabularies side by side. The composition bar reports
+that overlap as a single number against the frozen 200-gene lens; that number is not the
+one a GSEA of hypoxia in the Treg contrast is computed on, because a ranked list carries
+only the genes that survived detection and `filterByExpr`. Drawing one vocabulary alone
+would contradict the other and read as an error, so both are drawn on one shared
+area-per-gene scale and the loss between them becomes the visible quantity.
 
 Band widths use the FRACTIONAL accounting, which is the only accounting under which
 "fraction of arm" is a true statement. A gene claimed by k lenses gives 1/k to each, so an
@@ -29,6 +39,7 @@ Reads only committed 13_arm_decomposition tables. Run from the compartment root,
 """
 from __future__ import annotations
 
+import math
 import os
 import sys
 import textwrap
@@ -38,21 +49,26 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
-from matplotlib.patches import Patch  # noqa: E402
+from matplotlib.patches import Circle, Patch  # noqa: E402
+from scipy.optimize import brentq  # noqa: E402
 
 COMPARTMENT_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = COMPARTMENT_ROOT.parent
 sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PATHS  # noqa: E402
+from config import CONFIG, PATHS  # noqa: E402
 from helpers.figure_style import (  # noqa: E402
     FIG_CFG,
     purge_figures,
     round_numeric_cols,
     save_overview,
     set_paper_style,
+    write_caption,
 )
+from helpers.geneset_utils import load_alias_map, resolve_symbols  # noqa: E402
+from helpers.source_hash_manifest import verify_source_hash  # noqa: E402
 
 STAGE = "13_arm_decomposition"
 SCRIPT = "02_analysis/scripts/13_arm_decomposition_viz.py"
@@ -61,6 +77,14 @@ RESIDUAL = "unassigned"
 
 ARM_ORDER = ["WT_heat_up", "KO_heat_up", "Interaction_up", "Interaction_up_fdrOnly"]
 
+# --- the one pair the Euler draws, and the ranking it is restricted to -------------------
+# The Treg gate is the compartment's most directly Treg-relevant ranking and the one whose
+# hypoxia enrichment is quoted downstream, so it is the vocabulary the second panel uses.
+EULER_ARM = "WT_heat_up"
+EULER_LENS = "hypoxia"
+EULER_LENS_SET = "HALLMARK_HYPOXIA"
+EULER_POPULATION = "treg"
+
 # --- declared palette --------------------------------------------------------------------
 # Every hue is read from the project config (`colors.okabe_ito` for the eight categorical
 # slots, `colors.diverging.up` for the ninth) so this panel shares the compartment's
@@ -68,6 +92,9 @@ ARM_ORDER = ["WT_heat_up", "KO_heat_up", "Interaction_up", "Interaction_up_fdrOn
 # purpose: it names no program, so it must not look like one.
 _OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
 _DIVERGING = (FIG_CFG.get("colors", {}) or {}).get("diverging", {}) or {}
+# The neutral grey config reserves for a reference annotation drawn over data, so a leader
+# line can never be mistaken for a data series.
+_REFERENCE_LINE = (FIG_CFG.get("colors", {}) or {})["reference_line"]
 PROGRAM_COL = {
     "nfkb_tnfa": _OKABE["vermillion"],
     "inflammatory": _OKABE["orange"],
@@ -274,9 +301,352 @@ def plot_composition(df: pd.DataFrame):
 
 
 # ===========================================================================
+# 3. The Euler: one arm against one lens, in two vocabularies
+# ===========================================================================
+# Set membership is NOT recomputed here. The arm's genes and its intersection with the
+# hypoxia lens are read from the tables 13_arm_decomposition.py committed, the frozen lens
+# file is hash-verified against that stage's own pin before it is read, and the read is
+# asserted to reproduce the committed intersection gene for gene. What this section adds is
+# a RESTRICTION of that membership to a declared vocabulary, which is a different question
+# from who is a member.
+EULER_COL_ARM = _OKABE["orange"]
+EULER_COL_LENS = PROGRAM_COL["hypoxia"]
+EULER_FILL_ALPHA = 0.45
+# Room above the taller circle for the shared-count leader, in gene-area units.
+EULER_HEAD_ROOM = 2.6
+EULER_MARGIN = 0.7
+# The band below the panels, wide enough that the legend and the key never overlap. Both
+# are placed by hand for that reason: a collision there is invisible in a text report.
+EULER_BOTTOM = 0.29
+EULER_LEGEND_Y = 0.255
+EULER_KEY_Y = 0.145
+
+
+def frozen_lens_path(set_id: str) -> Path:
+    """The frozen lens file this compartment declares for `set_id`, read from config.
+
+    Selected out of the declared `project_frozen` file list rather than spelled out, so a
+    config that stops declaring the set stops this figure instead of silently reading a
+    path that happens to still exist on disk.
+    """
+    files = (((CONFIG.get("unbiased_enrichment", {}) or {}).get("project_frozen", {}) or {})
+             .get("files", []) or [])
+    hits = [f for f in files if Path(f).stem == set_id]
+    if len(hits) != 1:
+        raise ValueError(
+            f"analysis_config.yaml::unbiased_enrichment.project_frozen.files declares "
+            f"{len(hits)} file(s) with stem {set_id}; expected exactly one.")
+    return COMPARTMENT_ROOT / hits[0]
+
+
+def read_gene_list(path: Path) -> list[str]:
+    """Newline-delimited HGNC symbols, order preserved, blank lines dropped."""
+    return [ln.strip() for ln in Path(path).read_text().splitlines() if ln.strip()]
+
+
+def _symbol_column(rel_path: str) -> list[str]:
+    """The `gene_symbol` column of one committed vocabulary table."""
+    return pd.read_csv(COMPARTMENT_ROOT / rel_path)["gene_symbol"].astype(str).tolist()
+
+
+def vocabulary_layers() -> dict:
+    """The three nested vocabulary layers plus the alias map, all from config.
+
+    `ranked` is the layer the Euler's second panel restricts to; `matrix` and `reference`
+    exist so a symbol absent from `ranked` can be attributed to the expression filter, to
+    never having been detected, or to the reference build, rather than all three at once.
+    """
+    sa = CONFIG.get("symbol_alias") or {}
+    for key in ("map_path", "matrix_vocabulary", "reference_feature_symbols", "ranked_list"):
+        if not sa.get(key):
+            raise ValueError(f"analysis_config.yaml::symbol_alias has no `{key}`")
+    ranked_rel = str(sa["ranked_list"]).replace("{population}", EULER_POPULATION)
+    ranked = pd.read_csv(COMPARTMENT_ROOT / ranked_rel, sep="\t", header=None,
+                         names=["symbol", "stat"])
+    return {
+        "alias_map": load_alias_map(COMPARTMENT_ROOT / sa["map_path"]),
+        "matrix": set(_symbol_column(sa["matrix_vocabulary"])),
+        "reference": set(_symbol_column(sa["reference_feature_symbols"])),
+        "ranked": set(ranked["symbol"].dropna().astype(str)),
+        "ranked_rel": ranked_rel,
+        "map_rel": str(sa["map_path"]),
+    }
+
+
+def restrict_to_ranked(genes: list[str], voc: dict) -> dict:
+    """Resolve `genes` into the matrix vintage, then keep what the ranked list carries.
+
+    Returns the surviving symbols plus the three-way ledger the compartment requires:
+    matched, matched-via-alias, and genuinely absent split by WHY. Alias resolution only
+    ever adds, so `n_exact` cannot move and the recovery is reported rather than absorbed.
+    """
+    nominal = list(dict.fromkeys(genes))
+    resolved, applied = resolve_symbols(nominal, voc["alias_map"], voc["matrix"])
+    kept = [g for g in resolved if g in voc["ranked"]]
+    exact = [g for g in nominal if g in voc["ranked"]]
+    via_alias = [(ref, tgt) for ref, tgt in applied
+                 if tgt in voc["ranked"] and ref not in voc["ranked"]]
+    lost = [g for g in nominal if g not in voc["ranked"]
+            and g not in {ref for ref, _ in via_alias}]
+    return {
+        "kept": set(kept),
+        "n_nominal": len(nominal),
+        "n_exact": len(set(exact)),
+        "n_via_alias": len(via_alias),
+        "alias_pairs": [f"{ref}->{tgt}" for ref, tgt in via_alias],
+        # A symbol the matrix carries but the ranking does not was dropped by filterByExpr;
+        # one the reference build carries but the matrix does not was never detected in
+        # sorted T cells; one the reference build lacks is a vocabulary miss outright.
+        "n_expression_filtered": len([g for g in lost if g in voc["matrix"]]),
+        "n_undetected": len([g for g in lost
+                             if g not in voc["matrix"] and g in voc["reference"]]),
+        "n_absent_from_reference": len([g for g in lost
+                                        if g not in voc["matrix"]
+                                        and g not in voc["reference"]]),
+    }
+
+
+def lens_area(r_a: float, r_b: float, d: float) -> float:
+    """Area shared by two circles of radii `r_a`, `r_b` whose centres are `d` apart."""
+    if d >= r_a + r_b:
+        return 0.0
+    if d <= abs(r_a - r_b):
+        return math.pi * min(r_a, r_b) ** 2
+    seg_a = r_a ** 2 * math.acos((d * d + r_a * r_a - r_b * r_b) / (2 * d * r_a))
+    seg_b = r_b ** 2 * math.acos((d * d + r_b * r_b - r_a * r_a) / (2 * d * r_b))
+    kite = 0.5 * math.sqrt((r_a + r_b - d) * (d + r_a - r_b)
+                           * (d - r_a + r_b) * (d + r_a + r_b))
+    return seg_a + seg_b - kite
+
+
+def solve_euler(n_a: int, n_b: int, n_both: int) -> dict:
+    """Circle geometry whose three areas EQUAL the three region counts, in gene units.
+
+    A two-set Euler is exactly solvable for every valid configuration, which is why this
+    figure can be area-proportional rather than merely suggestive: the shared area falls
+    continuously and monotonically from min(n_a, n_b) when one circle sits inside the other
+    to zero when they part, so one distance hits any admissible overlap exactly. The
+    configurations with no exact solution begin at three sets. Areas are in gene units, so
+    the same scale serves every panel and the residual is a gene count.
+    """
+    if n_both > min(n_a, n_b):
+        raise ValueError(f"overlap {n_both} exceeds the smaller set ({min(n_a, n_b)})")
+    r_a, r_b = math.sqrt(n_a / math.pi), math.sqrt(n_b / math.pi)
+    lo, hi = abs(r_a - r_b), r_a + r_b
+    if n_both == min(n_a, n_b):
+        d = lo
+    elif n_both == 0:
+        d = hi
+    else:
+        d = brentq(lambda x: lens_area(r_a, r_b, x) - n_both, lo, hi,
+                   xtol=1e-12, rtol=8.9e-16)
+    solved = lens_area(r_a, r_b, d)
+    y_cross = 0.0 if d >= r_a + r_b else math.sqrt(
+        max(0.0, r_a ** 2 - ((d * d + r_a * r_a - r_b * r_b) / (2 * d)) ** 2))
+    return {"r_a": r_a, "r_b": r_b, "d": d, "solved_area": solved,
+            "residual": solved - n_both, "y_cross": y_cross,
+            "cx_a": -d / 2.0, "cx_b": d / 2.0,
+            "x_lens": (r_a - r_b) / 2.0,
+            "x_a_only": -(r_a + r_b) / 2.0, "x_b_only": (r_a + r_b) / 2.0}
+
+
+def euler_universes() -> list[dict]:
+    """The two vocabularies the Euler draws, each with its regions solved and its ledger.
+
+    Panel one is the frozen sets exactly as curated, which is the universe the composition
+    bar and the committed membership tables report. Panel two restricts both sets to the
+    Treg donor-pseudobulk ranked list, which is the universe an enrichment statistic on
+    that ranking is actually computed over.
+    """
+    tdir = PATHS.tables(STAGE)
+    summary = pd.read_csv(tdir / "arm_program_summary.csv")
+    gene = pd.read_csv(tdir / "arm_program_gene.csv")
+
+    arm = sorted(set(gene[gene["arm"] == EULER_ARM]["gene"].astype(str)))
+    row = summary[(summary["arm"] == EULER_ARM) & (summary["program"] == EULER_LENS)]
+    if len(row) != 1:
+        raise ValueError(f"arm_program_summary.csv has no single {EULER_ARM}/{EULER_LENS} row")
+    row = row.iloc[0]
+    committed_both = sorted(str(row["genes"]).split(";")) if str(row["genes"]) else []
+
+    lens_path = frozen_lens_path(EULER_LENS_SET)
+    verify_source_hash(lens_path, f"lens_{EULER_LENS}",
+                       tdir / "source_hash_manifest.csv", root=REPO_ROOT)
+    lens = read_gene_list(lens_path)
+    if len(lens) != int(row["n_curated_set"]):
+        raise AssertionError(
+            f"{EULER_LENS_SET} holds {len(lens)} genes, the committed membership table "
+            f"declares {int(row['n_curated_set'])}")
+    if len(arm) != int(row["n_arm"]):
+        raise AssertionError(
+            f"{EULER_ARM} holds {len(arm)} genes in arm_program_gene.csv, "
+            f"arm_program_summary.csv declares {int(row['n_arm'])}")
+    both = sorted(set(arm) & set(lens))
+    if both != committed_both:
+        raise AssertionError(
+            "the frozen lens read here does not reproduce the committed intersection:\n"
+            f"  this read: {both}\n  arm_program_summary.csv: {committed_both}")
+
+    voc = vocabulary_layers()
+    arm_r = restrict_to_ranked(arm, voc)
+    lens_r = restrict_to_ranked(lens, voc)
+    print(f"[{STAGE}_viz] {EULER_LENS_SET} in the {EULER_POPULATION} ranking: "
+          f"{lens_r['n_exact']} exact + {lens_r['n_via_alias']} via alias "
+          f"= {len(lens_r['kept'])} of {lens_r['n_nominal']} "
+          f"({', '.join(lens_r['alias_pairs']) or 'no alias recovery'})")
+    print(f"[{STAGE}_viz] {EULER_ARM} in the {EULER_POPULATION} ranking: "
+          f"{arm_r['n_exact']} exact + {arm_r['n_via_alias']} via alias "
+          f"= {len(arm_r['kept'])} of {arm_r['n_nominal']}")
+
+    return [
+        {"universe": "frozen_sets",
+         "universe_label": "Frozen sets as curated",
+         "universe_note": "every gene of both committed lists",
+         "vocabulary": "(none — the curated lists in full)",
+         "arm": set(arm), "lens": set(lens), "ledger_arm": None, "ledger_lens": None},
+        {"universe": "treg_ranked_list",
+         "universe_label": f"Restricted to the {EULER_POPULATION.capitalize()} ranked list",
+         "universe_note": f"only genes {Path(voc['ranked_rel']).name} carries "
+                          f"({len(voc['ranked']):,} symbols)",
+         "vocabulary": voc["ranked_rel"],
+         "arm": arm_r["kept"], "lens": lens_r["kept"],
+         "ledger_arm": arm_r, "ledger_lens": lens_r},
+    ]
+
+
+def euler_table(universes: list[dict]) -> pd.DataFrame:
+    """One row per (universe, region): the count drawn, and the geometry that drew it."""
+    rows = []
+    for u in universes:
+        a, b = u["arm"], u["lens"]
+        geo = solve_euler(len(a), len(b), len(a & b))
+        u["geometry"] = geo
+        regions = [
+            ("arm_only", f"in {EULER_ARM} only", sorted(a - b)),
+            ("shared", f"in both {EULER_ARM} and {EULER_LENS_SET}", sorted(a & b)),
+            ("lens_only", f"in {EULER_LENS_SET} only", sorted(b - a)),
+        ]
+        led_a, led_l = u["ledger_arm"], u["ledger_lens"]
+        for region, label, genes in regions:
+            rows.append({
+                "universe": u["universe"],
+                "universe_label": u["universe_label"],
+                "vocabulary": u["vocabulary"],
+                "region": region,
+                "region_label": label,
+                "n_genes": len(genes),
+                "n_arm": len(a),
+                "n_lens": len(b),
+                "frac_of_arm": len(genes) / len(a),
+                "arm_n_nominal": led_a["n_nominal"] if led_a else len(a),
+                "arm_n_exact_match": led_a["n_exact"] if led_a else len(a),
+                "arm_n_via_alias": led_a["n_via_alias"] if led_a else 0,
+                "arm_n_expression_filtered": led_a["n_expression_filtered"] if led_a else 0,
+                "arm_n_undetected": led_a["n_undetected"] if led_a else 0,
+                "arm_n_absent_from_reference": (led_a["n_absent_from_reference"]
+                                                if led_a else 0),
+                "lens_n_nominal": led_l["n_nominal"] if led_l else len(b),
+                "lens_n_exact_match": led_l["n_exact"] if led_l else len(b),
+                "lens_n_via_alias": led_l["n_via_alias"] if led_l else 0,
+                "lens_n_expression_filtered": (led_l["n_expression_filtered"]
+                                               if led_l else 0),
+                "lens_n_undetected": led_l["n_undetected"] if led_l else 0,
+                "lens_n_absent_from_reference": (led_l["n_absent_from_reference"]
+                                                 if led_l else 0),
+                "lens_alias_pairs_applied": ";".join(led_l["alias_pairs"]) if led_l else "",
+                "arm_alias_pairs_applied": ";".join(led_a["alias_pairs"]) if led_a else "",
+                "circle_radius_arm": geo["r_a"],
+                "circle_radius_lens": geo["r_b"],
+                "centre_distance": geo["d"],
+                "shared_area_solved": geo["solved_area"],
+                "shared_area_residual_genes": geo["residual"],
+                "is_area_proportional": True,
+                "measurement": "membership_not_enrichment",
+                "evidence_tier": TIER,
+                "genes": ";".join(genes),
+            })
+    return pd.DataFrame(rows)
+
+
+def plot_arm_hypoxia_euler(universes: list[dict]):
+    """Two exactly area-proportional two-circle Eulers on ONE shared area-per-gene scale."""
+    geos = [u["geometry"] for u in universes]
+    half_x = max(g["d"] / 2 + max(g["r_a"], g["r_b"]) for g in geos) + EULER_MARGIN
+    r_max = max(max(g["r_a"], g["r_b"]) for g in geos)
+    ylim = (-(r_max + EULER_MARGIN), r_max + EULER_HEAD_ROOM)
+
+    fig, axes = plt.subplots(1, len(universes))
+    fig.subplots_adjust(left=0.015, right=0.985, top=0.82, bottom=EULER_BOTTOM, wspace=0.04)
+
+    for ax, u in zip(axes, universes):
+        g = u["geometry"]
+        a, b = u["arm"], u["lens"]
+        for cx, r, colour in ((g["cx_a"], g["r_a"], EULER_COL_ARM),
+                              (g["cx_b"], g["r_b"], EULER_COL_LENS)):
+            ax.add_patch(Circle((cx, 0), r, facecolor=colour, alpha=EULER_FILL_ALPHA,
+                                edgecolor=colour, linewidth=1.6, zorder=2))
+        # Counts sit in the region they measure. The shared count goes inside the lens and
+        # its name above the diagram, because the lens is too narrow to hold both.
+        ax.text(g["x_a_only"], 0.9, f"{len(a - b)}", ha="center", va="center",
+                fontsize=ANNOT_SIZE + 3, zorder=4)
+        ax.text(g["x_a_only"], -0.9, f"{EULER_ARM} only", ha="center", va="center",
+                fontsize=ANNOT_SIZE, zorder=4)
+        ax.text(g["x_b_only"], 0.9, f"{len(b - a)}", ha="center", va="center",
+                fontsize=ANNOT_SIZE + 3, zorder=4)
+        ax.text(g["x_b_only"], -0.9, f"{EULER_LENS_SET}\nonly", ha="center", va="center",
+                fontsize=ANNOT_SIZE, zorder=4)
+        ax.text(g["x_lens"], 0.0, f"{len(a & b)}", ha="center", va="center",
+                fontsize=ANNOT_SIZE + 3, zorder=4)
+        head = r_max + EULER_HEAD_ROOM - 1.1
+        ax.plot([g["x_lens"], g["x_lens"]], [g["y_cross"] + 0.35, head - 0.5],
+                color=_REFERENCE_LINE, linewidth=0.9, zorder=1)
+        ax.text(g["x_lens"], head, "in both", ha="center", va="bottom",
+                fontsize=ANNOT_SIZE, color=_REFERENCE_LINE, zorder=4)
+
+        # Two lines only. The vocabulary's fuller description would run into the
+        # neighbouring panel's title at this canvas width, so it lives in the caption.
+        ax.set_title(f"{u['universe_label']}\n{EULER_ARM} {len(a)} · "
+                     f"{EULER_LENS_SET} {len(b)}", fontsize=ANNOT_SIZE + 1)
+        ax.set_xlim(-half_x, half_x)
+        ax.set_ylim(*ylim)
+        ax.set_aspect("equal", adjustable="box")
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+    handles = [Patch(facecolor=EULER_COL_ARM, alpha=EULER_FILL_ALPHA,
+                     edgecolor=EULER_COL_ARM,
+                     label=f"{EULER_ARM} — the mouse WT iTreg 39-versus-37 °C up arm"),
+               Patch(facecolor=EULER_COL_LENS, alpha=EULER_FILL_ALPHA,
+                     edgecolor=EULER_COL_LENS,
+                     label=f"{EULER_LENS_SET} — frozen MSigDB Hallmark, "
+                           "anchor-independent")]
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, EULER_LEGEND_Y),
+               ncol=2, frameon=False, fontsize=LEGEND_SIZE, columnspacing=2.4)
+    fig.suptitle("The mouse 39 °C-derived up arm against curated hypoxia, "
+                 "drawn to scale in two vocabularies", fontsize=float(_F["title_size"]))
+
+    led = universes[-1]["ledger_lens"]
+    key = ("Every area is exactly proportional to its gene count and both panels share one "
+           "area-per-gene scale, so the right panel is smaller because fewer genes are "
+           "testable in this contrast, not because it is drawn smaller. Right is the "
+           f"vocabulary an enrichment statistic on the {EULER_POPULATION.capitalize()} "
+           f"ranking is computed over; {led['n_via_alias']} of its "
+           f"{len(universes[-1]['lens'])} hypoxia genes match only after alias resolution "
+           f"({', '.join(p.replace('->', ' as ') for p in led['alias_pairs'])}), and the arm "
+           "recovers none. Membership, not enrichment: no NES, FDR or effect size here.")
+    wrap_col = max(60, int(CANVAS_W_IN * 0.97 / (ANNOT_SIZE * 0.0088)))
+    fig.text(0.015, EULER_KEY_Y, "\n".join(textwrap.wrap(key, width=wrap_col)),
+             ha="left", va="top", fontsize=ANNOT_SIZE)
+    return fig
+
+
+# ===========================================================================
 def main() -> None:
     set_paper_style(config=FIG_CFG)
     purge_figures(STAGE, "arm_program", overview=True, config=FIG_CFG)
+    purge_figures(STAGE, "arm_hypoxia", overview=True, config=FIG_CFG)
 
     df = composition_table()
     fig = plot_composition(df)
@@ -346,6 +716,143 @@ def main() -> None:
           f"{len(band_order(df))} bands x {len(ARM_ORDER)} arms")
     print(df[["arm", "program", "n_intersect", "frac_of_arm",
               "frac_of_arm_fractional"]].to_string(index=False))
+
+    # --- the arm-versus-hypoxia Euler, in both vocabularies ------------------
+    universes = euler_universes()
+    euler = euler_table(universes)
+    fig = plot_arm_hypoxia_euler(universes)
+
+    def _n(universe: str, region: str) -> int:
+        return int(euler[(euler["universe"] == universe)
+                         & (euler["region"] == region)]["n_genes"].iloc[0])
+
+    nominal, ranked = "frozen_sets", "treg_ranked_list"
+    n_arm_nom = _n(nominal, "arm_only") + _n(nominal, "shared")
+    n_arm_rank = _n(ranked, "arm_only") + _n(ranked, "shared")
+    n_lens_rank = _n(ranked, "lens_only") + _n(ranked, "shared")
+    led = universes[-1]["ledger_lens"]
+    lost_shared = sorted(set(str(euler[(euler["universe"] == nominal)
+                                       & (euler["region"] == "shared")]["genes"].iloc[0]).split(";"))
+                         - set(str(euler[(euler["universe"] == ranked)
+                                         & (euler["region"] == "shared")]["genes"].iloc[0]).split(";")))
+    max_resid = float(euler["shared_area_residual_genes"].abs().max())
+
+    save_overview(
+        fig, STAGE, "arm_hypoxia_euler",
+        table=round_numeric_cols(euler),
+        finding=(
+            f"Curated hypoxia accounts for a small minority of the mouse 39 °C-derived up arm "
+            f"in either vocabulary, and the vocabulary decides how small: the frozen lists "
+            f"share {_n(nominal, 'shared')} genes of the arm's {n_arm_nom} against "
+            f"{_n(nominal, 'lens_only')} hypoxia genes the arm does not carry, while "
+            f"restricting both to the {EULER_POPULATION.capitalize()} donor-pseudobulk ranked "
+            f"list leaves only {n_arm_rank} of the arm's {n_arm_nom} genes testable and drops "
+            f"the shared count to {_n(ranked, 'shared')} — so the arm's hypoxia content is "
+            f"{_n(nominal, 'shared') / n_arm_nom:.0%} of the curated arm but "
+            f"{_n(ranked, 'shared') / n_arm_rank:.0%} of the part of it this contrast can "
+            f"actually test, and {led['n_via_alias']} of the {n_lens_rank} testable hypoxia "
+            "genes are visible only because alias resolution recovered them."),
+        script=SCRIPT, fn="plot_arm_hypoxia_euler",
+        config_kv=(f"arm = {EULER_ARM}; lens = {EULER_LENS_SET} "
+                   f"(gene_sets.project_frozen); vocabulary = symbol_alias.ranked_list at "
+                   f"population={EULER_POPULATION}; alias pairs from symbol_alias.map_path, "
+                   f"accepted only; colours = colors.okabe_ito.orange + the hypoxia band hue "
+                   f"of this stage's program palette; fill_alpha={EULER_FILL_ALPHA}; "
+                   f"evidence_tier={TIER}"),
+        input=("03_results/13_arm_decomposition/tables/arm_program_summary.csv, "
+               "03_results/13_arm_decomposition/tables/arm_program_gene.csv, "
+               "03_results/13_arm_decomposition/tables/source_hash_manifest.csv, "
+               "00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, "
+               "00_data/references/symbol_alias/symbol_alias_map.csv, "
+               "03_results/03_pseudobulk/tables/ranked_treg.tsv, "
+               "03_results/03_pseudobulk/tables/gene_symbols.csv, "
+               "03_results/00_build/tables/reference_feature_symbols.csv"),
+        how_to_read=(
+            "The same two gene lists, read in two vocabularies. Every area equals its gene "
+            "count, solved numerically rather than approximated; the largest residual across "
+            f"both panels is {max_resid:.1e} genes. A two-set Euler is exactly solvable for "
+            "every valid configuration, because the shared area falls continuously from the "
+            "smaller set's size to zero as the circles part, so nothing here is an "
+            "approximation; the configurations with no exact solution begin at three sets. "
+            "Both panels share one area-per-gene scale and one bounding box, so the right "
+            "panel is smaller because it holds fewer genes. Orange is the mouse WT iTreg "
+            "39-versus-37 °C up arm in human projection; blue is frozen MSigDB Hallmark "
+            "hypoxia, curated without reference to the anchor, so the overlap measures "
+            "something rather than restating a result. Each region carries its count, the "
+            "shared one inside the lens with its name above on a grey leader because the lens "
+            f"is too narrow for both. LEFT is the frozen lists in full, {n_arm_nom} and "
+            f"{_n(nominal, 'lens_only') + _n(nominal, 'shared')} genes, the universe the "
+            "composition bar and the committed membership tables report. RIGHT keeps only what "
+            f"the {EULER_POPULATION.capitalize()} donor-pseudobulk ranked list carries, the "
+            "universe an enrichment statistic on that ranking is computed over: the arm falls "
+            f"to {n_arm_rank} and hypoxia to {n_lens_rank}. So the panels report "
+            f"{_n(nominal, 'shared')} and {_n(ranked, 'shared')} shared genes and BOTH are "
+            "correct — quoting either without its vocabulary is the misreading this figure "
+            f"exists to prevent. The {len(lost_shared)} shared genes on the left and not the "
+            f"right are {', '.join(lost_shared)}. Absence is not one thing and the source "
+            "table splits it: present in the count matrix but not the ranking means dropped by "
+            "filterByExpr, present in the CellRanger reference but not the matrix means never "
+            "detected in sorted T cells, absent from the reference means a vocabulary miss. "
+            f"Alias resolution runs first and only ever adds, so {led['n_exact']} hypoxia "
+            f"genes match exactly and {led['n_via_alias']} more only once their current "
+            "symbols resolve into the hg19-vintage vocabulary this matrix carries "
+            f"({', '.join(led['alias_pairs'])}) — which is why the testable size is "
+            f"{n_lens_rank} and not {led['n_exact']}. The arm recovers none. Membership, not "
+            "enrichment: no NES, FDR, direction or effect size, and no row reaches "
+            "effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator. A small "
+            "overlap bounds how much of the arm is hypoxia GENE CONTENT and says nothing about "
+            "whether temperature and hypoxia are separable in this niche, which "
+            "cross-sectional human data cannot decide. Annotation tier."),
+        config=FIG_CFG, wide=True, height=6.6,
+    )
+    plt.close(fig)
+
+    write_caption(
+        STAGE, "tables/_overview/arm_hypoxia_euler.csv",
+        finding=(f"The plotted regions with their gene names, and the ledger behind the two "
+                 f"vocabularies: {led['n_exact']} of the 200 frozen hypoxia genes match the "
+                 f"{EULER_POPULATION.capitalize()} ranked list by exact symbol and "
+                 f"{led['n_via_alias']} more only after alias resolution, so what looks like a "
+                 f"{led['n_exact']}-gene set is a {n_lens_rank}-gene one."),
+        script=SCRIPT, fn="euler_table",
+        config_kv=(f"rows = {len(universes)} vocabularies x 3 regions; "
+                   f"arm = {EULER_ARM}; lens = {EULER_LENS_SET}; "
+                   f"vocabulary = symbol_alias.ranked_list at population={EULER_POPULATION}"),
+        input=("03_results/13_arm_decomposition/tables/arm_program_summary.csv, "
+               "03_results/13_arm_decomposition/tables/arm_program_gene.csv, "
+               "00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, "
+               "00_data/references/symbol_alias/symbol_alias_map.csv, "
+               "03_results/03_pseudobulk/tables/ranked_treg.tsv, "
+               "03_results/03_pseudobulk/tables/gene_symbols.csv, "
+               "03_results/00_build/tables/reference_feature_symbols.csv"),
+        how_to_read=(
+            "One row per (`universe` x `region`), six rows. `region` is `arm_only`, `shared` or "
+            "`lens_only` and `n_genes` is the count the figure draws that area to; `genes` "
+            "names them, semicolon-delimited and sorted, so any region can be checked gene by "
+            "gene. `universe` is `frozen_sets` for the lists as curated and "
+            "`treg_ranked_list` for the restriction, and `vocabulary` records the file the "
+            "restriction was made against. The `arm_*` and `lens_*` columns repeat that "
+            "universe's ledger on every row: `n_nominal` is the curated size, `n_exact_match` "
+            "how many symbols match the ranked list verbatim, `n_via_alias` how many more are "
+            "recovered by resolving a current symbol into this matrix's hg19 vintage (named in "
+            "`*_alias_pairs_applied`), and the three `n_absent_*` columns split what is left: "
+            "`expression_filtered` for symbols the count matrix carries but filterByExpr "
+            "dropped, `undetected` for symbols the CellRanger reference carries but the matrix "
+            "does not, `absent_from_reference` for a vocabulary miss outright. Those three are "
+            "reported separately because collapsing them reads a power fact and a nomenclature "
+            "fact as the same biological absence. On `frozen_sets` rows the ledger columns are "
+            "trivial by construction, since that universe applies no restriction. "
+            "`circle_radius_*`, `centre_distance` and `shared_area_solved` are the geometry the "
+            "figure drew, and `shared_area_residual_genes` is how far the drawn shared area "
+            "misses the count in gene units — read it as the proof that "
+            "`is_area_proportional` is a fact and not a label. Membership, not enrichment: no "
+            "NES, p-value or effect size in the file. Annotation tier."),
+        config=FIG_CFG)
+
+    print(f"[{STAGE}_viz] wrote 1 overview (arm_hypoxia_euler) over "
+          f"{len(universes)} vocabularies; max area residual {max_resid:.2e} genes")
+    print(euler[["universe", "region", "n_genes", "n_arm", "n_lens",
+                 "shared_area_residual_genes"]].to_string(index=False))
 
 
 if __name__ == "__main__":

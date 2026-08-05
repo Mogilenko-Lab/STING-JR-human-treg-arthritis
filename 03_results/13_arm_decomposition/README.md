@@ -155,6 +155,29 @@ rather than the IFN-independent STING kind. It says nothing about whether any of
 synovial fluid from paired blood in human data; at 7 and 18 genes these arms are thin sets, and
 that question belongs to the donor-pseudobulk panels.
 
+## A second thing a containment count depends on: the vocabulary
+
+Everything above is counted over the frozen lists in full, which is the right universe for a
+composition question. It is not the universe an enrichment statistic lives in. A ranked list
+carries only the genes that were detected and survived `filterByExpr`, and this compartment's
+count matrix is frozen to a CellRanger hg19 HGNC vintage while the reference sets ship current
+symbols, so a set meeting that ranking loses members two ways at once — to power and to
+nomenclature.
+
+Both losses are large enough to change a number a reader would quote. `HALLMARK_HYPOXIA` is 200
+genes as curated; against the Treg ranked list 139 match by exact symbol and 4 more only after
+their current symbols are resolved into the vintage the matrix carries (`CAVIN1` as `PTRF`,
+`CAVIN3` as `PRKCDBP`, `ERO1A` as `ERO1L`, `NOCT` as `CCRN4L`), giving 143. `WT_heat_up` is 199
+as curated and 119 against the same ranking, recovering nothing by alias. The 18-gene containment
+above is therefore 12 on that ranking, and the six genes that fall out — `ADM`, `ADORA2B`,
+`CCN1`, `EGFR`, `F3`, `TGM2` — are absent for reasons the tables separate rather than pool.
+
+`figures/_overview/arm_hypoxia_euler.png` draws both universes side by side for exactly this
+reason: 18 and 12 are both right, and either quoted without its vocabulary is wrong. Any
+hypoxia set size taken from elsewhere in this project should be checked for the same thing,
+because a table written before the alias map was built carries the exact-match count and reads
+like the whole set.
+
 ## tables/arm_program_gene.csv
 
 One row per (arm, program, gene) shows that the 199 `WT_heat_up` genes generate 232 rows, 100
@@ -300,3 +323,94 @@ firewalled from the donor-pseudobulk claim spine; no effect-size row.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/13_arm_decomposition_viz.py` | `plot_composition` | `colors.okabe_ito + colors.diverging.up; label_floor=0.045; accounting=fractional (1/n_programs_for_gene); evidence_tier=secondary_annotation` | `03_results/13_arm_decomposition/tables/arm_program_summary.csv, 03_results/13_arm_decomposition/tables/arm_program_gene.csv, 03_results/13_arm_decomposition/tables/arm_program_multiplicity.csv` |
+
+## figures/_overview/arm_hypoxia_euler.png
+
+Curated hypoxia accounts for a small minority of the mouse 39
+°C-derived up arm in either vocabulary, and the vocabulary decides how
+small: the frozen lists share 18 genes of the arm's 199 against 182
+hypoxia genes the arm does not carry, while restricting both to the
+Treg donor-pseudobulk ranked list leaves only 119 of the arm's 199
+genes testable and drops the shared count to 12 — so the arm's hypoxia
+content is 9% of the curated arm but 10% of the part of it this
+contrast can actually test, and 4 of the 143 testable hypoxia genes
+are visible only because alias resolution recovered them.
+
+**How to read:** The same two gene lists, read in two vocabularies. Every area equals
+its gene count, solved numerically rather than approximated; the
+largest residual across both panels is 1.4e-13 genes. A two-set Euler
+is exactly solvable for every valid configuration, because the shared
+area falls continuously from the smaller set's size to zero as the
+circles part, so nothing here is an approximation; the configurations
+with no exact solution begin at three sets. Both panels share one
+area-per-gene scale and one bounding box, so the right panel is
+smaller because it holds fewer genes. Orange is the mouse WT iTreg
+39-versus-37 °C up arm in human projection; blue is frozen MSigDB
+Hallmark hypoxia, curated without reference to the anchor, so the
+overlap measures something rather than restating a result. Each region
+carries its count, the shared one inside the lens with its name above
+on a grey leader because the lens is too narrow for both. LEFT is the
+frozen lists in full, 199 and 200 genes, the universe the composition
+bar and the committed membership tables report. RIGHT keeps only what
+the Treg donor-pseudobulk ranked list carries, the universe an
+enrichment statistic on that ranking is computed over: the arm falls
+to 119 and hypoxia to 143. So the panels report 18 and 12 shared genes
+and BOTH are correct — quoting either without its vocabulary is the
+misreading this figure exists to prevent. The 6 shared genes on the
+left and not the right are ADM, ADORA2B, CCN1, EGFR, F3, TGM2. Absence
+is not one thing and the source table splits it: present in the count
+matrix but not the ranking means dropped by filterByExpr, present in
+the CellRanger reference but not the matrix means never detected in
+sorted T cells, absent from the reference means a vocabulary miss.
+Alias resolution runs first and only ever adds, so 139 hypoxia genes
+match exactly and 4 more only once their current symbols resolve into
+the hg19-vintage vocabulary this matrix carries (CAVIN1->PTRF,
+CAVIN3->PRKCDBP, ERO1A->ERO1L, NOCT->CCRN4L) — which is why the
+testable size is 143 and not 139. The arm recovers none. Membership,
+not enrichment: no NES, FDR, direction or effect size, and no row
+reaches effect_sizes_treg_arthritis.csv or any 03_results/master/
+accumulator. A small overlap bounds how much of the arm is hypoxia
+GENE CONTENT and says nothing about whether temperature and hypoxia
+are separable in this niche, which cross-sectional human data cannot
+decide. Annotation tier.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/13_arm_decomposition_viz.py` | `plot_arm_hypoxia_euler` | `arm = WT_heat_up; lens = HALLMARK_HYPOXIA (gene_sets.project_frozen); vocabulary = symbol_alias.ranked_list at population=treg; alias pairs from symbol_alias.map_path, accepted only; colours = colors.okabe_ito.orange + the hypoxia band hue of this stage's program palette; fill_alpha=0.45; evidence_tier=secondary_annotation` | `03_results/13_arm_decomposition/tables/arm_program_summary.csv, 03_results/13_arm_decomposition/tables/arm_program_gene.csv, 03_results/13_arm_decomposition/tables/source_hash_manifest.csv, 00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, 00_data/references/symbol_alias/symbol_alias_map.csv, 03_results/03_pseudobulk/tables/ranked_treg.tsv, 03_results/03_pseudobulk/tables/gene_symbols.csv, 03_results/00_build/tables/reference_feature_symbols.csv` |
+
+## tables/_overview/arm_hypoxia_euler.csv
+
+The plotted regions with their gene names, and the ledger behind the
+two vocabularies: 139 of the 200 frozen hypoxia genes match the Treg
+ranked list by exact symbol and 4 more only after alias resolution, so
+what looks like a 139-gene set is a 143-gene one.
+
+**How to read:** One row per (`universe` x `region`), six rows. `region` is `arm_only`,
+`shared` or `lens_only` and `n_genes` is the count the figure draws
+that area to; `genes` names them, semicolon-delimited and sorted, so
+any region can be checked gene by gene. `universe` is `frozen_sets`
+for the lists as curated and `treg_ranked_list` for the restriction,
+and `vocabulary` records the file the restriction was made against.
+The `arm_*` and `lens_*` columns repeat that universe's ledger on
+every row: `n_nominal` is the curated size, `n_exact_match` how many
+symbols match the ranked list verbatim, `n_via_alias` how many more
+are recovered by resolving a current symbol into this matrix's hg19
+vintage (named in `*_alias_pairs_applied`), and the three `n_absent_*`
+columns split what is left: `expression_filtered` for symbols the
+count matrix carries but filterByExpr dropped, `undetected` for
+symbols the CellRanger reference carries but the matrix does not,
+`absent_from_reference` for a vocabulary miss outright. Those three
+are reported separately because collapsing them reads a power fact and
+a nomenclature fact as the same biological absence. On `frozen_sets`
+rows the ledger columns are trivial by construction, since that
+universe applies no restriction. `circle_radius_*`, `centre_distance`
+and `shared_area_solved` are the geometry the figure drew, and
+`shared_area_residual_genes` is how far the drawn shared area misses
+the count in gene units — read it as the proof that
+`is_area_proportional` is a fact and not a label. Membership, not
+enrichment: no NES, p-value or effect size in the file. Annotation
+tier.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/13_arm_decomposition_viz.py` | `euler_table` | `rows = 2 vocabularies x 3 regions; arm = WT_heat_up; lens = HALLMARK_HYPOXIA; vocabulary = symbol_alias.ranked_list at population=treg` | `03_results/13_arm_decomposition/tables/arm_program_summary.csv, 03_results/13_arm_decomposition/tables/arm_program_gene.csv, 00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt, 00_data/references/symbol_alias/symbol_alias_map.csv, 03_results/03_pseudobulk/tables/ranked_treg.tsv, 03_results/03_pseudobulk/tables/gene_symbols.csv, 03_results/00_build/tables/reference_feature_symbols.csv` |
