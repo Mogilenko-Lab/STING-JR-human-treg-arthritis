@@ -503,23 +503,30 @@ The two statistics sit on different scales and get separate y axes.
 
 ## figures/_overview/tf_rank_cascade.png
 
-HIF1A's inferred-activity rank on the sorted-Treg synovial-fluid-versus-paired-blood contrast sits in
-the top twelve in twelve of the thirteen network-by-estimator configurations, its remaining placement
-rank 42 of 388 under literature-signed MLM, which makes it the steadiest of the eight. The same axes
-move its neighbours much further — NFKB1 from ULM rank 7 to 252 under unsigned MLM, REL to 298 of 388
-under literature-signed MLM — so the rank instability the mouse anchor documented falls here on the
-NF-kB and AP-1 members.
+HIF1A's inferred-activity rank on the sorted-Treg
+synovial-fluid-versus-paired-blood contrast sits in the top 12 in 12
+of the 13 network-by-estimator configurations, its remaining
+placement rank 42 of 388 under literature-signed MLM. Ordered by the
+span of ranks a factor traverses, HIF1A places 2 of 8 at 40 places,
+and STAT3 at 23 places is the narrowest. The same axes move its
+neighbours much further — NFKB1 from ULM rank 7 to 252 under unsigned
+MLM, REL to 298 of 388 under literature-signed MLM — so the rank
+instability the mouse anchor documented falls here on the NF-kB and
+AP-1 members.
 
-**How to read:** One line per factor, labelled at the right edge, each with its own point
-shape so two lines of similar hue stay separable. The y axis is rank by descending activity within a
-configuration, inverted on a log scale, so rank 1 sits at the top. ULM scores each regulon on its
-own; MLM fits every regulon jointly, so a factor whose targets are shared loses rank there.
-
-The four variants: `signed` uses CollecTRI's recorded per-edge mode of regulation, `unsigned` forces
-every edge positive, `literature_signed` keeps only evidence-signed edges, `alias_recovered` adds
-targets resolved to the pre-2019 symbol this matrix carries. The leftmost column is the committed
-unsigned-regulon fgsea rank. Denominators differ between configurations and sit in the source table.
-Annotation tier: an inferred activity is a statistic over target-gene expression.
+**How to read:** One line per factor, labelled at the right edge, each with its own
+point shape so two lines of similar hue stay separable. The y axis is
+rank by descending activity within a configuration, inverted on a log
+scale, so rank 1 sits at the top. ULM scores each regulon on its own;
+MLM fits every regulon jointly, so a factor whose targets are shared
+loses rank there. The four variants: `signed` uses CollecTRI's
+recorded per-edge mode of regulation, `unsigned` forces every edge
+positive, `literature_signed` keeps only evidence-signed edges,
+`alias_recovered` adds targets resolved to the pre-2019 symbol this
+matrix carries. The leftmost column is the committed unsigned-regulon
+fgsea rank. Denominators differ between configurations and sit in the
+source table. Annotation tier: an inferred activity is a statistic
+over target-gene expression.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -527,25 +534,30 @@ Annotation tier: an inferred activity is a statistic over target-gene expression
 
 ## figures/_overview/tf_target_promiscuity.png
 
-The direction of HIF1A's CollecTRI-ULM score comes from targets many other regulons also contain. The
-27 of 293 targets HIF1A alone claims hold 15% of its signed total in magnitude and net 0.14%, because
-13 go up on the synovial-fluid side and 14 go down, while the 73 targets in more than 25 regulons carry
-35% net. NFKB1's 2 exclusive targets split the same way (0.07% net), so joint ownership of the
-directional high-t genes bounds both regulons equally.
+The direction of HIF1A's CollecTRI-ULM score comes from targets many
+other regulons also contain. The 27 of 293 targets HIF1A alone claims
+hold 15% of its signed total in magnitude and net 0.14%, because 13
+go up on the synovial-fluid side and 14 go down, while the 73 targets
+in more than 25 regulons carry 35% net. NFKB1's 2 exclusive targets
+split the same way (0.07% net), so joint ownership of the directional
+high-t genes bounds both regulons equally.
 
-**How to read:** One point per regulon target, faceted by factor. The x axis counts how many
-CollecTRI regulons contain that target, on a log scale, so points to the right are jointly owned and
-points at x = 1 belong to this regulon alone. The y axis is the target's signed contribution, its
-moderated t multiplied by the edge sign, so positive means the target moves with the synovial-fluid
-side and the zero rule separates the directions.
-
-Orange marks the exclusively-claimed targets. The ten largest positive contributors per facet are
-named in black, and the three largest exclusively-claimed targets in each direction in orange,
-placed above and below the x = 1 strip because 27 labels do not fit inside it;
-`tf_selective_targets` names every one. The in-panel text gives the exclusively-claimed share of the
-signed total twice, in magnitude and net, with the up/down split behind the difference, then the
-share from targets in more than 25 regulons. Annotation tier: a contribution is arithmetic on the
-committed ranked list and carries no separate test.
+**How to read:** One point per regulon target, faceted by factor. The x axis counts
+how many CollecTRI regulons contain that target, on a log scale, so
+points to the right are jointly owned and points at x = 1 belong to
+this regulon alone. The y axis is the target's signed contribution,
+its moderated t multiplied by the edge sign, so positive means the
+target moves with the synovial-fluid side and the zero rule separates
+the directions. Orange marks the exclusively-claimed targets. The 10
+largest positive contributors per facet are named in black, and the 3
+largest exclusively-claimed targets in each direction in orange,
+placed above and below the x = 1 strip because 27 labels do not fit
+inside it; `tf_selective_targets` names every one. The in-panel text
+gives the exclusively-claimed share of the signed total twice, in
+magnitude and net, with the up/down split behind the difference, then
+the share from targets in more than 25 regulons. Annotation tier: a
+contribution is arithmetic on the committed ranked list and carries
+no separate test.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -553,24 +565,31 @@ committed ranked list and carries no separate test.
 
 ## figures/_overview/tf_activity_vs_regulon_size.png
 
-Inferred activity rises with regulon size across every factor tested: Spearman rho = 0.47 between size
-and CollecTRI-ULM score over 601 factors, 0.54 between size and unsigned-regulon fgsea NES over 592
-sets, falling to 0.08 when the gene labels are permuted. That places the size dependence in the breadth
-of the synovial-fluid-side shift a bigger regulon samples more thoroughly, and every large-regulon
+Inferred activity rises with regulon size across every factor tested:
+Spearman rho = 0.47 between size and CollecTRI-ULM score over 601
+factors, 0.54 between size and unsigned-regulon fgsea NES over 592
+sets, falling to 0.08 when the gene labels are permuted. That places
+the size dependence in the breadth of the synovial-fluid-side shift a
+bigger regulon samples more thoroughly, and every large-regulon
 factor in the headline table sits on that gradient.
 
-**How to read:** One grey point per factor, faceted by statistic, x = the factor's targets present in
-the ranked list on a log scale. The dashed dark-grey curve is the size-conditional expectation fitted
-over the real regulons themselves, so a point above it is more active than its size alone accounts
-for. Coloured labelled points are the headline-table factors, each with its own shape.
-
-The open triangle below each is the 95th percentile of random regulons matched to that factor on
-size, on repressing-edge fraction and on average-expression decile composition, and the stalk spans
-that percentile to the observed value, so a short stalk means a factor barely beats a matched bag of
-genes. In-panel text gives the size-versus-activity Spearman correlation, and for the left facet the
-same correlation after the gene labels are permuted. The facets use free y axes because the
-statistics differ in scale, so position relative to the curve and the triangle is the comparable
-quantity. The unsigned-regulon facet omits the regulons above the sweep's size cap. Annotation tier.
+**How to read:** One grey point per factor, faceted by statistic, x = the factor's
+targets present in the ranked list on a log scale. The dashed
+dark-grey curve is the size-conditional expectation fitted over the
+real regulons themselves, so a point above it is more active than its
+size alone accounts for. Coloured labelled points are the
+headline-table factors, each with its own shape. The open triangle
+below each is the 95th percentile of random regulons matched to that
+factor on size, on repressing-edge fraction and on average-expression
+decile composition, and the stalk spans that percentile to the
+observed value, so a short stalk means a factor barely beats a
+matched bag of genes. In-panel text gives the size-versus-activity
+Spearman correlation, and for the left facet the same correlation
+after the gene labels are permuted. The facets use free y axes
+because the statistics differ in scale, so position relative to the
+curve and the triangle is the comparable quantity. The
+unsigned-regulon facet omits the regulons above the sweep's size cap.
+Annotation tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -578,18 +597,24 @@ quantity. The unsigned-regulon facet omits the regulons above the sweep's size c
 
 ## figures/_overview/hif1a_rank_cascade_linear.png
 
-HIF1A's rank stays between 2 and 12 in twelve of the thirteen configurations and reaches 42 of 388 in
-the thirteenth, literature-signed MLM. On the linear rank axis the mouse anchor uses for its Hif1a
-cascade, that traverse is nearly flat, where the murine one runs rank 1 to 12 to 142 and back to 8. The
-two panels are comparable in shape alone: the ranked lists differ in length (13,999 genes here) and the
-factors scored differ between configurations, both of which sit in the source table.
+HIF1A's rank stays between 2 and 12 in 12 of the 13 configurations
+and reaches 42 of 388 in the thirteenth, literature-signed MLM. On
+the linear rank axis the mouse anchor uses for its Hif1a cascade,
+that traverse is nearly flat, where the murine one runs rank 1 to 12
+to 142 and back to 8. The two panels are comparable in shape alone:
+the ranked lists differ in length (13,999 genes here) and the factors
+scored differ between configurations, both of which sit in the source
+table.
 
-**How to read:** One factor, one line, on the configuration axis and order `tf_rank_cascade` uses, so
-a column means the same in both. The y axis is HIF1A's rank by descending activity among the factors
-scored in that configuration, linear and inverted, so rank 1 is at the top and a step's height is the
-size of the rank move. Labels give the rank, the factors scored and the score behind it. Point colour
-is that score; the four estimators share no scale, so colour compares within an estimator alone.
-Annotation tier: an inferred activity is a statistic over target-gene expression.
+**How to read:** One factor, one line, on the configuration axis and order
+`tf_rank_cascade` uses, so a column means the same in both. The y
+axis is HIF1A's rank by descending activity among the factors scored
+in that configuration, linear and inverted, so rank 1 is at the top
+and a step's height is the size of the rank move. Labels give the
+rank, the factors scored and the score behind it. Point colour is
+that score; the four estimators share no scale, so colour compares
+within an estimator alone. Annotation tier: an inferred activity is a
+statistic over target-gene expression.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -597,25 +622,31 @@ Annotation tier: an inferred activity is a statistic over target-gene expression
 
 ## figures/_overview/tf_selective_targets.png
 
-Named one by one, the targets HIF1A alone claims carry magnitude without direction: 13 of the 27 go up
-on the synovial-fluid side and 14 go down, holding 15% of the regulon's signed total in magnitude and
-netting 0.14%. Glycolytic members fall on both sides (PGAM1 +5.68, GBE1 +3.93 up; PFKL −2.55, TKTL1
-−4.25 down). 16 of the 27 carry no recorded evidence for the edge direction, so activation is assumed
-for those sixteen. NFKB1's 2 such targets split one each way (GCA +2.80, BST1 −2.47).
+Named one by one, the targets HIF1A alone claims carry magnitude
+without direction: 13 of the 27 go up on the synovial-fluid side and
+14 go down, holding 15% of the regulon's signed total in magnitude
+and netting 0.14%. Glycolytic members fall on both sides (PGAM1
++5.68, GBE1 +3.93 up; PFKL -2.55, TKTL1 -4.25 down). 16 of the 27
+carry no recorded evidence for the edge direction, so activation is
+assumed for those 16. NFKB1's 2 such targets split one each way (GCA
++2.80, BST1 -2.47).
 
-**How to read:** One row per target that no other CollecTRI regulon contains, faceted by factor,
-ordered by signed contribution. The bar runs from zero to the target's signed contribution, its
-moderated t multiplied by the edge sign, so length is magnitude and side is direction; colour
-restates the direction. Row pitch is equal in both panels, so a bar length means the same thing in
-each.
-
-A filled point means CollecTRI records literature evidence for the edge's direction; an open point
-means the direction was assumed activating by default, which holds for 16 of HIF1A's 27. A dashed bar
-marks a repressing edge, which flips the contribution's sign away from the gene's own direction;
-TM9SF4 is the only one here, so its positive contribution comes from a gene that goes down in
-synovial fluid. In-panel text gives the set's size, its up/down split, and its share of the factor's
-signed total in magnitude and net, which differ because the set nearly cancels. Annotation tier: a
-contribution is arithmetic on the committed ranked list and carries no separate test.
+**How to read:** One row per target that no other CollecTRI regulon contains, faceted
+by factor, ordered by signed contribution. The bar runs from zero to
+the target's signed contribution, its moderated t multiplied by the
+edge sign, so length is magnitude and side is direction; colour
+restates the direction. Row pitch is equal in both panels, so a bar
+length means the same thing in each. A filled point means CollecTRI
+records literature evidence for the edge's direction; an open point
+means the direction was assumed activating by default, which holds
+for 16 of HIF1A's 27. A dashed bar marks a repressing edge, which
+flips the contribution's sign away from the gene's own direction;
+TM9SF4 is the only one here, so its positive contribution comes from
+a gene that goes down in synovial fluid. In-panel text gives the
+set's size, its up/down split, and its share of the factor's signed
+total in magnitude and net, which differ because the set nearly
+cancels. Annotation tier: a contribution is arithmetic on the
+committed ranked list and carries no separate test.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -623,25 +654,32 @@ contribution is arithmetic on the committed ranked list and carries no separate 
 
 ## figures/_overview/tf_selective_targets_volcano.png
 
-Placed on the contrast they were scored on, the 27 targets HIF1A alone claims sit on both sides: 12 go
-up in synovial fluid and 15 go down, 12 clear FDR 0.05, and those twelve split six up against six down,
-so the set carries evidence and carries no direction. That is what makes its 0.14% share of HIF1A's
-signed contribution a cancellation: in magnitude the same 27 targets are 15% of that total. NFKB1's two
-exclusively-claimed targets split one each way, and the FDR cut is cleared by neither.
+Placed on the contrast they were scored on, the 27 targets HIF1A
+alone claims sit on both sides: 12 go up in synovial fluid and 15 go
+down, 12 clear FDR 0.05, and those 12 split 6 up against 6 down, so
+the set carries evidence and carries no direction. That is what makes
+its 0.14% share of HIF1A's signed contribution a cancellation: in
+magnitude the same 27 targets are 15% of that total. NFKB1's 2
+exclusively-claimed targets split one each way, and the FDR cut is
+cleared by neither.
 
-**How to read:** The standard volcano of the committed donor-pseudobulk contrast: x is log2 fold
-change, synovial fluid over paired blood; y is raw p on a −log10 scale; colour is the significance
-category, decided on FDR while the axis keeps raw p for resolution. The dashed horizontal rule is the
-raw p that realises the FDR cut, the vertical rules the fold-change cut.
-
-Only the targets no other CollecTRI regulon claims are ringed and named, circles for HIF1A and
-triangles for NFKB1, the ring unfilled so the point inside keeps its category colour. The spread of
-the named genes across both halves is the point, so nothing else is labelled: count how many sit
-either side of zero and how many clear the rules. The split here is by fold change; by signed
-contribution it reads 13 up and 14 down, since TM9SF4 sits on a repressing edge and contributes
-positively while going down. Annotation tier: this restates a committed DE table and a set
+**How to read:** The standard volcano of the committed donor-pseudobulk contrast: x is
+log2 fold change, synovial fluid over paired blood; y is raw p on a
+-log10 scale; colour is the significance category, decided on FDR
+while the axis keeps raw p for resolution. The dashed horizontal rule
+is the raw p that realises the FDR cut, the vertical rules the
+fold-change cut. Only the targets no other CollecTRI regulon claims
+are ringed and named, circles for HIF1A and triangles for NFKB1, the
+ring unfilled so the point inside keeps its category colour. The
+spread of the named genes across both halves is the point, so nothing
+else is labelled: count how many sit either side of zero and how many
+clear the rules. The split here is by fold change; by signed
+contribution it reads 13 up and 14 down, since TM9SF4 sits on a
+repressing edge and contributes positively while going down.
+Annotation tier: this restates a committed DE table and a set
 membership, so nothing here is a new test.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/18_tf_selective_volcano_viz.R` | `save_overview` | `thresholds.de_fdr=0.05; thresholds.de_logfc=1; tf_activity.decompose_tfs=[HIF1A, NFKB1]; tf_activity.selective_max_regulons=1; tf_activity.primary_population=treg` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv, 03_results/18_tf_activity/tables/target_decomposition.csv` |
+

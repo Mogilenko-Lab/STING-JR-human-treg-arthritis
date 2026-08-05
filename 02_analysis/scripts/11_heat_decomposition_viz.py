@@ -169,7 +169,21 @@ def sting_sentence() -> str:
     r = st.loc[key]
     genes = str(r["genes_intersect"]).replace(";", " and ")
     return (f"The published {int(r['n_b'])}-gene interferon-independent STING signature "
-            f"contributes only {genes} here, tallied in sting_axis_overlap.csv.")
+            f"contributes {genes} here, tallied in sting_axis_overlap.csv.")
+
+
+def _mult(mult: pd.DataFrame, arm: str, col: str) -> int:
+    """One cell of the committed per-arm multiplicity table, for a caption.
+
+    `multiplicity_rows()` returns the table indexed by `arm`, so the lookup is by label.
+    """
+    return int(mult.loc[arm, col])
+
+
+def _cov(cov: pd.DataFrame, arm: str, subcomponent: str) -> int:
+    """That arm x subcomponent intersection size, read off the coverage table."""
+    hit = cov[cov["arm"].eq(arm) & cov["subcomponent"].eq(subcomponent)]
+    return int(hit["n_intersect"].iloc[0]) if len(hit) else 0
 
 
 def coverage_note(r: pd.Series) -> str:
@@ -341,13 +355,17 @@ def main() -> None:
     save_overview(
         fig, STAGE, "heatdecomp_arm_coverage",
         table=round_numeric_cols(cov),
-        finding=("Curated public gene sets claim only 62 of the 199 mouse 39 C-derived up "
-                 "genes and 11 of the 94 down genes, so the largest part of the projected "
-                 "signature — 137 up genes — belongs to no named program, and the curated "
-                 "HSR core (Reactome/GO) contributes 2 genes. The bars are not a partition: "
-                 "25 of those 62 claimed up genes belong to two or three curated sets at "
-                 "once, so the 62 carry 92 claims and summing the named bars double-counts "
-                 "30 of them."),
+        finding=(f"Curated public gene sets claim {_mult(mult, 'up', 'n_claimed')} of the "
+                 f"{_mult(mult, 'up', 'n_arm')} mouse 39 C-derived up genes and "
+                 f"{_mult(mult, 'down', 'n_claimed')} of the {_mult(mult, 'down', 'n_arm')} down "
+                 f"genes, so the largest part of the projected signature — "
+                 f"{_mult(mult, 'up', 'n_unassigned')} up genes — belongs to no named program, "
+                 f"and the curated HSR core (Reactome/GO) contributes "
+                 f"{_cov(cov, 'up', 'hsr_curated')} genes. The bars overlap: "
+                 f"{_mult(mult, 'up', 'n_claimed_multiply')} of the claimed up genes belong to "
+                 f"up to {_mult(mult, 'up', 'max_subcomponents_per_gene')} curated sets at once, "
+                 f"so they carry {_mult(mult, 'up', 'n_claims_total')} claims and summing the "
+                 f"named bars double-counts {_mult(mult, 'up', 'n_excess_claims')} of them."),
         script=SCRIPT, fn="plot_coverage",
         config_kv=(f"gsea_min_size={MIN_SIZE}; figures.top_n={TOP_N}; "
                    "evidence_tier=secondary_annotation"),
@@ -357,20 +375,23 @@ def main() -> None:
                "decomposition_assignment_multiplicity.csv, "
                "03_results/11_heat_decomposition/tables/sting_axis_overlap.csv"),
         how_to_read=(
-            "ANSWERS what the projected set is made of, by membership over frozen versioned "
-            "gene lists — arithmetic over committed files, not an effect estimate, and no NES "
-            "on the face. One bar per mouse arm and curated presumption; length is how many "
-            "of that arm's genes the curated set contains. Warm brown = the 199-gene up arm, "
-            "cool blue = the 94-gene down arm. The right-hand text gives the count, then the "
-            f"testability: parts reaching {MIN_SIZE} genes in the ranked lists are tested, "
-            "smaller parts are marked under the floor, and a part with no gene in that arm "
-            "says so. **Do not sum the bars.** The assignment is not a partition — 25 of the "
-            "62 claimed up-arm genes sit in two or three sets, so adding the named bars "
-            "double-counts 30 claims and shrinks the 137-gene remainder, the largest single "
-            "part. That count is on the face, per arm in "
-            "decomposition_assignment_multiplicity.csv, and per gene in "
-            "decomposition_gene_assignment.csv. The remainder is reported as a remainder: it "
-            "is not named, and is evidence for no mechanism. "
+            f"This gives the composition of the projected set by membership over frozen "
+            f"versioned gene lists: arithmetic over committed files. It carries no effect "
+            f"estimate and no NES on the face. One bar per mouse arm and curated presumption; "
+            f"length is how many of that arm's genes the curated set contains. Warm brown is "
+            f"the {_mult(mult, 'up', 'n_arm')}-gene up arm, cool blue the "
+            f"{_mult(mult, 'down', 'n_arm')}-gene down arm. The right-hand text gives the "
+            f"count, then the testability: parts reaching {MIN_SIZE} genes in the ranked lists "
+            f"are tested, smaller parts are marked under the floor, and a part with no gene in "
+            f"that arm says so. **Read each bar on its own.** The bars overlap — "
+            f"{_mult(mult, 'up', 'n_claimed_multiply')} of the "
+            f"{_mult(mult, 'up', 'n_claimed')} claimed up-arm genes sit in up to "
+            f"{_mult(mult, 'up', 'max_subcomponents_per_gene')} sets — so adding the named bars "
+            f"double-counts {_mult(mult, 'up', 'n_excess_claims')} claims and shrinks the "
+            f"{_mult(mult, 'up', 'n_unassigned')}-gene remainder, the largest single part. That "
+            f"count is on the face, per arm in decomposition_assignment_multiplicity.csv, and "
+            f"per gene in decomposition_gene_assignment.csv. The remainder is reported as a "
+            f"remainder: it is unnamed, and it supports no mechanism. "
             + sting_sentence() + " Annotation tier."),
         config=FIG_CFG, wide=True, height=8.0,
     )
@@ -384,7 +405,9 @@ def main() -> None:
             family[(arm, key)] = traces
             summaries[(arm, key)] = summary
     span = family_span(family)
-    n_arm = {"up": 199, "down": 94}
+    # Arm sizes read from the committed multiplicity table, so a caption and a panel note
+    # cannot state different denominators. `mult` is indexed by `arm`.
+    n_arm = {str(a): int(v) for a, v in mult["n_arm"].items()}
 
     for arm, key in DRAWN:
         if (arm, key) not in family:
@@ -396,7 +419,7 @@ def main() -> None:
         save_overview(
             fig, STAGE, f"heatdecomp_runsum_{arm}_{key}",
             table=round_numeric_cols(summary),
-            finding=FINDINGS[(arm, key)],
+            finding=render_finding(arm, key, summary, n_arm[arm]),
             script=SCRIPT, fn="plot_subcomponent_runsum",
             config_kv=(f"figures.running_sum_heights={RS_HEIGHTS[:2]}; "
                        f"thresholds.gsea_fdr={FDR}; gsea_min_size={MIN_SIZE}; "
@@ -419,36 +442,60 @@ def main() -> None:
 # Caption text for the running-sum family, keyed by (arm, subcomponent) so a
 # figure can never be shipped with another figure's finding.
 # ---------------------------------------------------------------------------
+# Templates, filled from this figure's own summary rows by `render_finding`, so a printed NES
+# always belongs to the run that drew the curve.
 FINDINGS = {
     ("up", "unassigned"): (
-        "The 137 up-arm genes that no curated presumption claims give the strongest "
-        "synovial-fluid enrichment of any part in CD8 (+2.10) and remain strongly "
-        "enriched in Treg (+2.21) and Tcon (+2.27), so the shift is not carried by "
-        "any single named program."),
+        "The {n} up-arm genes that no curated presumption claims give the strongest "
+        "synovial-fluid enrichment of any part in CD8 ({CD8}) and stay strongly enriched in "
+        "Treg ({Treg}) and Tcon ({Tcon}), so the shift spreads across the arm rather than "
+        "concentrating in one named program."),
     ("up", "nfkb_tnfa"): (
-        "The 35 TNFA/NF-kB up-arm genes enrich toward synovial fluid strongly in Treg "
-        "(+2.24) and Tcon (+2.32) and only weakly in CD8 (+1.23, FDR 0.22), making the "
+        "The {n} TNFA/NF-kB up-arm genes enrich toward synovial fluid strongly in Treg "
+        "({Treg}) and Tcon ({Tcon}) and weakly in CD8 ({CD8}, FDR {CD8_fdr}), making the "
         "inflammatory-signalling part the most CD4-selective of the decomposition."),
     ("up", "hypoxia"): (
-        "The 18 hypoxia-overlap up-arm genes enrich toward synovial fluid in all three "
-        "populations (+1.81 to +2.07), so this part carries a shift of its own — which is a "
-        "separate question from whether the whole set's enrichment is reducible to it, and "
-        "that one is answered by the deletion panel rather than here."),
+        "The {n} hypoxia-overlap up-arm genes enrich toward synovial fluid in all three "
+        "populations ({lo} to {hi}), so this part carries a shift of its own. Whether the "
+        "whole set's enrichment is reducible to it is a separate question, and the deletion "
+        "panel answers that one."),
     ("up", "inflammatory"): (
-        "The 21 inflammatory-response up-arm genes track the whole up-arm (+1.48 to "
-        "+2.11), adding no separation of their own beyond the broad synovial-fluid shift."),
+        "The {n} inflammatory-response up-arm genes track the whole up-arm ({lo} to {hi}), so "
+        "their separation is the broad synovial-fluid shift itself."),
     ("up", "t_activation"): (
-        "The 14 IL2-STAT5 activation up-arm genes are the weakest testable part in Treg "
-        "(+1.32, FDR 0.22) while reaching +1.89 in Tcon, so a curated T-cell activation "
-        "program does not account for the Treg shift."),
+        "The {n} IL2-STAT5 activation up-arm genes are the weakest testable part in Treg "
+        "({Treg}, FDR {Treg_fdr}) while reaching {Tcon} in Tcon, so the Treg shift rests on "
+        "more than a curated T-cell activation program."),
     ("down", "unassigned"): (
-        "The 83 down-arm genes no presumption claims sit nowhere in particular — NES "
-        "+0.97 in Treg, +1.41 in Tcon and -1.12 in CD8, none of them significant — so this "
-        "remainder does not separate synovial fluid from blood in either direction. Read that "
-        "as a statement about the remainder and not about the arm — the whole 94-gene down arm "
-        "does reach significance in Tcon, at the same sign as the up arm, and that result "
-        "belongs to the whole-set panels rather than to this one."),
+        "The {n} down-arm genes no presumption claims sit nowhere in particular — NES {Treg} "
+        "in Treg, {Tcon} in Tcon and {CD8} in CD8, none of them significant — so this "
+        "remainder separates synovial fluid from blood in neither direction. That is a "
+        "statement about the remainder. The whole {n_arm}-gene down arm does reach "
+        "significance in Tcon, at the same sign as the up arm, and the whole-set panels carry "
+        "that result."),
 }
+
+
+class _Missing(dict):
+    """`format` mapping that names an absent population instead of raising on it.
+
+    A population with no trace for this part has no summary row, and a caption that says so
+    is better than a crashed render or a number carried over from another run.
+    """
+
+    def __missing__(self, key: str) -> str:
+        return "not tested"
+
+
+def render_finding(arm: str, key: str, summary: pd.DataFrame, n_arm: int) -> str:
+    """Fill one FINDINGS template from the summary rows behind this very figure."""
+    vals = _Missing({"n": int(summary["n_genes"].iloc[0]), "n_arm": n_arm,
+                     "lo": f"{summary['nes'].astype(float).min():+.2f}",
+                     "hi": f"{summary['nes'].astype(float).max():+.2f}"})
+    for _, r in summary.iterrows():
+        vals[str(r["population"])] = f"{float(r['nes']):+.2f}"
+        vals[f"{r['population']}_fdr"] = f"{float(r['padj']):.2f}"
+    return FINDINGS[(arm, key)].format_map(vals)
 
 _HOW_BASE = (
     "Top panel: the weighted running enrichment score as each population's ranked list is "
@@ -457,9 +504,10 @@ _HOW_BASE = (
     "panel: where this part's genes sit in each ranking, in matching colour. Legend labels "
     "carry the testable gene count, the NES and the FDR, and no other glyph marks "
     "significance. The y-range is shared across the whole decomposition family, so curve "
-    "heights compare between figures. CORROBORATES; does not answer the niche question — "
-    "annotation tier, firewalled from the confirmatory WT_heat spine, no effect-size row. The "
-    "parts overlap, so their NES may not be added or ranked as shares of the whole.")
+    "heights compare between figures. This corroborates; the whole-set panels answer the niche "
+    "question. Annotation tier, firewalled from the confirmatory WT_heat spine, and it writes no "
+    "effect-size row. The parts overlap, so read each NES on its own; adding them or ranking "
+    "them as shares of the whole would double-count genes.")
 
 HOW_TO_READ = {
     ("up", "unassigned"): (
@@ -469,7 +517,7 @@ HOW_TO_READ = {
         "This part is the up-arm genes that also sit in HALLMARK_TNFA_SIGNALING_VIA_NFKB. "
         + _HOW_BASE),
     ("up", "hypoxia"): (
-        "This part is the up-arm genes that also sit in HALLMARK_HYPOXIA, the same 18 the "
+        "This part is the up-arm genes that also sit in HALLMARK_HYPOXIA, the same genes the "
         "whole-signature purge removes. " + _HOW_BASE),
     ("up", "inflammatory"): (
         "This part is the up-arm genes that also sit in HALLMARK_INFLAMMATORY_RESPONSE. "

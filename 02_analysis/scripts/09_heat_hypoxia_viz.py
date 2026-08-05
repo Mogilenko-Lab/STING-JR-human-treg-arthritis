@@ -644,56 +644,64 @@ def main() -> None:
 
     paired = purge_paired_table()
     fig = plot_purge_paired(paired)
+    # Every NES, delta and gene count below is read from `paired` in this run. The mouse arms
+    # are re-derived upstream in mouse_anchor, so a typed value here would go stale.
+    up = paired[paired["arm"].eq("up")]
+    up_moves = ", ".join(f"{float(r['nes_full']):.4f} to {float(r['nes_purged']):.4f} in "
+                         f"{r['population']}" for _, r in up.iterrows())
     save_overview(
         fig, STAGE, "heat_purge_nes_paired",
         table=round_numeric_cols(paired),
-        finding=("Deleting the 18 HALLMARK_HYPOXIA-overlap genes from the mouse 39 °C-derived "
-                 "up-set takes 12 to 15 testable genes out of the arm and costs 0.129 to 0.165 "
-                 "NES — 2.5915 to 2.4268 in Treg, 2.6809 to 2.5516 in Tcon, 2.0710 to 1.9261 in "
-                 "CD8 — leaving all three significant, so the synovial-fluid enrichment is not "
-                 "reducible to its HALLMARK_HYPOXIA-overlap gene content. That is a statement "
-                 "about gene content and nothing else: it says nothing about temperature, and "
-                 "nothing about whether hypoxia is a confound or a co-exposure, which are not "
-                 "separable in cross-sectional human data."),
+        finding=(f"Deleting the {int(up['n_removed_nominal'].max())} HALLMARK_HYPOXIA-overlap "
+                 f"genes from the mouse 39 °C-derived up-set takes "
+                 f"{int(up['n_removed_testable'].min())} to "
+                 f"{int(up['n_removed_testable'].max())} testable genes out of the arm and costs "
+                 f"{up['delta_nes'].abs().min():.3f} to {up['delta_nes'].abs().max():.3f} NES — "
+                 f"{up_moves} — leaving all three significant. The synovial-fluid enrichment "
+                 f"therefore survives the removal of its HALLMARK_HYPOXIA-overlap gene content. "
+                 f"This is a statement about gene content. Temperature is untested here, and "
+                 f"cross-sectional human data leave hypoxia's status as confound or co-exposure "
+                 f"undetermined."),
         script=SCRIPT, fn="plot_purge_paired",
         config_kv=(f"thresholds.gsea_fdr={FDR}; gsea_min_size={PARAMS.gsea_min_size}; "
                    f"gsea_nperm={PARAMS.gsea_nperm}"),
         input="03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv",
         how_to_read=(
-            "ANSWERS at confirmatory tier: donor-level pseudobulk within frozen sort labels, "
+            "This is the confirmatory tier: donor-level pseudobulk within frozen sort labels, "
             "limma-voom then fgsea. Positive NES points toward synovial fluid. Each row pairs "
             "the full set (large diamond) with its purged form (small circle); the connecting "
             "bar is the NES cost. Warm brown is the up arm and cool blue the down arm. A dark "
             f"outline marks FDR below {FDR}. Right-hand text reports effective and nominal set "
-            "sizes, the NES cost, and purged FDR. Distinguish the 18 genes removed from the "
-            "frozen set from the 12 to 15 present in a ranked list. The Tcon down arm remains "
-            "significant at the up arm's sign. This licenses a membership statement only. "
-            "Correlative."),
+            f"sizes, the NES cost, and purged FDR. Two gene counts differ and both are given: "
+            f"{int(up['n_removed_nominal'].max())} genes come out of the frozen set, of which "
+            f"{int(up['n_removed_testable'].min())} to {int(up['n_removed_testable'].max())} "
+            f"were present in a ranked list. The Tcon down arm stays significant at the up "
+            f"arm's sign. This licenses a membership statement. Correlative."),
         config=FIG_CFG, height=7.6,
     )
     plt.close(fig)
 
     coloc = colocalization_table()
     fig = plot_colocalization(coloc)
+    sp = coloc[coloc["method"].eq("spearman")]["r"]
     save_overview(
         fig, STAGE, "heat_hypoxia_colocalization",
         table=round_numeric_cols(coloc),
-        finding=("Within synovial-fluid cells the per-cell WT_heat_up score and the "
-                 "HALLMARK_HYPOXIA score correlate only weakly (Spearman 0.08 to 0.20), so the "
-                 "two scores are carried by largely different cells rather than reading out one "
-                 "shared cell state. Per-cell tier: this corroborates the membership result and "
-                 "cannot answer anything on its own."),
+        finding=(f"Within synovial-fluid cells the per-cell WT_heat_up score and the "
+                 f"HALLMARK_HYPOXIA score correlate weakly, Spearman {sp.min():.2f} to "
+                 f"{sp.max():.2f}, so largely different cells carry the two scores. This is the "
+                 f"per-cell tier; it corroborates the membership result."),
         script=SCRIPT, fn="plot_colocalization",
         config_kv="level=cell; tissue=synovial_fluid; evidence_tier=secondary_percell",
         input="03_results/09_heat_hypoxia/tables/heat_hypoxia_colocalization.csv",
         how_to_read=(
-            "CORROBORATES and never answers: this per-cell tier cannot support a claim. Bars "
-            "show within-SF cell-level correlation between WT_heat_up and HALLMARK_HYPOXIA "
+            "This per-cell tier corroborates; the confirmatory result is the paired purge panel. "
+            "Bars show within-SF cell-level correlation between WT_heat_up and HALLMARK_HYPOXIA "
             "AUCell scores, with Spearman dark and Pearson light; cell counts sit below each "
-            "population. The y-axis spans -0.05 to 1, so read bar height rather than rank. "
-            "Positive r means the scores tend to coincide. Donor-level SF means rest on 6 to "
-            "7 donors and remain in the stage table. Never pool this diagnostic with "
-            "pseudobulk NES or read it as directional evidence."),
+            "population. The y-axis spans -0.05 to 1, so bar height is the readable quantity. "
+            "Positive r means the scores tend to coincide. Donor-level SF means rest on 6 to 7 "
+            "donors and sit in the stage table. Keep this diagnostic separate from the "
+            "pseudobulk NES; it carries no direction."),
         config=FIG_CFG,
     )
     plt.close(fig)
@@ -723,8 +731,8 @@ def main() -> None:
             "up-arm gene the hypoxia purge removes. Membership is the only thing added to the "
             "committed DE table, and the printed tallies are counts of it. Gene names are "
             f"capped at the top {LABEL_TOP} up-arm genes by FDR and the rest are in the "
-            "source table. The down arm scattering both ways is the honest caveat. Primary "
-            "donor-pseudobulk tier, correlative."),
+            "source table. The down arm scatters both ways, which is the caveat to carry. "
+            "Primary donor-pseudobulk tier, correlative."),
         config=FIG_CFG, height=VOLCANO_HEIGHT,
     )
     plt.close(fig)
@@ -735,12 +743,12 @@ def main() -> None:
     save_overview(
         fig, STAGE, "heat_treg_volcano_programs",
         table=volcano_source_table(de, tal, keep, labelled),
-        finding=(f"Only {tal['n_sting_specific_in_up']} of the "
-                 f"{tal['n_sting_specific_set']} published IFN-independent STING-activation "
-                 f"genes and {tal['n_ifn_only_in_up']} of {tal['n_ifn_only_set']} generic "
-                 "type-I IFN genes are in the mouse 39 °C up-arm, so the SF-high program the "
-                 "purge leaves standing is an effector and activation program that shares "
-                 "almost nothing with the STING reference axis."),
+        finding=(f"{tal['n_sting_specific_in_up']} of the {tal['n_sting_specific_set']} "
+                 f"published IFN-independent STING-activation genes and "
+                 f"{tal['n_ifn_only_in_up']} of {tal['n_ifn_only_set']} generic type-I IFN genes "
+                 f"sit in the mouse 39 °C up-arm, so the SF-high program the purge leaves "
+                 f"standing is an effector and activation program with minimal overlap with the "
+                 f"STING reference axis."),
         script=SCRIPT, fn="plot_programs_axes_volcano",
         config_kv=(f"thresholds.de_fdr={DE_FDR}; de_logfc={DE_LFC}; "
                    "taxonomy=00_data/references/heat_leadingedge_taxonomy"),
@@ -751,8 +759,9 @@ def main() -> None:
             "Two views of one volcano, same axes as the signature volcano. Left colours the "
             f"up-arm genes by leading-edge program, with the {tal['n_taxonomy_in_up']}-gene "
             "annotation covering the leading edge only and pale brown marking the up-arm "
-            "genes it leaves unlabelled, so read it as an annotation and not a decomposition "
-            "of the 199-gene set. Right draws the two frozen reference axes: black squares "
+            "genes it leaves unlabelled. It is an annotation of that leading edge; the "
+            "unlabelled remainder is the measure of what it leaves out. Right draws the two "
+            "frozen reference axes: black squares "
             "are the published IFN-independent STING-activation genes, all named, blue "
             "circles the generic type-I IFN program, and a brown outline means the gene is "
             "also a mouse signature member. The heat-shock trio is named in the left panel "

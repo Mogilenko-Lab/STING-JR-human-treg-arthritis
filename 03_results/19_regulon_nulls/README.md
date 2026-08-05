@@ -91,13 +91,13 @@ network's target assignments. This stage is silent on hypoxia, on temperature, a
 
 The CollecTRI human regulon table read across the compartment
 boundary is pinned at sha256 4473c918..., so a change to that network
-halts this stage. Without the pin, both nulls would move in
-silence.
+halts this stage. Without the pin, both nulls would move in silence.
 
-**How to read:** One row per cross-compartment source: `source_label` is the name this stage refers to it
-by, `source_path` is repository-root-relative, `sha256` the digest of the bytes actually read. The first
-run writes the pin; every later run verifies against it and stops on a mismatch. This stage keeps its own
-pin, so a moved network stops both stages.
+**How to read:** One row per cross-compartment source: `source_label` is the name this
+stage refers to it by, `source_path` is repository-root-relative,
+`sha256` the digest of the bytes actually read. The first run writes
+the pin; every later run verifies against it and stops on a mismatch.
+This stage keeps its own pin, so a moved network stops both stages.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -105,18 +105,23 @@ pin, so a moved network stops both stages.
 
 ## tables/ulm_engine_validation.csv
 
-The closed-form univariate-linear-model score used for all 1,064 null draws reproduces decoupleR's
-`run_ulm` on the observed network exactly: Spearman 1.000000 and a largest absolute difference of
-2.13e-14 over 601 factors, which is machine precision, so the nulls measure the same statistic the
-headline was read off.
+The closed-form univariate-linear-model score used for all 1,064 null
+draws reproduces decoupleR's `run_ulm` on the observed network
+exactly: Spearman 1.000000 and a largest absolute difference of
+2.13e-14 over 601 factors, which is machine precision, so the nulls
+measure the same statistic the headline was read off.
 
-**How to read:** One row. `score_closed_form` against `score_decoupler` is a like-for-like comparison on
-the observed signed network, summarised by `spearman`, `pearson` and `max_abs_diff`. decoupleR regresses
-every gene's contrast statistic on the regulon's mode of regulation, zero for a non-target, so the fit
-has a closed form costing one sparse matrix-vector product for all factors at once, which is what makes
-tens of thousands of null fits feasible. `gate` reads `pass` only when `spearman` reaches
-`gate_min_spearman`; the run stops otherwise. This is a guard, and it satisfies the compartment's
-standing requirement that an engine swap be shown by rank correlation to be a method change.
+**How to read:** One row. `score_closed_form` against `score_decoupler` is a
+like-for-like comparison on the observed signed network, summarised
+by `spearman`, `pearson` and `max_abs_diff`. decoupleR regresses
+every gene's contrast statistic on the regulon's mode of regulation,
+zero for a non-target, so the fit has a closed form costing one
+sparse matrix-vector product for all factors at once, which is what
+makes tens of thousands of null fits feasible. `gate` reads `pass`
+only when `spearman` reaches `gate_min_spearman`; the run stops
+otherwise. This is a guard, and it satisfies the compartment's
+standing requirement that an engine swap be shown by rank correlation
+to be a method change.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -124,24 +129,30 @@ standing requirement that an engine swap be shown by rank correlation to be a me
 
 ## tables/rewiring_null.csv
 
-Held against random regulons that share its size and every one of its targets' in-degrees, HIF1A's
-CollecTRI-ULM score of 8.30 clears the null at empirical p 0.005, z 2.58, and the null's centre sits at
-5.54, so most of the score is what any regulon of that size and promiscuity profile
-earns on this contrast. The null does not single HIF1A out: REL clears it harder (p 0.001, z 3.26) on 83
-targets, NFKB1 is indistinguishable (p 0.006), and EPAS1 sits exactly on its own null (obs 2.79 against
-a null mean of 2.79, p 0.48).
+Held against random regulons that share its size and every one of its
+targets' in-degrees, HIF1A's CollecTRI-ULM score of 8.30 clears the
+null at empirical p 0.005, z 2.58, and the null's centre sits at
+5.54, so most of the score is what any regulon of that size and
+promiscuity profile earns on this contrast. The null does not single
+HIF1A out: REL clears it harder (p 0.001, z 3.26) on 83 targets,
+NFKB1 is indistinguishable (p 0.006), and EPAS1 sits exactly on its
+own null (obs 2.79 against a null mean of 2.79, p 0.48).
 
-**How to read:** One row per focus factor. `obs_score` and `obs_rank` are the observed signed-network
-ULM values; the `null_*` columns describe the draws. A curveball trade holds the targets two regulons
-share and redistributes the rest between them, so every regulon's size and every target's in-degree stay
-invariant and only the assignment of targets to factors is randomised — which is why `null_mean` sits far
-above zero and why beating this null means more than beating a random gene set of matched size.
-
-`mean_target_indeg` is the observed regulon's average target promiscuity, the property this null holds
-fixed. `p_empirical` is (draws at or above obs + 1)/(draws + 1), so it never returns exactly zero, and
-`z_vs_null` standardises the gap. Because size is preserved exactly, `null_rank_median` and
-`null_rank_best` share the `n_tfs_scored` denominator with `obs_rank`. Annotation tier: this is a
-statement about the regulon's target set, and protein activity is untested.
+**How to read:** One row per focus factor. `obs_score` and `obs_rank` are the observed
+signed-network ULM values; the `null_*` columns describe the draws. A
+curveball trade holds the targets two regulons share and
+redistributes the rest between them, so every regulon's size and
+every target's in-degree stay invariant and only the assignment of
+targets to factors is randomised — which is why `null_mean` sits far
+above zero and why beating this null means more than beating a random
+gene set of matched size. `mean_target_indeg` is the observed
+regulon's average target promiscuity, the property this null holds
+fixed. `p_empirical` is (draws at or above obs + 1)/(draws + 1), so
+it never returns exactly zero, and `z_vs_null` standardises the gap.
+Because size is preserved exactly, `null_rank_median` and
+`null_rank_best` share the `n_tfs_scored` denominator with
+`obs_rank`. Annotation tier: this is a statement about the regulon's
+target set, and protein activity is untested.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -153,11 +164,13 @@ The per-draw substrate behind the rewiring null: 1000
 degree-preserving rewirings scored for each of the 8 focus factors
 present in this configuration.
 
-**How to read:** One row per (draw, factor). `score` is that draw's closed-form ULM value and `rank`
-its position by descending score among every factor scored in the same draw. Draws come from one Markov
-chain advanced between samples by trades, so consecutive rows are decorrelated and dependent by
-construction. This is the distribution `rewiring_null.csv` summarises; read it when a
-summary statistic needs checking against the shape it came from.
+**How to read:** One row per (draw, factor). `score` is that draw's closed-form ULM
+value and `rank` its position by descending score among every factor
+scored in the same draw. Draws come from one Markov chain advanced
+between samples by trades, so consecutive rows are decorrelated and
+dependent by construction. This is the distribution
+`rewiring_null.csv` summarises; read it when a summary statistic
+needs checking against the shape it came from.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -165,26 +178,32 @@ summary statistic needs checking against the shape it came from.
 
 ## tables/signflip_null.csv
 
-Permuting the experimental design with the annotation held fixed, the observed
-synovial-fluid-versus-blood labelling gives HIF1A the largest score of all 64 within-donor
-configurations (8.30 against a null maximum of 6.63), which is exact p = 0.0156, the finest this design
-can resolve. It carries no information about HIF1A specifically: 7 of the 8 focus factors reach the same
-floor, ATF3 being the one that does not (p 0.125). What it establishes is that the contrast itself
-survives relabelling.
+Permuting the experimental design with the annotation held fixed, the
+observed synovial-fluid-versus-blood labelling gives HIF1A the
+largest score of all 64 within-donor configurations (8.30 against a
+null maximum of 6.63), which is exact p = 0.0156, the finest this
+design can resolve. It carries no information about HIF1A
+specifically: 7 of the 8 focus factors reach the same floor, ATF3
+being the one that does not (p 0.125). What it establishes is that
+the contrast itself survives relabelling.
 
-**How to read:** One row per focus factor. The two tissue labels are swapped within a donor and the
-whole limma-voom contrast is refitted, which is the exchangeability a paired design licenses and which
-leaves the correlation between genes intact, where permuting gene labels would destroy it.
-`n_paired_donors` donors carry both arms, so `n_configurations` = 2^that, and every one is enumerated:
-the test is exact and no seed enters it.
-
-`n_ge_obs` counts configurations scoring at or above the observed, the observed one included, and
-`p_exact_one_sided` is that count over `n_configurations`. `p_floor` is 1/`n_configurations`, and
-`at_resolution_floor` is TRUE when only the observed configuration reaches the observed score, i.e. the
-p-value is as small as this many donors can make it. Flipping every donor negates the contrast, so the
-configurations come in sign-symmetric pairs and `null_mean` sits near zero. The gene set is filtered once
-on the observed design and held fixed, so scores are comparable across configurations; voom is recomputed
-per configuration, because its weights depend on the design.
+**How to read:** One row per focus factor. The two tissue labels are swapped within a
+donor and the whole limma-voom contrast is refitted, which is the
+exchangeability a paired design licenses and which leaves the
+correlation between genes intact, where permuting gene labels would
+destroy it. `n_paired_donors` donors carry both arms, so
+`n_configurations` = 2^that, and every one is enumerated: the test is
+exact and no seed enters it. `n_ge_obs` counts configurations scoring
+at or above the observed, the observed one included, and
+`p_exact_one_sided` is that count over `n_configurations`. `p_floor`
+is 1/`n_configurations`, and `at_resolution_floor` is TRUE when only
+the observed configuration reaches the observed score, i.e. the
+p-value is as small as this many donors can make it. Flipping every
+donor negates the contrast, so the configurations come in
+sign-symmetric pairs and `null_mean` sits near zero. The gene set is
+filtered once on the observed design and held fixed, so scores are
+comparable across configurations; voom is recomputed per
+configuration, because its weights depend on the design.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -196,12 +215,14 @@ The per-configuration substrate behind the sign-flip null: all 64
 within-donor label swaps of the 6 paired donors, scored for each
 focus factor.
 
-**How to read:** One row per (configuration, factor). `donors_flipped` names the donors whose two tissue
-labels were swapped, pipe-delimited, and `is_observed` marks the configuration that flips none — the
-published contrast. `score` and `rank` are that configuration's closed-form ULM value and its position
-among every factor scored. Configurations are enumerated in a fixed order, so this table is byte-stable
-across runs. Read it for the null's shape, and for the observed row being the extreme one for most
-factors.
+**How to read:** One row per (configuration, factor). `donors_flipped` names the
+donors whose two tissue labels were swapped, pipe-delimited, and
+`is_observed` marks the configuration that flips none — the published
+contrast. `score` and `rank` are that configuration's closed-form ULM
+value and its position among every factor scored. Configurations are
+enumerated in a fixed order, so this table is byte-stable across
+runs. Read it for the null's shape, and for the observed row being
+the extreme one for most factors.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -209,20 +230,26 @@ factors.
 
 ## tables/null_ladder.csv
 
-Set side by side, the four nulls order by what they hold fixed, and the conclusion weakens along that
-order: HIF1A clears a size-and-expression-matched random regulon by a wide margin, clears a
-size-and-promiscuity-matched real-degree rewiring by a narrow one, and is one of seven focus factors
-that max out the exact design permutation. Each rung is published beside the others because no single
-rung supports a claim alone.
+Set side by side, the 4 nulls order by what they hold fixed, and the
+conclusion weakens along that order: HIF1A clears a
+size-and-expression-matched random regulon by a wide margin, clears a
+size-and-promiscuity-matched real-degree rewiring by a narrow one,
+and is one of 7 focus factors that max out the exact design
+permutation. Each rung is published beside the others because no
+single rung supports a claim alone.
 
-**How to read:** One row per (factor, null), ordered weakest-to-strongest by what the null holds constant.
-`holds_fixed` names that and `permutes` names what is randomised, which together bound what a p-value from
-that row can mean. `obs` is the same observed CollecTRI-ULM score in every row for a given factor; only the
-reference distribution changes, so the columns are comparable down a factor's block and the movement in
-`p_empirical` is the whole content of the table. `null_q95` is empty for the sign-flip rung, whose 64
-configurations do not support a stable upper percentile. The two random-regulon rungs are re-read from
-their own published table.
+**How to read:** One row per (factor, null), ordered weakest-to-strongest by what the
+null holds constant. `holds_fixed` names that and `permutes` names
+what is randomised, which together bound what a p-value from that row
+can mean. `obs` is the same observed CollecTRI-ULM score in every row
+for a given factor; only the reference distribution changes, so the
+columns are comparable down a factor's block and the movement in
+`p_empirical` is the whole content of the table. `null_q95` is empty
+for the sign-flip rung, whose 64 configurations do not support a
+stable upper percentile. The two random-regulon rungs are re-read
+from their own published table.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/19_regulon_nulls.R` | `bind_rows` | `tf_activity.focus_tfs = 8; tf_activity.null_draws; regulon_nulls.rewiring_draws` | `03_results/18_tf_activity/tables/size_matched_null.csv, 03_results/19_regulon_nulls/tables/rewiring_null.csv + signflip_null.csv` |
+

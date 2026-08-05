@@ -249,7 +249,8 @@ save_overview(
     "synovial-fluid side, blue on paired blood. Horizontal position is the exact NES,",
     "clamped to plus or minus 3.5. Yellow diamonds are the arms, filled when",
     "significant. Grey text is that population's own count, or an arm's NES and FDR.",
-    "Read for calibration: far right in a dense row is strong but ordinary. Correlative."),
+    "Read for calibration: far right in a dense row is strong and ordinary at once.",
+    "Correlative."),
   config = FIG_CFG, width = 14, height = 9)
 
 # =============================================================================
@@ -328,11 +329,11 @@ best_dn <- top2 |> dplyr::filter(direction == "down") |>
 
 save_overview(
   p2, STAGE, "treg_top_sets", table = tbl2,
-  finding = sprintf(paste0("In the JIA Treg contrast the largest shifts are downward rather than ",
-                           "upward: %s reaches NES %+.2f toward paired blood, against %s at %+.2f ",
-                           "toward synovial fluid, so the niche difference this compartment reads ",
-                           "as an inflammatory gain is accompanied by an at least equally large ",
-                           "loss of translation and ribosomal programs."),
+  finding = sprintf(paste0("In the JIA Treg contrast the largest shifts are downward: %s reaches ",
+                           "NES %+.2f toward paired blood, against %s at %+.2f toward synovial ",
+                           "fluid, so the niche difference this compartment reads as an ",
+                           "inflammatory gain is accompanied by an at least equally large loss of ",
+                           "translation and ribosomal programs."),
                     best_dn$pathway_id[1], best_dn$nes[1],
                     best_up$pathway_id[1], best_up$nes[1]),
   script = SCRIPT, fn = "main",
@@ -342,9 +343,9 @@ save_overview(
   input = "03_results/14_unbiased_enrichment/tables/gsea_all.csv",
   how_to_read = paste(
     "One row per gene set, capped at the top ten in each direction by absolute NES among",
-    "sets at FDR < 0.05 after pooling; the subtitle states how many are not shown, so the",
-    "cap is not completeness. Identifiers are shown with underscores as spaces and",
-    "wrapped, never truncated, each with its collection in brackets. Right of zero the",
+    "sets at FDR < 0.05 after pooling; the subtitle states how many the cap leaves out, so",
+    "the panel is a top-N view. Identifiers are shown with underscores as spaces and",
+    "wrapped in full, each with its collection in brackets. Right of zero the",
     "set's genes concentrate on the synovial-fluid side of this ranking, left on paired",
     "blood. Point size is how many of the set's genes reach the ranked list, so a large",
     "NES on a small point rests on few genes. The grey number is the pooled FDR; a black",
@@ -423,8 +424,8 @@ save_overview(
                            "contrast carries its largest PROGENy footprint in %s (score %+.2f, FDR ",
                            "%s) while the Hypoxia footprint scores %+.2f at FDR %s, so the ",
                            "inflammatory and low-oxygen readouts rise together in the same niche ",
-                           "contrast and neither can be read as the other's cause; %d of the ",
-                           "fourteen pathways are significant on both tests in Treg."),
+                           "contrast; which of the two drives the other is untested here. %d of ",
+                           "the fourteen pathways are significant on both tests in Treg."),
                     as.character(topA$pathway_name[1]), topA$nes[1], fmt_p(topA$padj[1]),
                     hyp$nes[1], fmt_p(hyp$padj[1]), n_both),
   script = SCRIPT, fn = "main",
@@ -440,9 +441,9 @@ save_overview(
     "contrast statistics: right of zero the pathway's footprint genes move with synovial",
     "fluid, left with paired blood. Colour is the population. A solid point reaches",
     "FDR < 0.05 on that test; a black ring marks one that also reaches it in the",
-    "independent donor-paired test, so ringed and solid is corroborated twice and faded",
-    "and unringed by neither. A footprint is inferred from target-gene expression, not a",
-    "measurement of pathway activity. Correlative; no causal reading."),
+    "independent donor-paired test, so ringed and solid is corroborated twice while faded",
+    "and unringed is corroborated by neither. A footprint is inferred from target-gene",
+    "expression; pathway activity itself is untested. Correlative; no causal reading."),
   config = FIG_CFG, width = 12.5, height = 8.5)
 
 message("[14_viz] wrote 3 overview figures with same-stem source tables and README captions")

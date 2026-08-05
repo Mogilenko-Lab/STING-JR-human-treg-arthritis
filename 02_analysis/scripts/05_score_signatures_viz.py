@@ -169,31 +169,61 @@ def main() -> None:
                   "carries an interval.",
                 transform=ax.transAxes, ha="left", va="top", fontsize=9)
     fig.tight_layout()
+
+    # Every NES, FDR and set size the caption states is read from `gsea` in this run. The
+    # mouse arms are re-derived upstream in mouse_anchor, so a typed triple here would go
+    # stale the moment that correction lands.
+    def _arm_rows(direction: str) -> pd.DataFrame:
+        if gsea.empty:
+            return gsea
+        sub = gsea[gsea["direction"].eq(direction)].copy()
+        sub["ord"] = sub["cell_state"].map({p: i for i, p in enumerate(POP_TAG)})
+        return sub.sort_values("ord")
+
+    def _phrase(sub: pd.DataFrame, first_full: bool = True) -> str:
+        bits = []
+        for k, (_, r) in enumerate(sub.iterrows()):
+            size = (f" ({int(r['set_size'])} of {int(r['n_nominal'])} genes ranked)"
+                    if k == 0 and first_full else f" ({int(r['set_size'])})")
+            bits.append(f"{float(r['nes']):.4f} in {r['cell_state']}{size}")
+        return ", ".join(bits[:-1]) + (" and " if len(bits) > 1 else "") + bits[-1]
+
+    up_rows, down_rows = _arm_rows("up"), _arm_rows("down")
+    if gsea.empty:
+        up_line = down_line = "No enrichment table was found for this stage."
+    else:
+        up_line = (f"The mouse 39 °C-derived up arm separates synovial fluid from paired blood "
+                   f"in every sorted population: NES {_phrase(up_rows)}, all at FDR below "
+                   f"{up_rows['padj'].max():.0e}. The result is pan-T, and Tregs are one of the "
+                   f"three populations carrying it.")
+        d_sig = down_rows[down_rows["padj"].lt(fdr)]
+        d_ns = down_rows[~down_rows["padj"].lt(fdr)]
+        down_line = (
+            (f"The down arm reaches NES "
+             + ", ".join(f"{float(r['nes']):.4f} at FDR {float(r['padj']):.3f} in {r['cell_state']}"
+                         for _, r in d_sig.iterrows())
+             + ", the same sign as the up arm, and carries no direction in "
+             + " or ".join(f"{r['cell_state']} ({float(r['nes']):.4f})"
+                           for _, r in d_ns.iterrows()) + ".")
+            if len(d_sig) else
+            f"The down arm reaches significance in no population at FDR {fdr}.")
+
     save_overview(fig, STAGE, "wt_heat_nes_forest",
                   table=gsea[["cell_state", "pathway_id", "nes", "pvalue", "padj",
                               "set_size", "n_nominal"]]
                   if not gsea.empty else pd.DataFrame(),
-                  finding=("The mouse 39 °C-derived up arm separates synovial fluid from paired "
-                           "blood in every sorted population — NES 2.5915 in Treg (119 of 199 "
-                           "genes ranked), 2.6809 in Tcon (130) and 2.0710 in CD8 (113), all at "
-                           "FDR below 1e-6 — so the answer to Treg preference is NO: the result "
-                           "is pan-T, and Tregs are in it rather than privileged in it. The down "
-                           "arm is not silent either, reaching NES "
-                           "1.4718 at FDR 0.026 in Tcon, the same sign as the up arm, while "
-                           "carrying no direction in Treg (0.9676) or CD8 (1.0943)."),
+                  finding=f"{up_line} {down_line}",
                   script=SCRIPT, fn="main",
                   config_kv=f"thresholds.gsea_fdr={PARAMS.gsea_fdr}; gsea_min_size={PARAMS.gsea_min_size}",
                   input="03_results/05_scoring/tables/gsea_pseudobulk_{treg,tcon,cd8}.csv",
-                  how_to_read=("ANSWERS, at the only tier that may: donor-level pseudobulk "
-                               "within frozen sort labels, limma-voom then fgsea, using the 6 "
-                               "donors represented in both arms. Points are NES for the up "
-                               "(circle) and down (diamond) arms, coloured by population; the "
-                               f"asterisk marks FDR below {PARAMS.gsea_fdr}. Labels give effective "
-                               "and nominal set sizes plus FDR. All three up arms are significant, "
-                               "so the result is pan-T. The down arm also reaches significance in "
-                               "Tcon at the up arm's sign. Effective size tracks the NES ordering, "
-                               "which therefore is not a biological ranking. Ordered NES dot plot "
-                               "with FDR encoding and no interval. Correlative."),
+                  how_to_read=("This is the confirmatory tier: donor-level pseudobulk within "
+                               "frozen sort labels, limma-voom then fgsea, on the 6 donors "
+                               "present in both arms. Points are NES for the up (circle) and down "
+                               "(diamond) arms, coloured by population; the asterisk marks FDR "
+                               f"below {PARAMS.gsea_fdr}. Labels give effective and nominal set "
+                               "sizes plus FDR. Effective size tracks the NES ordering, so the "
+                               "ordering is a size effect. Ordered NES dot plot with FDR "
+                               "encoding; the rows carry no interval. Correlative."),
                   config=FIG_CFG, width=9.5, height=8.5)
 
     # ---- 2. per-cell score violins ----
@@ -222,24 +252,22 @@ def main() -> None:
     save_overview(fig3, STAGE, "score_violins", table=dm,
                   finding=("Donor-mean WT_heat_up AUCell sits higher in synovial fluid than in "
                            "paired blood in all three sorted populations, so the per-cell channel "
-                           "shadows the pseudobulk answer in the same direction. It corroborates "
-                           "and cannot answer: a per-cell score is a different estimand on a "
-                           "secondary tier, and the shift it shows is not confined to Tregs "
-                           "either."),
+                           "shadows the pseudobulk result in the same direction. This corroborates. "
+                           "A per-cell score is a different estimand on a secondary tier, and the "
+                           "shift it shows spans all three populations."),
                   script=SCRIPT, fn="main",
                   config_kv="signature = WT_heat_up (AUCell, rank-based [0,1])",
                   input="03_results/05_scoring/tables/donor_label_score_means.csv",
-                  how_to_read=("This panel CORROBORATES and never answers — per-cell scores are "
-                               "not a tier that may support a claim. Each dot is one donor's mean "
-                               "WT_heat_up AUCell score for that state×tissue, and the violins "
-                               "summarise across donors. AUCell is a rank-based score in [0,1], "
-                               "the area under each cell's gene-recovery curve for the up-set, "
-                               "robust to library size and composition. Read the RELATIVE "
-                               "SF-vs-PB shift within each population (Treg SF vs Treg PB), not "
-                               "the absolute level. This is a different estimand from the "
-                               "pseudobulk NES dot plot and shares no axis with it; NEVER pooled "
-                               "with it. Down arm omitted because up and down co-shift in SF. "
-                               "Correlative."),
+                  how_to_read=("This panel corroborates; the confirmatory answer is the pseudobulk "
+                               "NES dot plot. Each dot is one donor's mean WT_heat_up AUCell score "
+                               "for that state × tissue, and the violins summarise across donors. "
+                               "AUCell is a rank-based score in [0, 1], the area under each cell's "
+                               "gene-recovery curve for the up set, robust to library size and "
+                               "composition. Read the SF-versus-PB shift within a population (Treg "
+                               "SF against Treg PB); the absolute level carries no reading. This "
+                               "is a different estimand from the pseudobulk NES dot plot and "
+                               "shares no axis with it. The down arm is omitted because up and "
+                               "down co-shift in synovial fluid. Correlative."),
                   config=FIG_CFG)
     print("[05_scoring_viz] wrote 2 overviews (ordered NES dot plot + score violins)")
 

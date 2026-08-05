@@ -16,12 +16,14 @@ stage.
 
 ## figures/_overview/pseudobulk_pca.png
 
-Pseudobulk samples separate by tissue and by label, and no single donor dominates an axis, so donor
-pseudobulk is well-posed for SF-versus-PB differential expression.
+Pseudobulk samples separate by tissue and by label, and no single
+donor dominates an axis, so donor pseudobulk is well-posed for SF-
+versus-PB differential expression.
 
-**How to read:** Each point is one donor × tissue × label pseudobulk profile (log-CPM, top 2,000
-variable genes). Circle is SF, square PB, colour donor. Read for tissue separation and for the
-absence of a single-donor axis. Display transform only.
+**How to read:** Each point is one donor × tissue × label pseudobulk profile (log-CPM,
+top 2,000 variable genes). Circle is SF, square PB, colour donor. Read
+for tissue separation and for the absence of a single-donor axis.
+Display transform only.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -29,12 +31,13 @@ absence of a single-donor axis. Display transform only.
 
 ## figures/_overview/treg_volcano.png
 
-Synovial-fluid Tregs carry a reproducible SF-versus-PB transcriptional program, 1,797 genes at FDR
-< 0.05 and |log2FC| ≥ 1. This is the substrate the mouse-derived signature is tested against.
+Synovial-fluid Tregs carry a reproducible SF-versus-PB transcriptional
+program, 1,797 genes at FDR < 0.05 and |log2FC| ≥ 1.0. This is the
+substrate the mouse-derived signature is tested against.
 
-**How to read:** x is log2 fold change SF over PB, y is −log10 padj, orange marks significance.
-Dashed lines are the FDR and |log2FC| gates. The top 500 genes are tabulated alongside. Correlative
-donor-pseudobulk DE.
+**How to read:** x is log2 fold change SF over PB, y is −log10 padj, orange marks
+significance. Dashed lines are the FDR and |log2FC| gates. The top 500
+genes are tabulated alongside. Correlative donor-pseudobulk DE.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -42,11 +45,13 @@ donor-pseudobulk DE.
 
 ## figures/_overview/de_count_bar.png
 
-All three sorted populations yield significant SF-versus-PB differential expression — 1,797 genes
-in Treg, 1,949 in Tcon, 1,695 in CD8 — so each has a ranked list powered for signature enrichment.
+All 3 sorted populations yield significant SF-versus-PB differential
+expression — 1,797 genes in Treg, 1,949 in Tcon, 1,695 in CD8 — so
+each has a ranked list powered for signature enrichment.
 
-**How to read:** One bar per population, height the count of significant SF-versus-PB DE genes.
-Read it to confirm each arm carries enough signal to rank for pre-ranked GSEA. Diagnostic.
+**How to read:** One bar per population, height the count of significant SF-versus-PB
+DE genes. Read it to confirm each arm carries enough signal to rank
+for pre-ranked GSEA. Diagnostic.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

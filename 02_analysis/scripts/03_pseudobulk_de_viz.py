@@ -79,14 +79,16 @@ def main() -> None:
     pca_tab = coldata.assign(PC1=pcs[:, 0], PC2=pcs[:, 1])[
         ["donor", "tissue", "coarse_label", "n_cells", "PC1", "PC2"]]
     save_overview(fig, STAGE, "pseudobulk_pca", table=pca_tab,
-                  finding=("Pseudobulk samples separate by tissue and label without a single donor "
-                           "dominating an axis, so donor pseudobulk is well-posed for SF-vs-PB DE."),
+                  finding=("Pseudobulk samples separate by tissue and by label, and no single "
+                           "donor dominates an axis, so donor pseudobulk is well-posed for "
+                           "SF-versus-PB differential expression."),
                   script=SCRIPT, fn="main",
                   config_kv="thresholds.pseudobulk_min_cells (strata filter)",
                   input="03_results/03_pseudobulk/tables/pseudobulk_counts.csv",
-                  how_to_read=("Each point = one donor x tissue x label pseudobulk (log-CPM, top-2000 "
-                               "var genes). Circle=SF, square=PB, color=donor. Look for tissue "
-                               "separation and NO single-donor axis dominance. Display transform only."),
+                  how_to_read=(f"Each point is one donor × tissue × label pseudobulk profile "
+                               f"(log-CPM, top {len(hv):,} variable genes). Circle is SF, square "
+                               f"PB, colour donor. Read for tissue separation and for the absence "
+                               f"of a single-donor axis. Display transform only."),
                   config=FIG_CFG)
 
     # ---- 2. Treg SF-vs-PB volcano ----
@@ -121,13 +123,17 @@ def main() -> None:
         fig2.tight_layout()
         vol_tab = de[["gene_symbol", "log2FoldChange", "stat", "pvalue", "padj"]].head(500)
         save_overview(fig2, STAGE, "treg_volcano", table=vol_tab,
-                      finding=("Synovial-fluid Tregs carry a reproducible SF-vs-PB transcriptional "
-                               "program (significant up/down genes), the substrate the mouse signature is tested against."),
+                      finding=(f"Synovial-fluid Tregs carry a reproducible SF-versus-PB "
+                               f"transcriptional program, {int(sig.sum()):,} genes at FDR < "
+                               f"{PARAMS.de_fdr} and |log2FC| ≥ {PARAMS.de_logfc}. This is the "
+                               f"substrate the mouse-derived signature is tested against."),
                       script=SCRIPT, fn="main",
                       config_kv=f"thresholds.de_fdr={PARAMS.de_fdr}; de_logfc={PARAMS.de_logfc}",
                       input="03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv",
-                      how_to_read=("x=log2FC SF/PB, y=-log10 padj; orange = significant. Dashed lines = "
-                                   "FDR + |log2FC| gates. Correlative DE, top-500 genes tabulated."),
+                      how_to_read=(f"x is log2 fold change SF over PB, y is −log10 padj, orange "
+                                   f"marks significance. Dashed lines are the FDR and |log2FC| "
+                                   f"gates. The top {len(vol_tab)} genes are tabulated alongside. "
+                                   f"Correlative donor-pseudobulk DE."),
                       config=FIG_CFG)
 
     # ---- 3. DE-count bar ----
@@ -140,14 +146,19 @@ def main() -> None:
     ax.set_ylabel("significant SF-vs-PB DE genes")
     ax.set_title("Pseudobulk DE burden per population")
     fig3.tight_layout()
+    # Counts read from de_summary.csv so the caption cannot drift from its own source table.
+    n_by_pop = [f"{int(r['n_sig_de']):,} in {r['population']}" for _, r in s.iterrows()]
+    n_by_pop[0] = n_by_pop[0].replace(" in ", " genes in ", 1)
     save_overview(fig3, STAGE, "de_count_bar", table=summary,
-                  finding=("All three sorted populations yield significant SF-vs-PB DE, so each has a "
-                           "ranked list powered for signature enrichment."),
+                  finding=(f"All {len(s)} sorted populations yield significant SF-versus-PB "
+                           f"differential expression — {', '.join(n_by_pop)} — so each has a "
+                           f"ranked list powered for signature enrichment."),
                   script=SCRIPT, fn="main",
                   config_kv=f"thresholds.de_fdr={PARAMS.de_fdr}; de_logfc={PARAMS.de_logfc}",
                   input="03_results/03_pseudobulk/tables/de_summary.csv",
-                  how_to_read=("Bar = # significant SF-vs-PB DE genes per population (Treg/Tcon/CD8). "
-                               "Confirms each arm has enough signal to rank for fgsea. Diagnostic."),
+                  how_to_read=("One bar per population, height the count of significant "
+                               "SF-versus-PB DE genes. Read it to confirm each arm carries enough "
+                               "signal to rank for pre-ranked GSEA. Diagnostic."),
                   config=FIG_CFG)
     print("[03_pseudobulk_viz] wrote 3 overviews")
 

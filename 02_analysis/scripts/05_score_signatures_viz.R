@@ -119,10 +119,10 @@ finding_for <- function(pop, tbl, nominal) {
   }, FUN.VALUE = character(1))
   paste0(
     "In ", pop, " ", paste(parts, collapse = ", and "), ". ",
-    "The curve shows WHERE along this population's synovial-fluid-versus-blood ",
-    "ranking each arm concentrates; whether one sorted population separates more ",
-    "than another is a cross-population comparison and is read off the ordered NES ",
-    "dot plot, not off this panel.")
+    "The curve gives the place along this population's synovial-fluid-versus-blood ",
+    "ranking where each arm concentrates. The cross-population comparison — whether ",
+    "one sorted population separates more than another — is read off the ordered NES ",
+    "dot plot.")
 }
 
 HOW_TO_READ <- paste(

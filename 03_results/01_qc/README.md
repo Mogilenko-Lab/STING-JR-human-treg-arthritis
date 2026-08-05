@@ -11,11 +11,12 @@ artifacts characterise the pocket of such cells.
 
 ## figures/_overview/qc_violins_per_gsm.png
 
-Per-GSM UMI and gene depth is adequate across every stratum and %mito stays low, so no GSM is
-grossly degraded.
+Per-GSM UMI and gene depth is adequate across every stratum and %mito
+stays low, so no GSM is grossly degraded.
 
-**How to read:** One violin per GSM on x, coloured by sorted population; rows are UMIs, genes (log
-y) and %mito. The source table lists per-GSM medians. QC diagnostic — no biological claim.
+**How to read:** One violin per GSM on x, coloured by sorted population; rows are UMIs,
+genes (log y) and %mito. The source table lists per-GSM medians. QC
+diagnostic — no biological claim.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -23,13 +24,15 @@ y) and %mito. The source table lists per-GSM medians. QC diagnostic — no biolo
 
 ## figures/_overview/cells_kept_dropped.png
 
-QC retains 99,915 of 108,414 cells, 92.2% overall. The SF-Treg p5 library (GSM4859852) is near-empty
-at a median around 14 UMIs and drops entirely, leaving 6 of 7 donors with paired SF and PB Tregs for
+QC retains 99,915 of 108,414 cells, 92.2% overall. The SF-Treg p5
+library (GSM4859852) is near-empty at a median around 14 UMIs and
+drops entirely, leaving 6 of 7 donors with paired SF and PB Tregs for
 the donor-level contrast.
 
-**How to read:** Stacked bars per stratum, blue kept and red dropped, where a drop is a MAD outlier,
-a low-gene cell, a doublet call, or the hard GSM exclusion. Read it to confirm every SF and PB Treg
-stratum retains enough cells for pseudobulk. QC diagnostic.
+**How to read:** Stacked bars per stratum, blue kept and red dropped, where a drop is a
+MAD outlier, a low-gene cell, a doublet call, or the hard GSM
+exclusion. Read it to confirm every SF and PB Treg stratum retains
+enough cells for pseudobulk. QC diagnostic.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -37,30 +40,35 @@ stratum retains enough cells for pseudobulk. QC diagnostic.
 
 ## figures/_overview/unsupervised_umap.png
 
-Sorted Treg, Tcon and CD8 cells occupy largely distinct transcriptomic territory, and FOXP3, IL2RA,
-CTLA4 and IKZF2 concentrate in the Treg gate, supporting sort fidelity.
+Sorted Treg, Tcon and CD8 cells occupy largely distinct transcriptomic
+territory, and FOXP3, IL2RA, CTLA4 and IKZF2 concentrate in the Treg
+gate, supporting sort fidelity.
 
-**How to read:** Top row places cells on the unsupervised UMAP coloured by sort population, tissue, donor
-and leiden cluster; bottom row gives Treg-marker expression on magma. The source table is the leiden ×
-population cross-tab, a contamination check. This UMAP is a usability lens; biology is read from
-donor-level pseudobulk.
+**How to read:** Top row places cells on the unsupervised UMAP coloured by sort
+population, tissue, donor and leiden cluster; bottom row gives Treg-
+marker expression on magma. The source table is the leiden ×
+population cross-tab, a contamination check. This UMAP is a usability
+lens; biology is read from donor-level pseudobulk.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/01_qc_filter_viz.py` | `main` | `thresholds.hvg_n_top = 2000; n_pcs = 30; leiden_resolution = 1.0` | `03_results/objects/01_qc.h5ad (X_umap_unsupervised)` |
+| `02_analysis/scripts/01_qc_filter_viz.py` | `main` | `thresholds.hvg_n_top = 3000; n_pcs = 30; leiden_resolution = 1.0` | `03_results/objects/01_qc.h5ad (X_umap_unsupervised)` |
 
 ## figures/_overview/mthi_cluster_mt_etreg.png
 
-Two Treg leiden clusters carry high mitochondrial content, a median near 20% against 3.8% to 8.7%
-in the remaining sixteen. They split on effector identity: one is the effector-like, SF-restricted
-pocket, the other is equally mito-high and effector-low. The pocket is a discrete, reproducibly
-defined region of the embedding.
+2 Treg leiden clusters carry high mitochondrial content, a median near
+20% against 3.8% to 8.7% in the remaining 16. They split on effector
+identity: leiden 3 is the effector-like, SF-restricted pocket, and
+leiden 16 is equally mito-high and effector-low. The pocket is a
+discrete, reproducibly defined region of the embedding.
 
-**How to read:** Left panel plots one dot per Treg leiden cluster, size scaling with cell count, x the
-median %mt and y the median `score_eTreg`; orange is the mt-hi effector pocket, purple the mt-hi
-non-effector cluster. Right panel is a per-Treg %mt against eTreg hexbin on log density, pocket cells
-overlaid in green. The panel legend labels the clusters cl6 and cl16; `mthi_cluster_enrichment.csv`
-numbers them leiden 3 and 16. `secondary_percell` / EDA tier — never pseudobulk evidence.
+**How to read:** Left panel plots one dot per Treg leiden cluster, size scaling with
+cell count, x the median %mt and y the median `score_eTreg`; orange is
+the mt-hi effector pocket, blue the mt-hi non-effector cluster. Right
+panel is a per-Treg %mt against eTreg hexbin on log density, pocket
+cells overlaid in orange. Both panels label the two clusters leiden 3
+and 16, the numbering `mthi_cluster_enrichment.csv` uses.
+`secondary_percell` / EDA tier — never pseudobulk evidence.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -68,15 +76,17 @@ numbers them leiden 3 and 16. `secondary_percell` / EDA tier — never pseudobul
 
 ## figures/_overview/mthi_identity_retention.png
 
-The mt-hi effector pocket retains Treg identity. IKZF2 (rbc +0.60) and CTLA4 (+0.37) sit above
-normal Treg, IL2RA and TIGIT are comparable, and FOXP3 is modestly lower (expressed in 55% of
-pocket cells against 80% of normal Tregs), which tracks the lower sequencing depth of high-mito
-cells. These cells are Tregs.
+The mt-hi effector pocket retains Treg identity. IKZF2 (rbc +0.60) and
+CTLA4 (+0.37) sit above normal Treg, IL2RA and TIGIT are comparable,
+and FOXP3 is modestly lower (expressed in 55% of pocket cells against
+80% of normal Tregs), which tracks the lower sequencing depth of high-
+mito cells. These cells are Tregs.
 
-**How to read:** Grouped bars over 5 canonical Treg markers: mt-hi effector in orange, mt-hi
-non-effector in purple, normal Treg in grey. Left panel is median log-normalised expression, where
-rbc is the rank-biserial correlation against normal Treg (Mann-Whitney, BH-FDR; asterisk marks FDR
-< 0.05). Right panel is the fraction expressing. `secondary_percell` tier.
+**How to read:** Grouped bars over 5 canonical Treg markers: mt-hi effector in orange,
+mt-hi non-effector in blue, normal Treg in grey. Left panel is median
+log-normalised expression, where rbc is the rank-biserial correlation
+against normal Treg (Mann-Whitney, BH-FDR; asterisk marks FDR < 0.05).
+Right panel is the fraction expressing. `secondary_percell` tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -84,17 +94,20 @@ rbc is the rank-biserial correlation against normal Treg (Mann-Whitney, BH-FDR; 
 
 ## figures/_overview/mthi_qc_discrimination.png
 
-The pocket holds real cells at lower depth: median 1,338 genes, far above the 200-gene QC floor,
-which is the expected corollary of a high mitochondrial fraction. `score_apoptosis` (rbc −0.14) and
-`score_HSP` (−0.22) both sit below normal Treg. No cell in the pocket is flagged
-`predicted_doublet`. `doublet_score` was not populated in this run, a Scrublet gap, so the doublet
-evidence rests on the flag alone.
+The pocket holds real cells at lower depth: median 1,338 genes, far
+above the 200-gene QC floor, which is the expected corollary of a high
+mitochondrial fraction. `score_apoptosis` (rbc -0.14) and `score_HSP`
+(-0.22) both sit below normal Treg. No cell in the pocket is flagged
+`predicted_doublet`. `doublet_score` was not populated in this run, a
+Scrublet gap, so the doublet evidence rests on the flag alone.
 
-**How to read:** Four bars per metric across groups — eff is the mt-hi effector pocket, non the mt-hi
-non-effector cluster, norm normal Treg. rbc is the rank-biserial correlation against normal Treg
-(Mann-Whitney, all BH-FDR < 0.05); the red dashed line is the 200-gene QC floor. `n_genes_by_counts` and
-`total_counts` are objective QC measures; `score_apoptosis` and `score_HSP` are Tier-3 hand marker
-modules, QC-descriptive. `secondary_percell` tier.
+**How to read:** One panel per metric, three bars per panel — eff is the mt-hi effector
+pocket, non the mt-hi non-effector cluster, norm normal Treg. rbc is
+the rank-biserial correlation against normal Treg (Mann-Whitney, all
+BH-FDR < 0.05); the red dashed line is the 200-gene QC floor.
+`n_genes_by_counts` and `total_counts` are objective QC measures;
+`score_apoptosis` and `score_HSP` are Tier-3 hand marker modules, QC-
+descriptive. `secondary_percell` tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -102,33 +115,40 @@ modules, QC-descriptive. `secondary_percell` tier.
 
 ## figures/_overview/mthi_heat_honesty.png
 
-The mouse 39 °C-derived signature is quiet in the pocket. The balanced `WT_heat_updown` channel is
-essentially flat, median −0.075 in the mt-hi effector pocket against −0.060 in normal Treg. The
-one-sided `WT_heat_up` channel shifts up, and that shift co-varies with the effector/depth axis.
-This is `secondary_percell` tier, and it is a per-cell descriptive reading. The donor-pseudobulk
-enrichment of the same mouse up arm was unchanged when these high-mito cells were recovered; those
-NES values and their FDRs live in `03_results/05_scoring/`.
+The mouse 39 °C-derived signature is quiet in the pocket. The balanced
+`WT_heat_updown` channel is essentially flat, median -0.075 in the mt-
+hi effector pocket against -0.060 in normal Treg. The one-sided
+`WT_heat_up` channel shifts up, and that shift co-varies with the
+effector/depth axis. This is `secondary_percell` tier, and it is a
+per-cell descriptive reading. The same mouse up arm enriches the
+donor-pseudobulk SF-versus-PB contrast at NES Treg 2.59, Tcon 2.68,
+CD8 2.07, unchanged when these high-mito cells were recovered; those
+values and their FDRs live in `03_results/05_scoring/`.
 
-**How to read:** Point is the group median and bar the IQR, for `WT_heat_up` on the left and the
-balanced `WT_heat_updown` on the right, across the two mt-hi Treg groups, normal Treg, Tcon and CD8.
-`secondary_percell` / EDA tier — descriptive, never pooled with the donor-pseudobulk NES.
+**How to read:** Point is the group median and bar the IQR, for `WT_heat_up` on the
+left and the balanced `WT_heat_updown` on the right, across the two
+mt-hi Treg groups, normal Treg, Tcon and CD8. `secondary_percell` /
+EDA tier — descriptive, never pooled with the donor-pseudobulk NES.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
-| `02_analysis/scripts/01_qc_mthi_characterize_viz.py` | `main` | `decisions.go_no_go.primary_signature = WT_heat (pseudobulk, NOT per-cell)` | `03_results/01_qc/tables/mthi_heat_percell.csv` |
+| `02_analysis/scripts/01_qc_mthi_characterize_viz.py` | `main` | `decisions.go_no_go.primary_signature = WT_heat (pseudobulk, not per-cell)` | `03_results/01_qc/tables/mthi_heat_percell.csv` |
 
 ## figures/_overview/mthi_donor_tissue.png
 
-The pocket is 98% synovial fluid (284 of 291 cells) and 69% one donor (p6, 202 cells). It clears the
-20-cell floor in 3 SF donors and has an essentially empty PB arm — p6 contributes 4 PB cells and no
-donor reaches the floor — so it cannot support its own paired SF-versus-PB pseudobulk contrast. It
-is therefore retained inside the main SF-versus-PB Treg pseudobulk and shown on the embedding, and
-it is carved out as its own DE stratum nowhere.
+The pocket is 98% synovial fluid (284 of 291 cells) and 69% one donor
+(p6, 202 cells). It clears the 20-cell floor in 3 SF donors and has an
+essentially empty PB arm — p6 contributes 4 PB cells and 0 donors
+reach the floor — so it cannot support its own paired SF-versus-PB
+pseudobulk contrast. It is therefore retained inside the main SF-
+versus-PB Treg pseudobulk and shown on the embedding, and it is carved
+out as its own DE stratum nowhere.
 
-**How to read:** Left panel stacks pocket cells per donor, SF orange and PB blue, with the black
-dashed line the per-stratum `min_cells`. Right panel places all Tregs on the unsupervised UMAP with
-the mt-hi effector cluster in orange and the non-effector cluster in purple. `secondary_percell`
-tier; the UMAP is a usability lens.
+**How to read:** Left panel stacks pocket cells per donor, SF orange and PB blue, with
+the black dashed line the per-stratum `min_cells`. Right panel places
+all Tregs on the unsupervised UMAP with the mt-hi effector cluster in
+orange and the non-effector cluster in blue. `secondary_percell` tier;
+the UMAP is a usability lens.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

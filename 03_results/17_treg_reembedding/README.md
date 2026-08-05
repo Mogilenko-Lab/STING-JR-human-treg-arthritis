@@ -154,25 +154,31 @@ there is a statement about a sample; on `x`/`y` that falls to 1.38× chance. Ann
 
 ## figures/_overview/umap_treg_reembedding.png
 
-On the Treg-only map, drawn on the Harmony-corrected coordinates, the synovial-fluid and paired-blood
-cells still occupy distinct territory — 0.923 same-tissue neighbours at k = 30 against 0.500 expected —
-after the same-donor neighbour fraction has fallen from 0.661 to 0.201 against 0.146 expected. Both
-the mouse WT 39 °C-derived up arm and the curated Hallmark hypoxia lens colour the synovial-fluid
-territory brighter: per-cell AUCell mean 0.0112 to 0.0190 for WT_heat_up, 0.0736 to 0.0974 for the
-hypoxia lens.
+On the Treg-only map, drawn on the Harmony-corrected coordinates, the
+synovial-fluid and paired-blood cells still occupy distinct territory
+— 0.923 same-tissue neighbours at k = 30 against 0.500 expected —
+after the same-donor neighbour fraction has fallen from 0.661 to 0.201
+against 0.146 expected. Both the mouse WT 39 °C-derived up arm and the
+curated Hallmark hypoxia lens colour the synovial-fluid territory
+brighter: per-cell AUCell mean 0.0112 to 0.0190 for WT_heat_up, 0.0736
+to 0.0974 for the hypoxia lens.
 
-**How to read:** Three panels over one frame of the same 27,175 sorted Treg cells at the same
-coordinates, sharing one square bounding box. Left is tissue of origin, synovial fluid in vermillion and
-paired blood in blue, drawn in shuffled order. Middle and right colour every cell by per-cell AUCell of
-one gene set, on the scale the full-object figures use, clipped to the 2nd and 98th percentile with the
-highest-scoring cells drawn last.
-
-Panel titles carry the set identifier and its size: WT_heat_up is the up arm of the mouse WT iTreg
-39-versus-37 °C contrast in human projection, HALLMARK_HYPOXIA the curated MSigDB Hallmark program. The
-two sets are unrelated and their ranges differ, so each keeps its own colour scale. The coordinates are
-the Harmony-corrected pair, and Harmony reshapes the space it corrects, so this map is annotation. Cells
-are pooled across donors, so a tissue difference read off the colouring is pseudoreplicated. Claims rest
-on donor-level pseudobulk differential expression within the frozen cell states.
+**How to read:** Three panels over one frame of the same 27,175 sorted Treg cells at
+the same coordinates, sharing one square bounding box. Left is tissue
+of origin, synovial fluid in vermillion and paired blood in blue,
+drawn in shuffled order. Middle and right colour every cell by per-
+cell AUCell of one gene set, on the scale the full-object figures use,
+clipped to the 2nd and 98th percentile with the highest-scoring cells
+drawn last. Panel titles carry the set identifier and its size:
+WT_heat_up is the up arm of the mouse WT iTreg 39-versus-37 °C
+contrast in human projection, HALLMARK_HYPOXIA the curated MSigDB
+Hallmark program. The two sets are unrelated and their ranges differ,
+so each keeps its own colour scale. The coordinates are the Harmony-
+corrected pair, and Harmony reshapes the space it corrects, so this
+map is annotation. Cells are pooled across donors, so a tissue
+difference read off the colouring is pseudoreplicated. Claims rest on
+donor-level pseudobulk differential expression within the frozen cell
+states.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -180,15 +186,19 @@ on donor-level pseudobulk differential expression within the frozen cell states.
 
 ## tables/_overview/umap_treg_reembedding.csv
 
-Per-cell AUCell summaries of the two sets drawn on the Treg-only map, WT_heat_up and
-HALLMARK_HYPOXIA, restricted to the Treg gate, one row per tissue, so the colouring reads as numbers.
+Per-cell AUCell summaries of the 2 sets drawn on the Treg-only map,
+WT_heat_up and HALLMARK_HYPOXIA, restricted to the Treg gate, one row
+per tissue, so the colouring reads as numbers.
 
-**How to read:** A restriction of the narrative scoring summary table to the Treg gate and the two
-sets this figure draws. One row per (`set_name` × `tissue`) with the mean, median and standard
-deviation of the per-cell AUCell score and the cell and donor counts behind it. AUCell is bounded in
-[0, 1] and its scale depends on set size, so values compare across tissue within a `set_name`. Cells
-are pooled across donors, so the unit of replication is the cell and the tissue difference here is
-pseudoreplicated. `evidence_tier` reads `secondary_percell` throughout.
+**How to read:** A restriction of the narrative scoring summary table to the Treg gate
+and the two sets this figure draws. One row per (`set_name` x
+`tissue`) with the mean, median and standard deviation of the per-cell
+AUCell score and the cell and donor counts behind it. AUCell is
+bounded in [0, 1] and its scale depends on set size, so values compare
+across tissue within a `set_name`. Cells are pooled across donors, so
+the unit of replication is the cell and the tissue difference here is
+pseudoreplicated. `evidence_tier` reads `secondary_percell`
+throughout.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -196,27 +206,36 @@ pseudoreplicated. `evidence_tier` reads `secondary_percell` throughout.
 
 ## figures/_overview/umap_treg_arms.png
 
-Read on the Treg gate's own map and on the full object's colour scale, all three mouse 39 °C-derived
-up arms still colour the synovial-fluid territory brighter than the paired-blood territory, so the
-tissue contrast the full-object row shows survives viewing Treg apart from Tcon and CD8. Per-cell
-AUCell means run 0.0112 to 0.0190 for WT_heat_up, 0.0111 to 0.0192 for KO_heat_up, and 0.0717 to
-0.1245 for the 7-gene Interaction_up.
+Read on the Treg gate's own map and on the full object's colour scale,
+all three mouse 39 °C-derived up arms still colour the synovial-fluid
+territory brighter than the paired-blood territory, so the tissue
+contrast the full-object row shows survives viewing Treg apart from
+Tcon and CD8. Per-cell AUCell means run 0.0112 to 0.0190 for
+WT_heat_up, 0.0111 to 0.0192 for KO_heat_up, and 0.0717 to 0.1245 for
+the 7-gene Interaction_up.
 
 **How to read:** The Treg-only counterpart of
-`16_narrative_scoring/figures/_overview/umap_full_arms.png`: same three sets, same order, same panel
-geometry, same sequential colormap, drawn on the 27,175 sorted Treg cells alone.
-
-Panel titles carry the set identifier and its size. WT_heat_up is the up arm of the mouse WT iTreg
-39-versus-37 °C contrast in human projection, 199 symbols; KO_heat_up the same contrast in cGAS-knockout
-iTregs, 218 symbols; Interaction_up the mouse genotype-by-temperature up arm, 7 symbols, small enough
-that one gene moves the score, so read it for location and treat its spread as noise. WT_heat_up and
-KO_heat_up share 182 genes and one colour scale, so the two panels compare directly; Interaction_up spans
-a range an order of magnitude wider and keeps its own bar.
-
-AUCell is bounded in [0, 1] and scales with set size, so the source table carries mean, median,
-standard deviation and cell and donor counts for any comparison the colour cannot make.
-
-Colour limits, coordinates and tier follow the counterpart contract at the top of this page: limits are the full-object figure's from the same frame and seed, so a washed-out panel is a real statement about the Treg gate's range; the coordinates are this map's own; cells are pooled across donors, so a tissue difference read off the colouring is pseudoreplicated; and claims rest on donor-level pseudobulk differential expression within the frozen cell states.
+`16_narrative_scoring/figures/_overview/umap_full_arms.png`: same
+three sets, same order, same panel geometry, same sequential colormap,
+drawn on the 27,175 sorted Treg cells alone. Panel titles carry the
+set identifier and its size. WT_heat_up is the up arm of the mouse WT
+iTreg 39-versus-37 °C contrast in human projection, 199 symbols;
+KO_heat_up the same contrast in cGAS-knockout iTregs, 218 symbols;
+Interaction_up the mouse genotype-by-temperature up arm, 7 symbols,
+small enough that one gene moves the score, so read it for location
+and treat its spread as noise. WT_heat_up and KO_heat_up share 182
+genes and one colour scale, so the two panels compare directly;
+Interaction_up spans a range an order of magnitude wider and keeps its
+own bar. AUCell is bounded in [0, 1] and scales with set size, so the
+source table carries mean, median, standard deviation and cell and
+donor counts for any comparison the colour cannot make. Colour limits,
+coordinates and tier follow the counterpart contract at the top of
+this page: limits are the full-object figure's from the same frame and
+seed, so a washed-out panel is a real statement about the Treg gate's
+range; the coordinates are this map's own; cells are pooled across
+donors, so a tissue difference read off the colouring is
+pseudoreplicated; and claims rest on donor-level pseudobulk
+differential expression within the frozen cell states.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -224,39 +243,48 @@ Colour limits, coordinates and tier follow the counterpart contract at the top o
 
 ## figures/_overview/umap_treg_programs.png
 
-All three curated lenses colour synovial-fluid territory brighter than paired blood on the Treg gate's
-own map, so that structure appears without the other two sort gates: per-cell AUCell means 0.0736 to
-0.0974 for hypoxia, 0.0176 to 0.0298 for the generic interferon axis, and 0.0186 to 0.0366 for the 21
-published IFN-independent STING genes. What the shared scale adds is the level. The published STING
-panel sits in the lower part of its bar across the whole Treg map, because Treg blood carries roughly
-a third of what the other gates do — 0.0186 against 0.0532 in Tcon and 0.0647 in CD8 — a difference a
-self-scaled panel would have hidden.
+All three curated lenses colour synovial-fluid territory brighter than
+paired blood on the Treg gate's own map, so that structure appears
+without the other two sort gates: per-cell AUCell means 0.0736 to
+0.0974 for hypoxia, 0.0176 to 0.0298 for the generic interferon axis,
+0.0186 to 0.0366 for the 21 published IFN-independent STING genes. The
+shared scale adds the level: the published STING panel sits low in its
+bar across the whole Treg map, Treg blood mean 0.0186 against Tcon
+0.0532 and CD8 0.0647. Its median is exactly 0.000, the only 1 of 6
+rows at zero, against Tcon 0.0512 and CD8 0.0610, so at least half of
+Treg blood cells score zero on that 21-gene set and the Treg synovial-
+versus-blood difference on it rests partly on a zero-inflated blood
+baseline.
 
 **How to read:** The Treg-only counterpart of
-`16_narrative_scoring/figures/_overview/umap_full_programs.png`: same three sets, same order, same
-panel geometry, same colormap, on the 27,175 sorted Treg cells alone. Every set here is curated,
-versioned and derived independently of the mouse anchor — HALLMARK_HYPOXIA from MSigDB Hallmark,
-`sting_specific_published` the 21 published IFN-independent STING-activation genes, `ifn_generic_axis` a
-200-gene generic type-I interferon axis — so a colouring here stands apart from the anchor.
-
-The three sets are unrelated and their ranges differ, so each panel keeps its own set's limits; what is
-shared is the object those limits come from, which makes each panel comparable to its own twin.
-Brightness therefore compares tissue within a panel, and the source table carries the cross-panel
-numbers.
-
-Two limits bind the reading. The published STING set is 21 genes and its own IFN-β validation in the
-positive-control compartment is underpowered at three donors, so a dim or bright panel there is
-consistent with STING pathway activity and is never proof of it. Hypoxia and temperature are both
-imposed by the inflamed joint and stay entangled in cross-sectional human data, so the hypoxia panel
-is one lens on that niche and carries no HIF claim.
-
-Every colour limit is the full-object figure's, from the same frame and seed, so the pair compares
-brightness for brightness. A washed-out counterpart panel is therefore a real statement about the Treg
-gate's range. The pair shares its cells and its colour scale; the coordinates differ, because these are
-a re-embedding of the Treg cells alone. Cells are pooled across donors, so a tissue difference read off
-the colouring is pseudoreplicated, and Harmony reshapes the space it corrects, so this is a map. Claims
-in this compartment rest on donor-level pseudobulk differential expression within the frozen cell
-states.
+`16_narrative_scoring/figures/_overview/umap_full_programs.png`: same
+three sets, same order, same panel geometry, same colormap, on the
+27,175 sorted Treg cells alone. Every set here is curated, versioned
+and derived independently of the mouse anchor — HALLMARK_HYPOXIA from
+MSigDB Hallmark, sting_specific_published the 21 published IFN-
+independent STING-activation genes, ifn_generic_axis a 200-gene
+generic type-I interferon axis — so a colouring here stands apart from
+the anchor. The three sets are unrelated and their ranges differ, so
+each panel keeps its own set's limits; what is shared is the object
+those limits come from, which makes each panel comparable to its own
+twin. Brightness therefore compares tissue within a panel, and the
+source table carries the cross-panel numbers. Two limits bind the
+reading. The published STING set is 21 genes and its own IFN-β
+validation in the positive-control compartment is underpowered at
+three donors, so a dim or bright panel there is consistent with STING
+pathway activity and is never proof of it. Hypoxia and temperature are
+both imposed by the inflamed joint and stay entangled in cross-
+sectional human data, so the hypoxia panel is one lens on that niche
+and carries no HIF claim. Every colour limit is the full-object
+figure's, from the same frame and seed, so the pair compares
+brightness for brightness. A washed-out counterpart panel is therefore
+a real statement about the Treg gate's range. The pair shares its
+cells and its colour scale; the coordinates differ, because these are
+a re-embedding of the Treg cells alone. Cells are pooled across
+donors, so a tissue difference read off the colouring is
+pseudoreplicated, and Harmony reshapes the space it corrects, so this
+is a map. Claims in this compartment rest on donor-level pseudobulk
+differential expression within the frozen cell states.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -264,29 +292,41 @@ states.
 
 ## figures/_overview/umap_treg_signatures.png
 
-The three candidate harvest signatures on the Treg gate's own map and on the full-object figure's
-limits. Within the Treg gate the effector-Treg and heat-shock module scores still separate synovial
-fluid from paired blood (`score_eTreg` −0.0539 to 0.1021, `score_HSP` 0.0270 to 0.0806), alongside the
-mouse anchor annotation (WT_heat_up −0.0699 to −0.0475), so the structure the full-object figure shows
-for these three channels appears without viewing the Treg gate against Tcon and CD8.
+The three candidate harvest signatures on the Treg gate's own map and
+on the full-object figure's limits. Within the Treg gate the effector-
+Treg and heat-shock module scores still separate synovial fluid from
+paired blood (score_eTreg -0.0539 to 0.1021, score_HSP 0.0270 to
+0.0806), alongside the mouse anchor annotation (WT_heat_up -0.0699 to
+-0.0475), so the structure the full-object figure shows for these
+three channels appears without viewing the Treg gate against Tcon and
+CD8.
 
 **How to read:** The Treg-only counterpart of
-`07_embedding/figures/_overview/umap_signatures_treg.png`, which draws these same three channels across
-all three sort gates. Two differences from the other counterparts here matter first.
-
-The unit: these are scanpy `score_genes` module scores, mean-centred against a sampled background and
-signed, so they share a scale neither with the AUCell panels here nor with each other, and a value near
-zero means at background. The AUCell reading of the same mouse arm is the WT_heat_up panel of
-`umap_treg_arms`. The panel count: the full-object twin carries a fourth panel, a Treg/Tcon/CD8 sort-gate
-reference, which is a single category on a Treg-only object and is therefore omitted; the tissue
-reference here is the left panel of `umap_treg_reembedding`.
-
-WT_heat_up here is the mouse WT 39-versus-37 °C up arm carried as annotation only — never a selection
-predicate, and the harvest design it was previewed for is frozen as implemented. `score_eTreg` is the
-effector-Treg score and `score_HSP` the heat-shock/stress score, both curated in this compartment
-independently of the anchor.
-
-Colour limits come from all 99,915 cells of the `07_embedding` substrate, which is the frame that figure draws, so the pair is comparable panel for panel. The rest follows the counterpart contract at the top of this page: this map's own coordinates, cells pooled across donors so a tissue difference read off the colouring is pseudoreplicated, and claims resting on donor-level pseudobulk differential expression within the frozen cell states.
+`07_embedding/figures/_overview/umap_signatures_treg.png`, which draws
+these same three channels across all three sort gates. Two differences
+from the other counterparts here matter first. The unit: these are
+scanpy `score_genes` module scores, mean-centred against a sampled
+background and signed, so they share a scale neither with the AUCell
+panels here nor with each other, and a value near zero means at
+background. The AUCell reading of the same mouse arm is the WT_heat_up
+panel of `umap_treg_arms`. The panel count: the full-object twin
+carries a fourth panel, a Treg/Tcon/CD8 sort-gate reference, which is
+a single category on a Treg-only object and is therefore omitted; the
+tissue reference here is the left panel of `umap_treg_reembedding`.
+WT_heat_up here is the mouse WT 39-versus-37 °C up arm carried as
+annotation only — never a selection predicate, and the harvest design
+it was previewed for is frozen as implemented. score_eTreg is the
+effector-Treg score and score_HSP the heat-shock/stress score, both
+curated in this compartment independently of the anchor. Colour limits
+come from all 99,915 cells of the 07_embedding substrate, which is the
+frame that figure draws, so the pair is comparable panel for panel.
+Colour limits, coordinates and tier follow the counterpart contract at
+the top of this page: limits are the full-object figure's from the
+same frame and seed, so a washed-out panel is a real statement about
+the Treg gate's range; the coordinates are this map's own; cells are
+pooled across donors, so a tissue difference read off the colouring is
+pseudoreplicated; and claims rest on donor-level pseudobulk
+differential expression within the frozen cell states.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -294,19 +334,22 @@ Colour limits come from all 99,915 cells of the `07_embedding` substrate, which 
 
 ## tables/_overview/umap_treg_arms.csv
 
-Per-cell AUCell summaries of the 3 sets drawn in `figures/_overview/umap_treg_arms.png` — WT_heat_up,
-KO_heat_up, Interaction_up — restricted to the Treg gate, one row per tissue, so the colouring reads as
-numbers.
+Per-cell AUCell summaries of the 3 sets drawn in
+`figures/_overview/umap_treg_arms.png` — WT_heat_up, KO_heat_up,
+Interaction_up — restricted to the Treg gate, one row per tissue, so
+the colouring reads as numbers.
 
-**How to read:** A restriction of the narrative scoring summary table to the Treg gate and the sets
-this figure draws. One row per (`set_name` × `tissue`) with the mean, median and standard deviation of
-the per-cell AUCell score and the cell and donor counts behind it. These are the values the full-object
-figure's Treg rows carry too, because the scores are joined on barcode and not recomputed, so a
-difference between the paired figures is a difference of layout.
-
-AUCell is bounded in [0, 1] and its scale depends on set size, so values compare across tissue within a
-`set_name`. Cells are pooled across donors, so the unit of replication is the cell and every tissue
-difference is pseudoreplicated. `evidence_tier` reads `secondary_percell`.
+**How to read:** A restriction of the narrative scoring summary table to the Treg gate
+and the sets this figure draws. One row per (`set_name` x `tissue`)
+with the mean, median and standard deviation of the per-cell AUCell
+score and the cell and donor counts behind it. These are the values
+the full-object figure's Treg rows carry too, because the scores are
+joined on barcode and not recomputed, so a difference between the
+paired figures is a difference of layout. AUCell is bounded in [0, 1]
+and its scale depends on set size, so values compare across tissue
+within a `set_name`. Cells are pooled across donors, so the unit of
+replication is the cell and every tissue difference is
+pseudoreplicated. `evidence_tier` reads `secondary_percell`.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -314,19 +357,22 @@ difference is pseudoreplicated. `evidence_tier` reads `secondary_percell`.
 
 ## tables/_overview/umap_treg_programs.csv
 
-Per-cell AUCell summaries of the 3 sets drawn in `figures/_overview/umap_treg_programs.png` —
-HALLMARK_HYPOXIA, `sting_specific_published`, `ifn_generic_axis` — restricted to the Treg gate, one row
-per tissue, so the colouring reads as numbers.
+Per-cell AUCell summaries of the 3 sets drawn in
+`figures/_overview/umap_treg_programs.png` — HALLMARK_HYPOXIA,
+sting_specific_published, ifn_generic_axis — restricted to the Treg
+gate, one row per tissue, so the colouring reads as numbers.
 
-**How to read:** A restriction of the narrative scoring summary table to the Treg gate and the sets
-this figure draws. One row per (`set_name` × `tissue`) with the mean, median and standard deviation of
-the per-cell AUCell score and the cell and donor counts behind it. These are the values the full-object
-figure's Treg rows carry too, because the scores are joined on barcode and not recomputed, so a
-difference between the paired figures is a difference of layout.
-
-AUCell is bounded in [0, 1] and its scale depends on set size, so values compare across tissue within a
-`set_name`. Cells are pooled across donors, so the unit of replication is the cell and every tissue
-difference is pseudoreplicated. `evidence_tier` reads `secondary_percell`.
+**How to read:** A restriction of the narrative scoring summary table to the Treg gate
+and the sets this figure draws. One row per (`set_name` x `tissue`)
+with the mean, median and standard deviation of the per-cell AUCell
+score and the cell and donor counts behind it. These are the values
+the full-object figure's Treg rows carry too, because the scores are
+joined on barcode and not recomputed, so a difference between the
+paired figures is a difference of layout. AUCell is bounded in [0, 1]
+and its scale depends on set size, so values compare across tissue
+within a `set_name`. Cells are pooled across donors, so the unit of
+replication is the cell and every tissue difference is
+pseudoreplicated. `evidence_tier` reads `secondary_percell`.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -334,17 +380,22 @@ difference is pseudoreplicated. `evidence_tier` reads `secondary_percell`.
 
 ## tables/_overview/umap_treg_signatures.csv
 
-Per (channel × tissue) summaries of the three candidate harvest signatures within the Treg gate,
-giving the numbers behind the counterpart figure's colouring: all three channels sit higher in synovial
-fluid than in paired blood.
+Per (channel x tissue) summaries of the three candidate harvest
+signatures within the Treg gate, giving the numbers behind the
+counterpart figure's colouring: all three channels sit higher in
+synovial fluid than in paired blood.
 
-**How to read:** One row per (`set_name` × `tissue`) over the 27,175 Treg cells, with the mean, median
-and standard deviation of the module score and the cell and donor counts behind it. `metric` reads
-`scanpy_score_genes_module_score`. These values are mean-centred against a sampled background and
-signed, so zero means at background and a negative mean records a position on that scale; they compare
-across tissue within a `set_name`. `WT_heat_up` is the mouse anchor arm carried as annotation only and
-never as a selection predicate. Cells are pooled across donors, so the unit of replication is the cell
-and every tissue difference is pseudoreplicated. Annotation tier; no test, no effect size.
+**How to read:** One row per (`set_name` x `tissue`) over the 27,175 Treg cells, with
+the mean, median and standard deviation of the module score and the
+cell and donor counts behind it. `metric` reads
+`scanpy_score_genes_module_score`. These values are mean-centred
+against a sampled background and signed, so zero means at background
+and a negative mean records a position on that scale; they compare
+across tissue within a `set_name`. `WT_heat_up` is the mouse anchor
+arm carried as annotation only and never as a selection predicate.
+Cells are pooled across donors, so the unit of replication is the cell
+and every tissue difference is pseudoreplicated. Annotation tier; no
+test, no effect size.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

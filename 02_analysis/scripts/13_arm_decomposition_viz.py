@@ -211,6 +211,16 @@ def band_order(df: pd.DataFrame) -> list[str]:
     return list(df.sort_values("band_order")["program"].drop_duplicates())
 
 
+def arm_gene_sets() -> dict:
+    """The gene set of each arm, read from `arm_program_gene.csv`.
+
+    The overlaps between arms are stated in the caption; reading them here keeps a printed
+    overlap from outliving the frozen lists the arms were thresholded from.
+    """
+    gene = pd.read_csv(PATHS.tables(STAGE) / "arm_program_gene.csv")
+    return {str(a): set(d["gene"]) for a, d in gene.groupby("arm")}
+
+
 # ===========================================================================
 # 2. The panel
 # ===========================================================================
@@ -630,12 +640,12 @@ def plot_arm_hypoxia_euler(universes: list[dict]):
     led = universes[-1]["ledger_lens"]
     key = ("Every area is exactly proportional to its gene count and both panels share one "
            "area-per-gene scale, so the right panel is smaller because fewer genes are "
-           "testable in this contrast, not because it is drawn smaller. Right is the "
+           "testable in this contrast. Right is the "
            f"vocabulary an enrichment statistic on the {EULER_POPULATION.capitalize()} "
            f"ranking is computed over; {led['n_via_alias']} of its "
            f"{len(universes[-1]['lens'])} hypoxia genes match only after alias resolution "
            f"({', '.join(p.replace('->', ' as ') for p in led['alias_pairs'])}), and the arm "
-           "recovers none. Membership, not enrichment: no NES, FDR or effect size here.")
+           "recovers none. This is membership: no NES, FDR or effect size here.")
     wrap_col = max(60, int(CANVAS_W_IN * 0.97 / (ANNOT_SIZE * 0.0088)))
     fig.text(0.015, EULER_KEY_Y, "\n".join(textwrap.wrap(key, width=wrap_col)),
              ha="left", va="top", fontsize=ANNOT_SIZE)
@@ -649,6 +659,7 @@ def main() -> None:
     purge_figures(STAGE, "arm_hypoxia", overview=True, config=FIG_CFG)
 
     df = composition_table()
+    gsets = arm_gene_sets()
     fig = plot_composition(df)
 
     wt = df[df["arm"] == "WT_heat_up"].set_index("program")
@@ -660,21 +671,24 @@ def main() -> None:
         fig, STAGE, "arm_program_composition",
         table=round_numeric_cols(df),
         finding=(
-            "Nine curated anchor-independent lenses contain "
-            f"{int(wt.loc[RESIDUAL, 'arm_n_claimed'])} of the 199 WT_heat_up genes and "
-            f"{int(ko.loc[RESIDUAL, 'arm_n_claimed'])} of the 218 KO_heat_up genes, leaving "
-            f"remainders of {int(wt.loc[RESIDUAL, 'n_intersect'])} and "
+            f"{len(band_order(df)) - 1} curated anchor-independent lenses contain "
+            f"{int(wt.loc[RESIDUAL, 'arm_n_claimed'])} of the "
+            f"{int(wt.loc[RESIDUAL, 'n_arm'])} WT_heat_up genes and "
+            f"{int(ko.loc[RESIDUAL, 'arm_n_claimed'])} of the "
+            f"{int(ko.loc[RESIDUAL, 'n_arm'])} KO_heat_up genes, leaving remainders of "
+            f"{int(wt.loc[RESIDUAL, 'n_intersect'])} and "
             f"{int(ko.loc[RESIDUAL, 'n_intersect'])} genes as the largest single part of each "
-            "large arm, while what the lenses do claim is dominated by inflammatory gene "
-            f"content ({int(wt.loc['nfkb_tnfa', 'n_intersect'])} TNFA/NF-kB and "
+            "large arm. Inflammatory gene content dominates what the lenses do claim: "
+            f"{int(wt.loc['nfkb_tnfa', 'n_intersect'])} TNFA/NF-kB and "
             f"{int(wt.loc['inflammatory', 'n_intersect'])} inflammatory-response genes in "
-            f"WT_heat_up) against {int(wt.loc['hsr_curated', 'n_intersect'])} in the curated HSR "
-            f"core and {int(wt.loc['sting_specific_published', 'n_intersect'])} of the 21 "
-            "published IFN-independent STING genes. The thin Interaction arms invert that shape: "
+            f"WT_heat_up, against {int(wt.loc['hsr_curated', 'n_intersect'])} in the curated HSR "
+            f"core and {int(wt.loc['sting_specific_published', 'n_intersect'])} of the "
+            f"{int(wt.loc['sting_specific_published', 'n_curated_set'])} published "
+            "IFN-independent STING genes. The thin Interaction arms invert that shape: "
             f"Hallmark type-I interferon contains {int(inter.loc['ifn_type_i', 'n_intersect'])} "
-            f"of the 7 genes at the fdr_logfc gate and "
-            f"{int(fdr_only.loc['ifn_type_i', 'n_intersect'])} of the 18 at the relaxed fdr_only "
-            "gate."),
+            f"of the {int(inter.loc[RESIDUAL, 'n_arm'])} genes at the fdr_logfc gate and "
+            f"{int(fdr_only.loc['ifn_type_i', 'n_intersect'])} of the "
+            f"{int(fdr_only.loc[RESIDUAL, 'n_arm'])} at the relaxed fdr_only gate."),
         script=SCRIPT, fn="plot_composition",
         config_kv=(f"colors.okabe_ito + colors.diverging.up; label_floor={LABEL_FLOOR}; "
                    f"accounting=fractional (1/n_programs_for_gene); evidence_tier={TIER}"),
@@ -684,14 +698,14 @@ def main() -> None:
         how_to_read=(
             "Each band counts how many of one arm's genes a frozen curated lens contains. That "
             "is set arithmetic over committed gene lists, so no NES, FDR, direction or effect "
-            "size appears here or anywhere in these tables. One row per arm, named by how it was "
+            "size appears here or in these tables. One row per arm, named by how it was "
             "derived and labelled with its gene count and the mouse anchor's gate (fdr_logfc, "
             "with fdr_only the relaxed Interaction variant frozen as Interaction_fdrOnly_up.txt). "
             "Band width is the fractional share: a gene in k lenses gives 1/k to each, so widths "
             "total 1.0. The number in a band is the duplicated count of that arm's genes the lens "
-            "contains, so numbers and widths disagree. A band too narrow for a digit carries its "
-            "count to the right of the bar, so every lens keeps its number. Grey is the "
-            "remainder, the genes no lens contains, left unnamed on purpose. "
+            "contains, so numbers and widths measure different things. A band too narrow for a "
+            "digit carries its count to the right of the bar, so every lens keeps its number. "
+            "Grey is the remainder, the genes no lens contains, left unnamed on purpose. "
             "The lenses overlap, so the bands are a containment tally: "
             f"{int(wt.loc[RESIDUAL, 'arm_n_claimed'])} of the "
             f"{int(wt.loc[RESIDUAL, 'n_arm'])} WT_heat_up genes are contained by at least one "
@@ -704,10 +718,13 @@ def main() -> None:
             "mouse contrasts are linearly dependent as model coefficients (WT_heat = KO_heat + "
             "Interaction), and the two Interaction rows are one contrast at two gates, so "
             "agreement between rows is expected. That algebra holds for the coefficients and "
-            "stops at the thresholded lists: WT_heat_up and KO_heat_up share 182 genes, "
-            "Interaction_up shares none with either, and Interaction_up_fdrOnly holds all 7 "
-            "Interaction_up genes among its 18. Annotation tier, firewalled from the "
-            "donor-pseudobulk claim spine; no effect-size row."),
+            f"stops at the thresholded lists: WT_heat_up and KO_heat_up share "
+            f"{len(gsets['WT_heat_up'] & gsets['KO_heat_up'])} genes, Interaction_up shares "
+            f"{len(gsets['Interaction_up'] & (gsets['WT_heat_up'] | gsets['KO_heat_up']))} with "
+            f"either, and Interaction_up_fdrOnly holds all "
+            f"{len(gsets['Interaction_up'] & gsets['Interaction_up_fdrOnly'])} Interaction_up "
+            f"genes among its {len(gsets['Interaction_up_fdrOnly'])}. Annotation tier, "
+            f"firewalled from the donor-pseudobulk claim spine; no effect-size row."),
         config=FIG_CFG, wide=True, height=7.4,
     )
     plt.close(fig)
@@ -769,40 +786,41 @@ def main() -> None:
                "03_results/00_build/tables/reference_feature_symbols.csv"),
         how_to_read=(
             "The same two gene lists, read in two vocabularies. Every area equals its gene "
-            "count, solved numerically rather than approximated; the largest residual across "
+            "count, solved numerically; the largest residual across "
             f"both panels is {max_resid:.1e} genes. A two-set Euler is exactly solvable for "
             "every valid configuration, because the shared area falls continuously from the "
-            "smaller set's size to zero as the circles part, so nothing here is an "
-            "approximation; the configurations with no exact solution begin at three sets. "
+            "smaller set's size to zero as the circles part, so every area here is exact; the "
+            "configurations with no exact solution begin at three sets. "
             "Both panels share one area-per-gene scale and one bounding box, so the right "
             "panel is smaller because it holds fewer genes. Orange is the mouse WT iTreg "
             "39-versus-37 °C up arm in human projection; blue is frozen MSigDB Hallmark "
-            "hypoxia, curated without reference to the anchor, so the overlap measures "
-            "something rather than restating a result. Each region carries its count, the "
+            "hypoxia, curated independently of the anchor, so the overlap is an independent "
+            "measurement. Each region carries its count, the "
             "shared one inside the lens with its name above on a grey leader because the lens "
-            f"is too narrow for both. LEFT is the frozen lists in full, {n_arm_nom} and "
+            f"is too narrow for both. Left is the frozen lists in full, {n_arm_nom} and "
             f"{_n(nominal, 'lens_only') + _n(nominal, 'shared')} genes, the universe the "
-            "composition bar and the committed membership tables report. RIGHT keeps only what "
+            "composition bar and the committed membership tables report. Right keeps only what "
             f"the {EULER_POPULATION.capitalize()} donor-pseudobulk ranked list carries, the "
             "universe an enrichment statistic on that ranking is computed over: the arm falls "
             f"to {n_arm_rank} and hypoxia to {n_lens_rank}. So the panels report "
-            f"{_n(nominal, 'shared')} and {_n(ranked, 'shared')} shared genes and BOTH are "
-            "correct — quoting either without its vocabulary is the misreading this figure "
-            f"exists to prevent. The {len(lost_shared)} shared genes on the left and not the "
-            f"right are {', '.join(lost_shared)}. Absence is not one thing and the source "
-            "table splits it: present in the count matrix but not the ranking means dropped by "
-            "filterByExpr, present in the CellRanger reference but not the matrix means never "
-            "detected in sorted T cells, absent from the reference means a vocabulary miss. "
+            f"{_n(nominal, 'shared')} and {_n(ranked, 'shared')} shared genes and both are "
+            "correct, each within its own vocabulary; quoting either without its vocabulary is "
+            f"the misreading this figure exists to prevent. The {len(lost_shared)} shared genes "
+            f"the left panel carries and the right panel drops are {', '.join(lost_shared)}. "
+            "Absence has three causes and the source table splits them: a symbol in the count "
+            "matrix and outside the ranking was dropped by filterByExpr, a symbol in the "
+            "CellRanger reference and outside the matrix was never detected in sorted T cells, "
+            "and a symbol outside the reference is a vocabulary miss. "
             f"Alias resolution runs first and only ever adds, so {led['n_exact']} hypoxia "
             f"genes match exactly and {led['n_via_alias']} more only once their current "
             "symbols resolve into the hg19-vintage vocabulary this matrix carries "
-            f"({', '.join(led['alias_pairs'])}) — which is why the testable size is "
-            f"{n_lens_rank} and not {led['n_exact']}. The arm recovers none. Membership, not "
-            "enrichment: no NES, FDR, direction or effect size, and no row reaches "
-            "effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator. A small "
-            "overlap bounds how much of the arm is hypoxia GENE CONTENT and says nothing about "
-            "whether temperature and hypoxia are separable in this niche, which "
-            "cross-sectional human data cannot decide. Annotation tier."),
+            f"({', '.join(led['alias_pairs'])}) — which is what lifts the testable size from "
+            f"{led['n_exact']} to {n_lens_rank}. The arm recovers none of them. This is "
+            "membership: the figure and its table carry no NES, FDR, direction or effect size, "
+            "and no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ "
+            "accumulator. A small overlap bounds how much of the arm is hypoxia gene content. "
+            "Whether temperature and hypoxia are separable in this niche is undecidable from "
+            "cross-sectional human data. Annotation tier."),
         config=FIG_CFG, wide=True, height=6.6,
     )
     plt.close(fig)
@@ -810,7 +828,8 @@ def main() -> None:
     write_caption(
         STAGE, "tables/_overview/arm_hypoxia_euler.csv",
         finding=(f"The plotted regions with their gene names, and the ledger behind the two "
-                 f"vocabularies: {led['n_exact']} of the 200 frozen hypoxia genes match the "
+                 f"vocabularies: {led['n_exact']} of the {int(led['n_nominal'])} frozen "
+                 f"hypoxia genes match the "
                  f"{EULER_POPULATION.capitalize()} ranked list by exact symbol and "
                  f"{led['n_via_alias']} more only after alias resolution, so what looks like a "
                  f"{led['n_exact']}-gene set is a {n_lens_rank}-gene one."),
@@ -844,9 +863,8 @@ def main() -> None:
             "trivial by construction, since that universe applies no restriction. "
             "`circle_radius_*`, `centre_distance` and `shared_area_solved` are the geometry the "
             "figure drew, and `shared_area_residual_genes` is how far the drawn shared area "
-            "misses the count in gene units — read it as the proof that "
-            "`is_area_proportional` is a fact and not a label. Membership, not enrichment: no "
-            "NES, p-value or effect size in the file. Annotation tier."),
+            "misses the count in gene units — the proof behind `is_area_proportional`. This is "
+            "membership: the file carries no NES, p-value or effect size. Annotation tier."),
         config=FIG_CFG)
 
     print(f"[{STAGE}_viz] wrote 1 overview (arm_hypoxia_euler) over "

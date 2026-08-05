@@ -64,17 +64,18 @@ def main() -> None:
     save_overview(
         fig, STAGE, "cells_per_gsm",
         table=cpg[["gsm", "donor", "tissue", "population", "n_cells"]],
-        finding=("At ingest, all 7 donors contribute SF+PB Treg samples; Tcon and CD8 lack "
-                 "a PB sample for p3 by design. The near-empty SF-Treg p5 sample is later "
-                 "removed by QC, leaving 6 paired donors in each analyzed population."),
+        finding=("All 7 donors contribute both SF and PB Treg samples at ingest. Tcon and CD8 "
+                 "have no PB sample for donor p3, an absence in the study design. QC later "
+                 "removes the near-empty SF-Treg p5 library, leaving 6 paired donors in each "
+                 "analyzed population."),
         script=SCRIPT, fn="main",
         config_kv="design.populations = [CD4_Treg, CD4_Tcon, CD8]",
         input="03_results/00_build/tables/cells_per_gsm.csv",
-        how_to_read=("Grouped bars = cells recovered per donor; orange = synovial fluid (SF), "
-                     "blue = peripheral blood (PB); one facet per sorted population. A missing "
-                     "PB bar (p3 in Tcon/CD8) is an intentionally-absent sample, not a QC drop. "
-                     "These are ingest counts before QC; the donor-level analysis uses 6 paired "
-                     "donors per population. Descriptive counts only — no claim tier."),
+        how_to_read=("Grouped bars give cells recovered per donor, orange for synovial fluid "
+                     "and blue for peripheral blood, one facet per sorted population. The "
+                     "missing p3 PB bar in Tcon and CD8 marks a sample that was never "
+                     "collected. These are ingest counts, taken before QC. Descriptive "
+                     "counts — no claim tier."),
         config=FIG_CFG, wide=True,
     )
     print("[00_build_viz] wrote cells_per_gsm overview")

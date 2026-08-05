@@ -63,16 +63,16 @@ def main() -> None:
     fig.suptitle("Sort identity vs marker-module prediction (scANVI deferred)")
     fig.tight_layout()
     save_overview(fig, STAGE, "umap_sort_identity", table=confusion.reset_index(),
-                  finding=("Frozen sort labels track the transcriptomic structure; the large "
-                           "majority of cells are marker-consistent, so the sort gate is a "
-                           "sound anchor for pseudobulk."),
+                  finding=("The frozen sort labels track the transcriptomic structure, and the "
+                           "large majority of cells are marker-consistent, so the sort gate is "
+                           "a sound anchor for pseudobulk."),
                   script=SCRIPT, fn="main",
                   config_kv="basis_of_label = sorting (scANVI deferred until go = yes)",
                   input="03_results/objects/02_annotation.h5ad",
-                  how_to_read=("Unsupervised UMAP colored by frozen sort label, marker-module "
-                               "argmax prediction, and their agreement (blue=consistent). "
-                               "Disagreement flags candidate mis-sorts, not Treg collapse. "
-                               "Annotation/viz only — no biological claim."),
+                  how_to_read=("Unsupervised UMAP coloured by frozen sort label, by "
+                               "marker-module argmax prediction, and by their agreement "
+                               "(blue = consistent). Disagreement flags candidate mis-sorts. "
+                               "Annotation and visualisation only — no biological claim."),
                   config=FIG_CFG, wide=True)
 
     # ---- 2. marker dotplot ----
@@ -91,14 +91,15 @@ def main() -> None:
     plt.colorbar(sctr, ax=ax, shrink=0.6, label="mean lognorm")
     fig2.tight_layout()
     save_overview(fig2, STAGE, "marker_dotplot", table=markers,
-                  finding=("FOXP3/IL2RA/CTLA4/IKZF2 are Treg-restricted while CD8A/B/GZMK mark the "
-                           "CD8 gate; IL7R is depleted in Tregs (CD127-lo sort), confirming gate fidelity."),
+                  finding=("FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted; CD8A, CD8B and "
+                           "GZMK mark the CD8 gate; IL7R is depleted in Tregs, as a CD127-lo "
+                           "sort requires. Markers land where the sort predicts."),
                   script=SCRIPT, fn="main",
                   config_kv="LINEAGE_MODULES (Treg/Tcon/CD8 canonical markers)",
                   input="03_results/02_annotation/tables/substate_markers.csv",
-                  how_to_read=("Dot size = fraction of cells expressing; color = mean lognorm "
-                               "expression. Rows = frozen label. Confirms markers land where the "
-                               "sort predicts. QC overlay tier (hand markers, not evidence)."),
+                  how_to_read=("Dot size is the fraction of cells expressing, colour the mean "
+                               "log-normalised expression, rows the frozen label. QC overlay "
+                               "tier — hand markers, which carry no evidential weight."),
                   config=FIG_CFG, wide=True)
 
     # ---- 3. donor x label x tissue count grid ----
@@ -121,15 +122,17 @@ def main() -> None:
     plt.colorbar(im, ax=ax, shrink=0.6)
     fig3.tight_layout()
     save_overview(fig3, STAGE, "counts_grid", table=counts,
-                  finding=("The cohort contains 7 donors, and 6 span SF and PB in each analyzed "
-                           "population after QC. Every observed stratum clears the pseudobulk "
-                           "cell floor; p3 PB Tcon/CD8 are absent by design."),
+                  finding=(f"The cohort holds 7 donors and 6 span SF and PB in each analyzed "
+                           f"population after QC. Every observed stratum clears the {floor}-cell "
+                           f"pseudobulk floor. The p3 PB Tcon and PB CD8 samples were never "
+                           f"collected."),
                   script=SCRIPT, fn="main",
                   config_kv=f"thresholds.pseudobulk_min_cells = {floor}",
                   input="03_results/02_annotation/tables/counts_donor_by_label_tissue.csv",
-                  how_to_read=("Heatmap of cells per donor (x) x label+tissue (y); red * marks a "
-                               "stratum below the pseudobulk cell floor; empty = intentionally-absent "
-                               "sample. Donor count per arm determines contrast precision. Diagnostic."),
+                  how_to_read=("Heatmap of cells per donor (x) against label plus tissue (y). A "
+                               "red asterisk marks a stratum below the pseudobulk cell floor; an "
+                               "empty square marks an absent sample. Donor count per arm sets "
+                               "contrast precision. Diagnostic."),
                   config=FIG_CFG)
     print("[02_annotation_viz] wrote 3 overviews")
 

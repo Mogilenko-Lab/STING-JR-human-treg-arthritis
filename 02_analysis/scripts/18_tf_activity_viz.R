@@ -132,34 +132,56 @@ fig1_tbl <- casc %>%
          rank, n_tfs_scored, pct_rank) %>%
   arrange(tf, configuration)
 
+# Every number the caption below states is looked up in `casc` in this run, so the caption
+# cannot outlive the cascade it describes. `rk()` reads one (factor, configuration) cell.
+rk <- function(f, cfgn, col = "rank") {
+  hit <- casc[casc$tf == f & as.character(casc$configuration) == cfgn, ]
+  stopifnot(nrow(hit) == 1L)
+  as.integer(hit[[col]])
+}
+hif <- casc %>% filter(tf == "HIF1A") %>% arrange(rank)
+hif_worst <- hif[nrow(hif), ]
+hif_rest_max <- hif$rank[nrow(hif) - 1L]
+# Steadiness, ordered by the span of ranks a factor traverses across the configurations.
+spans <- casc %>% group_by(tf) %>%
+  summarise(span = max(rank) - min(rank), .groups = "drop") %>% arrange(span)
+hif_place <- which(spans$tf == "HIF1A")
+
 save_overview(
   p1, STAGE, "tf_rank_cascade", table = fig1_tbl,
   finding = paste(
-    "HIF1A's inferred-activity rank on the sorted-Treg synovial-fluid-versus-paired-blood",
-    "contrast sits in the top twelve in twelve of the thirteen network-by-estimator",
-    "configurations, its one remaining placement being rank 42 of 388 under the",
-    "literature-signed network scored multivariately, which makes it the steadiest of the eight.",
-    "The same axes move its neighbours much further: NFKB1 from rank 3 to rank 138 under signed",
-    "MLM and rank 252 under unsigned MLM, REL from rank 2 to rank 298 under literature-signed",
-    "MLM, so the rank instability the mouse anchor documented for its HIF1a result falls here on",
-    "the NF-kB and AP-1 members."),
+    sprintf(paste("HIF1A's inferred-activity rank on the sorted-%s",
+                  "synovial-fluid-versus-paired-blood contrast sits in the top %d in %d of the %d",
+                  "network-by-estimator configurations, its remaining placement rank %d of %d",
+                  "under literature-signed MLM."),
+            PRIMARY_LABEL, hif_rest_max, nrow(hif) - 1L, nrow(hif),
+            hif_worst$rank, hif_worst$n_tfs_scored),
+    sprintf(paste("Ordered by the span of ranks a factor traverses, HIF1A places %d of %d at %d",
+                  "places, and %s at %d places is the narrowest."),
+            hif_place, nrow(spans), spans$span[hif_place], spans$tf[1], spans$span[1]),
+    sprintf(paste("The same axes move its neighbours much further — NFKB1 from ULM rank %d to %d",
+                  "under unsigned MLM, REL to %d of %d under literature-signed MLM — so the rank",
+                  "instability the mouse anchor documented falls here on the NF-kB and AP-1",
+                  "members."),
+            rk("NFKB1", "signed / ulm"), rk("NFKB1", "unsigned / mlm"),
+            rk("REL", "literature_signed / mlm"),
+            rk("REL", "literature_signed / mlm", "n_tfs_scored"))),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("tf_activity.network_variants=[signed, unsigned, literature_signed, ",
                      "alias_recovered]; tf_activity.methods=[ulm, mlm, consensus]; ",
                      "thresholds.gsea_min_size=", CFG$thresholds$gsea_min_size),
   input = "03_results/18_tf_activity/tables/hif1a_rank_cascade.csv",
   how_to_read = paste(
-    "One line per factor, labelled at the right edge and carrying its own point shape so two",
+    "One line per factor, labelled at the right edge, each with its own point shape so two",
     "lines of similar hue stay separable. The y axis is rank by descending activity within a",
-    "configuration, inverted on a log scale, so higher means more activated and rank 1 is at the",
-    "top. ULM scores each regulon on its own; MLM fits every regulon jointly, so a factor whose",
-    "targets are shared with other regulons loses rank there. `signed` uses CollecTRI's recorded",
-    "per-edge mode of regulation, `unsigned` forces every edge positive, `literature_signed`",
-    "keeps only evidence-signed edges, `alias_recovered` adds targets resolved to the pre-2019",
-    "symbol this matrix carries. The leftmost column is the committed unsigned-regulon fgsea",
-    "rank. Denominators differ between configurations and sit in the source table.",
-    "Annotation tier: an inferred activity is a statistic over target-gene expression, and",
-    "nothing here pools with the donor-pseudobulk claim spine."),
+    "configuration, inverted on a log scale, so rank 1 sits at the top. ULM scores each regulon",
+    "on its own; MLM fits every regulon jointly, so a factor whose targets are shared loses rank",
+    "there. The four variants: `signed` uses CollecTRI's recorded per-edge mode of regulation,",
+    "`unsigned` forces every edge positive, `literature_signed` keeps only evidence-signed edges,",
+    "`alias_recovered` adds targets resolved to the pre-2019 symbol this matrix carries. The",
+    "leftmost column is the committed unsigned-regulon fgsea rank. Denominators differ between",
+    "configurations and sit in the source table. Annotation tier: an inferred activity is a",
+    "statistic over target-gene expression."),
   config = CFG, wide = TRUE
 )
 
@@ -218,7 +240,18 @@ share <- dec %>%
             n_sel_up = sum(n_regulons <= SEL_MAX & contrib > 0),
             n_sel_down = sum(n_regulons <= SEL_MAX & contrib < 0), .groups = "drop") %>%
   left_join(DECSUM %>% filter(promiscuity_band == ">25") %>%
-              select(tf, pct_over_25 = pct_of_total_contrib), by = "tf") %>%
+              select(tf, n_over_25 = n_targets, pct_over_25 = pct_of_total_contrib),
+            by = "tf") %>%
+  left_join(dec %>% count(tf, name = "n_targets") %>% mutate(tf = as.character(tf)),
+            by = "tf") %>%
+  # How many exclusively-claimed edges carry no recorded direction, so the caption states the
+  # assumed-sign count the figure's open points draw.
+  left_join(dec %>% filter(n_regulons <= SEL_MAX) %>%
+              group_by(tf) %>%
+              summarise(n_sel_assumed = sum(sign_decision ==
+                                              (TA$default_sign_decision %||% "default activation")),
+                        .groups = "drop") %>% mutate(tf = as.character(tf)),
+            by = "tf") %>%
   mutate(tf = factor(tf, levels = DECOMP),
          # Three short lines rather than two long ones: at this text size a line wider than the
          # facet runs off the canvas, and the panel is half of a 13-inch wide figure.
@@ -226,6 +259,10 @@ share <- dec %>%
                               "%.0f%% of the signed total in magnitude, %.2f%% net\n",
                               "%.0f%% of the signed total from targets in more than 25 regulons"),
                        n_sel, n_sel_up, n_sel_down, pct_abs, pct_net, pct_over_25))
+
+# One cell of `share`, so every number in this stage's decomposition captions is read from the
+# table the figure draws rather than typed beside it.
+sh <- function(f, col) share[[col]][as.character(share$tf) == f]
 
 p2 <- ggplot(dec, aes(x = n_regulons, y = contrib)) +
   geom_hline(yintercept = 0, linewidth = 0.4, colour = REFC) +
@@ -258,12 +295,16 @@ save_overview(
   p2, STAGE, "tf_target_promiscuity", table = fig2_tbl,
   finding = paste(
     "The direction of HIF1A's CollecTRI-ULM score comes from targets many other regulons also",
-    "contain, and its exclusively-claimed targets carry magnitude without direction: the 27 of",
-    "293 targets HIF1A alone claims hold 15% of its signed total in magnitude but net only 0.14%,",
-    "because 13 of them go up on the synovial-fluid side and 14 go down, while the 73 targets",
-    "sitting in more than 25 regulons carry 35% net. NFKB1 has only 2 exclusive targets, which",
-    "split the same way (one up, one down, 0.07% net), so joint ownership of the directional",
-    "high-t genes is a property the two regulons share and it bounds both of them equally."),
+    "contain.",
+    sprintf(paste("The %d of %d targets HIF1A alone claims hold %.0f%% of its signed total in",
+                  "magnitude and net %.2f%%, because %d go up on the synovial-fluid side and %d go",
+                  "down, while the %d targets in more than 25 regulons carry %.0f%% net."),
+            sh("HIF1A", "n_sel"), sh("HIF1A", "n_targets"), sh("HIF1A", "pct_abs"),
+            sh("HIF1A", "pct_net"), sh("HIF1A", "n_sel_up"), sh("HIF1A", "n_sel_down"),
+            sh("HIF1A", "n_over_25"), sh("HIF1A", "pct_over_25")),
+    sprintf(paste("NFKB1's %d exclusive targets split the same way (%.2f%% net), so joint",
+                  "ownership of the directional high-t genes bounds both regulons equally."),
+            sh("NFKB1", "n_sel"), sh("NFKB1", "pct_net"))),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("tf_activity.decompose_tfs=[", paste(DECOMP, collapse = ", "),
                      "]; tf_activity.selective_max_regulons=", SEL_MAX,
@@ -274,16 +315,17 @@ save_overview(
     "One point per regulon target, faceted by factor. The x axis counts how many CollecTRI",
     "regulons contain that target, on a log scale, so points to the right are jointly owned and",
     "points at x = 1 belong to this regulon alone. The y axis is the target's signed",
-    "contribution, its moderated t multiplied by the sign of the edge, so positive means the",
-    "target moves with the synovial-fluid side and the zero rule separates the directions. Orange",
-    "marks the exclusively-claimed targets. The ten largest positive contributors per facet are",
-    "named in black, and the three largest exclusively-claimed targets in each direction are named",
-    "in orange, placed in the empty space above and below the x = 1 strip because 27 labels do not",
-    "fit inside it; `tf_selective_targets` names every one of them. The in-panel text gives the",
-    "exclusively-claimed share of the signed total twice, once in magnitude and once net, with the",
-    "up/down split that makes the two differ, and then the share from targets in more than 25",
-    "regulons. Annotation tier: a contribution is arithmetic on the committed ranked list and",
-    "carries no separate test."),
+    "contribution, its moderated t multiplied by the edge sign, so positive means the target moves",
+    "with the synovial-fluid side and the zero rule separates the directions. Orange marks the",
+    sprintf(paste("exclusively-claimed targets. The %d largest positive contributors per facet are",
+                  "named in black, and the %d largest exclusively-claimed targets in each direction",
+                  "in orange, placed above and below the x = 1 strip because %d labels do not fit",
+                  "inside it; `tf_selective_targets` names every one."),
+            LBL_N, SEL_EXTREME_N, sh("HIF1A", "n_sel")),
+    "The in-panel text gives the exclusively-claimed share of the signed total twice, in magnitude",
+    "and net, with the up/down split behind the difference, then the share from targets in more",
+    "than 25 regulons. Annotation tier: a contribution is arithmetic on the committed ranked list",
+    "and carries no separate test."),
   config = CFG, wide = TRUE
 )
 
@@ -355,15 +397,31 @@ fig2b_tbl <- sel_named %>%
          n_other_regulons, promiscuity_band, avg_expr, padj_gene) %>%
   arrange(tf, desc(contrib))
 
+# Signed contribution of one named target, and the repressing-edge targets, both read from the
+# frame this figure draws so a named value can never disagree with its own bar.
+ct <- function(f, g) sel_named$contrib[as.character(sel_named$tf) == f &
+                                        as.character(sel_named$target) == g]
+gly <- function(f, gs) paste(sprintf("%s %+.2f", gs, vapply(gs, function(g) ct(f, g), numeric(1))),
+                             collapse = ", ")
+nf_pair <- sel_named %>% filter(as.character(tf) == "NFKB1") %>% arrange(desc(contrib))
+flipped <- sel_named %>% filter(mor < 0)
+
 save_overview(
   p2b, STAGE, "tf_selective_targets", table = fig2b_tbl,
   finding = paste(
-    "Named one by one, the targets HIF1A alone claims carry magnitude without direction: 13 of",
-    "the 27 go up on the synovial-fluid side and 14 go down, so they hold 15% of the regulon's",
-    "signed total in magnitude and net 0.14% of it. Glycolytic members fall on both sides",
-    "(PGAM1 +5.68 and GBE1 +3.93 up against PFKL -2.55 and TKTL1 -4.25 down), and 14 of the 27",
-    "carry no recorded evidence for the edge direction the contribution is computed with.",
-    "NFKB1 has 2 such targets and they split one each way (GCA +2.80, BST1 -2.47)."),
+    sprintf(paste("Named one by one, the targets HIF1A alone claims carry magnitude without",
+                  "direction: %d of the %d go up on the synovial-fluid side and %d go down,",
+                  "holding %.0f%% of the regulon's signed total in magnitude and netting %.2f%%."),
+            sh("HIF1A", "n_sel_up"), sh("HIF1A", "n_sel"), sh("HIF1A", "n_sel_down"),
+            sh("HIF1A", "pct_abs"), sh("HIF1A", "pct_net")),
+    sprintf("Glycolytic members fall on both sides (%s up; %s down).",
+            gly("HIF1A", c("PGAM1", "GBE1")), gly("HIF1A", c("PFKL", "TKTL1"))),
+    sprintf(paste("%d of the %d carry no recorded evidence for the edge direction, so activation",
+                  "is assumed for those %d."),
+            sh("HIF1A", "n_sel_assumed"), sh("HIF1A", "n_sel"), sh("HIF1A", "n_sel_assumed")),
+    sprintf("NFKB1's %d such targets split one each way (%s).",
+            sh("NFKB1", "n_sel"),
+            paste(sprintf("%s %+.2f", nf_pair$target, nf_pair$contrib), collapse = ", "))),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("tf_activity.decompose_tfs=[", paste(DECOMP, collapse = ", "),
                      "]; tf_activity.selective_max_regulons=", SEL_MAX,
@@ -373,17 +431,20 @@ save_overview(
   how_to_read = paste(
     "One row per target that no other CollecTRI regulon contains, faceted by factor, ordered by",
     "signed contribution. The bar runs from zero to the target's signed contribution, its",
-    "moderated t multiplied by the edge sign, so length is magnitude and side is direction.",
-    "Colour restates that direction. A filled point means CollecTRI records literature evidence",
-    "for the edge's direction and an open point means the direction was assumed activating by",
-    "default, which is the case for 14 of HIF1A's 27. A dashed bar marks a repressing edge, which",
-    "flips the contribution's sign away from the gene's own direction; TM9SF4 is the only one here,",
-    "so its positive contribution comes from a gene that goes down in synovial fluid. Row pitch is",
-    "equal in both panels, so a bar length means the",
-    "same thing in each. In-panel text gives the set's size, its up/down split, and its share of",
-    "the factor's signed total in magnitude and net, which differ because the set nearly cancels.",
-    "Annotation tier: a contribution is arithmetic on the committed ranked list and carries no",
-    "separate test."),
+    "moderated t multiplied by the edge sign, so length is magnitude and side is direction;",
+    "colour restates the direction. Row pitch is equal in both panels, so a bar length means the",
+    "same thing in each.",
+    sprintf(paste("A filled point means CollecTRI records literature evidence for the edge's",
+                  "direction; an open point means the direction was assumed activating by default,",
+                  "which holds for %d of HIF1A's %d."),
+            sh("HIF1A", "n_sel_assumed"), sh("HIF1A", "n_sel")),
+    sprintf(paste("A dashed bar marks a repressing edge, which flips the contribution's sign away",
+                  "from the gene's own direction; %s is the only one here, so its positive",
+                  "contribution comes from a gene that goes down in synovial fluid."),
+            paste(flipped$target, collapse = ", ")),
+    "In-panel text gives the set's size, its up/down split, and its share of the factor's signed",
+    "total in magnitude and net, which differ because the set nearly cancels. Annotation tier: a",
+    "contribution is arithmetic on the committed ranked list and carries no separate test."),
   config = CFG, width = 9, height = 10.5
 )
 
@@ -460,15 +521,16 @@ fig3_tbl <- cal_long %>%
 save_overview(
   p3, STAGE, "tf_activity_vs_regulon_size", table = fig3_tbl,
   finding = paste(
-    "Inferred activity on this contrast rises with regulon size across every factor tested:",
-    sprintf("Spearman rho = %.2f between size and CollecTRI-ULM score over %d factors and %.2f between size and unsigned-regulon fgsea NES over %d sets,",
+    "Inferred activity rises with regulon size across every factor tested:",
+    sprintf(paste("Spearman rho = %.2f between size and CollecTRI-ULM score over %d factors,",
+                  "%.2f between size and unsigned-regulon fgsea NES over %d sets,"),
             rho$spearman_ulm_score_vs_size, rho$n_tfs_ulm,
             rho$spearman_fgsea_nes_vs_size, rho$n_tfs_fgsea),
-    sprintf("falling to %.2f when the gene labels of the same ranked list are permuted,",
+    sprintf("falling to %.2f when the gene labels are permuted.",
             rho_perm$spearman_ulm_score_vs_size),
-    "which places the size dependence in the breadth of the synovial-fluid-side shift that a",
-    "bigger regulon samples more thoroughly, and every large-regulon factor in the headline",
-    "table sits on that gradient."),
+    "That places the size dependence in the breadth of the synovial-fluid-side shift a bigger",
+    "regulon samples more thoroughly, and every large-regulon factor in the headline table sits",
+    "on that gradient."),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("tf_activity.null_draws=", TA$null_draws,
                      "; tf_activity.null_expression_deciles=", TA$null_expression_deciles,
@@ -486,10 +548,9 @@ save_overview(
     "composition, and the stalk spans that percentile to the observed value, so a short stalk",
     "means a factor barely beats a matched bag of genes. In-panel text gives the",
     "size-versus-activity Spearman correlation, and for the left facet the same correlation after",
-    "the ranked list's gene labels are permuted. The facets use free y axes because the statistics",
-    "differ in scale, so only position relative to the curve and the triangle is comparable",
-    "between them. The unsigned-regulon facet omits the regulons above the sweep's size cap.",
-    "Annotation tier."),
+    "the gene labels are permuted. The facets use free y axes because the statistics differ in",
+    "scale, so position relative to the curve and the triangle is the comparable quantity. The",
+    "unsigned-regulon facet omits the regulons above the sweep's size cap. Annotation tier."),
   config = CFG, wide = TRUE
 )
 
@@ -540,16 +601,17 @@ fig4_tbl <- casc_hif %>%
 save_overview(
   p4, STAGE, "hif1a_rank_cascade_linear", table = fig4_tbl,
   finding = paste(
-    sprintf("Across the thirteen network-by-estimator configurations, HIF1A's inferred-activity rank on the sorted-%s",
-            PRIMARY_LABEL),
-    "synovial-fluid-versus-paired-blood contrast stays between rank 2 and rank 12 in twelve of them and reaches",
-    "rank 42 of 388 in the thirteenth, the literature-signed network scored multivariately.",
-    "On the linear rank axis the mouse anchor uses for its Hif1a cascade, that traverse is nearly flat, where the",
-    "murine one on the same kind of axis runs rank 1 to rank 12 to rank 142 and back to rank 8.",
-    "The two panels are comparable in shape only: the ranked lists differ in length",
-    sprintf("(%s genes here) and the number of factors scored differs between configurations, both of which sit in the",
+    sprintf(paste("HIF1A's rank stays between %d and %d in %d of the %d configurations and reaches",
+                  "%d of %d in the %s, literature-signed MLM."),
+            min(hif$rank), hif_rest_max, nrow(hif) - 1L, nrow(hif),
+            hif_worst$rank, hif_worst$n_tfs_scored,
+            if (nrow(hif) == 13L) "thirteenth" else sprintf("remaining one of %d", nrow(hif))),
+    "On the linear rank axis the mouse anchor uses for its Hif1a cascade, that traverse is nearly",
+    "flat, where the murine one runs rank 1 to 12 to 142 and back to 8. The two panels are",
+    "comparable in shape alone: the ranked lists differ in length",
+    sprintf("(%s genes here) and the factors scored differ between configurations, both of which",
             format(N_RANKED, big.mark = ",")),
-    "source table."),
+    "sit in the source table."),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("tf_activity.primary_population=", TA$primary_population,
                      "; tf_activity.network_variants=[signed, unsigned, literature_signed, ",
@@ -559,11 +621,11 @@ save_overview(
   how_to_read = paste(
     "One factor, one line, on the configuration axis and order `tf_rank_cascade` uses, so a column",
     "means the same in both. The y axis is HIF1A's rank by descending activity among the factors",
-    "scored in that configuration, linear and inverted, so rank 1 is at the top and the height of a step is the",
-    "size of the rank move rather than its logarithm. Labels give the rank, the factors scored and the score",
-    "behind it. Point colour is that score; the four estimators share no scale, so colour compares within an",
-    "estimator and not across them. Annotation tier: an inferred activity is a statistic over target-gene",
-    "expression, and nothing here pools with the donor-pseudobulk claim spine."),
+    "scored in that configuration, linear and inverted, so rank 1 is at the top and a step's height",
+    "is the size of the rank move. Labels give the rank, the factors scored and the score behind",
+    "it. Point colour is that score; the four estimators share no scale, so colour compares within",
+    "an estimator alone. Annotation tier: an inferred activity is a statistic over target-gene",
+    "expression."),
   config = CFG, wide = TRUE, height = 8.5
 )
 

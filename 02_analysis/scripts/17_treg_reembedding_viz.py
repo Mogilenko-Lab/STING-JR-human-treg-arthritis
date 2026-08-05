@@ -284,6 +284,20 @@ def _mean_of(summary: pd.DataFrame, set_name: str, tissue: str, label: str = "Tr
     return float(hit["mean"].iloc[0])
 
 
+def _median_of(summary: pd.DataFrame, set_name: str, tissue: str, label: str = "Treg") -> float:
+    hit = summary[(summary["set_name"] == set_name) & (summary["coarse_label"] == label)
+                  & (summary["tissue"] == tissue)]
+    if hit.empty:
+        raise ValueError(f"no summary row for {set_name} / {label} / {tissue}")
+    return float(hit["median"].iloc[0])
+
+
+def _n_zero_median(summary: pd.DataFrame, set_name: str) -> int:
+    """How many (cell state x tissue) rows of `set_name` carry a median of exactly zero."""
+    rows = summary[summary["set_name"] == set_name]
+    return int((rows["median"] == 0).sum()), int(len(rows))
+
+
 def _mixing(mix: pd.DataFrame, embedding: str, key: str) -> float:
     hit = mix[(mix["embedding"] == embedding) & (mix["grouping_key"] == key)
               & (mix["group"] == "_all_")]
@@ -456,17 +470,18 @@ def main() -> None:
         fig, STAGE, "umap_treg_reembedding",
         table=score_table(summary, PANEL_SETS),
         finding=("On the Treg-only map, drawn on the Harmony-corrected coordinates, the synovial-"
-                 f"fluid and paired-blood cells still occupy distinct territory ({tissue_harmony:.3f} "
-                 f"same-tissue neighbours at k = 30 against {tissue_chance:.3f} expected) after the "
-                 f"same-donor neighbour fraction has dropped from {donor_raw:.3f} to "
-                 f"{donor_harmony:.3f} against {donor_chance:.3f} expected, and both the mouse WT "
-                 "39 \u00b0C-derived up arm and the curated Hallmark hypoxia lens colour the synovial-"
-                 "fluid territory brighter (per-cell AUCell mean "
+                 f"fluid and paired-blood cells still occupy distinct territory \u2014 "
+                 f"{tissue_harmony:.3f} same-tissue neighbours at k = 30 against "
+                 f"{tissue_chance:.3f} expected \u2014 after the same-donor neighbour fraction has "
+                 f"fallen from {donor_raw:.3f} to {donor_harmony:.3f} against "
+                 f"{donor_chance:.3f} expected. Both the mouse WT 39 \u00b0C-derived up arm and "
+                 "the curated Hallmark hypoxia lens colour the synovial-fluid territory "
+                 "brighter: per-cell AUCell mean "
                  f"{_mean_of(summary, 'WT_heat_up', 'peripheral_blood'):.4f} to "
-                 f"{_mean_of(summary, 'WT_heat_up', 'synovial_fluid'):.4f} for WT_heat_up and "
+                 f"{_mean_of(summary, 'WT_heat_up', 'synovial_fluid'):.4f} for WT_heat_up, "
                  f"{_mean_of(summary, 'HALLMARK_HYPOXIA', 'peripheral_blood'):.4f} to "
                  f"{_mean_of(summary, 'HALLMARK_HYPOXIA', 'synovial_fluid'):.4f} for the hypoxia "
-                 "lens)."),
+                 "lens."),
         script=SCRIPT, fn="figure_treg",
         config_kv=(f"coordinates = x / y (Harmony over donor), all {len(drawn):,} cells drawn, "
                    f"point_size = {PT}, cmap = {CMAP}, clip_percentiles = {list(CLIP)}, "
@@ -474,32 +489,28 @@ def main() -> None:
                    "columns = WT_heat_up_AUCell, HALLMARK_HYPOXIA_AUCell"),
         input=f"{SUBSTRATE_REL}, {SUMMARY_REL}, {MIXING_REL}",
         how_to_read=(
-            "Three panels over ONE frame of the same 27,175 sorted Treg cells at the same "
-            "coordinates, sharing one square bounding box. Left is tissue of origin, synovial "
-            "fluid in vermillion and paired blood in blue, drawn in shuffled order. Middle and "
-            "right colour every cell by per-cell AUCell of one gene set, on the scale the "
-            "full-object figures use, clipped to the 2nd and 98th percentile with the "
+            f"Three panels over one frame of the same {len(drawn):,} sorted Treg cells at the "
+            "same coordinates, sharing one square bounding box. Left is tissue of origin, "
+            "synovial fluid in vermillion and paired blood in blue, drawn in shuffled order. "
+            "Middle and right colour every cell by per-cell AUCell of one gene set, on the "
+            "scale the full-object figures use, clipped to the 2nd and 98th percentile with the "
             "highest-scoring cells drawn last. Panel titles carry the set identifier and its "
-            "size: WT_heat_up is the up arm of the mouse WT iTreg 39 versus 37 °C contrast in "
-            "human projection, HALLMARK_HYPOXIA the curated MSigDB Hallmark program. The two sets "
-            "are unrelated and their ranges differ, so each keeps its own colour scale. "
-            "The coordinates are the Harmony-corrected pair, because at k = 30 the same-donor "
-            f"neighbour fraction is {donor_raw:.3f} on the uncorrected Treg-only map and "
-            f"{donor_harmony:.3f} after Harmony over donor against {donor_chance:.3f} expected, "
-            f"while same-tissue neighbours hold at {tissue_harmony:.3f} against "
-            f"{tissue_chance:.3f} expected. Harmony reshapes the space it corrects, so this map "
-            "is annotation, and cells are pooled across donors, making a tissue difference read "
-            "off the colouring pseudoreplicated and descriptive. Claims in this compartment rest "
-            "on donor-level pseudobulk differential expression within the frozen cell states."),
+            "size: WT_heat_up is the up arm of the mouse WT iTreg 39-versus-37 °C contrast in "
+            "human projection, HALLMARK_HYPOXIA the curated MSigDB Hallmark program. The two "
+            "sets are unrelated and their ranges differ, so each keeps its own colour scale. "
+            "The coordinates are the Harmony-corrected pair, and Harmony reshapes the space it "
+            "corrects, so this map is annotation. Cells are pooled across donors, so a tissue "
+            "difference read off the colouring is pseudoreplicated. Claims rest on donor-level "
+            "pseudobulk differential expression within the frozen cell states."),
         width=FIG_W, height=FIG_H, config=FIG_CFG)
 
     write_caption(
         STAGE, "tables/_overview/umap_treg_reembedding.csv",
-        finding=("Per-cell AUCell summaries of the two sets drawn on the Treg-only map, "
-                 "WT_heat_up and HALLMARK_HYPOXIA, restricted to the Treg gate, one row per "
-                 "tissue, so the colouring can be read as numbers."),
+        finding=(f"Per-cell AUCell summaries of the {len(PANEL_SETS)} sets drawn on the "
+                 f"Treg-only map, {' and '.join(PANEL_SETS)}, restricted to the Treg gate, one "
+                 f"row per tissue, so the colouring reads as numbers."),
         script=SCRIPT, fn="score_table",
-        config_kv="rows = 2 sets x Treg x 2 tissues, metric = AUCell",
+        config_kv=f"rows = {len(PANEL_SETS)} sets x Treg x 2 tissues, metric = AUCell",
         input=SUMMARY_REL,
         how_to_read=("A restriction of the narrative scoring summary table to the Treg gate and "
                      "the two sets this figure draws. One row per (`set_name` x `tissue`) with "
@@ -526,15 +537,22 @@ def main() -> None:
                   f"sample_seed = {FULL_SAMPLE_SEED}, clip_percentiles = {list(CLIP)}")
     pair_line = (
         "Every colour limit is the full-object figure's, from the same frame and seed, so "
-        "the pair compares brightness for brightness rather than each panel rescaling to "
-        "itself. A washed-out counterpart panel is therefore a real statement about the "
-        "Treg gate's range, not a rendering fault. The pair shares its cells and its "
-        "colour scale and NOT its coordinates: these are a re-embedding of the Treg cells "
-        "alone, so a point does not sit where it sits on the full-object map. Cells are "
-        "pooled across donors, making a tissue difference read off the colouring "
-        "pseudoreplicated, and Harmony reshapes the space it corrects, so this is a map. "
-        "Claims in this compartment rest on donor-level pseudobulk differential expression "
-        "within the frozen cell states.")
+        "the pair compares brightness for brightness. A washed-out counterpart panel is "
+        "therefore a real statement about the Treg gate's range. The pair shares its cells "
+        "and its colour scale; the coordinates differ, because these are a re-embedding of "
+        "the Treg cells alone. Cells are pooled across donors, so a tissue difference read "
+        "off the colouring is pseudoreplicated, and Harmony reshapes the space it corrects, "
+        "so this is a map. Claims in this compartment rest on donor-level pseudobulk "
+        "differential expression within the frozen cell states.")
+    # The short form, for the two counterparts whose caption already carries its own
+    # limits sentence; the contract itself is stated once in the README preamble.
+    pair_line_short = (
+        "Colour limits, coordinates and tier follow the counterpart contract at the top of "
+        "this page: limits are the full-object figure's from the same frame and seed, so a "
+        "washed-out panel is a real statement about the Treg gate's range; the coordinates "
+        "are this map's own; cells are pooled across donors, so a tissue difference read off "
+        "the colouring is pseudoreplicated; and claims rest on donor-level pseudobulk "
+        "differential expression within the frozen cell states.")
 
     # --- counterpart 1: the mouse-derived up arms ----------------------------
     fig = figure_counterpart(
@@ -550,15 +568,15 @@ def main() -> None:
         finding=("Read on the Treg gate's own map and on the full object's colour scale, all "
                  "three mouse 39 °C-derived up arms still colour the synovial-fluid territory "
                  "brighter than the paired-blood territory, so the tissue contrast the "
-                 "full-object row shows is not an artifact of viewing Treg alongside Tcon and "
-                 "CD8 (per-cell AUCell means "
+                 "full-object row shows survives viewing Treg apart from Tcon and CD8. "
+                 "Per-cell AUCell means run "
                  f"{_mean_of(summary, 'WT_heat_up', 'peripheral_blood'):.4f} to "
                  f"{_mean_of(summary, 'WT_heat_up', 'synovial_fluid'):.4f} for WT_heat_up, "
                  f"{_mean_of(summary, 'KO_heat_up', 'peripheral_blood'):.4f} to "
-                 f"{_mean_of(summary, 'KO_heat_up', 'synovial_fluid'):.4f} for KO_heat_up and "
+                 f"{_mean_of(summary, 'KO_heat_up', 'synovial_fluid'):.4f} for KO_heat_up, and "
                  f"{_mean_of(summary, 'Interaction_up', 'peripheral_blood'):.4f} to "
                  f"{_mean_of(summary, 'Interaction_up', 'synovial_fluid'):.4f} for the 7-gene "
-                 "Interaction_up)."),
+                 "Interaction_up."),
         script=SCRIPT, fn="figure_counterpart",
         config_kv=(f"{cfg_common}, columns = " + ", ".join(c for c, _ in ARM_PANELS)
                    + f", shared_scale = WT_heat_up + KO_heat_up at "
@@ -568,17 +586,17 @@ def main() -> None:
         how_to_read=(
             "The Treg-only counterpart of `16_narrative_scoring/figures/_overview/"
             "umap_full_arms.png`: same three sets, same order, same panel geometry, same "
-            "sequential colormap, drawn on the 27,175 sorted Treg cells alone. Panel titles "
-            "carry the set identifier and its size. WT_heat_up is the up arm of the mouse WT "
-            "iTreg 39 versus 37 °C contrast in human projection, 199 symbols; KO_heat_up the "
-            "same contrast in cGAS-knockout iTregs, 218 symbols; Interaction_up the mouse "
-            "genotype-by-temperature up arm, 7 symbols, small enough that one gene moves the "
-            "score, so read it for location and treat its spread as noise. WT_heat_up and "
-            "KO_heat_up share 182 genes and share one colour scale so the two panels can be "
-            "compared directly; Interaction_up spans a range an order of magnitude wider and "
+            f"sequential colormap, drawn on the {len(drawn):,} sorted Treg cells alone. Panel "
+            "titles carry the set identifier and its size. WT_heat_up is the up arm of the "
+            "mouse WT iTreg 39-versus-37 °C contrast in human projection, 199 symbols; "
+            "KO_heat_up the same contrast in cGAS-knockout iTregs, 218 symbols; Interaction_up "
+            "the mouse genotype-by-temperature up arm, 7 symbols, small enough that one gene "
+            "moves the score, so read it for location and treat its spread as noise. "
+            "WT_heat_up and KO_heat_up share 182 genes and one colour scale, so the two panels "
+            "compare directly; Interaction_up spans a range an order of magnitude wider and "
             "keeps its own bar. AUCell is bounded in [0, 1] and scales with set size, so the "
             "source table carries mean, median, standard deviation and cell and donor counts "
-            f"for any comparison the colour cannot make. {pair_line}"),
+            f"for any comparison the colour cannot make. {pair_line_short}"),
         width=FIG_W, height=FIG_H, config=FIG_CFG)
     plt.close(fig)
 
@@ -589,29 +607,37 @@ def main() -> None:
         f"{len(drawn):,} sorted Treg cells, one frame shared by all three panels. Each "
         "panel carries its full-object twin's colour limits.")
     prog_tbl = score_table(summary, PROGRAM_SETS)
+    n_zero, n_rows = _n_zero_median(summary, "sting_specific_published")
     save_overview(
         fig, STAGE, "umap_treg_programs",
         table=prog_tbl,
         finding=("All three curated lenses colour synovial-fluid territory brighter than paired "
-                 "blood on the Treg gate's own map, so none of that structure needs the other "
-                 "two sort gates to appear (per-cell AUCell means "
+                 "blood on the Treg gate's own map, so that structure appears without the other "
+                 "two sort gates: per-cell AUCell means "
                  f"{_mean_of(summary, 'HALLMARK_HYPOXIA', 'peripheral_blood'):.4f} to "
                  f"{_mean_of(summary, 'HALLMARK_HYPOXIA', 'synovial_fluid'):.4f} for hypoxia, "
                  f"{_mean_of(summary, 'ifn_generic_axis', 'peripheral_blood'):.4f} to "
                  f"{_mean_of(summary, 'ifn_generic_axis', 'synovial_fluid'):.4f} for the "
-                 "generic interferon axis and "
+                 "generic interferon axis, "
                  f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood'):.4f} to "
                  f"{_mean_of(summary, 'sting_specific_published', 'synovial_fluid'):.4f} for "
-                 "the 21 published IFN-independent STING genes); what the shared scale adds is "
-                 "the LEVEL, and the published STING panel sits in the lower part of its bar "
-                 "across the whole Treg map because Treg blood carries roughly a third of what "
-                 "the other gates do "
-                 f"({_mean_of(summary, 'sting_specific_published', 'peripheral_blood'):.4f} "
-                 "against "
+                 "the 21 published IFN-independent STING genes. The shared scale adds the "
+                 "level: the published STING panel sits low in its bar across the whole Treg "
+                 "map, Treg blood mean "
+                 f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood'):.4f} "
+                 "against Tcon "
                  f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood', 'Tcon'):.4f} "
-                 "in Tcon and "
-                 f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood', 'CD8'):.4f} "
-                 "in CD8), which a self-scaled panel would have hidden."),
+                 "and CD8 "
+                 f"{_mean_of(summary, 'sting_specific_published', 'peripheral_blood', 'CD8'):.4f}. "
+                 "Its median is exactly "
+                 f"{_median_of(summary, 'sting_specific_published', 'peripheral_blood'):.3f}, the "
+                 f"only {n_zero} of {n_rows} rows at zero, against Tcon "
+                 f"{_median_of(summary, 'sting_specific_published', 'peripheral_blood', 'Tcon'):.4f} "
+                 "and CD8 "
+                 f"{_median_of(summary, 'sting_specific_published', 'peripheral_blood', 'CD8'):.4f}, "
+                 "so at least half of Treg blood cells score zero on that 21-gene set and the "
+                 "Treg synovial-versus-blood difference on it rests partly on a zero-inflated "
+                 "blood baseline."),
         script=SCRIPT, fn="figure_counterpart",
         config_kv=(f"{cfg_common}, columns = "
                    + ", ".join(c for c, _ in PROGRAM_PANELS)
@@ -620,28 +646,30 @@ def main() -> None:
         how_to_read=(
             "The Treg-only counterpart of `16_narrative_scoring/figures/_overview/"
             "umap_full_programs.png`: same three sets, same order, same panel geometry, same "
-            "colormap, on the 27,175 sorted Treg cells alone. Every set here is curated, "
-            "versioned and derived without reference to the mouse anchor — HALLMARK_HYPOXIA "
-            "from MSigDB Hallmark, sting_specific_published the 21 published "
+            f"colormap, on the {len(drawn):,} sorted Treg cells alone. Every set here is "
+            "curated, versioned and derived independently of the mouse anchor — "
+            "HALLMARK_HYPOXIA from MSigDB Hallmark, sting_specific_published the 21 published "
             "IFN-independent STING-activation genes, ifn_generic_axis a 200-gene generic "
-            "type-I interferon axis — so a colouring here is not a restatement of the "
-            "anchor. The three sets are unrelated to each other and their ranges differ, so "
-            "each panel keeps its OWN set's limits; what is shared is the OBJECT the limits "
-            "come from, which makes each panel comparable to its own twin and not to its "
-            "neighbours. Brightness therefore compares tissue within a panel, and the source "
-            "table carries the cross-panel numbers. The published STING set is 21 genes and "
-            "its own IFN-β validation in the positive-control compartment is underpowered at "
-            "three donors, so a dim or bright panel there is consistent with STING pathway "
-            "activity and never proof of it. Hypoxia and temperature are both imposed by the "
-            "inflamed joint and stay entangled in cross-sectional human data, so the hypoxia "
-            f"panel is one lens on that niche and not a HIF claim. {pair_line}"),
+            "type-I interferon axis — so a colouring here stands apart from the anchor. The "
+            "three sets are unrelated and their ranges differ, so each panel keeps its own "
+            "set's limits; what is shared is the object those limits come from, which makes "
+            "each panel comparable to its own twin. Brightness therefore compares tissue "
+            "within a panel, and the source table carries the cross-panel numbers. Two limits "
+            "bind the reading. The published STING set is 21 genes and its own IFN-β "
+            "validation in the positive-control compartment is underpowered at three donors, "
+            "so a dim or bright panel there is consistent with STING pathway activity and is "
+            "never proof of it. Hypoxia and temperature are both imposed by the inflamed joint "
+            "and stay entangled in cross-sectional human data, so the hypoxia panel is one "
+            f"lens on that niche and carries no HIF claim. {pair_line}"),
         width=FIG_W, height=FIG_H, config=FIG_CFG)
     plt.close(fig)
 
     # --- counterpart 3: the 07_embedding candidate signatures ----------------
     with_hooks = join_hook_scores(drawn)
-    s_clips = {c: clip_of(pd.read_parquet(COMPARTMENT_ROOT / HOOK_SUBSTRATE_REL), [c])
-               for c in SIGNATURE_CHANNELS}
+    # Read once: the frame is both the source of the per-channel limits and the cell count the
+    # caption states, so the two cannot disagree.
+    hook_frame = pd.read_parquet(COMPARTMENT_ROOT / HOOK_SUBSTRATE_REL)
+    s_clips = {c: clip_of(hook_frame, [c]) for c in SIGNATURE_CHANNELS}
     fig = figure_counterpart(
         with_hooks, xlim, ylim, SIGNATURE_PANELS, s_clips,
         "Candidate harvest signatures on the Treg-only map",
@@ -652,40 +680,38 @@ def main() -> None:
     save_overview(
         fig, STAGE, "umap_treg_signatures",
         table=sig_tbl,
-        finding=("The three candidate harvest signatures drawn on the Treg gate's own map and "
-                 "on the full-object figure's limits: within the Treg gate the effector-Treg "
-                 "and heat-shock scores still separate synovial fluid from paired blood "
+        finding=("The three candidate harvest signatures on the Treg gate's own map and on the "
+                 "full-object figure's limits. Within the Treg gate the effector-Treg and "
+                 "heat-shock module scores still separate synovial fluid from paired blood "
                  f"({_tissue_shift(sig_tbl, 'score_eTreg')}, "
-                 f"{_tissue_shift(sig_tbl, 'score_HSP')}) alongside the mouse anchor "
+                 f"{_tissue_shift(sig_tbl, 'score_HSP')}), alongside the mouse anchor "
                  f"annotation ({_tissue_shift(sig_tbl, 'WT_heat_up')}), so the structure the "
-                 "full-object figure shows for these three channels is not produced by "
-                 "viewing the Treg gate against Tcon and CD8."),
+                 "full-object figure shows for these three channels appears without viewing "
+                 "the Treg gate against Tcon and CD8."),
         script=SCRIPT, fn="figure_counterpart",
         config_kv=(f"{cfg_common}, columns = " + ", ".join(SIGNATURE_CHANNELS)
                    + f"; joined on barcode from {HOOK_SUBSTRATE_REL}; limits from all "
-                     "99,915 cells of that substrate, which is the frame "
+                     f"{len(hook_frame):,} cells of that substrate, which is the frame "
                      "07_embedding_viz.py draws; metric = scanpy score_genes module score"),
         input=f"{SUBSTRATE_REL}, {HOOK_SUBSTRATE_REL}",
         how_to_read=(
             "The Treg-only counterpart of `07_embedding/figures/_overview/"
             "umap_signatures_treg.png`, which draws these same three channels across all "
-            "three sort gates. Two differences from the other counterparts on this page are "
-            "worth having before reading it. First, the unit: these are scanpy "
-            "`score_genes` MODULE SCORES, mean-centred against a sampled background and "
-            "signed, not AUCell, so they do not share a scale with the AUCell panels here or "
-            "with each other and a value near zero means 'at background', not 'absent'. The "
+            "three sort gates. Two differences from the other counterparts here matter first. "
+            "The unit: these are scanpy `score_genes` module scores, mean-centred against a "
+            "sampled background and signed, so they share a scale neither with the AUCell "
+            "panels here nor with each other, and a value near zero means at background. The "
             "AUCell reading of the same mouse arm is the WT_heat_up panel of "
-            "`umap_treg_arms`. Second, the full-object twin carries a FOURTH panel, a "
-            "Treg/Tcon/CD8 sort-gate reference, which is a single category on a Treg-only "
-            "object and is therefore omitted rather than drawn as one flat colour; the "
-            "tissue reference for this map is the left panel of `umap_treg_reembedding`. "
-            "WT_heat_up here is the mouse WT 39-versus-37 °C up arm carried as ANNOTATION "
-            "ONLY — it is never a selection predicate, and the harvest design it was "
-            "previewed for is frozen as implemented. score_eTreg is the effector-Treg score "
-            "and score_HSP the heat-shock/stress score, both curated in this compartment "
-            "independently of the anchor. Colour limits come from all 99,915 cells of the "
-            "07_embedding substrate, which is the frame that figure draws, so the pair is "
-            f"comparable panel for panel. {pair_line}"),
+            "`umap_treg_arms`. The panel count: the full-object twin carries a fourth panel, "
+            "a Treg/Tcon/CD8 sort-gate reference, which is a single category on a Treg-only "
+            "object and is therefore omitted; the tissue reference here is the left panel of "
+            "`umap_treg_reembedding`. WT_heat_up here is the mouse WT 39-versus-37 °C up arm "
+            "carried as annotation only — never a selection predicate, and the harvest design "
+            "it was previewed for is frozen as implemented. score_eTreg is the effector-Treg "
+            "score and score_HSP the heat-shock/stress score, both curated in this compartment "
+            f"independently of the anchor. Colour limits come from all {len(hook_frame):,} "
+            "cells of the 07_embedding substrate, which is the frame that figure draws, so the "
+            f"pair is comparable panel for panel. {pair_line_short}"),
         width=FIG_W, height=FIG_H, config=FIG_CFG)
     plt.close(fig)
 
@@ -693,9 +719,8 @@ def main() -> None:
         write_caption(
             STAGE, f"tables/_overview/{stem}.csv",
             finding=(f"Per-cell AUCell summaries of the {len(sets)} sets drawn in "
-                     f"`figures/_overview/{stem}.png` ({', '.join(sets)}), restricted to the "
-                     "Treg gate, one row per tissue, so the colouring can be read as numbers "
-                     "rather than inferred from brightness."),
+                     f"`figures/_overview/{stem}.png` — {', '.join(sets)} — restricted to the "
+                     "Treg gate, one row per tissue, so the colouring reads as numbers."),
             script=SCRIPT, fn="score_table",
             config_kv=f"rows = {len(sets)} sets x Treg x 2 tissues, metric = AUCell",
             input=SUMMARY_REL,
@@ -703,14 +728,14 @@ def main() -> None:
                          "gate and the sets this figure draws. One row per (`set_name` x "
                          "`tissue`) with the mean, median and standard deviation of the "
                          "per-cell AUCell score and the cell and donor counts behind it. "
-                         "These are the values the FULL-OBJECT figure's Treg rows carry too, "
-                         "because the scores are joined on barcode and not recomputed for "
-                         "the re-embedding, so a difference between the paired figures is a "
-                         "difference of layout and nothing else. AUCell is bounded in [0, 1] "
-                         "and its scale depends on set size, so values compare across tissue "
-                         "within a `set_name`. Cells are pooled across donors, so the unit "
-                         "of replication is the cell and every tissue difference here is "
-                         "pseudoreplicated. `evidence_tier` reads `secondary_percell`."),
+                         "These are the values the full-object figure's Treg rows carry too, "
+                         "because the scores are joined on barcode and not recomputed, so a "
+                         "difference between the paired figures is a difference of layout. "
+                         "AUCell is bounded in [0, 1] and its scale depends on set size, so "
+                         "values compare across tissue within a `set_name`. Cells are pooled "
+                         "across donors, so the unit of replication is the cell and every "
+                         "tissue difference is pseudoreplicated. `evidence_tier` reads "
+                         "`secondary_percell`."),
             config=FIG_CFG)
 
     write_caption(
@@ -723,18 +748,17 @@ def main() -> None:
         config_kv=(f"rows = {len(SIGNATURE_CHANNELS)} channels x Treg x 2 tissues, "
                    "metric = scanpy score_genes module score"),
         input=HOOK_SUBSTRATE_REL,
-        how_to_read=("One row per (`set_name` x `tissue`) over the 27,175 Treg cells, with "
-                     "the mean, median and standard deviation of the module score and the "
-                     "cell and donor counts behind it. `metric` reads "
-                     "`scanpy_score_genes_module_score`, not AUCell: these values are "
-                     "mean-centred against a sampled background and signed, so zero means "
-                     "'at background' and a negative mean is not an absence. They therefore "
-                     "do not compare with the AUCell tables beside them, nor across "
-                     "channels, only across tissue within a `set_name`. `WT_heat_up` is the "
-                     "mouse anchor arm carried as annotation only and never as a selection "
-                     "predicate. Cells are pooled across donors, so the unit of replication "
-                     "is the cell and every tissue difference here is pseudoreplicated and "
-                     "descriptive. Annotation tier; no test, no effect size."),
+        how_to_read=(f"One row per (`set_name` x `tissue`) over the {len(with_hooks):,} Treg "
+                     "cells, with the mean, median and standard deviation of the module score "
+                     "and the cell and donor counts behind it. `metric` reads "
+                     "`scanpy_score_genes_module_score`. These values are mean-centred against "
+                     "a sampled background and signed, so zero means at background and a "
+                     "negative mean records a position on that scale; they compare across "
+                     "tissue within a `set_name`. `WT_heat_up` is the mouse anchor arm carried "
+                     "as annotation only and never as a selection predicate. Cells are pooled "
+                     "across donors, so the unit of replication is the cell and every tissue "
+                     "difference is pseudoreplicated. Annotation tier; no test, no effect "
+                     "size."),
         config=FIG_CFG)
 
     print("[17_treg_reembedding_viz] wrote 4 overviews (umap_treg_reembedding, "

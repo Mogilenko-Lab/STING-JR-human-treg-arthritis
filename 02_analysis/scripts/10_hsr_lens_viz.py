@@ -170,11 +170,13 @@ def main() -> None:
     save_overview(
         fig, STAGE, "hsr_core_running_sum",
         table=round_numeric_cols(summary),
-        finding=("The curated HSR core changes sign at trend level: Treg NES +1.4889 at "
-                 "FDR 0.0637, Tcon -1.3426 at 0.1574, and CD8 -1.1507 at 0.3753, with "
-                 "43 of 56 genes testable in every ranking. No population clears FDR 0.05, "
-                 "so this secondary annotation is directional context rather than evidence "
-                 "of a Treg-selective effect."),
+        finding=(f"The curated HSR core changes sign at trend level: "
+                 + ", ".join(f"{r['population']} NES {float(r['nes']):+.4f} at FDR "
+                             f"{float(r['padj']):.4f}" for _, r in summary.iterrows())
+                 + f", with {int(summary['set_size'].min())} of "
+                 f"{int(summary['n_nominal'].iloc[0])} genes testable in every ranking. Every "
+                 f"population sits above FDR {FDR}, so this secondary annotation supplies "
+                 f"directional context. A Treg-selective effect is untested here."),
         script=SCRIPT, fn="plot_running_sum",
         config_kv=(f"figures.running_sum_heights={RS_HEIGHTS[:2]}; "
                    f"thresholds.gsea_fdr={FDR}; evidence_tier=secondary_annotation"),
@@ -185,12 +187,14 @@ def main() -> None:
             "from synovial-fluid-up (left) to blood-up (right); a positive, left-shifted "
             "excursion is synovial-fluid enrichment, a negative trace the opposite. Bottom "
             "panel: where each population's HSR core genes sit in its ranking, in matching "
-            "colour. Legend labels carry each NES and FDR, so read the Treg trace as a "
-            "trend at FDR 0.064, not a significant enrichment. Ranked-list lengths differ "
-            "slightly, so compare shapes rather than x positions; the y range is data-driven "
-            "because all three curves share one axis. The legend also gives effective size "
-            "against the 56-gene nominal set and its testability band. Secondary annotation "
-            "tier; no row supports a Treg-selective claim."),
+            f"colour. Legend labels carry each NES and FDR; the Treg trace is a trend at FDR "
+            f"{float(summary.loc[summary['population'].eq('Treg'), 'padj'].iloc[0]):.3f}. "
+            f"Ranked-list lengths differ slightly, so shape is the comparable feature; the y "
+            f"range is data-driven because all three curves share one "
+            f"axis. The legend also gives effective size against the "
+            f"{int(summary['n_nominal'].iloc[0])}-gene nominal set and its testability band. "
+            f"Secondary annotation tier; the confirmatory spine carries any Treg-selective "
+            f"claim."),
         config=FIG_CFG, height=7.0,
     )
     plt.close(fig)

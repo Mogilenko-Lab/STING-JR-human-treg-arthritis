@@ -83,14 +83,14 @@ def main() -> None:
     qc_summary = (per_cell.groupby("gsm")[["total_counts", "n_genes_by_counts", "pct_counts_mt"]]
                   .median().reset_index())
     save_overview(fig, STAGE, "qc_violins_per_gsm", table=qc_summary,
-                  finding=("Per-GSM UMI/gene depth is adequate across strata; %mito stays low, "
-                           "so no GSM is grossly degraded."),
+                  finding=("Per-GSM UMI and gene depth is adequate across every stratum and %mito "
+                           "stays low, so no GSM is grossly degraded."),
                   script=SCRIPT, fn="main",
                   config_kv=f"thresholds.qc_n_mads = {PARAMS.qc_n_mads}; qc_pct_mt_max = {PARAMS.qc_pct_mt_max}",
                   input="03_results/01_qc/tables/qc_metrics_per_cell.csv",
-                  how_to_read=("One violin per GSM (x), colored by sorted population; rows = UMIs, "
-                               "genes (log y), %mito. Table lists per-GSM medians. QC diagnostic — "
-                               "no biological claim."),
+                  how_to_read=("One violin per GSM on x, coloured by sorted population; rows are "
+                               "UMIs, genes (log y) and %mito. The source table lists per-GSM "
+                               "medians. QC diagnostic — no biological claim."),
                   config=FIG_CFG, wide=True)
 
     # ---- 2. kept / dropped ----
@@ -106,18 +106,33 @@ def main() -> None:
     ax.invert_yaxis(); ax.set_xlabel("cells"); ax.legend(frameon=True)
     ax.set_title("Cells kept vs dropped by QC (per stratum)")
     fig2.tight_layout()
+    # Retention, the excluded library and its depth are read from the tables in this run, so
+    # the caption cannot drift from the numbers the figure draws.
+    n_kept_tot, n_cells_tot = int(kept["n_kept"].sum()), int(kept["n_cells"].sum())
+    dropped_gsm = kept.loc[kept["frac_kept"] == 0]
+    if len(dropped_gsm):
+        dg = dropped_gsm.iloc[0]
+        dg_umi = float(qc_summary.loc[qc_summary["gsm"] == dg["gsm"], "total_counts"].iloc[0])
+        dg_tis = "SF" if dg["tissue"] == "synovial_fluid" else "PB"
+        dg_lab = (f"The {dg_tis}-{COARSE_LABEL[dg['population']]} "
+                  f"{dg['donor'].replace('JIA_patient_', 'p')} library ({dg['gsm']}) is "
+                  f"near-empty at a median around {dg_umi:.0f} UMIs and drops entirely, leaving "
+                  f"6 of 7 donors with paired SF and PB Tregs for the donor-level contrast.")
+    else:
+        dg_lab = "No library is excluded outright."
     save_overview(fig2, STAGE, "cells_kept_dropped",
                   table=kept[["gsm", "donor", "tissue", "population", "n_cells", "n_kept", "n_dropped", "frac_kept"]],
-                  finding=("QC retains ~86% of cells overall, but the SF-Treg p5 library "
-                           "(GSM4859852) is near-empty (median ~14 UMIs) and drops entirely, "
-                           "leaving 6 of 7 donors with paired SF+PB Tregs for the donor-level "
-                           "contrast."),
+                  finding=(f"QC retains {n_kept_tot:,} of {n_cells_tot:,} cells, "
+                           f"{n_kept_tot / n_cells_tot:.1%} overall. {dg_lab}"),
                   script=SCRIPT, fn="main",
-                  config_kv="thresholds.qc_min_genes = 200; scrublet_expected_doublet_rate = 0.06",
+                  config_kv=(f"thresholds.qc_min_genes = {int(PARAMS.qc_min_genes)}; "
+                             f"scrublet_expected_doublet_rate = "
+                             f"{PARAMS.scrublet_expected_doublet_rate}"),
                   input="03_results/01_qc/tables/cells_kept_dropped.csv",
-                  how_to_read=("Stacked bars per stratum: blue = kept, red = dropped (MAD outlier / "
-                               "low-gene / doublet). Confirm every SF+PB Treg stratum retains enough "
-                               "cells for pseudobulk. QC diagnostic."),
+                  how_to_read=("Stacked bars per stratum, blue kept and red dropped, where a drop "
+                               "is a MAD outlier, a low-gene cell, a doublet call, or the hard GSM "
+                               "exclusion. Read it to confirm every SF and PB Treg stratum retains "
+                               "enough cells for pseudobulk. QC diagnostic."),
                   config=FIG_CFG, wide=True)
 
     # ---- 3. unsupervised UMAP + marker overlay ----
@@ -149,16 +164,20 @@ def main() -> None:
                 .reset_index())
     save_overview(fig3, STAGE, "unsupervised_umap",
                   table=crosstab,
-                  finding=("Sorted Treg/Tcon/CD8 occupy largely distinct transcriptomic territory; "
-                           "FOXP3/IL2RA/CTLA4/IKZF2 concentrate in the Treg gate, supporting sort "
-                           "fidelity."),
+                  finding=(f"Sorted Treg, Tcon and CD8 cells occupy largely distinct "
+                           f"transcriptomic territory, and {', '.join(TREG_MARKERS[:-1])} and "
+                           f"{TREG_MARKERS[-1]} concentrate in the Treg gate, supporting sort "
+                           f"fidelity."),
                   script=SCRIPT, fn="main",
-                  config_kv="thresholds.hvg_n_top = 2000; n_pcs = 30; leiden_resolution = 1.0",
+                  config_kv=(f"thresholds.hvg_n_top = {int(PARAMS.hvg_n_top)}; "
+                             f"n_pcs = {int(PARAMS.n_pcs)}; "
+                             f"leiden_resolution = {PARAMS.leiden_resolution}"),
                   input="03_results/objects/01_qc.h5ad (X_umap_unsupervised)",
-                  how_to_read=("Top row: cells on the unsupervised UMAP colored by sort population, "
-                               "tissue, donor, leiden. Bottom row: Treg-marker expression (magma). "
-                               "The UMAP is a usability lens — biology is NOT read off it. Table = "
-                               "leiden x population cross-tab (contamination check)."),
+                  how_to_read=("Top row places cells on the unsupervised UMAP coloured by sort "
+                               "population, tissue, donor and leiden cluster; bottom row gives "
+                               "Treg-marker expression on magma. The source table is the leiden × "
+                               "population cross-tab, a contamination check. This UMAP is a "
+                               "usability lens; biology is read from donor-level pseudobulk."),
                   config=FIG_CFG, wide=True)
     print("[01_qc_viz] wrote 3 overviews")
 

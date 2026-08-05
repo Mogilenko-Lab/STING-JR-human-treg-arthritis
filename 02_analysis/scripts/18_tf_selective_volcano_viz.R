@@ -176,15 +176,39 @@ fig_tbl <- hl %>%
             past_fdr_and_logfc = adj.P.Val <= FDR_CUT & abs(logFC) >= LOGFC_CUT) %>%
   arrange(tf, desc(contrib))
 
+# Counts for the caption, read off the same frame the figure draws. `pct_abs`/`pct_net` come from
+# the committed decomposition so the volcano's account of the share matches the decomposition's.
+cnt <- hl %>% group_by(tf) %>%
+  summarise(n = n(), n_up = sum(logFC > 0), n_down = sum(logFC < 0),
+            n_fdr = sum(adj.P.Val <= FDR_CUT),
+            n_fdr_up = sum(adj.P.Val <= FDR_CUT & logFC > 0),
+            n_fdr_down = sum(adj.P.Val <= FDR_CUT & logFC < 0),
+            n_contrib_up = sum(contrib > 0), n_contrib_down = sum(contrib < 0),
+            .groups = "drop")
+cn <- function(f, col) cnt[[col]][as.character(cnt$tf) == f]
+tot <- DEC %>% filter(tf %in% DECOMP) %>% group_by(tf) %>%
+  summarise(pct_abs = 100 * sum(abs(contrib[n_regulons <= SEL_MAX])) / sum(contrib),
+            pct_net = 100 * sum(contrib[n_regulons <= SEL_MAX]) / sum(contrib),
+            .groups = "drop")
+tt <- function(f, col) tot[[col]][as.character(tot$tf) == f]
+flipped <- hl %>% filter(mor < 0)
+
 save_overview(
   p, STAGE, "tf_selective_targets_volcano", table = fig_tbl,
   finding = paste(
-    "Placed on the contrast they were scored on, the 27 targets HIF1A alone claims sit on both",
-    "sides of it: 12 go up in synovial fluid and 15 go down, 12 of the 27 clear FDR 0.05, and",
-    "those twelve split six up against six down, so the set carries evidence without carrying a",
-    "direction. That is what makes its 0.14% share of HIF1A's signed contribution a cancellation",
-    "rather than an absence: in magnitude the same 27 targets are 15% of that total. NFKB1's two",
-    "exclusively-claimed targets split one each way and neither clears the FDR cut."),
+    sprintf(paste("Placed on the contrast they were scored on, the %d targets HIF1A alone claims",
+                  "sit on both sides: %d go up in synovial fluid and %d go down, %d clear FDR %.2g,",
+                  "and those %d split %d up against %d down, so the set carries evidence and",
+                  "carries no direction."),
+            cn("HIF1A", "n"), cn("HIF1A", "n_up"), cn("HIF1A", "n_down"),
+            cn("HIF1A", "n_fdr"), FDR_CUT, cn("HIF1A", "n_fdr"),
+            cn("HIF1A", "n_fdr_up"), cn("HIF1A", "n_fdr_down")),
+    sprintf(paste("That is what makes its %.2f%% share of HIF1A's signed contribution a",
+                  "cancellation: in magnitude the same %d targets are %.0f%% of that total."),
+            tt("HIF1A", "pct_net"), cn("HIF1A", "n"), tt("HIF1A", "pct_abs")),
+    sprintf(paste("NFKB1's %d exclusively-claimed targets split one each way, and the FDR cut is",
+                  "cleared by neither."),
+            cn("NFKB1", "n"))),
   script = SCRIPT, fn = "save_overview",
   config_kv = paste0("thresholds.de_fdr=", FDR_CUT, "; thresholds.de_logfc=", LOGFC_CUT,
                      "; tf_activity.decompose_tfs=[", paste(DECOMP, collapse = ", "),
@@ -194,16 +218,20 @@ save_overview(
                  "03_results/18_tf_activity/tables/target_decomposition.csv"),
   how_to_read = paste(
     "The standard volcano of the committed donor-pseudobulk contrast: x is log2 fold change,",
-    "synovial fluid over paired blood, y is raw p on a -log10 scale, and colour is the significance",
+    "synovial fluid over paired blood; y is raw p on a -log10 scale; colour is the significance",
     "category, decided on FDR while the axis keeps raw p for resolution. The dashed horizontal rule",
-    "is the raw p that realises the FDR cut; the vertical rules are the fold-change cut. Only the",
-    "targets no other CollecTRI regulon claims are ringed and named, circles for HIF1A and triangles",
-    "for NFKB1, and the ring is unfilled so the point inside keeps its own category colour. Nothing",
-    "else is labelled, because the spread of the named genes across both halves is the point: count",
-    "how many sit either side of zero and how many clear the rules. The split here is by fold",
-    "change; by signed contribution it reads 13 up and 14 down, since TM9SF4 sits on a repressing",
-    "edge and contributes positively while going down. Annotation tier: this restates a committed",
-    "DE table and a set membership, so nothing here is a new test."),
+    "is the raw p that realises the FDR cut, the vertical rules the fold-change cut.",
+    "Only the targets no other CollecTRI regulon claims are ringed and named, circles for HIF1A and",
+    "triangles for NFKB1, the ring unfilled so the point inside keeps its category colour. The",
+    "spread of the named genes across both halves is the point, so nothing else is labelled: count",
+    "how many sit either side of zero and how many clear the rules.",
+    sprintf(paste("The split here is by fold change; by signed contribution it reads %d up and %d",
+                  "down, since %s sits on a repressing edge and contributes positively while going",
+                  "down."),
+            cn("HIF1A", "n_contrib_up"), cn("HIF1A", "n_contrib_down"),
+            paste(flipped$target, collapse = ", ")),
+    "Annotation tier: this restates a committed DE table and a set membership, so nothing here is",
+    "a new test."),
   config = CFG, wide = TRUE, height = 9
 )
 

@@ -367,7 +367,7 @@ def main() -> None:
                    "state green/orange/pink, donor 7 hues)"),
         input=SUBSTRATE_REL,
         how_to_read=(
-            "Three panels over ONE sampled frame of the same cells at the same coordinates, so a "
+            "Three panels over one sampled frame of the same cells at the same coordinates, so a "
             "cell sits in the same place in all three. Left is tissue of origin, synovial fluid in "
             "vermillion and paired blood in blue. Middle is the frozen FACS sort gate the "
             "compartment is built on, Treg, Tcon and CD8. Right is donor, one hue per JIA "
@@ -375,7 +375,7 @@ def main() -> None:
             "shuffled order so overlapping groups paint evenly, the axes are UMAP coordinates "
             "without units, and all three panels share one square bounding box, so the row is "
             "comparable panel to panel and comparable to the score figures beside it. "
-            f"{SAMPLE_N:,} of the 99,915 cells are drawn with a fixed seed, and the source table "
+            f"{SAMPLE_N:,} of the {len(full):,} cells are drawn with a fixed seed, and the source table "
             "gives the full per cell state, tissue and donor counts next to the counts drawn. This "
             "is annotation. Claims in this compartment rest on donor-level pseudobulk differential "
             "expression within these frozen cell states, meta-analysed as effect sizes with "
@@ -400,14 +400,14 @@ def main() -> None:
                    f"shared_scale = WT_heat_up + KO_heat_up at {arm_shared[0]:.4f}-{arm_shared[1]:.4f}"),
         input=f"{SUBSTRATE_REL}, {SUMMARY_REL}",
         how_to_read=(
-            "Three panels over the SAME sampled frame and square bounding box as the reference "
+            "Three panels over the same sampled frame and square bounding box as the reference "
             "figure. Panel titles carry the set identifier and its size. WT_heat_up is the up arm "
             "of the mouse WT iTreg 39 versus 37 °C contrast, 199 human symbols. KO_heat_up is the "
             "same contrast in cGAS-knockout iTregs, 218 symbols. Interaction_up is the mouse "
             "genotype by temperature up arm, 7 symbols, small enough that one gene moves the "
             f"score, so read it for location and treat its spread as noise. WT_heat_up and "
-            f"KO_heat_up share 182 genes and are drawn on ONE colour scale, {arm_shared[0]:.4f} to "
-            f"{arm_shared[1]:.4f}, so the two panels can be compared pixel for pixel. "
+            f"KO_heat_up share 182 genes and are drawn on one colour scale, {arm_shared[0]:.4f} to "
+            f"{arm_shared[1]:.4f}, so the two panels compare pixel for pixel. "
             "Interaction_up spans a range an order of magnitude wider, so a common scale would "
             "flatten both, and it carries its own bar. Colour is per-cell AUCell with the "
             "highest-scoring cells drawn last, and the limits are the 2nd and 98th percentile of "
@@ -440,16 +440,15 @@ def main() -> None:
                    "ifn_generic_axis_AUCell"),
         input=f"{SUBSTRATE_REL}, {SUMMARY_REL}",
         how_to_read=(
-            "Three panels over the SAME sampled frame and bounding box as the mouse-arm figure, "
+            "Three panels over the same sampled frame and bounding box as the mouse-arm figure, "
             "on the same sequential colormap. Panel titles carry the set identifier and its size. "
-            "Each set here is curated, versioned and derived without reference to the mouse "
-            "anchor: "
+            "Each set here is curated, versioned and derived independently of the mouse anchor: "
             "HALLMARK_HYPOXIA from MSigDB Hallmark, sting_specific_published the 21 published "
             "IFN-independent STING-activation genes, and ifn_generic_axis a 200-gene generic "
             "type-I interferon axis of which 116 symbols match this object, the thinnest "
             "intersection in the panel. Colour is per-cell AUCell, clipped to the 2nd and 98th "
             "percentile within each panel, highest-scoring cells drawn last. These three sets "
-            "are unrelated to each other and their ranges differ, so each keeps its own scale and "
+            "are unrelated and their ranges differ, so each keeps its own scale and "
             "brightness compares tissues within a panel while the source table carries the "
             "cross-panel numbers. Hypoxia and temperature are both imposed by the "
             "inflamed joint and stay entangled in cross-sectional human data, so this hypoxia "
@@ -461,15 +460,16 @@ def main() -> None:
     write_caption(
         STAGE, "tables/_overview/umap_full_reference.csv",
         finding=("The 39 populated (cell state x tissue x donor) strata behind the reference map: "
-                 "all seven donors appear in both tissues, and the three strata that are absent "
-                 "are single sort gates in one donor arm rather than a missing donor."),
+                 "all seven donors appear in both tissues, and each of the three absent strata "
+                 "is a single sort gate in one donor arm."),
         script=SCRIPT, fn="reference_table",
         config_kv=f"sample_n = {SAMPLE_N}, sample_seed = {SAMPLE_SEED}",
         input=SUBSTRATE_REL,
         how_to_read=("One row per (`coarse_label` x `tissue` x `donor`) stratum present in the "
                      "frozen annotation. `n_cells` is the full-object count and `n_cells_drawn` "
                      "the count in the sampled frame the figure draws, so the two say how faithful "
-                     "the drawn frame is to the object. `frac_of_total` is `n_cells` over 99,915. "
+                     f"the drawn frame is to the object. `frac_of_total` is `n_cells` over "
+                     f"{len(full):,}. "
                      "Absent combinations carry no row. Annotation tier, no test and no effect "
                      "size."),
         config=FIG_CFG)
@@ -477,8 +477,8 @@ def main() -> None:
         write_caption(
             STAGE, f"tables/_overview/{stem}.csv",
             finding=(f"Per-cell AUCell summaries of the {len(sets)} sets drawn in "
-                     f"`figures/_overview/{stem}.png` ({', '.join(sets)}), one row per cell state "
-                     "and tissue, so the colouring can be read as numbers."),
+                     f"`figures/_overview/{stem}.png` — {', '.join(sets)} — one row per cell "
+                     "state and tissue, so the colouring reads as numbers."),
             script=SCRIPT, fn="score_table",
             config_kv="rows = 3 sets x 3 frozen cell states x 2 tissues, metric = AUCell",
             input=SUMMARY_REL,
@@ -487,11 +487,10 @@ def main() -> None:
                          "median and standard deviation of the per-cell AUCell score and the cell "
                          "and donor counts behind it. AUCell is bounded in [0, 1] and its scale "
                          "depends on set size, so values compare across tissue within a "
-                         "`set_name` and the source of a cross-set comparison is the gene lists, "
-                         "not these means. Cells are pooled across donors, so the unit of "
-                         "replication is the cell and every tissue difference here is "
-                         "pseudoreplicated. `evidence_tier` reads `secondary_percell` "
-                         "throughout."),
+                         "`set_name`; a cross-set comparison takes the gene lists themselves. "
+                         "Cells are pooled across donors, so the unit of replication is the cell "
+                         "and every tissue difference is pseudoreplicated. `evidence_tier` reads "
+                         "`secondary_percell` throughout."),
             config=FIG_CFG)
 
     print("[16_narrative_embedding_viz] wrote 3 overviews "

@@ -7,14 +7,16 @@ analysis retains 6 paired donors in each population._
 
 ## figures/_overview/cells_per_gsm.png
 
-All 7 donors contribute both SF and PB Treg samples at ingest. Tcon and CD8 have no PB sample for
-donor p3, an absence in the study design. QC later removes the near-empty SF-Treg p5 library,
-leaving 6 paired donors in each analyzed population.
+All 7 donors contribute both SF and PB Treg samples at ingest. Tcon
+and CD8 have no PB sample for donor p3, an absence in the study
+design. QC later removes the near-empty SF-Treg p5 library, leaving 6
+paired donors in each analyzed population.
 
-**How to read:** Grouped bars give cells recovered per donor, orange for synovial fluid and blue
-for peripheral blood, one facet per sorted population. The missing p3 PB bar in Tcon and CD8 marks
-a sample that was never collected. These are ingest counts, taken before QC. Descriptive counts —
-no claim tier.
+**How to read:** Grouped bars give cells recovered per donor, orange for synovial fluid
+and blue for peripheral blood, one facet per sorted population. The
+missing p3 PB bar in Tcon and CD8 marks a sample that was never
+collected. These are ingest counts, taken before QC. Descriptive
+counts — no claim tier.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

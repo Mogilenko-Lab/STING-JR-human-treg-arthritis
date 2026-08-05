@@ -236,17 +236,20 @@ def main() -> None:
             f"Across the {len(df):,} sorted cells the median per-cell AUCell of the mouse "
             "39 °C-derived up arm sits higher in synovial fluid than in paired blood in "
             f"{count_phrase(wt_up)}, and KO_heat_up follows the same pattern, so the per-cell "
-            "channel shows the same direction the donor-level pseudobulk carries. The 7-gene "
+            f"channel shows the same direction the donor-level pseudobulk carries. The "
+            f"{ARMS[-1][2]}-gene "
             f"interaction arm leaves {inter_zero_pct:.0f}% of cells at exactly zero, which is "
-            "what a 7-gene set does when none of its genes reaches a cell's top-ranked genes, "
+            f"what a {ARMS[-1][2]}-gene set does when none of its genes reaches a cell's "
+            "top-ranked genes, "
             f"and its synovial-fluid median exceeds its blood median in {count_phrase(inter_up)}. "
             f"Every distribution here is one vote per cell over {int(df['donor'].nunique())} "
             f"donors of unequal cell yield ({donor_lo:,} to {donor_hi:,} cells), so it carries "
             "shape and spread while ranking the cell states stays with the donor-level panel."
         ),
         script=SCRIPT, fn="build_figure",
-        config_kv=("metric = AUCell (rank-based, 0 to 1); arms = WT_heat_up 199, KO_heat_up 218, "
-                   f"Interaction_up 7 genes; y_pad_frac = {Y_PAD_FRAC}"),
+        config_kv=("metric = AUCell (rank-based, 0 to 1); arms = "
+                   + ", ".join(f"{a} {n}" for _c, a, n in ARMS)
+                   + f" genes; y_pad_frac = {Y_PAD_FRAC}"),
         input="03_results/interactive/16_narrative_embedding.parquet",
         how_to_read=(
             "Annotation tier. One panel per mouse-derived up arm, one violin pair per frozen sort "
@@ -254,10 +257,11 @@ def main() -> None:
             "median. AUCell is a rank-based score in 0 to 1, the area under a cell's "
             "gene-recovery curve for that arm, so it is robust to library size and composition. "
             "The comparison the panel supports is the synovial-fluid-versus-blood offset inside "
-            "one cell state of one panel. Each panel has its own y axis because the arms are 199, "
-            "218 and 7 genes and AUCell is computed against each cell's own ranking, so a level "
-            "in one panel means nothing against a level in another. Both ends of every y axis "
-            "carry headroom, so the score itself is bounded in [0, 1] and the axis is not. Every "
+            "one cell state of one panel. Each panel has its own y axis because the arms are "
+            + ", ".join(str(n) for _c, _a, n in ARMS[:-1]) + f" and {ARMS[-1][2]} genes and "
+            "AUCell is computed against each cell's own ranking, so a level compares within a "
+            "panel. Both ends of every y axis carry headroom: the score is bounded in [0, 1] and "
+            "the axis extends past it. Every "
             f"one of the {len(df):,} cells casts one vote, and the {int(df['donor'].nunique())} donors "
             f"contributed {donor_lo:,} to {donor_hi:,} cells each, so a panel-level average "
             "follows the donors that contributed the most cells. Ranking the cell states is the "
@@ -266,7 +270,8 @@ def main() -> None:
             "where each donor carries one vote inside a frozen label and the enrichment is "
             "tested; this panel adds the shape and the spread the donor-level aggregate is built "
             "from. The same-stem source table gives the cell count, mean, median, quartiles and "
-            "range of all 18 violins. Naming follows how each arm was derived, from mouse iTreg "
+            f"range of all {len(summary)} violins. Naming follows how each arm was derived, from "
+            "mouse iTreg "
             "37 versus 39 °C contrasts, and the reading stays correlative."
         ),
         config=FIG_CFG, width=width, height=height)

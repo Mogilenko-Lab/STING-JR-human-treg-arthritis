@@ -277,7 +277,7 @@ def main() -> None:
         signs = {np.sign(by_pop[p]["nes"]) for p in POP_ORDER}
         sig_pops = [p for p in POP_ORDER if by_pop[p]["padj_pooled"] < FDR]
         shape = ("all three populations carry the same sign" if len(signs) == 1
-                 else "the sign is not shared across the three populations")
+                 else "the three populations split on sign")
         finding = (
             f"On one fractional-rank axis, {display_name(set_id)} gives {parts}, so {shape}"
             + (f" and {'it' if len(sig_pops) == 1 else 'they'} reach pooled FDR < {FDR:g} in "
@@ -285,7 +285,7 @@ def main() -> None:
                else f" and no population reaches pooled FDR < {FDR:g}.")
             + " Where a curve peaks is where the set's genes concentrate in that population's "
               "ranking; a difference in peak height between populations is a difference in "
-              "concentration, not a measured difference in the program the set is named for.")
+              "concentration. The program the set is named for is untested here.")
 
         save_overview(
             fig, STAGE, stem, table=round_numeric_cols(sub),
@@ -294,21 +294,21 @@ def main() -> None:
             input=("03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, "
                    "runsum_interactive_{treg,tcon,cd8}_" + set_id + ".csv, gsea_all.csv"),
             how_to_read=(
-                "One set, three populations, one axis. TOP: the running enrichment score as "
+                "One set, three populations, one axis. Top: the running enrichment score as "
                 "each ranked list is walked from its most synovial-fluid-up gene (left) to "
                 "its most blood-up gene (right), so a positive left-shifted excursion is "
                 "concentration on the synovial-fluid side and a negative trace the opposite. "
-                "MIDDLE: where that population's members of the set sit in its own ranking, "
-                "one named row each. BOTTOM: the three moderated-t rankings, which show them "
-                "crossing zero at comparable fractions and so justify the shared axis. "
-                "X IS A FRACTION of each list's length, not a rank, because the lists differ "
-                "in length. Y IS DATA-DRIVEN, not the fixed range the by_contrast panels use, "
-                "so do not compare curve heights across the two families. The legend carries "
+                "Middle: where that population's members of the set sit in its own ranking, "
+                "one named row each. Bottom: the three moderated-t rankings, which cross zero "
+                "at comparable fractions and so justify the shared axis. "
+                "X is a fraction of each list's length, because the lists differ in length. Y "
+                "is data-driven here and fixed in the by_contrast panels, so curve heights "
+                "compare within this family alone. The legend carries "
                 "each NES, pooled adjusted p, genes reaching the ranked list and leading-edge "
                 "count, so a tall curve resting on few genes shows as one. Correlative: this "
-                "says where gene content sits in a ranking, not that the program the set is "
-                "named for is present. Claim tier: L3; no row reaches an effect-size "
-                "accumulator."),
+                "gives where gene content sits in a ranking. Whether the program the set is "
+                "named for is present is untested. Claim tier: L3; no row reaches an "
+                "effect-size accumulator."),
             config=FIG_CFG, width=11.0, height=8.5,
         )
         plt.close(fig)
@@ -317,7 +317,7 @@ def main() -> None:
     skipped_txt = (
         "Every set with a trace is drawn." if skipped.empty else
         "Not drawn, because a trace exists in only some populations and a one-curve panel in "
-        "this family would read as absence of enrichment rather than absence of a trace: "
+        "this family would read as absence of enrichment where it records absence of a trace: "
         + "; ".join(f"{r['gene_set']} [{r['database']}] ({r['populations_with_a_trace']})"
                     for _, r in skipped.iterrows())
         + ". Their statistics are all in gsea_all.csv, and any of them can be added to the "
@@ -340,17 +340,17 @@ def main() -> None:
         input=("03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv "
                "+ runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv"),
         how_to_read=(
-            "LAYOUT. One figure per set, figures/_overview/runsum_&lt;set&gt;.{pdf,png}, with its "
+            "Layout. One figure per set, figures/_overview/runsum_&lt;set&gt;.{pdf,png}, with its "
             "three rows under tables/_overview/. This family is the transpose of "
             "figures/by_contrast/, where a panel holds one population and many sets. "
-            "MEMBERSHIP IS A REPORTING CHOICE, NOT A RESULT: a set is here because it was named "
-            "in the config or ranked top-N in all three populations, so the family is not a "
-            "ranking and a set's presence in it privileges nothing. READ IT FOR SHARED VERSUS "
-            "SELECTIVE. Three curves of similar shape and height mean the set's genes sit in a "
-            "comparable part of all three rankings; one curve standing apart means it does not. "
-            "Neither reading is evidence about the program a set is named for, and neither "
-            "reaches the confirmatory spine, which stays the donor-pseudobulk effect sizes. "
-            "Correlative. Claim tier: L3 (enrichment statistics)."),
+            "Membership is a reporting choice: a set is here because it was named in the config "
+            "or ranked top-N in all three populations, so the family is a browse surface and a "
+            "set's presence in it carries the same standing as any other set's. Read it for "
+            "shared against selective. Three curves of similar shape and height mean the set's "
+            "genes sit in a comparable part of all three rankings; one curve standing apart "
+            "means one population places them elsewhere. Both readings describe rankings; the "
+            "program a set is named for is untested, and the donor-pseudobulk effect sizes stay "
+            "the confirmatory spine. Correlative. Claim tier: L3 (enrichment statistics)."),
         config=FIG_CFG)
 
     print(f"[14d] wrote {summary['gene_set'].nunique()} cross-population running sums "

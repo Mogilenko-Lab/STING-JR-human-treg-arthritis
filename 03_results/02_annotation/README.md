@@ -9,12 +9,14 @@ against expression; none replaces it.
 
 ## figures/_overview/umap_sort_identity.png
 
-The frozen sort labels track the transcriptomic structure, and the large majority of cells are
-marker-consistent, so the sort gate is a sound anchor for pseudobulk.
+The frozen sort labels track the transcriptomic structure, and the
+large majority of cells are marker-consistent, so the sort gate is a
+sound anchor for pseudobulk.
 
-**How to read:** Unsupervised UMAP coloured by frozen sort label, by marker-module argmax
-prediction, and by their agreement (blue = consistent). Disagreement flags candidate mis-sorts.
-Annotation and visualisation only — no biological claim.
+**How to read:** Unsupervised UMAP coloured by frozen sort label, by marker-module
+argmax prediction, and by their agreement (blue = consistent).
+Disagreement flags candidate mis-sorts. Annotation and visualisation
+only — no biological claim.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -22,11 +24,13 @@ Annotation and visualisation only — no biological claim.
 
 ## figures/_overview/marker_dotplot.png
 
-FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted; CD8A, CD8B and GZMK mark the CD8 gate; IL7R is
-depleted in Tregs, as a CD127-lo sort requires. Markers land where the sort predicts.
+FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted; CD8A, CD8B and GZMK
+mark the CD8 gate; IL7R is depleted in Tregs, as a CD127-lo sort
+requires. Markers land where the sort predicts.
 
-**How to read:** Dot size is the fraction of cells expressing, colour the mean log-normalised
-expression, rows the frozen label. QC overlay tier — hand markers, which carry no evidential weight.
+**How to read:** Dot size is the fraction of cells expressing, colour the mean log-
+normalised expression, rows the frozen label. QC overlay tier — hand
+markers, which carry no evidential weight.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -34,13 +38,15 @@ expression, rows the frozen label. QC overlay tier — hand markers, which carry
 
 ## figures/_overview/counts_grid.png
 
-The cohort holds 7 donors and 6 span SF and PB in each analyzed population after QC. Every
-observed stratum clears the 20-cell pseudobulk floor. The p3 PB Tcon and PB CD8 samples were never
+The cohort holds 7 donors and 6 span SF and PB in each analyzed
+population after QC. Every observed stratum clears the 20-cell
+pseudobulk floor. The p3 PB Tcon and PB CD8 samples were never
 collected.
 
-**How to read:** Heatmap of cells per donor (x) against label plus tissue (y). A red asterisk marks
-a stratum below the pseudobulk cell floor; an empty square marks an absent sample. Donor count per
-arm sets contrast precision. Diagnostic.
+**How to read:** Heatmap of cells per donor (x) against label plus tissue (y). A red
+asterisk marks a stratum below the pseudobulk cell floor; an empty
+square marks an absent sample. Donor count per arm sets contrast
+precision. Diagnostic.
 
 | Script | Function | Config | Input |
 |---|---|---|---|

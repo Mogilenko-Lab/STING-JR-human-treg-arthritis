@@ -638,7 +638,7 @@ emit_cell <- function(pop, db) {
     if (length(focus) >= 2)
       emit_running_sum(
         g, focus, pop, db, "running_sum_focus",
-        sprintf("named, not ranked: %s", paste(focus, collapse = " and ")),
+        sprintf("named pair, no ranking: %s", paste(focus, collapse = " and ")),
         wrap_text(sprintf("%s synovial fluid versus paired blood, %s against %s",
                           pop, focus[1], focus[2]), TITLE_WRAP),
         note)
@@ -683,7 +683,7 @@ DB_CONTENT <- c(
     "is recorded in geneset_manifest.csv."),
   Reactome = paste(
     "Reactome canonical pathways from MSigDB C2. Set names here are the longest in",
-    "the battery and are wrapped rather than shortened, so the label column is wide."),
+    "the battery and are wrapped in full, so the label column is wide."),
   WikiPathways = "WikiPathways canonical pathways from MSigDB C2.",
   GO_BP = paste(
     "Gene Ontology biological process terms from MSigDB C5, the largest collection in",
@@ -696,25 +696,25 @@ DB_CONTENT <- c(
     "activating and repressing targets pooled, so a set is that factor's",
     "transcriptional neighbourhood. A set enriching says the factor's targets move",
     "with one side of the contrast; it is a statement about target-gene expression",
-    "and carries no measurement of the factor's activity."),
+    "and the factor's own activity is untested."),
   project_frozen = paste(
     "The seven frozen curated lists this compartment owns, all seven drawn. Six are",
     "re-pins of MSigDB Hallmark sets with identical gene content, so they are pooled",
-    "under Hallmark rather than twice — geneset_manifest.csv records them as",
+    "once under Hallmark — geneset_manifest.csv records them as",
     "n_sets_aliased_out_of_pooling = 6 — and each is drawn here with the adjusted p it",
     "was pooled under, marked `pooled under Hallmark` on the panel and in the",
-    "pooled_under column of every same-stem CSV. Being drawn twice is not being tested",
-    "twice. The seventh is HSR_core, the curated heat-shock-response lens, held",
+    "pooled_under column of every same-stem CSV. A set drawn twice is tested once.",
+    "The seventh is HSR_core, the curated heat-shock-response lens, held",
     "independent of the mouse anchor and general to proteotoxic stress. This is also the",
     "one collection that holds both HSR_core and HALLMARK_HYPOXIA, so it carries the",
     "extra running_sum_focus panel over that named pair: the inflamed niche imposes",
-    "proteotoxic and low-oxygen stress together and cross-sectional human data cannot",
-    "separate them, so the two curves are worth reading side by side rather than",
-    "leaving it to a |NES| ranking to decide whether both appear."),
+    "proteotoxic and low-oxygen stress together and cross-sectional human data leave",
+    "them entangled, so the pair is named and both curves are drawn, which a |NES|",
+    "ranking would leave to chance."),
   mouse_projection = paste(
     "The three mouse-derived up arms projected onto human symbols: WT_heat_up",
-    "(199 genes, 119 in the Treg ranked list), KO_heat_up and Interaction_up. They are",
-    "ordinary members of the sweep with no privilege, and WT_heat_up doubles as the",
+    "WT_heat_up, KO_heat_up and Interaction_up. They are ordinary members of the sweep,",
+    "each with the same standing as any other set, and WT_heat_up doubles as the",
     "reproduction check against the published targeted result on the same ranked list."),
   sting_axes = paste(
     "The two frozen axes from the SAVI positive-control compartment, sting_specific_up",
@@ -746,14 +746,14 @@ DB_CONTENT <- c(
     "The curated TCR and immediate-early T-cell activation lens, 66 human symbols",
     "spanning TCR-proximal signalling, early costimulation, immediate-early",
     "transcription factors and activation effectors, with FOXP3 absent because it marks",
-    "Treg lineage identity rather than activation. The curated panel is defined in human",
+    "Treg lineage identity. The curated panel is defined in human",
     "symbols and the mouse-anchor list is the ortholog conversion of it, so the set scored",
     "here carries no ortholog step. Held as the activation-pole comparator against the",
     "heat-shock-response lens.")
 )
 DB_CONTENT_GENERIC <- paste(
-  "Read each set's direction on its own. The panels rank sets within a cell and make",
-  "no statement about which regulator drives any of them.")
+  "Read each set's direction on its own. The panels rank sets within a cell; which",
+  "regulator drives any of them is untested here.")
 
 #' Which panels this collection got, and why any were left out.
 panels_note <- function(db) {
@@ -812,10 +812,10 @@ for (db in DBS) {
     # Glyphs, sign convention and the pooled-correction note are stated once, in the
     # battery-level caption, so each collection's block carries only what differs.
     how_to_read = paste0(sprintf(paste0(
-      "SELECTION RULES, which govern every absence: dotplot top %d by pooled adjusted p; ",
+      "Selection rules, which govern every absence: dotplot top %d by pooled adjusted p; ",
       "facet top %d per direction by pooled adjusted p; barplot sets at pooled FDR < %.2g only, ",
       "then top %d of those by |NES|; running_sum top %d by |NES|; running_sum_focus, where it ",
-      "exists, a NAMED pair and no ranking at all. Glyphs, the sign convention ",
+      "exists, a named pair and no ranking at all. Glyphs, the sign convention ",
       "and the pooled correction are described once in the `figures/by_contrast/ (per-database GSEA battery)` section of this README. Each panel ",
       "writes its own same-stem CSV under tables/by_contrast/&lt;population&gt;/%s/ listing the ",
       "rows it drew, in draw order, with the rule that picked them, the per-collection ",
@@ -857,9 +857,9 @@ write_caption(
     "The full browse surface for the unbiased sweep: %d panels across %d sorted populations and ",
     "%d gene-set collections, one directory per (population, collection) cell. Read against the ",
     "whole family, the Treg contrast carries %s pooled-significant sets out of %s tests, so the ",
-    "mouse-derived WT_heat_up arm (NES %+.4f, pooled FDR %s, %d of 199 genes in the ranked list) ",
+    "mouse-derived WT_heat_up arm (NES %+.4f, pooled FDR %s, %d genes in the ranked list) ",
     "and HALLMARK_HYPOXIA (NES %+.4f, pooled FDR %s, %d genes) both sit inside a broad ",
-    "co-enrichment rather than standing alone. %s"),
+    "co-enrichment shared with many other sets. %s"),
     n_fig, dplyr::n_distinct(EMIT$population), dplyr::n_distinct(EMIT$database),
     format(sum(treg$padj_pooled < FDR, na.rm = TRUE), big.mark = ","),
     format(treg$n_tests_pooled[1], big.mark = ","),
@@ -871,33 +871,33 @@ write_caption(
   config_kv = CFG_KV,
   input     = "03_results/objects/14_gsea/*.rds + 03_results/14_unbiased_enrichment/tables/{gsea_all,gsea_&lt;population&gt;_&lt;collection&gt;,geneset_alias_map,geneset_manifest}.csv",
   how_to_read = sprintf(paste0(
-    "LAYOUT. figures/by_contrast/&lt;population&gt;/&lt;COLLECTION&gt;/{dotplot,facet,barplot,",
+    "Layout. figures/by_contrast/&lt;population&gt;/&lt;COLLECTION&gt;/{dotplot,facet,barplot,",
     "running_sum}.{pdf,png}, with the rows behind each panel in the mirrored path under ",
     "tables/by_contrast/. Population directories are Treg, Tcon and CD8, and the contrast inside ",
     "every one of them is the same donor-paired synovial fluid versus peripheral blood ",
     "comparison, published in each CSV as SF_vs_PB_&lt;population&gt;. ",
-    "WHERE TO START. The three Hallmark dotplots, one per population: fifty named programs on a ",
+    "Where to start. The three Hallmark dotplots, one per population: fifty named programs on a ",
     "top-%d axis with both hypoxia and interferon among them. ",
-    "GLYPHS, shared by every cell of the battery. dotplot: x = GeneRatio (leading-edge genes ",
+    "Glyphs, shared by every cell of the battery. dotplot: x = GeneRatio (leading-edge genes ",
     "divided by set size), point size = -log10(pooled adjusted p), fill = NES with orange %s ",
     "positive and blue %s negative and the fill squished at plus or minus %.1f, black outline = ",
-    "pooled FDR < %.2g. The dotplot SELECTS by adjusted p and ORDERS its y-axis by GeneRatio ",
+    "pooled FDR < %.2g. The dotplot selects by adjusted p and orders its y-axis by GeneRatio ",
     "descending, so vertical position there is a gene-ratio ranking. facet: the same dotplot ",
     "split into an NES > 0 block and an NES < 0 block. barplot: NES bars from zero, ordered by ",
     "NES. running_sum: three stacked panels, the running enrichment score with its leading-edge ",
     "peak on top, gene-hit ticks at each member's rank in the middle, and the ranked moderated t ",
     "at the bottom, with the score clamped to [%.0f, %.0f] so curves stay comparable between ",
     "collections, and each curve's NES, pooled adjusted p and effective size in the legend beneath ",
-    "so the panel can be read without the CSV. SIGN. NES > 0 means the set's genes concentrate on ",
+    "so the panel can be read from its own face. Sign. NES > 0 means the set's genes concentrate on ",
     "the synovial-fluid side of the ranking and NES < 0 on the paired-blood side. ",
-    "ADJUSTED P. Every panel uses the Benjamini-Hochberg correction across the whole family of ",
+    "Adjusted p. Every panel uses the Benjamini-Hochberg correction across the whole family of ",
     "tests asked of one population's ranked list, which is stricter than a single-collection ",
     "correction; the per-collection value travels in each same-stem CSV under padj_in_database. ",
-    "A SET CONFIGURED INTO TWO COLLECTIONS is pooled once and drawn in both, the second time with ",
+    "A set configured into two collections is pooled once and drawn in both, the second time with ",
     "the adjusted p of the copy that was pooled, labelled `pooled under &lt;collection&gt;` on the ",
     "panel and recorded in the pooled_under column; the gene content of the two copies is verified ",
-    "identical in geneset_alias_map.csv, so this is one hypothesis shown twice, not tested twice. ",
-    "RANKING. The panel types rank by different metrics, adjusted p for dotplot and facet ",
+    "identical in geneset_alias_map.csv, so this is one hypothesis shown twice and tested once. ",
+    "Ranking. The panel types rank by different metrics, adjusted p for dotplot and facet ",
     "and |NES| for barplot and running_sum, so read an absence against the rule named in that ",
     "panel's own subtitle before reading it as a null; running_sum_focus ranks nothing and draws a ",
     "named pair. ",
