@@ -51,3 +51,28 @@ Ingest audit — no claim tier.
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/00_build_anndata.py` | `main` | `project.species_db = HS`, `project.genome_build = GRCh38` (the union itself is an outer join inside `build_pooled` — no config key) | `00_data/GSE160097_JIA-SF-Treg/samples.csv`, `00_data/GSE160097_JIA-SF-Treg/raw/` (40 per-GSM 10x H5) |
+
+## tables/reference_feature_symbols.csv
+
+The same 32,738-feature union as above, by name rather than by count.
+The count alone cannot answer the question this list exists for: when a
+gene set member is missing from the analysis, is the gene absent from
+the CellRanger reference, present in it but never detected in sorted
+T cells, or present and detected under a different symbol? `EGFR`,
+`EPCAM` and `INHBA` are all here and all absent downstream — a
+detection fact. `IFNB1` is here too and undetected, while `NLRC3` and
+`MIR4691` are not in the union at all. `MB21D1` and `TMEM173` are here
+under names no current gene set uses.
+
+**How to read:** One row per feature of the 40-GSM union, `ensembl_id` = the
+`var_name` carried through every downstream object, `gene_symbol` = the
+symbol the CellRanger reference assigns it. Symbols are unique here
+(32,738 of 32,738), and the vintage is that reference's, not a current
+HGNC release's. This is the outermost of three nested vocabulary layers
+— union (32,738) > post-QC `gene_symbols.csv` (21,740) > post-`filterByExpr`
+ranked list (~14,000) — and absence from THIS layer is the only true
+"absent from the reference". Ingest audit — no claim tier.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/00_build_anndata.py` | `main` | `symbol_alias.reference_feature_symbols` names this file for its consumers (the union itself is an outer join inside `build_pooled` — no config key) | `00_data/GSE160097_JIA-SF-Treg/samples.csv`, `00_data/GSE160097_JIA-SF-Treg/raw/` (40 per-GSM 10x H5) |

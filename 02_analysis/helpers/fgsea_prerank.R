@@ -17,9 +17,16 @@
 #
 # Usage:
 #   Rscript fgsea_prerank.R <ranked.rnk> <out.csv> <contrast_label> \
-#       <min_size> <max_size> <seed> <nperm> name1:database=genes1.txt [name2:database=genes2.txt ...]
+#       <min_size> <max_size> <seed> <nperm> [--alias-map=path.csv] \
+#       name1:database=genes1.txt [name2:database=genes2.txt ...]
 #
 # ranked.rnk : 2-col TSV (symbol \t stat), no header.
+#
+# --alias-map : the committed reference-to-matrix symbol map. Optional, and passed as a
+#   flag rather than a positional so the existing call signature is unchanged. Without it
+#   every set is matched by exact string, which drops genes this matrix carries under its
+#   hg19-era name — TMEM173 and MB21D1 above all, the two strongest members of the STING
+#   family in this contrast. Only `accepted` pairs are applied.
 # Outputs (all under dirname(out.csv), stem = basename(out.csv) w/o .csv):
 #   <out.csv>                              master_gsea_table schema NES table
 #   <stem>.rds                             the gseaResult S4 object (for the plotter)
@@ -50,7 +57,10 @@ min_size  <- as.integer(args[4])
 max_size  <- as.integer(args[5])
 seed      <- as.integer(args[6])
 nperm     <- as.integer(args[7])
-set_specs <- args[8:length(args)]
+tail_args <- args[8:length(args)]
+alias_flag <- grepl("^--alias-map=", tail_args)
+alias_map_path <- if (any(alias_flag)) sub("^--alias-map=", "", tail_args[alias_flag][1]) else NA
+set_specs <- tail_args[!alias_flag]
 
 parse_set_spec <- function(spec) {
   kv <- strsplit(spec, "=", fixed = TRUE)[[1]]
@@ -84,6 +94,32 @@ for (spec in set_specs) {
   pathways[[nm]]  <- unique(genes)
   directions[nm]  <- if (grepl("_up$", nm)) "up" else if (grepl("_down$", nm)) "down" else "na"
   databases[nm]   <- parsed$database
+}
+
+# --- symbol-vintage resolution, before the T2G is built ----------------------
+# This matrix carries hg19-era HGNC symbols and the frozen sets ship current ones, so an
+# exact string match silently drops genes that are present. Resolution runs HERE, before
+# list_to_term2gene, because the effective `setSize` clusterProfiler reports is decided by
+# the T2G. It can only ever ADD, and the applied pairs are logged so a size change is never
+# mysterious.
+if (!is.na(alias_map_path)) {
+  if (!file.exists(alias_map_path))
+    stop("[fgsea_prerank] --alias-map points at a file that does not exist: ",
+         alias_map_path, call. = FALSE)
+  suppressMessages(source("02_analysis/helpers/symbol_alias.R"))
+  resolved <- resolve_sets(pathways, names(stats), utils::read.csv(alias_map_path))
+  for (nm in names(resolved$sets)) {
+    n_add <- length(resolved$sets[[nm]]) - length(pathways[[nm]])
+    if (n_add > 0)
+      cat(sprintf("[fgsea_prerank] %s: +%d gene(s) via alias (%s)\n", nm, n_add,
+                  paste(with(resolved$applied[resolved$applied$gene_set == nm, ],
+                             paste0(reference_symbol, "->", matrix_symbol)),
+                        collapse = " ")))
+  }
+  if (nrow(resolved$collapsed))
+    cat(sprintf("[fgsea_prerank] duplicate collapse in %s — the set already carried both vintages\n",
+                paste(resolved$collapsed$gene_set, collapse = ", ")))
+  pathways <- resolved$sets
 }
 
 # --- clusterProfiler::GSEA (by = "fgsea") -> a real gseaResult S4 object -----

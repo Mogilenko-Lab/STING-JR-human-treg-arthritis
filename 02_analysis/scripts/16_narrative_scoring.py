@@ -81,8 +81,9 @@ sys.path.insert(0, str(COMPARTMENT_ROOT))
 sys.path.insert(0, str(COMPARTMENT_ROOT / "02_analysis"))
 os.chdir(COMPARTMENT_ROOT)
 
-from config import PATHS, PARAMS, TISSUE_KEY, DONOR_KEY  # noqa: E402
-from helpers.geneset_utils import score_cells_aucell_ucell, _symbol_to_varname  # noqa: E402
+from config import CONFIG, PATHS, PARAMS, TISSUE_KEY, DONOR_KEY  # noqa: E402
+from helpers.geneset_utils import (load_alias_map, resolve_symbols,  # noqa: E402
+                                   score_cells_aucell_ucell, _symbol_to_varname)
 
 STAGE = "16_narrative_scoring"
 COARSE = "coarse_label"
@@ -393,7 +394,19 @@ def main() -> None:
     print(f"[{STAGE}] annotation object: {adata.n_obs} cells x {adata.n_vars} genes")
     check_barcode_coverage(pd.Index(adata.obs_names.astype(str)), pd.Index(pub.index))
 
+    # Resolved into this object's symbol vintage here rather than in load_gene_sets(),
+    # whose EXPECTED_SIZES check is a fact about the source files and must stay a check on
+    # them. Where the sets meet the matrix is where the vintage matters, and the gate band
+    # below is read off `n_genes_found_in_object`, so an unresolved count would understate
+    # a set's power for a vocabulary reason.
     sym_to_var = _symbol_to_varname(adata, "gene_symbol")
+    alias_map = load_alias_map(CONFIG["symbol_alias"]["map_path"])
+    for name, genes in list(gene_sets.items()):
+        genes_r, applied = resolve_symbols(genes, alias_map, set(sym_to_var))
+        gene_sets[name] = genes_r
+        if applied:
+            print(f"[16_narrative_scoring] {name}: +{len(applied)} via alias "
+                  f"({' '.join(f'{a}->{b}' for a, b in applied)})")
     manifest = build_manifest(gene_sets, kinds, sources, sym_to_var)
     thin = manifest[manifest["gate"] != "testable"]
     if len(thin):

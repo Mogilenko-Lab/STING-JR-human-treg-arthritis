@@ -46,8 +46,8 @@ os.chdir(ROOT)
 
 from config import (CONFIG, PATHS, PARAMS, TISSUE_KEY, DONOR_KEY, TISSUE_NUM,  # noqa: E402
                     TISSUE_DEN, COARSE_LABEL)
-from helpers.geneset_utils import (load_signature, score_cells_aucell_ucell,  # noqa: E402
-                                   _symbol_to_varname)
+from helpers.geneset_utils import (load_alias_map, load_signature,  # noqa: E402
+                                   score_cells_aucell_ucell, _symbol_to_varname)
 from helpers.figure_style import append_master_table, FIG_CFG  # noqa: E402
 from helpers.source_hash_manifest import verify_source_hashes  # noqa: E402
 
@@ -56,6 +56,10 @@ PRIMARY = "WT_heat"
 POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
 FGSEA_R = "02_analysis/helpers/fgsea_prerank.R"
 DATASET = "GSE160097"
+# This matrix carries hg19-era HGNC symbols; the frozen mouse arms ship current ones. The
+# map is the committed resolution between the two, and both the fgsea call and the per-cell
+# scoring read it, so the primary and secondary tiers see the same set membership.
+ALIAS_MAP_PATH = CONFIG["symbol_alias"]["map_path"]
 
 
 def effect_size_signoff_state() -> str:
@@ -69,10 +73,13 @@ def effect_size_signoff_state() -> str:
 
 
 def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) -> pd.DataFrame:
+    # The alias map travels with the call, so each set is matched against this matrix's own
+    # symbol vintage instead of by exact string against current HGNC. It only ever adds:
+    # WT_heat_up gains nothing, WT_heat_down gains CRACR2A -> EFCAB4B and CYSRT1 -> C9orf169.
     cmd = [
         "Rscript", FGSEA_R, str(ranked_path), str(out_csv), contrast,
         str(PARAMS.gsea_min_size), str(PARAMS.gsea_max_size), str(PARAMS.gsea_seed),
-        str(PARAMS.gsea_nperm),
+        str(PARAMS.gsea_nperm), f"--alias-map={ALIAS_MAP_PATH}",
         f"{PRIMARY}_up:mouse_projection={sig_dir / f'{PRIMARY}_up.txt'}",
         f"{PRIMARY}_down:mouse_projection={sig_dir / f'{PRIMARY}_down.txt'}",
     ]
@@ -108,8 +115,18 @@ def main() -> None:
         ],
         root=ROOT.parent,
     )
-    sig = load_signature(PATHS.signature_contract, PRIMARY)
+    # The arms arrive in current HGNC symbols and this object's var carries the hg19-era
+    # vintage, so they are resolved into the object's own vocabulary before anything is
+    # scored. The applied pairs are printed rather than silently absorbed: a coverage count
+    # that moved needs a reason attached to it.
+    alias_map = load_alias_map(ALIAS_MAP_PATH)
+    sig = load_signature(PATHS.signature_contract, PRIMARY, alias_map,
+                         set(_symbol_to_varname(adata, "gene_symbol")))
     print(f"[05_scoring] {PRIMARY}: {len(sig['up'])} up / {len(sig['down'])} down genes")
+    for direction, pairs in sig["alias_applied"].items():
+        if pairs:
+            print(f"[05_scoring] {PRIMARY}_{direction}: +{len(pairs)} via alias "
+                  f"({' '.join(f'{a}->{b}' for a, b in pairs)})")
 
     # --- per-cell scores (secondary tier): AUCell + UCell on lognorm X ---
     # Rank-based, composition/depth-robust; replaces the mean-centred scanpy score_genes.

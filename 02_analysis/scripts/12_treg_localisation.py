@@ -42,7 +42,8 @@ os.chdir(COMPARTMENT_ROOT)
 
 from config import (CONFIG, PATHS, PARAMS, DONOR_KEY, TISSUE_KEY, TISSUE_NUM,  # noqa: E402
                     TISSUE_DEN, COARSE_LABEL)
-from helpers.geneset_utils import score_cells_aucell_ucell, _symbol_to_varname  # noqa: E402
+from helpers.geneset_utils import (load_alias_map, resolve_symbols,  # noqa: E402
+                                   score_cells_aucell_ucell, _symbol_to_varname)
 
 STAGE = "12_treg_localisation"
 DATASET = "GSE160097"
@@ -101,12 +102,20 @@ def main() -> None:
     adata = sc.read_h5ad(h5ad_path)
     print(f"[12_treg_localisation] AnnData loaded: {adata.n_obs} cells x {adata.n_vars} genes")
 
+    # The sets ship current HGNC symbols and this object carries the hg19-era vintage, so
+    # they are resolved into it before the effective size is counted. Nominal size is left
+    # alone above: it is a fact about the source file, not about this matrix.
     sym_to_var = _symbol_to_varname(adata, "gene_symbol")
+    alias_map = load_alias_map(CONFIG["symbol_alias"]["map_path"])
     effective_sizes = {}
-    for sig_name, genes in gene_sets.items():
-        in_data = [g for g in genes if g in sym_to_var]
+    for sig_name, genes in list(gene_sets.items()):
+        genes_r, applied = resolve_symbols(genes, alias_map, set(sym_to_var))
+        gene_sets[sig_name] = genes_r
+        in_data = [g for g in genes_r if g in sym_to_var]
         effective_sizes[sig_name] = len(in_data)
-        print(f"[12_treg_localisation] {sig_name}: {len(in_data)}/{len(genes)} genes present in AnnData")
+        print(f"[12_treg_localisation] {sig_name}: {len(in_data)}/{len(genes)} genes present in AnnData"
+              + (f" (+{len(applied)} via alias: {' '.join(f'{a}->{b}' for a, b in applied)})"
+                 if applied else ""))
 
     # 3. Score all 5 gene sets using established AUCell method (one parallel Rscript execution)
     print(f"[12_treg_localisation] Running score_cells_aucell_ucell for {len(gene_sets)} signatures...")

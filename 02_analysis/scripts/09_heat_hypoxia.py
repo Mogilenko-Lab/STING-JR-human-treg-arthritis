@@ -42,6 +42,11 @@ DATASET = "GSE160097"
 POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
 FGSEA_R = "02_analysis/helpers/fgsea_prerank.R"
 HYPOXIA_PATH = Path("00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt")
+# This matrix carries hg19-era HGNC symbols and the frozen sets ship current ones, so the
+# fgsea call is given the committed resolution between the two. The PURGE itself needs no
+# resolution: it intersects the arm with HALLMARK_HYPOXIA and both are current-symbol, so
+# what the map moves here is the tested size of a purged arm, never its membership.
+ALIAS_MAP_PATH = CONFIG["symbol_alias"]["map_path"]
 
 # Leading-edge gene taxonomy: a frozen, provenance-stamped classification of the
 # WT_heat_up leading-edge genes into biological programs (heat_shock_proteostasis,
@@ -88,6 +93,7 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) ->
         str(PARAMS.gsea_max_size),
         str(PARAMS.gsea_seed),
         str(PARAMS.gsea_nperm),
+        f"--alias-map={ALIAS_MAP_PATH}",
         f"{PRIMARY}_up:mouse_projection={sig_dir / f'{PRIMARY}_up.txt'}",
         f"{PRIMARY}_down:mouse_projection={sig_dir / f'{PRIMARY}_down.txt'}",
     ]

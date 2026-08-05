@@ -6,8 +6,20 @@ Phase-0 exports the mouse->human signature at
 never re-derive it. Primary axis = `WT_heat`.
 
 - `load_signature(contract_dir, contrast)` -> {up, down, ranked} human-symbol sets.
+- `load_alias_map(path)` / `resolve_symbols(...)` -> the symbol-vintage fix (below).
 - `score_cells(...)` -> per-cell up/down module scores via scanpy score_genes.
 Used by 05_score_signatures.py.
+
+THE SYMBOL-VINTAGE SEAM. GSE160097 was quantified against a CellRanger hg19
+reference, so this compartment's matrix carries that build's HGNC vintage: cGAS is
+`MB21D1`, STING is `TMEM173`, MARCHF5 is `MARCH5`, MRE11 is `MRE11A`. Reference sets
+ship current symbols, and every match here is an exact string match, so a renamed
+gene leaves a set silently and the loss reads as biological absence. Python cannot
+reach org.Hs.eg.db, so the resolution is precomputed by
+`02_analysis/scripts/00_symbol_alias_map.R` into a committed CSV that both languages
+read; pass it through `alias_map=`/`vocabulary=` wherever a reference set meets this
+matrix. Only `accepted` pairs are applied — `flagged_for_review` is withheld by
+construction, so no consumer can apply a pair a human has not signed off on.
 """
 from __future__ import annotations
 
@@ -15,24 +27,90 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Sequence, Set, Tuple
 
 import pandas as pd
 
 
-def load_signature(contract_dir: Path, contrast: str = "WT_heat") -> Dict[str, object]:
-    """Load one contrast's up/down gene lists + ranked list from the frozen contract."""
+def load_signature(contract_dir: Path, contrast: str = "WT_heat",
+                   alias_map: Dict[str, str] | None = None,
+                   vocabulary: Set[str] | None = None) -> Dict[str, object]:
+    """Load one contrast's up/down gene lists + ranked list from the frozen contract.
+
+    `alias_map` + `vocabulary` resolve the up/down lists into this matrix's symbol
+    vintage; the applied pairs are returned under `alias_applied` so a caller can
+    report the recovery rather than only benefit from it. The ranked list is left
+    verbatim — it is the mouse contract's own ordering, not a set matched against
+    this matrix.
+    """
     sig_dir = Path(contract_dir) / "signatures" / contrast
-    up = _read_gene_list(sig_dir / f"{contrast}_up.txt")
-    down = _read_gene_list(sig_dir / f"{contrast}_down.txt")
+    up, up_pairs = resolve_symbols(
+        _read_gene_list(sig_dir / f"{contrast}_up.txt"), alias_map, vocabulary)
+    down, down_pairs = resolve_symbols(
+        _read_gene_list(sig_dir / f"{contrast}_down.txt"), alias_map, vocabulary)
     ranked_path = sig_dir / f"{contrast}_ranked.rnk"
     ranked = None
     if ranked_path.exists():
         ranked = pd.read_csv(ranked_path, sep="\t", header=None, names=["symbol", "t"])
-    return {"contrast": contrast, "up": up, "down": down, "ranked": ranked}
+    return {"contrast": contrast, "up": up, "down": down, "ranked": ranked,
+            "alias_applied": {"up": up_pairs, "down": down_pairs}}
+
+
+def load_alias_map(path: str | Path) -> Dict[str, str]:
+    """Read the committed reference_symbol -> matrix_symbol map, accepted pairs only.
+
+    Rows carrying any other `resolution` are withheld here rather than downstream:
+    `flagged_for_review` is a human decision to exclude, and the rejection classes are
+    candidates the ownership guard refused (a retired symbol that now names a
+    DIFFERENT gene, e.g. ACOD1 -> CAD or IL17F -> IL17A). Applying one would attach
+    one gene's expression to another gene's set membership.
+    """
+    df = pd.read_csv(path)
+    for col in ("reference_symbol", "matrix_symbol", "resolution"):
+        if col not in df.columns:
+            raise ValueError(f"{path} is not a symbol alias map (no `{col}` column)")
+    acc = df[df["resolution"] == "accepted"]
+    return dict(zip(acc["reference_symbol"].astype(str), acc["matrix_symbol"].astype(str)))
+
+
+def resolve_symbols(genes: Sequence[str], alias_map: Dict[str, str] | None,
+                    vocabulary: Set[str] | None) -> Tuple[List[str], List[Tuple[str, str]]]:
+    """Add each gene's matrix-vintage name where the reference name is not in `vocabulary`.
+
+    Only ever ADDS: the reference symbol is kept alongside its resolved twin, so a
+    caller's exact-match count cannot move. Order is preserved and the result is
+    de-duplicated, because a set carrying both vintages of one gene would otherwise
+    weight it twice.
+
+    Returns (resolved genes, [(reference_symbol, matrix_symbol) applied]).
+    """
+    out: List[str] = []
+    seen: Set[str] = set()
+    applied: List[Tuple[str, str]] = []
+    for g in genes:
+        if g in seen:
+            continue
+        out.append(g)
+        seen.add(g)
+        if not alias_map or vocabulary is None or g in vocabulary:
+            continue
+        tgt = alias_map.get(g)
+        if tgt is None or tgt not in vocabulary:
+            continue
+        applied.append((g, tgt))
+        if tgt not in seen:
+            out.append(tgt)
+            seen.add(tgt)
+    return out, applied
 
 
 def _read_gene_list(path: Path) -> List[str]:
+    """Read a one-symbol-per-line gene list verbatim; resolution is a separate step.
+
+    Kept unresolved on purpose: a caller has to name the vocabulary it is resolving
+    into, and this function cannot know one. Pass the result through
+    `resolve_symbols()` at the point the list meets a matrix.
+    """
     if not Path(path).exists():
         return []
     with open(path) as fh:

@@ -51,9 +51,11 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "02_analysis"))
 os.chdir(ROOT)
 
-from config import DONOR_KEY, PARAMS, PATHS, TISSUE_KEY, TISSUE_NUM  # noqa: E402
+from config import CONFIG, DONOR_KEY, PARAMS, PATHS, TISSUE_KEY, TISSUE_NUM  # noqa: E402
 from helpers.figure_style import FIG_CFG, append_master_table, round_numeric_cols  # noqa: E402
 from helpers.geneset_utils import (  # noqa: E402
+    load_alias_map,
+    resolve_symbols,
     _symbol_to_varname,
     load_signature,
     score_cells_aucell_ucell,
@@ -67,6 +69,10 @@ POP_TAG = {"Treg": "treg", "Tcon": "tcon", "CD8": "cd8"}
 FGSEA_R = "02_analysis/helpers/fgsea_prerank.R"
 HSR_DIR = ROOT / "00_data" / "references" / "temp_hsr_lens"
 HSR_TERMS = ("HSR_core", "HSR_sensitivity")
+# The curated lens ships current HGNC symbols and this matrix carries the hg19-era vintage,
+# so both the fgsea call and the per-cell coverage read the committed resolution between
+# them. HIKESHI is in the lens as C11orf73 here, in both terms.
+ALIAS_MAP_PATH = CONFIG["symbol_alias"]["map_path"]
 
 
 def read_gene_list(path: Path) -> list[str]:
@@ -109,6 +115,7 @@ def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) ->
         str(PARAMS.gsea_max_size),
         str(PARAMS.gsea_seed),
         str(PARAMS.gsea_nperm),
+        f"--alias-map={ALIAS_MAP_PATH}",
         f"HSR_core:curated_hsr_reactome_go={sig_dir / 'HSR_core.txt'}",
         f"HSR_sensitivity:curated_hsr_reactome_go={sig_dir / 'HSR_sensitivity.txt'}",
     ]
@@ -143,13 +150,24 @@ def leading_edge_from_row(row: pd.Series) -> str:
 
 
 def per_cell_hsr_scores(adata, hsr: dict[str, list[str]], tables_dir: Path) -> pd.DataFrame:
+    # The lens is resolved into this object's symbol vintage HERE and nowhere upstream:
+    # this is the one place the lens meets the matrix. The WT_heat_up-versus-lens overlap
+    # in `hsr_wt_overlap` is reference against reference, where the matrix never enters and
+    # resolving would change a set the map has no business touching.
     sym_to_var = _symbol_to_varname(adata, "gene_symbol")
+    alias_map = load_alias_map(ALIAS_MAP_PATH)
+    resolved = {}
     for term, genes in hsr.items():
-        print(f"[10_hsr_lens] {term} coverage: {sum(g in sym_to_var for g in genes)}/{len(genes)} genes present")
+        genes_r, applied = resolve_symbols(genes, alias_map, set(sym_to_var))
+        resolved[term] = genes_r
+        print(f"[10_hsr_lens] {term} coverage: {sum(g in sym_to_var for g in genes_r)}/{len(genes_r)} "
+              f"genes present"
+              + (f" (+{len(applied)} via alias: {' '.join(f'{a}->{b}' for a, b in applied)})"
+                 if applied else ""))
 
     scores = score_cells_aucell_ucell(
         adata,
-        hsr,
+        resolved,
         layer=None,
         symbol_col="gene_symbol",
         n_cores=int(PARAMS.get("percell_score_ncores", 4)),

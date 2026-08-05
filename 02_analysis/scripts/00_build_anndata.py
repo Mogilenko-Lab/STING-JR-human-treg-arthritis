@@ -68,6 +68,18 @@ def main() -> None:
     }])
     genes_union_summary.to_csv(tdir / "genes_union_summary.csv", index=False)
 
+    # The feature union by NAME, not only by count. Downstream a gene set member absent
+    # from the count matrix has two opposite causes — the symbol vintage differs, or the
+    # gene is genuinely not expressed in sorted T cells — and only this list separates
+    # them. EGFR, EPCAM and INHBA are all absent from the post-QC matrix and all present
+    # in the CellRanger reference: they are a detection fact. MB21D1 and TMEM173 are
+    # present under names no current gene set uses: that is a vocabulary fact. A count
+    # cannot tell those apart, so the symbols themselves are persisted.
+    pd.DataFrame({
+        "ensembl_id": adata.var_names.astype(str),
+        "gene_symbol": adata.var["gene_symbol"].astype(str),
+    }).to_csv(tdir / "reference_feature_symbols.csv", index=False)
+
     # Design-completeness table: expected 42 (3 pops x 2 tissues x 7 donors) minus 2 absent.
     design = (
         adata.obs.groupby(["population", "tissue"], observed=True)["donor"].nunique()

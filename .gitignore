@@ -10,6 +10,13 @@
 # tracked as a frozen input with its provenance rather than ignored.
 !00_data/references/heat_leadingedge_taxonomy/
 !00_data/references/heat_leadingedge_taxonomy/**
+# Committed reference: the symbol-alias map IS regenerable by 00_symbol_alias_map.R, so it
+# is tracked for the opposite reason to the taxonomy above — its content depends on the
+# org.Hs.eg.db release, and an untracked map lets a package upgrade silently change which
+# genes a reference set recovers, moving set sizes and NES with no reviewable diff. Frozen
+# here with its provenance so regenerating it is a deliberate act.
+!00_data/references/symbol_alias/
+!00_data/references/symbol_alias/**
 
 # Per-accession raw mounts (00_data/<accession>/raw/) — heavy RO bytes; keep the
 # committed provenance (PROVENANCE.md/manifest.json/samples.csv/download.sh) in the

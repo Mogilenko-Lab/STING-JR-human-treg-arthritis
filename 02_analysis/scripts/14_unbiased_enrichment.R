@@ -115,6 +115,8 @@ suppressPackageStartupMessages({
 options(stringsAsFactors = FALSE)
 
 source("02_analysis/helpers/figure_style.R")   # FIG_CFG, round_numeric_cols
+source("02_analysis/helpers/symbol_alias.R")   # resolve_sets, symbol_ledger
+source("02_analysis/helpers/source_hash_manifest.R")  # source_sha256
 source("01_modules/RNAseq-toolkit/scripts/GSEA/GSEA_processing/pathway_utils.R")  # list_to_term2gene
 
 STAGE  <- "14_unbiased_enrichment"
@@ -174,6 +176,41 @@ for (d in c(TBL, file.path(TBL, "_overview"), DIR_OBJ, DIR_GSEA))
 
 RANKED_DIR <- file.path(RESULTS, "03_pseudobulk",
                         CFG$paths$stage_tables_subdir %||% "tables")
+
+# ---- the symbol-vintage seam, and the three nested vocabulary layers ----
+# GSE160097 was quantified against a CellRanger hg19 reference, so this compartment's
+# matrix carries that build's HGNC vintage while every collection below ships current
+# symbols. Exact string matching therefore drops genes that are present: TMEM173 and
+# MB21D1 are the two strongest members of the STING family in the Treg contrast and are
+# invisible to all six of its sets. Resolution runs once here, against the MATRIX
+# vocabulary rather than against a ranked list, so one resolved collection serves all
+# three populations and a pair whose target the expression filter later drops is reported
+# as expression-filtered instead of as vocabulary loss.
+#
+# The layers exist because "missing" has three different meanings and the ledger's whole
+# job is to keep them apart: absent from the CellRanger feature union (a fact about the
+# reference), present there but never detected in sorted T cells (a fact about the
+# biology), and detected but dropped by filterByExpr (a fact about this contrast's power).
+SA <- CFG$symbol_alias
+if (is.null(SA))
+  stop("[14] analysis_config.yaml has no `symbol_alias:` block — add it before running.")
+if (!file.exists(SA$map_path))
+  stop("[14] the symbol alias map is absent: ", SA$map_path,
+       ". Build it with: Rscript 02_analysis/scripts/00_symbol_alias_map.R")
+ALIAS_MAP <- readr::read_csv(SA$map_path, show_col_types = FALSE, progress = FALSE)
+ALIAS_SHA <- source_sha256(SA$map_path)
+MATRIX_SYMBOLS <- unique(readr::read_csv(SA$matrix_vocabulary, show_col_types = FALSE,
+                                         progress = FALSE)$gene_symbol)
+REF_FEATURES <- if (file.exists(SA$reference_feature_symbols))
+  unique(readr::read_csv(SA$reference_feature_symbols, show_col_types = FALSE,
+                         progress = FALSE)$gene_symbol) else character(0)
+if (!length(REF_FEATURES))
+  message("[0] ", SA$reference_feature_symbols, " absent: n_below_detection cannot be ",
+          "separated from n_absent_from_reference and both are reported in the latter. ",
+          "Re-run 00_build_anndata.py to emit it.")
+message(sprintf("[0] alias map: %d accepted pairs; vocabulary layers %d reference / %d matrix",
+                sum(ALIAS_MAP$resolution == "accepted"), length(REF_FEATURES),
+                length(MATRIX_SYMBOLS)))
 
 message("=================================================================")
 message("14_unbiased_enrichment — unbiased sweep of the JIA niche contrast")
@@ -249,6 +286,55 @@ for (i in seq_len(nrow(keycheck)))
 filter_by_size <- function(gsets, min_sz = MINSZ, max_sz = MAXSZ) {
   sz <- vapply(gsets, length, integer(1))
   gsets[sz >= min_sz & sz <= max_sz]
+}
+
+#' Resolve one collection into this matrix's symbol vintage, BEFORE the size filter.
+#'
+#' Order is load-bearing. Resolving after the filter would trim a set for a nominal size
+#' it does not have — a 4-gene set that reaches 5 once its members are recognised should
+#' be kept, and one dropped before resolution is dropped for a vocabulary reason wearing a
+#' curation label. Only ever ADDS, so no set can shrink here and no exact-match count can
+#' move. The unresolved copy is returned alongside, because the ledger has to attribute a
+#' recovery to the symbol the reference shipped rather than to the one the data carries.
+resolve_collection <- function(gsets, label) {
+  r <- resolve_sets(gsets, MATRIX_SYMBOLS, ALIAS_MAP)
+  n_grew <- sum(lengths(r$sets) > lengths(gsets))
+  n_added <- sum(lengths(r$sets)) - sum(lengths(gsets))
+  if (n_added > 0)
+    message(sprintf("    %-14s alias resolution: +%d gene-set membership(s) over %d set(s)",
+                    label, n_added, n_grew))
+  # RESOLUTION MOVES SETS ACROSS BOTH SIZE BOUNDS, and both directions are recorded rather
+  # than absorbed into a kept-set count. A set below the floor that reaches it becomes
+  # testable for the first time, which is the whole reason resolution runs before the
+  # filter. A set just under the ceiling that crosses it is DROPPED because more of its
+  # genes were recognised — defensible, since the resolved size is the size this vocabulary
+  # gives it, but not something a reader should have to discover from a changed pooled
+  # denominator.
+  before <- lengths(gsets); after <- lengths(r$sets)
+  crossed_min <- names(gsets)[before < MINSZ & after >= MINSZ]
+  crossed_max <- names(gsets)[before <= MAXSZ & after > MAXSZ]
+  if (length(crossed_min))
+    message(sprintf("    %-14s %d set(s) reach the %d-gene floor only after resolution and become testable: %s",
+                    label, length(crossed_min), MINSZ,
+                    paste(utils::head(crossed_min, 5), collapse = ", ")))
+  if (length(crossed_max))
+    message(sprintf("    %-14s %d set(s) cross the %d-gene ceiling after resolution and are dropped: %s",
+                    label, length(crossed_max), MAXSZ,
+                    paste(utils::head(crossed_max, 5), collapse = ", ")))
+  if (nrow(r$collapsed))
+    message(sprintf("    %-14s %d set(s) already carried both symbol vintages; the duplicate collapsed: %s",
+                    label, nrow(r$collapsed),
+                    paste(utils::head(r$collapsed$gene_set, 5), collapse = ", ")))
+  if (nrow(r$many_to_one))
+    message(sprintf("    %-14s %d many-to-one resolution(s) — two reference symbols onto one matrix symbol, reported not merged: %s",
+                    label, nrow(r$many_to_one),
+                    paste(utils::head(unique(paste0(r$many_to_one$reference_symbols, "->",
+                                                    r$many_to_one$matrix_symbol)), 5),
+                          collapse = ", ")))
+  list(sets = r$sets, reference_sets = gsets,
+       n_sets_crossing_min_after_resolution = length(crossed_min),
+       n_sets_crossing_max_after_resolution = length(crossed_max),
+       n_memberships_added_by_resolution = n_added)
 }
 
 #' Fetch one MSigDB collection as a named list of HGNC-symbol vectors.
@@ -372,19 +458,29 @@ genesets_path <- file.path(DIR_OBJ, "14_genesets.rds")
 ## collections and sweep those instead, and every table would then report the previous
 ## family under the new config with nothing to say so. The mismatch is a rebuild, not an
 ## error, because rebuilding is cheap and correct.
+##
+## THE CACHE IS ALSO KEYED ON THE ALIAS MAP. The cached collections are the RESOLVED ones,
+## so a map that moved and a cache that did not would sweep the previous vintage's set
+## membership under the new map with nothing to say so — the same failure the config check
+## above exists for, one layer down.
 or_none <- function(x) if (length(x) == 0) "none" else paste(x, collapse = ", ")
-cache_dbs <- if (file.exists(genesets_path)) names(readRDS(genesets_path)) else character(0)
-cache_ok  <- file.exists(genesets_path) && setequal(cache_dbs, CONFIGURED_DBS)
+cached <- if (file.exists(genesets_path)) readRDS(genesets_path) else NULL
+cache_dbs <- names(cached) %||% character(0)
+cache_sha <- attr(cached, "alias_map_sha256") %||% NA_character_
+cache_ok  <- !is.null(cached) && setequal(cache_dbs, CONFIGURED_DBS) &&
+  identical(as.character(cache_sha), as.character(ALIAS_SHA))
 if (file.exists(genesets_path) && !cache_ok)
   message(sprintf(paste0("[2] gene-set cache is stale: it holds %d collection(s) and the config ",
-                         "asks for %d (added: %s; removed: %s). Rebuilding."),
+                         "asks for %d (added: %s; removed: %s); alias map sha %s, cache built on %s. ",
+                         "Rebuilding."),
                   length(cache_dbs), length(CONFIGURED_DBS),
                   or_none(setdiff(CONFIGURED_DBS, cache_dbs)),
-                  or_none(setdiff(cache_dbs, CONFIGURED_DBS))))
+                  or_none(setdiff(cache_dbs, CONFIGURED_DBS)),
+                  substr(ALIAS_SHA, 1, 12), substr(as.character(cache_sha), 1, 12)))
 
 if (cache_ok) {
   message("[2] gene-set collections: cache hit -> ", genesets_path)
-  COLLECTIONS <- readRDS(genesets_path)
+  COLLECTIONS <- cached
 } else {
   message("[2] building gene-set collections ...")
   COLLECTIONS <- list()
@@ -398,14 +494,19 @@ if (cache_ok) {
                     if (nzchar(used)) paste0("/", used) else "")
     if (!identical(used, m$subcategory %||% ""))
       src <- paste0(src, sprintf(" (config asked for %s)", m$subcategory))
-    COLLECTIONS[[m$name]] <- list(sets = filter_by_size(raw), n_raw = length(raw),
-                                  source = src)
+    res <- resolve_collection(raw, m$name)
+    keep <- names(filter_by_size(res$sets))
+    COLLECTIONS[[m$name]] <- list(sets = res$sets[keep], n_raw = length(raw),
+                                  reference_sets = res$reference_sets[keep], source = src)
     message(sprintf("  %-14s %5d raw -> %5d kept   [%s]", m$name, length(raw),
                     length(COLLECTIONS[[m$name]]$sets), src))
   }
 
   raw <- load_collectri(UE$tf_network)
-  COLLECTIONS[[UE$tf_network$name]] <- list(sets = filter_by_size(raw), n_raw = length(raw),
+  res <- resolve_collection(raw, UE$tf_network$name)
+  keep <- names(filter_by_size(res$sets))
+  COLLECTIONS[[UE$tf_network$name]] <- list(sets = res$sets[keep], n_raw = length(raw),
+                                            reference_sets = res$reference_sets[keep],
                                             source = sprintf("CollecTRI regulons, unsigned (%s)",
                                                              UE$tf_network$path))
   message(sprintf("  %-14s %5d raw -> %5d kept", UE$tf_network$name, length(raw),
@@ -416,7 +517,10 @@ if (cache_ok) {
   # rather than the handful of sets a reader came for.
   for (spec in UE$custom_rds %||% list()) {
     raw <- load_reference_rds(spec)
-    COLLECTIONS[[spec$name]] <- list(sets = filter_by_size(raw), n_raw = length(raw),
+    res <- resolve_collection(raw, spec$name)
+    keep <- names(filter_by_size(res$sets))
+    COLLECTIONS[[spec$name]] <- list(sets = res$sets[keep], n_raw = length(raw),
+                                     reference_sets = res$reference_sets[keep],
                                      source = attr(raw, "db_source"))
     message(sprintf("  %-14s %5d raw -> %5d kept   [%s]", spec$name, length(raw),
                     length(COLLECTIONS[[spec$name]]$sets), attr(raw, "db_source")))
@@ -433,13 +537,15 @@ if (cache_ok) {
     sets <- stats::setNames(
       lapply(spec$files, read_set_file),
       vapply(spec$files, function(p) sub("\\.txt$", "", basename(p)), character(1)))
+    res <- resolve_collection(sets, spec$name)
     COLLECTIONS[[spec$name]] <- list(
-      sets = sets, n_raw = length(sets),
+      sets = res$sets, n_raw = length(sets), reference_sets = res$reference_sets,
       source = sprintf("frozen gene lists: %s", paste(spec$files, collapse = "; ")))
     message(sprintf("  %-14s %5d sets (%s)", spec$name, length(sets),
                     paste(sprintf("%s=%d", names(sets), lengths(sets)), collapse = " ")))
   }
 
+  attr(COLLECTIONS, "alias_map_sha256") <- ALIAS_SHA
   saveRDS(COLLECTIONS, genesets_path)
   message("  cached -> ", genesets_path)
 }
@@ -539,6 +645,15 @@ manifest <- dplyr::bind_rows(lapply(DB_ORDER, function(db) {
   tibble::tibble(database = db, source = x$source, n_sets_in_source = x$n_raw,
                  n_sets_after_nominal_size_filter = length(x$sets),
                  nominal_size_filter_applied = !db %in% FILE_BACKED_DBS,
+                 # Resolution runs BEFORE the size filter, so it moves sets across both
+                 # bounds. A changed pooled denominator is explained by these three
+                 # columns rather than left to be inferred.
+                 n_memberships_added_by_resolution =
+                   x$n_memberships_added_by_resolution %||% 0L,
+                 n_sets_testable_only_after_resolution =
+                   x$n_sets_crossing_min_after_resolution %||% 0L,
+                 n_sets_dropped_over_max_after_resolution =
+                   x$n_sets_crossing_max_after_resolution %||% 0L,
                  n_sets_aliased_out_of_pooling = n_alias,
                  n_sets_offered_for_pooling = length(x$sets) - n_alias,
                  gsea_min_size = MINSZ, gsea_max_size = MAXSZ,
@@ -553,17 +668,104 @@ message(sprintf("[2] manifest -> %s (%d databases, %d sets total)",
 # 3. OVERLAP — the published evidence that the symbol join actually joined
 # ============================================================================
 
+## THE COUNTS ARE READ OFF THE REFERENCE UNION, NOT THE RESOLVED ONE. `n_overlap` is the
+## published exact-match number and it must not move: alias resolution may only ever add,
+## so a change in that column means something other than resolution changed. The new
+## columns say where the rest of a collection's genes went, and they close against the
+## set-gene count:
+##
+##   n_unique_set_genes == n_matched + n_matched_via_alias + n_alias_flagged_for_review +
+##     n_alias_rejected_ambiguous + n_expression_filtered + n_below_detection +
+##     n_absent_from_reference
+##
+## Each bucket is a different kind of statement and they must never be pooled. Absent from
+## the reference is a fact about the CellRanger build; below detection is a fact about
+## sorted T cells; expression-filtered is a power statement about this contrast; matched
+## via alias is a vocabulary result. Reporting them as one "unmatched" number is what made
+## a present gene read as an absent one. There is deliberately no recovery fraction and no
+## pass/fail floor: a floor on n_matched is precisely the two-way summary this replaces.
+ledger_for <- function(sets, pop) {
+  symbol_ledger(sets, ALIAS_MAP, ranked_vocabulary = names(RANKED[[pop]]),
+                matrix_vocabulary = MATRIX_SYMBOLS, reference_vocabulary = REF_FEATURES)
+}
+reference_sets_of <- function(db) COLLECTIONS[[db]]$reference_sets %||% COLLECTIONS[[db]]$sets
+
 overlap <- dplyr::bind_rows(lapply(names(POPS), function(pop) {
   g <- names(RANKED[[pop]])
   dplyr::bind_rows(lapply(DB_ORDER, function(db) {
-    u  <- unique(unlist(COLLECTIONS[[db]]$sets, use.names = FALSE))
+    u  <- unique(unlist(reference_sets_of(db), use.names = FALSE))
     ov <- length(intersect(u, g))
+    led <- ledger_for(stats::setNames(list(u), db), pop)   # the collection as one pseudo-set
     tibble::tibble(population = pop, database = db, n_ranked = length(g),
                    n_unique_set_genes = length(u), n_overlap = ov,
-                   frac_of_set_genes = ov / length(u), frac_of_ranked = ov / length(g))
+                   frac_of_set_genes = ov / length(u), frac_of_ranked = ov / length(g),
+                   n_matched = led$n_matched,
+                   n_matched_via_alias = led$n_matched_via_alias,
+                   n_alias_flagged_for_review = led$n_alias_flagged_for_review,
+                   n_alias_rejected_ambiguous = led$n_alias_rejected_ambiguous,
+                   n_expression_filtered = led$n_expression_filtered,
+                   n_below_detection = led$n_below_detection,
+                   n_absent_from_reference = led$n_absent_from_reference,
+                   reference_vocabulary_available = led$reference_vocabulary_available)
   }))
 }))
+assert_ledger_closes(overlap, "geneset_overlap.csv")
+if (!identical(overlap$n_matched, overlap$n_overlap))
+  stop("[14] n_matched disagrees with n_overlap. Alias resolution may only ADD genes, so ",
+       "the exact-match count cannot move; something other than resolution changed.")
+## ONE CAVEAT ON COMPARING THIS TABLE ACROSS RUNS. `n_overlap` is a per-COLLECTION union, so
+## it is comparable to an earlier run only where the kept sets are the same. Resolving
+## before the size filter moves a handful of sets across each bound (the manifest's three
+## resolution columns say how many), and a collection whose membership changed moves its
+## union counts for that reason rather than because an exact match moved. The per-set ledger
+## below is the artifact to diff across runs — it is keyed on the set.
 readr::write_csv(round_numeric_cols(overlap), file.path(TBL, "geneset_overlap.csv"))
+
+## The per-set ledger. Every claim in this family is made about a NAMED set and a
+## per-database roll-up cannot carry one, so the same buckets are emitted per set. Which
+## sets: every set of a file-backed collection, every set named in `runsum_always`, and
+## every set the alias map touches at all. The tens of thousands of MSigDB sets the map
+## never reaches would contribute rows saying only "matched or absent", which the roll-up
+## above already says for them collectively. The omitted count is reported rather than left
+## to be inferred from a row count.
+ledger_names <- function(db) {
+  ref <- reference_sets_of(db)
+  touched <- vapply(ref, function(g) any(g %in% ALIAS_MAP$reference_symbol), logical(1))
+  sort(unique(c(if (db %in% FILE_BACKED_DBS) names(ref) else character(0),
+                intersect(names(ref), RUNSUM_ALWAYS), names(ref)[touched])))
+}
+set_ledger <- dplyr::bind_rows(lapply(names(POPS), function(pop) {
+  dplyr::bind_rows(lapply(DB_ORDER, function(db) {
+    ref <- reference_sets_of(db)
+    nm  <- ledger_names(db)
+    if (!length(nm)) return(NULL)
+    led <- ledger_for(ref[nm], pop)
+    led$population <- pop
+    led$database <- db
+    led$set_size_scored <- vapply(nm, function(n)
+      length(intersect(COLLECTIONS[[db]]$sets[[n]], names(RANKED[[pop]]))), integer(1))
+    dplyr::relocate(led, population, database)
+  }))
+}))
+assert_ledger_closes(set_ledger, "geneset_symbol_ledger.csv")
+# The scored size is what clusterProfiler reports as setSize, so it must equal what the
+# ledger accounts for. A shortfall means a resolved set carried a duplicate.
+bad_size <- which(set_ledger$set_size_scored != set_ledger$set_size_resolved)
+if (length(bad_size))
+  stop("[14] a resolved set's scored size disagrees with its ledger (", length(bad_size),
+       " row(s), e.g. ", set_ledger$gene_set[bad_size[1]], " in ",
+       set_ledger$population[bad_size[1]], "). A duplicate collapsed, or a pair was ",
+       "applied in one place and not the other.")
+readr::write_csv(round_numeric_cols(set_ledger), file.path(TBL, "geneset_symbol_ledger.csv"))
+n_all_sets <- sum(vapply(DB_ORDER, function(db) length(COLLECTIONS[[db]]$sets), integer(1)))
+n_per_pop  <- nrow(set_ledger) / length(POPS)
+message(sprintf("[3] symbol ledger -> %s (%d rows; %d of %d scored sets per population, %d omitted as untouched by the alias map and not file-backed)",
+                file.path(TBL, "geneset_symbol_ledger.csv"), nrow(set_ledger),
+                n_per_pop, n_all_sets, n_all_sets - n_per_pop))
+message(sprintf("[3] alias recovery across the sweep (Treg): %s",
+                paste(sprintf("%s +%d", overlap$database[overlap$population == "Treg"],
+                              overlap$n_matched_via_alias[overlap$population == "Treg"]),
+                      collapse = " ")))
 
 # Hard guard on the largest curated collection actually present. A handful of
 # matching symbols means the join failed; fgsea would not say so.

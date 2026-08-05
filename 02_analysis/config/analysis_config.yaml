@@ -258,6 +258,56 @@ coresh:
       - { population: cd8,  direction: up, gate: fdr_logfc, origin: "SF-vs-PB up, CD8" }
 
 # =============================================================================
+# SYMBOL-ALIAS RESOLUTION (asset built by 00_symbol_alias_map.R)
+# =============================================================================
+# GSE160097 was quantified against a CellRanger hg19 reference, so this compartment's
+# count matrix is frozen to that build's HGNC vintage: cGAS is MB21D1, STING is
+# TMEM173, MARCHF5 is MARCH5, MRE11 is MRE11A. Reference gene sets ship current symbols
+# and every match here is an exact string match, so a renamed gene is dropped from a set
+# silently and the loss reads as biological absence. TMEM173 sits at rank 265 and MB21D1
+# at 458 of the 13,999-gene Treg synovial-vs-blood ranked list, and both are invisible
+# to every STING gene set.
+#
+# The map is a property of (matrix vocabulary x org.Hs.eg.db release), not of any one
+# gene set, so it is computed once by 00_symbol_alias_map.R, committed, and read by both
+# languages. Regenerating it is a deliberate act with a reviewable diff. Rebuild it when
+# the matrix vocabulary changes, when org.Hs.eg.db moves, or when a collection is added
+# to `unbiased_enrichment:` below.
+#
+# Resolution runs one way only: the reference symbol is NEWER and the matrix symbol is
+# OLDER, so a reference symbol is resolved DOWN into the vocabulary the data carries.
+
+symbol_alias:
+  map_path: "00_data/references/symbol_alias/symbol_alias_map.csv"
+  provenance_path: "00_data/references/symbol_alias/symbol_alias_provenance.csv"
+
+  # The vocabulary the map resolves INTO, and the two nested layers above it that let a
+  # ledger keep vocabulary loss apart from never-detected and from expression-filtered.
+  # Conflating those three is the defect this asset exists for, so all three layers are
+  # declared rather than inferred.
+  matrix_vocabulary: "03_results/03_pseudobulk/tables/gene_symbols.csv"   # 21,740 post-QC symbols
+  reference_feature_symbols: "03_results/00_build/tables/reference_feature_symbols.csv"  # 32,738 CellRanger features
+  ranked_list: "03_results/03_pseudobulk/tables/ranked_{population}.tsv"  # post-filterByExpr
+
+  # Pairs that pass the automated ownership guard but are NOT clean 1:1 nomenclature
+  # updates. They are withheld from every tested set and appear in the map with
+  # resolution `flagged_for_review`, so the exclusion is visible rather than silent.
+  # MIR4435-2HG and MIR4435-1HG are two distinct lncRNA loci in most annotations: -1HG
+  # was reclassified and org.Hs.eg.db carries it as an alias, but a lncRNA locus merge is
+  # not the same class of event as a protein-coding rename, and this pair lands in
+  # sting_specific_up, which is a claim surface.
+  flagged_for_review:
+    - "MIR4435-2HG->MIR4435-1HG"
+
+  # Reference symbols the map must cover beyond the collections `unbiased_enrichment:`
+  # declares. The projected mouse arms are read here for EVERY contrast and both
+  # directions, because that stage sweeps the up arms only while stages 05, 09 and 13
+  # consume the down arms and the interaction arms as well.
+  extra_reference_dirs:
+    - "../mouse_anchor/03_results/human_projection/signatures/"
+    - "00_data/references/"
+
+# =============================================================================
 # UNBIASED ENRICHMENT SWEEP (stage 14_unbiased_enrichment)
 # =============================================================================
 # The unbiased counterpart to the targeted stage-05 test: every collection is
@@ -572,6 +622,9 @@ stages:
   - id: "18_tf_activity"
     title: "Inferred TF activity on the donor-paired niche contrast"
     purpose: "ANNOTATION tier only, never pooled with the donor-pseudobulk claim spine and writing no effect-size row. decoupleR on the frozen limma-voom SF-vs-PB moderated-t vectors for the three sorted populations, using the human CollecTRI network read across the compartment boundary under a SHA-256 pin. An inferred TF activity is a statistic over the expression of the genes a network assigns to a transcription factor, so this stage measures target-gene behaviour rather than transcription-factor protein activity. Four forensics answer whether a high-ranking regulon is a regulatory signal or a property of which genes sit in it: a rank cascade over four network variants (signed as recorded, unsigned, literature-signed edges only, alias-recovered) crossed with three estimators (ULM primary, MLM and consensus as forensics) plus the committed unsigned-regulon fgsea rank; per-target decomposition of the score against how many other CollecTRI regulons contain each target; calibration of activity against regulon size across every TF tested, with size-matched and size-plus-expression-matched random-regulon nulls and a size-conditional residual taken over the real regulons; and a direction audit that reports whether the recorded per-edge signs change the answer and names the canonical HIF1A-selective targets with their direction in this contrast. A symbol-vocabulary check is run first and published: the JIA count matrix carries pre-2019 HGNC symbols while CollecTRI carries current ones, so every network target that fails to match is reported with its cause (absent from the matrix, dropped by the expression filter, or recoverable through an alias) rather than dropped in silence."
+  - id: "19_regulon_nulls"
+    title: "Degree-preserving and sign-flip nulls for the inferred regulon activity"
+    purpose: "ANNOTATION tier only, never pooled with the donor-pseudobulk claim spine and writing no effect-size row. Closes the two gaps stage 18's own tables name. Stage 18 draws random regulons matched on size, repressing-edge fraction and expression decile, fits a size-conditional residual over the real regulons, and permutes the ranked list's gene labels; none of those holds target promiscuity fixed, and all of them permute the annotation rather than the design. This stage adds one null per gap and reports both against the stage-18 ladder. The rewiring null rewires the CollecTRI TF-to-target bipartite graph by curveball trades, which preserve every regulon's size and every target's in-degree exactly, so a drawn regulon samples the jointly-owned genes as heavily as the observed regulon does and the promiscuity objection sits inside the null rather than beside it; each regulon keeps its own multiset of edge signs, permuted. The sign-flip null swaps the synovial-fluid and paired-blood labels within donor and refits limma-voom, which is the exchangeability a paired design licenses and which preserves the gene-gene correlation that gene-label permutation destroys; with six donors carrying both arms in Treg all 2^6 = 64 configurations are enumerated, so the test is exact and no seed enters it, at the cost of a resolution floor of one-sided p = 0.0156 that is published with the result. Two hard gates run first and neither is a finding: the fast closed-form ULM used for the draws must reproduce decoupleR's run_ulm on the observed network, and the identity configuration of the sign-flip must reproduce the committed ranked list. Neither null can license a statement about HIF1A the protein: both are statements about the CollecTRI HIF1A regulon's ULM activity on this contrast."
 
 # =============================================================================
 # INFERRED TF ACTIVITY FORENSICS (stage 18_tf_activity)
@@ -644,6 +697,63 @@ tf_activity:
   # compartment, so no hash pin is required.
   fgsea_sweep_table: "03_results/14_unbiased_enrichment/tables/gsea_all.csv"
   fgsea_database: "TF_Targets"
+
+  # The one axis every rank-cascade panel uses, here and in the mouse anchor. The plotted
+  # quantity is rank as a percentage of the factors scored in that same configuration,
+  # because the denominators differ — 388 to 603 across the configurations here, 263 to 658
+  # in the anchor — so a raw rank read across two columns compares two different things.
+  # log10 keeps the top of the ranking legible, where every focus factor sits; the range is
+  # pinned rather than fitted so no panel can rescale itself and read as a different result.
+  rank_axis:
+    percent_limits: [0.1, 100]
+    percent_breaks: [0.1, 0.3, 1, 3, 10, 30, 100]
+
+# =============================================================================
+# TWO STRONGER NULLS FOR AN INFERRED REGULON ACTIVITY (stage 19_regulon_nulls)
+# =============================================================================
+# Stage 18 leaves a gap that stage 18's own tables name. Its three nulls are: random
+# regulons matched on size, repressing-edge fraction and expression decile; a
+# size-conditional residual taken over the real regulons; and a permutation of the ranked
+# list's gene LABELS. None of them holds target PROMISCUITY fixed, which is the property
+# `target_decomposition.csv` shows carries the score, and all three permute the ANNOTATION
+# rather than the experimental design. This stage adds one null for each gap.
+#
+#   rewiring  -- the CollecTRI TF->target bipartite graph is rewired by curveball trades,
+#                which preserve every regulon's size AND every target's in-degree exactly.
+#                A drawn regulon therefore samples the promiscuous genes as heavily as the
+#                observed one does, so "the score comes from jointly-owned genes" is inside
+#                the null instead of being a caveat beside it. Each regulon keeps its own
+#                multiset of edge signs, permuted, matching tf_activity's null convention.
+#   sign-flip -- the SF/PB labels are swapped WITHIN donor, which is the exchangeability the
+#                paired design actually licenses, and the contrast is refitted. Gene-label
+#                permutation destroys gene-gene correlation and is anti-conservative; this
+#                preserves it. It is also EXACT rather than sampled: the six donors carrying
+#                both arms in Treg give 2^6 = 64 configurations and all of them are
+#                enumerated, so no seed enters the p-value. The cost is resolution — the
+#                finest attainable one-sided p is 1/64 = 0.0156, and that floor is published
+#                with the result rather than left for a reader to derive.
+#
+# Everything not listed here is read from the blocks above: the population, focus factors,
+# network path, mor and sign columns, minsize and seed. Two parameters exist that the stage
+# would rather assert than trust, and both are hard gates: the fast closed-form ULM must
+# reproduce decoupleR to `ulm_validation_min_spearman`, and the identity configuration of the
+# sign-flip must reproduce the committed ranked list to `signflip_identity_min_spearman`.
+
+regulon_nulls:
+  rewiring_draws: 1000
+  # Curveball mixing. Burn-in is a multiple of the EDGE count (Strona et al. 2014 mix in
+  # O(number of ones) trades); between draws the chain advances by a multiple of the ROW
+  # count, which decorrelates consecutive draws without re-burning the whole chain.
+  rewiring_burn_in_trades_per_edge: 5
+  rewiring_trades_between_draws_per_tf: 2
+
+  # Guard, not a tuning knob: exact enumeration is 2^n_paired_donors, so a compartment with
+  # more paired donors than this must switch to sampling deliberately rather than by hanging.
+  signflip_max_exact_donors: 20
+
+  # Hard gates. Neither is a result; both stop the run.
+  ulm_validation_min_spearman: 0.9999
+  signflip_identity_min_spearman: 0.99
 
 # =============================================================================
 # INPUT/OUTPUT PATHS (relative to project root)
