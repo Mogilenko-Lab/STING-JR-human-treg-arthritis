@@ -1,0 +1,33 @@
+population,tf,null,obs,null_mean,null_q95,p_empirical,holds_fixed,permutes,n_draws
+Treg,HIF1A,stage18_size,8.29858018,-0.0253668812,1.61596247,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,HIF1A,stage18_size_and_expression,8.29858018,0.517478982,2.0954063,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,HIF1A,rewiring_degree_preserving,8.29858018,5.5361372,7.28888903,0.004995005,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,HIF1A,signflip_within_donor_exact,8.29858018,-0.131723495,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,NFKB1,stage18_size,8.2864824,-0.0159280327,1.50931417,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,NFKB1,stage18_size_and_expression,8.2864824,0.627502371,2.23277974,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,NFKB1,rewiring_degree_preserving,8.2864824,5.44859692,7.30279252,0.00599400599,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,NFKB1,signflip_within_donor_exact,8.2864824,-0.131531467,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,STAT3,stage18_size,6.89487265,0.00696858075,1.65467795,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,STAT3,stage18_size_and_expression,6.89487265,0.46734105,2.17314128,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,STAT3,rewiring_degree_preserving,6.89487265,4.97776905,6.91255579,0.0549450549,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,STAT3,signflip_within_donor_exact,6.89487265,-0.109442423,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,CREB1,stage18_size,6.86970008,-0.0206778795,1.61613537,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,CREB1,stage18_size_and_expression,6.86970008,0.410305768,2.11047506,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,CREB1,rewiring_degree_preserving,6.86970008,5.43170862,7.27203799,0.105894106,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,CREB1,signflip_within_donor_exact,6.86970008,-0.109042858,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,ATF3,stage18_size,3.95688097,0.0230185018,1.54845236,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,ATF3,stage18_size_and_expression,3.95688097,0.0742933308,1.74839151,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,ATF3,rewiring_degree_preserving,3.95688097,1.68345515,3.90985248,0.046953047,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,ATF3,signflip_within_donor_exact,3.95688097,-0.0628076344,NA,0.125,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,REL,stage18_size,7.5586492,-0.0705083672,1.63246006,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,REL,stage18_size_and_expression,7.5586492,0.468411064,2.25807674,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,REL,rewiring_degree_preserving,7.5586492,3.40013544,5.50666136,9.99000999e-4,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,REL,signflip_within_donor_exact,7.5586492,-0.119978559,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,HSF1,stage18_size,5.59955767,-0.0323899579,1.5894829,9.99000999e-4,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,HSF1,stage18_size_and_expression,5.59955767,0.278232813,1.93206125,9.99000999e-4,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,HSF1,rewiring_degree_preserving,5.59955767,2.83198088,4.94744794,0.010989011,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,HSF1,signflip_within_donor_exact,5.59955767,-0.0888818677,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64
+Treg,EPAS1,stage18_size,2.79380722,0.0227167579,1.58939954,0.002997003,regulon size; repressing-edge fraction,which genes are in the regulon,NA
+Treg,EPAS1,stage18_size_and_expression,2.79380722,0.123077186,1.79453583,0.00599400599,regulon size; repressing-edge fraction; expression-decile composition,which genes are in the regulon,NA
+Treg,EPAS1,rewiring_degree_preserving,2.79380722,2.78956112,4.92660785,0.476523477,"regulon size; EVERY target's in-degree, so the promiscuity profile; each regulon's own sign multiset",which factor claims which target,1000
+Treg,EPAS1,signflip_within_donor_exact,2.79380722,-0.0443461464,NA,0.015625,the network entirely; the gene set; the gene-gene correlation structure,"the SF/PB labels within donor, i.e. the experimental design",64

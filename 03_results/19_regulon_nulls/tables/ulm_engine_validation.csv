@@ -1,0 +1,2 @@
+population,n_tfs_compared,n_genes,spearman,pearson,max_abs_diff,gate_min_spearman,gate
+Treg,601,13999,1,1,2.13162821e-14,0.9999,pass
