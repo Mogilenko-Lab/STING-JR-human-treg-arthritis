@@ -5,8 +5,8 @@ hypoxia-gene purge. It is also 199 genes doing many different things. This stage
 projected signature into subcomponents and asks where each one sits in the same donor-pseudobulk
 rankings.
 
-**Every testable up-arm part enriches toward synovial fluid**, so the shift is broad rather than
-localised. The 137-gene remainder that no curated program claims stays strongly enriched (+2.21
+**Every testable up-arm part enriches toward synovial fluid**, so the shift runs broad across the
+arm. The 137-gene remainder that no curated program claims stays strongly enriched (+2.21
 Treg, +2.27 Tcon, +2.10 CD8). The TNFα/NF-κB part is the most CD4-selective (+2.24, +2.32, +1.23),
 and the curated IL2-STAT5 activation proxy is the weakest in Treg (+1.32 at FDR 0.22).
 
@@ -49,14 +49,14 @@ The frozen lists live under `00_data/references/`, which is untracked. The repro
 tracked, so any clone regenerates byte-identical lists, and a size drift in the installed
 `msigdbr` is a hard stop.
 
-## Three properties of this decomposition to hold
+## Three properties of this decomposition
 
-**The parts overlap, and the size of the overlap shows they are no partition.** 62 of the 199 up
-genes are claimed by a curated set at all, and those 62 carry 92 claims between them, because 25
-belong to two or three sets at once. So the bars and the NES rows do not sum to the arm: adding
-the named parts double-counts 30 claims and shrinks the 137-gene remainder, which is the largest
-single part. Forcing a priority-ordered disjoint partition would silently decide which program
-gets credit for a shared gene, so the full per-gene membership is published instead.
+**The parts overlap, and the size of the overlap shows they are no partition.** A curated set
+claims 62 of the 199 up genes, and those 62 carry 92 claims between them, because 25 belong to
+two or three sets at once. So the bars and the NES rows do not sum to the arm: adding the named
+parts double-counts 30 claims and shrinks the 137-gene remainder, which is the largest single
+part. Forcing a priority-ordered disjoint partition would silently decide which program gets
+credit for a shared gene, so the full per-gene membership is published instead.
 
 **Small parts are reported with their size.** A part whose intersection with a ranked list falls
 under `gsea_min_size = 5` gets no score and is reported as untestable with its size and its
@@ -73,10 +73,11 @@ its own score, and it is the largest.
 ### `figures/_overview/heatdecomp_arm_coverage.png`
 
 **How much of each arm the curated presumptions claim.**
-One bar per mouse arm and curated presumption; length is how many of that arm's genes the curated
-set contains. Warm brown gives the 202-gene up arm and cool blue the 96-gene down arm. The
-right-hand text gives the count, then the testability: parts reaching 5 genes in the ranked lists
-are tested, smaller parts are marked under the floor, and a part with no gene in that arm says so.
+One bar per mouse arm and curated presumption. Bar length gives how many of that arm's genes the
+curated set contains. Warm brown gives the 202-gene up arm and cool blue the 96-gene down arm.
+The right-hand text gives the count, then the testability: parts reaching 5 genes in the ranked
+lists are tested, smaller parts are marked under the floor, and a part with no gene in that arm
+says so.
 
 Curated sets claim 62 of the 202 up genes and 11 of the 96 down genes, so **the largest part of
 the projected signature — 140 up genes — belongs to no named program**, and the curated heat-shock
@@ -126,7 +127,8 @@ the whole, would double-count genes.
 One row per mouse arm and presumption, plus an `unassigned` row per arm. `n_intersect` is how
 many of that arm's genes the curated set contains, `frac_of_mouse_arm` its share of the 199 or 94,
 and `frac_of_curated_set` how much of the public set the arm covers. `genes` is the
-semicolon-delimited membership. Rows overlap, so `n_intersect` does not sum to the arm.
+semicolon-delimited membership. Rows overlap, so summing `n_intersect` over an arm exceeds the
+arm's size by the amount of that sharing.
 
 Curated sets claim 62 of 199 up and 11 of 94 down, with TNFα/NF-κB the largest single claim at 35
 and the curated HSR core at 2.
@@ -135,12 +137,12 @@ and the curated HSR core at 2.
 
 The audit trail behind the overlap. The first holds one row per signature gene, with
 `subcomponents` the semicolon-delimited list of every presumption claiming it and
-`n_subcomponents` the count; a gene claimed by none reads `unassigned`. 25 of the 62 claimed up
+`n_subcomponents` the count. A gene claimed by none reads `unassigned`. 25 of the 62 claimed up
 genes and 2 of the 11 claimed down genes belong to more than one presumption, with ATF3, CDKN1A,
 F3, PLAUR and SERPINE1 claimed by three.
 
 The second aggregates that per arm. `n_claimed` counts genes claimed at least once and
-`n_unassigned` the rest; `n_claimed_once` and `n_claimed_multiply` split the claimed genes, with
+`n_unassigned` the rest. `n_claimed_once` and `n_claimed_multiply` split the claimed genes, with
 `max_subcomponents_per_gene` the worst case. `n_claims_total` is the sum over genes of how many
 sets claim each, and `n_excess_claims` is that total minus the number of claimed genes — exactly
 the amount by which summing the per-set bars over-counts. `is_partition` reads False whenever
@@ -157,7 +159,7 @@ enrichment toward synovial-up genes and `padj` is BH across the parts scored wit
 population.
 
 Every testable up-arm part enriches toward synovial fluid (NES +1.23 to +2.32) and no down-arm
-part reaches significance; 27 of the 48 population-by-part cells are untestable and carry their
+part reaches significance. 27 of the 48 population-by-part cells are untestable and carry their
 reason.
 
 ### `tables/sting_axis_overlap.csv`

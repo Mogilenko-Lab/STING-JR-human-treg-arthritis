@@ -1,9 +1,9 @@
 # 13_arm_decomposition — What the mouse up arms are made of
 
 The mouse 39 °C anchor hands this compartment four up arms in human projection. Elsewhere those
-arms are scored, purged and read against curated lenses. This stage asks the plainer question
-underneath all of that: **which curated programs contain the genes of each arm, and how much of
-each arm no program names.**
+arms are scored, purged and read against curated lenses. This stage asks the question underneath
+all of them: **which curated programs contain the genes of each arm, and how much of each arm no
+program names.**
 
 The answer is arithmetic over committed gene lists. Nine curated, versioned, anchor-independent
 lenses are intersected with each arm gene by gene. Two figures draw the result — a composition
@@ -28,7 +28,7 @@ contract stops the stage.
 | `Interaction_up_fdrOnly` | the same contrast, relaxed gate | `fdr_only` | 19 |
 
 Each lens is read verbatim from a frozen file and knows nothing of the mouse anchor, so an
-intersection measures something. The first seven are byte-identical to the lenses
+intersection is an independent measurement. The first seven are byte-identical to the lenses
 [`../11_heat_decomposition/`](../11_heat_decomposition/) uses, which lets the two stages join on
 `program`.
 
@@ -54,7 +54,7 @@ generic axis reflects a type-I interferon response of any origin.
 of the 202 `WT_heat_up` genes and 68 of the 221 `KO_heat_up` genes, leaving remainders of 135
 and 153 — the largest single part of each arm (`tables/arm_program_summary.csv`).
 
-**What the lenses do claim is largely inflammatory.** 35 `WT_heat_up` genes sit in
+**The claimed genes are largely inflammatory.** 35 `WT_heat_up` genes sit in
 `HALLMARK_TNFA_SIGNALING_VIA_NFKB` and 21 in `HALLMARK_INFLAMMATORY_RESPONSE`, against 18 in
 `HALLMARK_HYPOXIA` and 14 in `HALLMARK_IL2_STAT5_SIGNALING`. Three containments are small enough
 to name outright: the curated HSR core holds 2 genes, the unfolded-protein response 1, and
@@ -64,14 +64,13 @@ to `KO_heat_up`, and the generic interferon axis 6 and 4.
 **The two Interaction arms invert that shape.** In the 7-gene arm, Hallmark type-I interferon
 contains 4 genes and the generic axis 2, while hypoxia, activation, proteostasis and the
 published STING set contain none. The relaxed gate sharpens it: 10 of 19 in Hallmark type-I
-interferon, 6 in the generic axis. Read as composition, the genes the interaction contrast
-selected carry interferon annotation of the generic kind. At 7 and 19 genes these are thin sets,
-and whether they separate synovial fluid from blood is a question for the donor-pseudobulk
-panels.
+interferon, 6 in the generic axis. By composition, the genes the interaction contrast selected
+carry generic interferon annotation. At 7 and 19 genes these are thin sets, and whether they
+separate synovial fluid from blood is a question for the donor-pseudobulk panels.
 
 ## Three properties to hold while reading
 
-**The bands overlap, so they are no partition.** 67 of the 202 `WT_heat_up` genes are claimed at
+**The bands overlap, so they form no partition.** 67 of the 202 `WT_heat_up` genes are claimed at
 all, and those 67 carry 100 memberships, with ATF3 and PLAUR claimed by four lenses each. Adding
 the per-lens counts over-counts by 33 and shrinks the 135-gene remainder. The sharing is
 published per gene in `tables/arm_program_multiplicity.csv`.
@@ -95,8 +94,7 @@ lenses. This stage adds the two interferon-family lenses, and those claim exactl
 genes — `IL1RN`, `IL2`, `OAS3`, `SAMD4A`, `TGM1`. Restricting `arm_program_gene.csv` to the
 original seven programs reproduces the neighbouring count exactly, and the compute script
 asserts that against the committed table on every run. A remainder is meaningful against the
-panel it was measured on, so read the panel alongside every remainder quoted anywhere in this
-project.
+panel it was measured on, so quote every remainder together with its panel.
 
 ## The vocabulary decides the count
 
@@ -122,8 +120,8 @@ containment becomes 12 (`tables/_overview/arm_hypoxia_euler.csv`).
 One horizontal bar per arm, labelled with its gene count and the anchor's gate. Band width is
 the fractional share, so a gene in k lenses gives 1/k to each and the widths total 1.0. The
 number printed in a band is the duplicated count of that arm's genes the lens contains, so
-widths and numbers measure different things, and a band too narrow for a digit carries its
-count to the right of the bar. Grey is the remainder.
+widths and numbers measure different things. A band too narrow for a digit carries its count to
+the right of the bar. Grey is the remainder.
 
 Nine lenses claim 67 of the 202 `WT_heat_up` genes and 68 of the 221 `KO_heat_up` genes, and
 inflammatory content dominates what they claim. The thin Interaction arms invert that shape into
@@ -158,8 +156,8 @@ cells, or absent from the reference vocabulary outright.
 
 One row per (arm, program, gene). A gene contained by k lenses appears k times, each row
 carrying `n_programs_for_gene = k` and `weight_fractional = 1/k`. A gene no lens contains gets
-exactly one row reading `program = unassigned`, so the remainder is a member of the table rather
-than an absence from it. `gate` repeats the anchor's gate for that arm.
+exactly one row reading `program = unassigned`, so the remainder sits in the table as rows of its
+own. `gate` repeats the anchor's gate for that arm.
 
 The 202 `WT_heat_up` genes generate 232 rows — 100 memberships across nine lenses plus 135
 unclaimed genes.
@@ -171,8 +169,9 @@ arm's genes the lens contains and `frac_of_arm` its share of `n_arm`. `n_curated
 lens size, so a small `n_intersect` against a large lens is a statement about the arm.
 `genes` is the semicolon-delimited membership.
 
-Rows within an arm overlap, so `n_intersect` does not sum to `n_arm`. Use `weight_fractional`
-in `arm_program_gene.csv` for an accounting that does.
+Rows within an arm overlap, so summing `n_intersect` exceeds `n_arm` by the amount of that
+sharing. Use `weight_fractional` in `arm_program_gene.csv` for an accounting that totals the arm
+exactly.
 
 ### `tables/arm_program_multiplicity.csv` — the sharing, per gene
 
@@ -194,8 +193,9 @@ widths and totals 1.0 per arm. The `arm_*` columns repeat that arm's counts on e
 `arm_max_lenses_per_gene` — so a caption can quote them from one file. `is_partition` reads
 False on every row by construction.
 
-Where the two accountings diverge is legible in one line: 35 `WT_heat_up` genes in TNFα/NF-κB
-render as a 11.9% band rather than a 17.3% one, because 20 of those 35 sit in another lens too.
+One line shows where the two accountings diverge: 35 `WT_heat_up` genes in TNFα/NF-κB render as
+an 11.9% band where the duplicated accounting gives 17.3%, because 20 of those 35 sit in another
+lens too.
 
 ### `tables/_overview/arm_hypoxia_euler.csv`
 

@@ -8,7 +8,7 @@ the reason for this stage.
 **The question.** How much of that rank survives when the network, the estimator, the regulon
 size, the edge signs and the symbol vocabulary are each varied in turn?
 
-The mouse anchor ran the same forensics on its own contrast, where the equivalent result moved
+The mouse anchor ran the same forensics on its own contrast. There the equivalent result moved
 from rank 1 to 12 on a network swap and from 12 to 142 on a swap of estimator, and the score
 turned out to be carried by generic stress and glycolytic genes sitting in many regulons at
 once. These tables repeat that examination on the human contrast.
@@ -41,7 +41,7 @@ activity on the Treg synovial-versus-blood contrast", a name that stays checkabl
 
 **The rank cascade holds, and HIF1A is the steadiest of the eight.** Across thirteen
 configurations — four network variants crossed with three estimators, plus the committed
-unsigned-regulon fgsea column — HIF1A places in the top twelve twelve times
+unsigned-regulon fgsea column — HIF1A places in the top twelve in twelve of them
 (`tables/hif1a_rank_cascade.csv`).
 
 | Factor | Top-12 placements of 13 | Worst rank | Worst configuration |
@@ -107,10 +107,10 @@ evidence and carries no direction. Counted on fold change the split reads 12 and
 on a repressing edge, so it contributes positively while going down.
 
 **16 of the 27 carry `default activation`.** CollecTRI records no edge direction for them, so
-activation is the direction the arithmetic assumes for those sixteen, and it cites literature
+activation is the direction the arithmetic assumes for those sixteen. CollecTRI cites literature
 evidence for the remaining 11.
 
-What this licenses is narrow and is a statement about the regulon: the *direction* of HIF1A's
+What this licenses is narrow, and it is a statement about the regulon: the *direction* of HIF1A's
 ULM score comes from targets other regulons also claim. That is the bound the size calibration
 reaches by another route.
 
@@ -119,7 +119,7 @@ reaches by another route.
 All eleven named HIF1A-selective canonical targets carry a recorded activating edge
 (`tables/canonical_hif1a_targets.csv`). The glycolytic members go up on the synovial-fluid side
 (PGK1 t = +9.76, LDHA +6.58, SLC2A1 +3.69, HK2 +3.16), BNIP3L (+3.18) and VEGFA (+2.97) go up,
-BNIP3 (+1.29), CA9 (+1.25) and EGLN3 (+0.14) are flat, and PDK1 goes **down** at t = −4.65 with a
+and BNIP3 (+1.29), CA9 (+1.25) and EGLN3 (+0.14) are flat. PDK1 goes **down** at t = −4.65 with a
 gene-level FDR of 0.0065. ADM is absent from the ranked list, dropped by the expression filter.
 
 ## The symbol-vocabulary guard, and why it needed its own guard
@@ -130,9 +130,11 @@ probes confirm the vocabulary: the matrix holds `MB21D1`, `TMEM173`, `MARCH5` an
 `CGAS`, `STING1`, `MARCHF5` and `MRE11` are absent from it
 (`tables/symbol_vocabulary_probes.csv`).
 
-Of HIF1A's 463 network targets, 293 match, 89 sit in the count matrix and were dropped by the
-expression filter, 81 are absent from the count matrix, and 3 are lost to a resolvable rename
-(`MMUT`→`MUT`, `ATP5IF1`→`ATPIF1`, `TIGAR`→`C12orf5`). Recovering those across the whole Treg
+Of HIF1A's 463 network targets, 293 match and 170 stay unmatched. Those 170 split two ways: 89
+sit in the count matrix and were dropped by the expression filter, and 81 are absent from the
+count matrix. Three of those 81 are absent under the network's spelling alone, lost to a
+resolvable rename (`MMUT`→`MUT`, `ATP5IF1`→`ATPIF1`, `TIGAR`→`C12orf5`). Recovering those across
+the whole Treg
 network adds 394 edges over 124 renamed symbols and 184 factors, moves HIF1A's regulon from 293
 to 296 targets, and moves its ULM rank from 6 of 601 to 7 of 603.
 
@@ -151,9 +153,9 @@ top twelve, which says the estimator and the network variant decide no part of t
 much the answer means is decided by the size calibration, where HIF1A sits 252nd of 592 on the
 statistic the headline was read off.
 
-**Two regulons this similar cannot be separated by this contrast.** HIF1A and NFKB1 agree to
-three significant figures on both statistics and share their largest contributors. A reading that
-singles out one of them reads noise between them.
+**This contrast leaves HIF1A and NFKB1 inseparable.** The two agree to three significant figures
+on both statistics and share their largest contributors. A reading that singles out one of them
+reads noise between them.
 
 **A random-gene-set null is the weaker of the two nulls here.** HIF1A's observed +8.30 sits far
 above the 95th percentile of 1,000 random regulons matched on size and repressing-edge fraction
@@ -196,7 +198,7 @@ scale, so colour compares within an estimator alone.
 
 The rank stays between 2 and 12 in twelve configurations and reaches 42 of 388 in the
 thirteenth. On the linear axis the mouse anchor uses for its own cascade, that traverse is nearly
-flat, where the murine one runs rank 1 to 12 to 142 and back to 8. The two panels are comparable
+flat, and the murine one runs rank 1 to 12 to 142 and back to 8. The two panels are comparable
 in shape alone, since the ranked lists differ in length and the factors scored differ between
 configurations.
 *Source* `tables/_overview/hif1a_rank_cascade_linear.csv` ·
@@ -251,11 +253,11 @@ edge direction, and an open point means activation was assumed by default. A das
 repressing edge, which flips the contribution's sign away from the gene's own direction.
 
 The targets HIF1A alone claims carry magnitude without direction: 13 of the 27 go up on the
-synovial-fluid side and 14 go down. Glycolytic members fall on both sides (PGAM1 +5.68, GBE1
-+3.93 up; PFKL −2.55, TKTL1 −4.25 down). 16 of the 27 carry no recorded evidence for the edge
-direction. NFKB1's 2 such targets split one each way (GCA +2.80, BST1 −2.47). TM9SF4 is the only
-repressing edge here, so its positive contribution comes from a gene that goes down in synovial
-fluid.
+synovial-fluid side and 14 go down. Glycolytic members fall on both sides (PGAM1 +5.68 and
+GBE1 +3.93 up, PFKL −2.55 and TKTL1 −4.25 down). 16 of the 27 carry no recorded evidence for
+the edge direction. NFKB1's 2 such targets split one each way (GCA +2.80, BST1 −2.47). TM9SF4
+is the only repressing edge here, so its positive contribution comes from a gene that goes down
+in synovial fluid.
 *Source* `tables/_overview/tf_selective_targets.csv` ·
 `02_analysis/scripts/18_tf_activity_viz.R`.
 
@@ -272,8 +274,8 @@ colour.
 The spread of the named genes across both halves is the point, so nothing else is labelled. 12
 go up in synovial fluid and 15 go down, 12 clear FDR 0.05, and those 12 split 6 each way. That is
 what makes the 0.14% share a cancellation: in magnitude the same 27 targets are 15% of HIF1A's
-signed total. NFKB1's 2 exclusive targets split one each way and clear the FDR cut in neither
-case. The split here is by fold change; by signed contribution it reads 13 up and 14 down.
+signed total. NFKB1's 2 exclusive targets split one each way, and neither clears the FDR cut. The
+split here is by fold change. By signed contribution it reads 13 up and 14 down.
 *Source* `tables/_overview/tf_selective_targets_volcano.csv` ·
 `02_analysis/scripts/18_tf_selective_volcano_viz.R`.
 
@@ -363,7 +365,7 @@ with the per-factor move and the repressing-edge counts behind it.
 | File | What it holds |
 |---|---|
 | `tables/symbol_vocabulary_probes.csv` | One row per probe pair. `matrix_symbol` is the pre-2019 spelling and `current_symbol` the present HGNC symbol, with four booleans for presence in the ranked list and in the full pre-filter matrix vocabulary. A row reading TRUE then FALSE is a gene any current-symbol reference set drops in silence. |
-| `tables/symbol_vocabulary_check.csv` | One row per (population, factor). `n_targets_in_network` against `n_matched`, with three counts partitioning the unmatched remainder: `n_expression_filtered`, `n_absent_from_count_matrix`, `n_alias_recoverable`. The first two are facts about the dataset and the third is a join failure. Every focus regulon loses 27% to 41% of its targets before any statistic is computed. |
+| `tables/symbol_vocabulary_check.csv` | One row per (population, factor). `n_targets_in_network` against `n_matched`, with `n_expression_filtered` and `n_absent_from_count_matrix` partitioning the unmatched remainder. Both are facts about the dataset. `n_alias_recoverable` counts a subset of the absent ones — a join failure the `alias_recovered` variant repairs — so it sits inside that partition. Every focus regulon loses 27% to 41% of its targets before any statistic is computed. |
 | `tables/alias_recovery.csv` | One row per edge whose target failed to join directly. `resolution` takes four values: `accepted`, plus three rejection classes — candidate owned by another gene, multiple candidates present, or a reference symbol ambiguous in `org.Hs.eg.db`. Only accepted rows enter the `alias_recovered` variant. |
 | `tables/ranked_list_keycheck.csv` | One row per population. `n_ensembl_like` counts names matching `^ENSG[0-9]{6,}`, and the run stops unless `key` reads `hgnc_symbol`. An Ensembl-keyed list intersects every network at approximately zero and both fgsea and decoupleR report that as an empty result. |
 | `tables/source_hash_manifest.csv` | The SHA-256 pin on the CollecTRI human regulon table this stage reads. The first run writes it and every later run verifies, so a changed network halts the analysis. |
