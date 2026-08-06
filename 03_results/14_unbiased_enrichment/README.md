@@ -111,11 +111,11 @@ The Hypoxia footprint rising alongside the inflammatory ones is worth stating ca
 ## figures/_overview/pooled_overview_by_population.png
 
 The synovial-fluid-versus-paired-blood contrast moves a great many
-curated programs at once — 1,442 of 11,513 tests reach FDR < 0.05 in
-Treg after pooling — and while 24 pooled-significant sets carry a
+curated programs at once — 1,443 of 11,514 tests reach FDR < 0.05 in
+Treg after pooling — and while 25 pooled-significant sets carry a
 larger absolute NES than the mouse-derived WT_heat_up arm (NES +2.59,
-pooled FDR 4e-12), 21 of those 24 are on the blood side, so among the
-1,378 sets moving toward synovial fluid the arm ranks 4.
+pooled FDR 4e-12), 21 of those 25 are on the blood side, so among the
+1,379 sets moving toward synovial fluid the arm ranks 5.
 
 **How to read:** Columns are the three sorted populations side by side. Below the
 dashed line each row is a collection, ordered by how many of its sets
@@ -136,10 +136,10 @@ and ordinary at once. Correlative.
 
 In the JIA Treg contrast the largest shifts are downward:
 WP_CYTOPLASMIC_RIBOSOMAL_PROTEINS reaches NES -3.45 toward paired
-blood, against REACTOME_INTERLEUKIN_10_SIGNALING at +2.64 toward
-synovial fluid, so the niche difference this compartment reads as an
-inflammatory gain is accompanied by an at least equally large loss of
-translation and ribosomal programs.
+blood, against eTreg_up at +3.72 toward synovial fluid, so the niche
+difference this compartment reads as an inflammatory gain is
+accompanied by an at least equally large loss of translation and
+ribosomal programs.
 
 **How to read:** One row per gene set, capped at the top ten in each direction by
 absolute NES among sets at FDR < 0.05 after pooling; the subtitle
@@ -403,20 +403,21 @@ inferred from target-gene expression.
 
 ## figures/by_contrast/ (per-database GSEA battery)
 
-The full browse surface for the unbiased sweep: 138 panels across 3
-sorted populations and 14 gene-set collections, one directory per
+The full browse surface for the unbiased sweep: 141 panels across 3
+sorted populations and 15 gene-set collections, one directory per
 (population, collection) cell. Read against the whole family, the
-Treg contrast carries 1,442 pooled-significant sets out of 11,513
+Treg contrast carries 1,443 pooled-significant sets out of 11,514
 tests, so the mouse-derived WT_heat_up arm (NES +2.5918, pooled FDR
 4e-12, 120 genes in the ranked list) and HALLMARK_HYPOXIA (NES
 +2.2713, pooled FDR 1e-08, 143 genes) both sit inside a broad
-co-enrichment shared with many other sets. 4 collections are too
+co-enrichment shared with many other sets. 5 collections are too
 small for the full battery and carry fewer panels: HSR_lens (2
 set(s), 1 panel type(s)); TCR_activation (1 set(s), 1 panel type(s));
-mouse_projection (3 set(s), 2 panel type(s)); sting_axes (2 set(s), 1
-panel type(s)). The omission is a redundancy judgement recorded per
-collection above, and no statistic is withheld: every set of every
-collection is in gsea_all.csv.
+eTreg_lens (1 set(s), 1 panel type(s)); mouse_projection (3 set(s), 2
+panel type(s)); sting_axes (2 set(s), 1 panel type(s)). The omission
+is a redundancy judgement recorded per collection above, and no
+statistic is withheld: every set of every collection is in
+gsea_all.csv.
 
 **How to read:** Layout.
 figures/by_contrast/&lt;population&gt;/&lt;COLLECTION&gt;/{dotplot,facet,barplot,running_sum}.{pdf,png},
@@ -469,20 +470,20 @@ an effect-size accumulator.
 
 ## figures/_overview/named_sets_in_sweep.png
 
-Scored with no favourite against all 11,513 sets tested in the JIA
+Scored with no favourite against all 11,514 sets tested in the JIA
 Treg contrast, HALLMARK_HYPOXIA reaches NES +2.27 at pooled FDR
-1.4e-08, rank 73 of 11,513 by pooled FDR, while the best-placed of
-the six cGAS-STING sets reaches pooled FDR 0.105 at rank 2,020.
+1.4e-08, rank 74 of 11,514 by pooled FDR, while the best-placed of
+the six cGAS-STING sets reaches pooled FDR 0.104 at rank 2,021.
 sting_specific_up reaches pooled FDR 9.2e-03 in Tcon on 16 genes, so
 the cGAS-STING reading turns on which population is read. Set size
 tracks the outcome closely: 43.6% of Treg sets of 130 to 150 genes
 reach pooled significance against 6.1% of sets of 10 to 22 genes, the
-band five of the six cGAS-STING sets fall in, and 1,442 of 11,513
+band five of the six cGAS-STING sets fall in, and 1,443 of 11,514
 Treg tests are significant at all.
 
 **How to read:** Columns are the three sorted populations on one shared row axis. Each
-of the eleven upper rows is one named set, coloured by comparison
-thread and ordered inside a thread by its Treg NES. Below the dashed
+of the 17 upper rows is one named set, coloured by comparison thread
+and ordered inside a thread by its Treg NES. Below the dashed
 separator the bottom row is every set tested in that population, one
 grey point each, which is the distribution a marker is read against.
 Horizontal position is NES clamped to plus or minus 3.5; right of
@@ -495,15 +496,15 @@ pooled FDR alone; by NES the same sets order differently, and each
 ordering answers its own question. A cell reading 'not tested' had
 fewer than the minimum five of its genes in that ranked list, so it
 carries no result. Four bounds on the reading. This contrast moves
-many programs at once: 1,442 of 11,513 tests reach pooled FDR < 0.05
-in Treg, 2,042 of 11,751 in Tcon and 937 of 11,531 in CD8. Set size
+many programs at once: 1,443 of 11,514 tests reach pooled FDR < 0.05
+in Treg, 2,043 of 11,752 in Tcon and 939 of 11,532 in CD8. Set size
 drives that rate: in Treg 68 of 156 sets of 130 to 150 genes are
 pooled-significant (43.6%) against 205 of 3,360 sets of 10 to 22
 genes (6.1%); five of the six cGAS-STING sets sit in that smaller
 band and the sixth at five genes, while HALLMARK_HYPOXIA carries 143
 testable genes. KO_heat_up is drawn beside WT_heat_up because that
-comparator reaches pooled FDR 2.8e-13 against 3.8e-12, ranks 27
-against 31, and the two lists share 185 genes. And the cGAS-STING
+comparator reaches pooled FDR 2.7e-13 against 3.7e-12, ranks 28
+against 32, and the two lists share 185 genes. And the cGAS-STING
 family's own signs disagree: two regulation-of terms carry opposite
 sign and the positive-regulation term runs negative. The selection,
 its reason per row, and the two excluded substring matches are
@@ -890,20 +891,27 @@ HALLMARK_HYPOXIA reaches NES 2.2713 at pooled FDR 1e-08 on 143 genes
 while GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS reaches 1.1972 at 0.362
 on 125, so a reading taken from one of the four holds for that set
 alone. In the second group the two interferon sets carry the strongest
-rows in the figure, ifn_only_up reaching NES 2.6035 at 5e-10 in CD8.
-sting_specific_up clears pooled FDR 0.05 in Tcon at NES 1.9535 on 16
-genes and sits above the threshold in Treg (1.6609, 0.105) and CD8
+cGAS-STING-family rows, ifn_only_up reaching NES 2.6035 at 5e-10 in
+CD8. sting_specific_up clears pooled FDR 0.05 in Tcon at NES 1.9535 on
+16 genes and sits above the threshold in Treg (1.6609, 0.104) and CD8
 (1.6945, 0.096), and the three pathway-database STING terms stay
-between NES 0.81 and 1.68 on 13 to 27 genes.
+between NES 0.81 and 1.68 on 13 to 27 genes. The third group holds the
+strongest and the weakest rows of the figure: eTreg_up, this
+compartment's own synovial-versus-blood contrast on another cohort,
+reaches NES 3.7247 at 2e-68 in Treg, which marks what a set built to
+separate exactly these two tissues reaches here, while the curated
+proteostasis core HSR_core changes sign between the sorted populations
+at NES 1.4855 in Treg against -1.3293 in Tcon and -1.1280 in CD8,
+clearing pooled FDR 0.05 in none of the three.
 
 **How to read:** The companion to arm_nes_by_cell_state under
 03_results/14_unbiased_enrichment/, drawn to the same geometry so the
 two can be laid side by side. One dot per gene set and cell state, at
 the confirmatory tier: donor-level pseudobulk within frozen sort
 labels, limma-voom moderated t, then pre-ranked fgsea. Rows are gene
-sets in two labelled groups, ordered inside a group by descending Treg
-NES, and inside a row the three cell states are offset vertically and
-coloured, each with its own annotation line. The x position is the
+sets in three labelled groups, ordered inside a group by descending
+Treg NES, and inside a row the three cell states are offset vertically
+and coloured, each with its own annotation line. The x position is the
 normalised enrichment score for synovial fluid over paired blood, with
 a vertical rule at zero. A filled dot clears the config FDR threshold
 of 0.05 and an open dot sits above it. A cell reading not tested had
@@ -916,14 +924,18 @@ set of 10 to 22 genes clears it in 6.1% of 3,360. The four oxygen-
 named sets are four differently built sets for one named biology, and
 their scores differ, so read the group as a family and each score as
 that set's own. The cGAS-STING group carries a positive result in
-Tcon, so read that group set by set too. The complete six-member cGAS-
-STING family of this sweep, including the two regulation-of terms
-whose signs disagree, is drawn in named_sets_in_sweep under the same
-stage. Temperature and hypoxia are both imposed by the inflamed joint
-and stay entangled in cross-sectional human data, so these rows give
-what the niche contrast contains and leave open which of the two
-drives it. A score of this kind has no interval, so none is drawn, and
-the reading stays correlative.
+Tcon, so read that group set by set too. The third group carries the
+remaining panels of the per-cell score maps, so every lens a reader
+meets on a map has a row on this geometry, the three mouse arms on the
+sibling panel arm_nes_by_cell_state and the rest here. The complete
+six-member cGAS-STING family of this sweep, including the two
+regulation-of terms whose signs disagree, is drawn in
+named_sets_in_sweep under the same stage. Temperature and hypoxia are
+both imposed by the inflamed joint and stay entangled in cross-
+sectional human data, so these rows give what the niche contrast
+contains and leave open which of the two drives it. A score of this
+kind has no interval, so none is drawn, and the reading stays
+correlative.
 
 | Script | Function | Config | Input |
 |---|---|---|---|
@@ -1178,8 +1190,8 @@ untested. Claim tier: L3; no row reaches an effect-size accumulator.
 ## figures/_overview/runsum_REACTOME_EUKARYOTIC_TRANSLATION_ELONGATION.png
 
 On one fractional-rank axis, Eukaryotic translation elongation gives
-Treg NES -3.39 at pooled FDR 4e-29, Tcon NES -3.66 at pooled FDR
-1e-39, CD8 NES -3.76 at pooled FDR 2e-46, so all three populations
+Treg NES -3.39 at pooled FDR 3e-29, Tcon NES -3.66 at pooled FDR
+9e-40, CD8 NES -3.76 at pooled FDR 2e-46, so all three populations
 carry the same sign and they reach pooled FDR < 0.05 in Treg, Tcon,
 CD8. Where a curve peaks is where the set's genes concentrate in that
 population's ranking; a difference in peak height between populations
@@ -1301,7 +1313,7 @@ untested. Claim tier: L3; no row reaches an effect-size accumulator.
 ## figures/_overview/runsum_sting_specific_up.png
 
 On one fractional-rank axis, sting_specific_up gives Treg NES +1.66 at
-pooled FDR 0.105, Tcon NES +1.95 at pooled FDR 0.009, CD8 NES +1.69 at
+pooled FDR 0.104, Tcon NES +1.95 at pooled FDR 0.009, CD8 NES +1.69 at
 pooled FDR 0.096, so all three populations carry the same sign and it
 reach pooled FDR < 0.05 in Tcon. Where a curve peaks is where the
 set's genes concentrate in that population's ranking; a difference in
@@ -1330,7 +1342,7 @@ untested. Claim tier: L3; no row reaches an effect-size accumulator.
 
 ## figures/_overview/runsum_&lt;set&gt;.png (cross-population running-sum family)
 
-The transposed view of the sweep: 8 sets, each drawn once with all
+The transposed view of the sweep: 9 sets, each drawn once with all
 three sorted populations on one fractional-rank axis, so whether a
 set's enrichment is shared across Treg, Tcon and CD8 or specific to
 one of them is read off a single panel. 7 of them are in the family
@@ -1346,9 +1358,8 @@ GOCC_TRANSPORT_VESICLE [GO_CC] (Treg);
 HALLMARK_INTERFERON_GAMMA_RESPONSE [Hallmark] (CD8 Tcon);
 KEGG_RIBOSOME [KEGG] (Tcon Treg);
 REACTOME_EUKARYOTIC_TRANSLATION_INITIATION [Reactome] (CD8 Tcon);
-REACTOME_MHC_CLASS_II_ANTIGEN_PRESENTATION [Reactome] (CD8);
-REACTOME_NEUTROPHIL_DEGRANULATION [Reactome] (Tcon Treg);
-REACTOME_SIGNALING_BY_INTERLEUKINS [Reactome] (Tcon Treg);
+REACTOME_NEUTROPHIL_DEGRANULATION [Reactome] (Treg);
+REACTOME_SIGNALING_BY_INTERLEUKINS [Reactome] (Tcon);
 WP_CYTOPLASMIC_RIBOSOMAL_PROTEINS [WikiPathways] (Treg). Their
 statistics are all in gsea_all.csv, and any of them can be added to
 the family by naming it in unbiased_enrichment.runsum_always.
@@ -1371,3 +1382,69 @@ effect sizes stay the confirmatory spine. Correlative. Claim tier: L3
 | Script | Function | Config | Input |
 |---|---|---|---|
 | `02_analysis/scripts/14d_runsum_overview_viz.py` | `load_family` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/{runsum_interactive_index,gsea_all}.csv + runsum_interactive_&lt;population&gt;_&lt;set&gt;.csv` |
+
+## figures/by_contrast/&lt;population&gt;/eTreg_lens/*.png
+
+eTreg_lens GSEA of the donor-pseudobulk
+synovial-fluid-versus-paired-blood contrast in 3 sorted populations,
+drawn with the RNAseq-toolkit plotters on the cached gseaResult from
+03_results/objects/14_gsea/ with the adjusted p re-keyed to the
+sweep-wide pooled correction published in gsea_all.csv. Read each
+set's direction on its own. The panels rank sets within a cell; which
+regulator drives any of them is untested here. Panels drawn for this
+collection: running_sum. The collection offers 1 set(s) to the pooled
+family, and over a collection that small a dotplot, a direction split
+and a significant-only barplot are the same few points drawn several
+ways, so the redundant panels are left out. The running sum is kept
+at every size because it is the only panel that shows where in the
+ranking a set's genes sit.
+
+**How to read:** Selection rules, which govern every absence: dotplot top 20 by pooled
+adjusted p; facet top 10 per direction by pooled adjusted p; barplot
+sets at pooled FDR < 0.05 only, then top 20 of those by |NES|;
+running_sum top 5 by |NES|; running_sum_focus, where it exists, a
+named pair and no ranking at all. Glyphs, the sign convention and the
+pooled correction are described once in the `figures/by_contrast/
+(per-database GSEA battery)` section of this README. Each panel
+writes its own same-stem CSV under
+tables/by_contrast/&lt;population&gt;/eTreg_lens/ listing the rows it
+drew, in draw order, with the rule that picked them, the
+per-collection adjusted p under padj_in_database, and under
+pooled_under the collection each pooled adjusted p was read from. A
+set enriching says its gene content moves with one side of this
+contrast. Correlative. Claim tier: L3 (enrichment statistics).
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14c_gsea_battery_viz.R` | `gsea_dotplot / gsea_dotplot_facet / gsea_barplot / gsea_running_sum_plot` | `thresholds.gsea_fdr=0.05; thresholds.gsea_min_size=5; thresholds.gsea_max_size=500; figures.top_n=20; facet_top_n_per_direction=10; figures.running_sum_top=5; figures.running_sum_ylim=[-1.0,1.0]; figures.nes_cap=3.5; colors.diverging` | `03_results/objects/14_gsea/{treg,tcon,cd8}__eTreg_lens.rds + 03_results/14_unbiased_enrichment/tables/gsea_all.csv` |
+
+## figures/_overview/runsum_eTreg_up.png
+
+On one fractional-rank axis, eTreg_up gives Treg NES +3.72 at pooled
+FDR 2e-68, Tcon NES +3.67 at pooled FDR 2e-56, CD8 NES +3.24 at pooled
+FDR 1e-38, so all three populations carry the same sign and they reach
+pooled FDR < 0.05 in Treg, Tcon, CD8. Where a curve peaks is where the
+set's genes concentrate in that population's ranking; a difference in
+peak height between populations is a difference in concentration. The
+program the set is named for is untested here.
+
+**How to read:** One set, three populations, one axis. Top: the running enrichment
+score as each ranked list is walked from its most synovial-fluid-up
+gene (left) to its most blood-up gene (right), so a positive left-
+shifted excursion is concentration on the synovial-fluid side and a
+negative trace the opposite. Middle: where that population's members
+of the set sit in its own ranking, one named row each. Bottom: the
+three moderated-t rankings, which cross zero at comparable fractions
+and so justify the shared axis. X is a fraction of each list's length,
+because the lists differ in length. Y is data-driven here and fixed in
+the by_contrast panels, so curve heights compare within this family
+alone. The legend carries each NES, pooled adjusted p, genes reaching
+the ranked list and leading-edge count, so a tall curve resting on few
+genes shows as one. Correlative: this gives where gene content sits in
+a ranking. Whether the program the set is named for is present is
+untested. Claim tier: L3; no row reaches an effect-size accumulator.
+
+| Script | Function | Config | Input |
+|---|---|---|---|
+| `02_analysis/scripts/14d_runsum_overview_viz.py` | `plot_set` | `figures.running_sum_heights=[2.4, 0.7, 0.9]; thresholds.gsea_fdr=0.05; x_axis=rank/n_ranked; y_range=figures.running_sum_ylim; unbiased_enrichment.runsum_always=['HALLMARK_HYPOXIA', 'HSR_core', 'sting_specific_up', 'ifn_only_up']` | `03_results/14_unbiased_enrichment/tables/runsum_interactive_index.csv, runsum_interactive_{treg,tcon,cd8}_eTreg_up.csv, gsea_all.csv` |
+
