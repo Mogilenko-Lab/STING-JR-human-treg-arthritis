@@ -3,6 +3,7 @@ Treg,mouse_projection,Interaction_up,7,6,0,0,0,1,0,0,6,0,TRUE,->,->,->,6
 Treg,mouse_projection,KO_heat_up,221,132,4,0,0,59,23,3,136,0,TRUE,CAVIN1->PTRF/CCDC184->C12orf68/DYNLT2B->TCTEX1D2/GPAT3->AGPAT9,->,->,136
 Treg,mouse_projection,WT_heat_up,202,119,1,0,0,57,22,3,120,0,TRUE,DYNLT2B->TCTEX1D2,->,->,120
 Treg,TCR_activation,TCR_activation,66,63,1,0,0,1,0,1,64,0,TRUE,FYB1->FYB,->,->,64
+Treg,eTreg_lens,eTreg_up,200,167,0,0,0,6,2,25,167,0,TRUE,->,->,->,167
 Treg,sting_axes,ifn_only_up,200,60,1,0,2,58,27,52,61,0,TRUE,PLAAT2->HRASLS2,->,ACOD1->CAD/TDO2->TPH2,61
 Treg,sting_axes,sting_specific_up,21,12,1,1,0,5,0,2,13,0,TRUE,SELENOK->SELK,MIR4435-2HG->MIR4435-1HG,->,13
 Treg,HSR_lens,HSR_core,56,43,1,0,0,4,4,4,44,0,TRUE,HIKESHI->C11orf73,->,->,44
@@ -7044,6 +7045,7 @@ Tcon,mouse_projection,Interaction_up,7,6,0,0,0,1,0,0,6,0,TRUE,->,->,->,6
 Tcon,mouse_projection,KO_heat_up,221,143,4,0,0,48,23,3,147,0,TRUE,CAVIN1->PTRF/CCDC184->C12orf68/DYNLT2B->TCTEX1D2/GPAT3->AGPAT9,->,->,147
 Tcon,mouse_projection,WT_heat_up,202,130,1,0,0,46,22,3,131,0,TRUE,DYNLT2B->TCTEX1D2,->,->,131
 Tcon,TCR_activation,TCR_activation,66,64,1,0,0,0,0,1,65,0,TRUE,FYB1->FYB,->,->,65
+Tcon,eTreg_lens,eTreg_up,200,161,0,0,0,12,2,25,161,0,TRUE,->,->,->,161
 Tcon,sting_axes,ifn_only_up,200,71,1,0,2,47,27,52,72,0,TRUE,PLAAT2->HRASLS2,->,ACOD1->CAD/TDO2->TPH2,72
 Tcon,sting_axes,sting_specific_up,21,15,1,1,0,2,0,2,16,0,TRUE,SELENOK->SELK,MIR4435-2HG->MIR4435-1HG,->,16
 Tcon,HSR_lens,HSR_core,56,43,1,0,0,4,4,4,44,0,TRUE,HIKESHI->C11orf73,->,->,44
@@ -14085,6 +14087,7 @@ CD8,mouse_projection,Interaction_up,7,6,0,0,0,1,0,0,6,0,TRUE,->,->,->,6
 CD8,mouse_projection,KO_heat_up,221,125,4,0,0,66,23,3,129,0,TRUE,CAVIN1->PTRF/CCDC184->C12orf68/DYNLT2B->TCTEX1D2/GPAT3->AGPAT9,->,->,129
 CD8,mouse_projection,WT_heat_up,202,113,1,0,0,63,22,3,114,0,TRUE,DYNLT2B->TCTEX1D2,->,->,114
 CD8,TCR_activation,TCR_activation,66,63,1,0,0,1,0,1,64,0,TRUE,FYB1->FYB,->,->,64
+CD8,eTreg_lens,eTreg_up,200,160,0,0,0,13,2,25,160,0,TRUE,->,->,->,160
 CD8,sting_axes,ifn_only_up,200,58,1,0,2,60,27,52,59,0,TRUE,PLAAT2->HRASLS2,->,ACOD1->CAD/TDO2->TPH2,59
 CD8,sting_axes,sting_specific_up,21,12,1,1,0,5,0,2,13,0,TRUE,SELENOK->SELK,MIR4435-2HG->MIR4435-1HG,->,13
 CD8,HSR_lens,HSR_core,56,43,1,0,0,4,4,4,44,0,TRUE,HIKESHI->C11orf73,->,->,44

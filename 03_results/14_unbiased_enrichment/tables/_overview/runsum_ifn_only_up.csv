@@ -1,4 +1,4 @@
 gene_set,display_name,database,population,contrast,nes,pvalue,padj_in_database,padj_pooled,direction,set_size,leading_edge_size,n_ranked,peak_running_es,peak_rank,peak_rank_fraction,emitted_because_named
-ifn_only_up,ifn_only_up,sting_axes,Treg,SF_vs_PB_Treg,2.30989266,5.39627127e-08,1.07925425e-07,3.78824824e-06,up,61.0,24.0,13999.0,0.620362764,1770.0,0.126437603,True
-ifn_only_up,ifn_only_up,sting_axes,Tcon,SF_vs_PB_Tcon,2.32913742,8.92266089e-09,1.78453218e-08,6.20415314e-07,up,72.0,30.0,14411.0,0.593283239,1947.0,0.135105128,True
-ifn_only_up,ifn_only_up,sting_axes,CD8,SF_vs_PB_CD8,2.60345181,2.08966781e-12,4.17933563e-12,5.23825208e-10,up,59.0,38.0,14014.0,0.713112556,2581.0,0.18417297,True
+ifn_only_up,ifn_only_up,sting_axes,Treg,SF_vs_PB_Treg,2.30989266,5.39627127e-08,1.07925425e-07,3.76561621e-06,up,61.0,24.0,13999.0,0.620362764,1770.0,0.126437603,True
+ifn_only_up,ifn_only_up,sting_axes,Tcon,SF_vs_PB_Tcon,2.32913742,8.92266089e-09,1.78453218e-08,6.16818299e-07,up,72.0,30.0,14411.0,0.593283239,1947.0,0.135105128,True
+ifn_only_up,ifn_only_up,sting_axes,CD8,SF_vs_PB_CD8,2.60345181,2.08966781e-12,4.17933563e-12,5.12724451e-10,up,59.0,38.0,14014.0,0.713112556,2581.0,0.18417297,True

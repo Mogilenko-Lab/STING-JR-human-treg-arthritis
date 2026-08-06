@@ -1,6 +1,6 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,1,HALLMARK_INTERFERON_GAMMA_RESPONSE,Interferon-gamma Response,up,2.35377659,0.541194187,7.58265847e-14,3.79132924e-12,2.13257646e-11,Hallmark,183,70,0.382513661
-CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,2,HALLMARK_INTERFERON_ALPHA_RESPONSE,Interferon-alpha Response,up,2.22776361,0.563777663,1.15208206e-8,9.60068382e-8,1.62008027e-6,Hallmark,93,36,0.387096774
-CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,3,HALLMARK_CHOLESTEROL_HOMEOSTASIS,Cholesterol Homeostasis,up,2.16816942,0.583099857,1.15459751e-6,7.21623446e-6,9.9355701e-5,Hallmark,65,30,0.461538462
-CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,4,HALLMARK_MITOTIC_SPINDLE,Mitotic Spindle,up,2.11390042,0.486040446,1.37654755e-9,2.29424591e-8,2.40499542e-7,Hallmark,183,97,0.530054645
-CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,5,HALLMARK_E2F_TARGETS,E2f Targets,up,2.10048094,0.477830455,5.48554961e-10,1.3713874e-8,1.02022375e-7,Hallmark,200,101,0.505
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,1,HALLMARK_INTERFERON_GAMMA_RESPONSE,Interferon-gamma Response,up,2.35377659,0.541194187,7.58265847e-14,3.79132924e-12,2.08198137e-11,Hallmark,183,70,0.382513661
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,2,HALLMARK_INTERFERON_ALPHA_RESPONSE,Interferon-alpha Response,up,2.22776361,0.563777663,1.15208206e-8,9.60068382e-8,1.60070004e-6,Hallmark,93,36,0.387096774
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,3,HALLMARK_CHOLESTEROL_HOMEOSTASIS,Cholesterol Homeostasis,up,2.16816942,0.583099857,1.15459751e-6,7.21623446e-6,9.86282854e-5,Hallmark,65,30,0.461538462
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,4,HALLMARK_MITOTIC_SPINDLE,Mitotic Spindle,up,2.11390042,0.486040446,1.37654755e-9,2.29424591e-8,2.36930542e-7,Hallmark,183,97,0.530054645
+CD8,SF_vs_PB_CD8,Hallmark,running_sum,top 5 by |NES|,5,HALLMARK_E2F_TARGETS,E2f Targets,up,2.10048094,0.477830455,5.48554961e-10,1.3713874e-8,1.0041168e-7,Hallmark,200,101,0.505

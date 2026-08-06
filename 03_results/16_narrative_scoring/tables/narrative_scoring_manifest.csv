@@ -12,3 +12,4 @@ HALLMARK_UNFOLDED_PROTEIN_RESPONSE,curated_lens,human_treg_arthritis/00_data/ref
 HSR_core,curated_lens,human_treg_arthritis/00_data/references/temp_hsr_lens/HSR_core.txt,57,48,0.8421052631578947,AUCell,testable
 ifn_generic_axis,curated_lens,sting_positive_control/03_results/06_reference_axis/signatures/ifn_only_up.txt,203,119,0.5862068965517241,AUCell,testable
 sting_specific_published,curated_lens,sting_positive_control/03_results/06_reference_axis/signatures/sting_specific_up.txt,22,18,0.8181818181818182,AUCell,testable
+eTreg_up,project_derived_lens,human_treg_arthritis/00_data/references/etreg_GSE161426/eTreg_up.txt,200,173,0.865,AUCell,testable

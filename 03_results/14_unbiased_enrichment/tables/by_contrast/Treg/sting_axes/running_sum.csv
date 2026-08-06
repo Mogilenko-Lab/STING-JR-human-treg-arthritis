@@ -1,3 +1,3 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Treg,SF_vs_PB_Treg,sting_axes,running_sum,every one of the 2 set(s) in this collection,1,ifn_only_up,IFN Only Up,up,2.30989266,0.620362764,5.39627127e-8,1.07925425e-7,3.78824824e-6,sting_axes,61,24,0.393442623
-Treg,SF_vs_PB_Treg,sting_axes,running_sum,every one of the 2 set(s) in this collection,2,sting_specific_up,Sting Specific Up,up,1.6609432,0.638501485,0.0183588638,0.0183588638,0.104516443,sting_axes,13,7,0.538461538
+Treg,SF_vs_PB_Treg,sting_axes,running_sum,every one of the 2 set(s) in this collection,1,ifn_only_up,IFN Only Up,up,2.30989266,0.620362764,5.39627127e-8,1.07925425e-7,3.76561621e-6,sting_axes,61,24,0.393442623
+Treg,SF_vs_PB_Treg,sting_axes,running_sum,every one of the 2 set(s) in this collection,2,sting_specific_up,Sting Specific Up,up,1.6609432,0.638501485,0.0183588638,0.0183588638,0.104473904,sting_axes,13,7,0.538461538

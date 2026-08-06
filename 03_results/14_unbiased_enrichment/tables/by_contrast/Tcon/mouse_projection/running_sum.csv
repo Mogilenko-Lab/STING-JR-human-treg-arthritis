@@ -1,4 +1,4 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Tcon,SF_vs_PB_Tcon,mouse_projection,running_sum,every one of the 3 set(s) in this collection,1,WT_heat_up,Wt Heat Up,up,2.68228025,0.619020524,4.16926573e-17,6.2538986e-17,1.36091782e-14,mouse_projection,131,71,0.541984733
-Tcon,SF_vs_PB_Tcon,mouse_projection,running_sum,every one of the 3 set(s) in this collection,2,KO_heat_up,Ko Heat Up,up,2.65683946,0.603337165,1.7916907e-17,5.37507209e-17,6.19239923e-15,mouse_projection,147,75,0.510204082
-Tcon,SF_vs_PB_Tcon,mouse_projection,running_sum,every one of the 3 set(s) in this collection,3,Interaction_up,Interaction Up,up,1.40502822,0.668618365,0.103521796,0.103521796,0.265607996,mouse_projection,6,3,0.5
+Tcon,SF_vs_PB_Tcon,mouse_projection,running_sum,every one of the 3 set(s) in this collection,1,WT_heat_up,Wt Heat Up,up,2.68228025,0.619020524,4.16926573e-17,6.2538986e-17,1.32424894e-14,mouse_projection,131,71,0.541984733
+Tcon,SF_vs_PB_Tcon,mouse_projection,running_sum,every one of the 3 set(s) in this collection,2,KO_heat_up,Ko Heat Up,up,2.65683946,0.603337165,1.7916907e-17,5.37507209e-17,6.01598545e-15,mouse_projection,147,75,0.510204082
+Tcon,SF_vs_PB_Tcon,mouse_projection,running_sum,every one of the 3 set(s) in this collection,3,Interaction_up,Interaction Up,up,1.40502822,0.668618365,0.103521796,0.103521796,0.265572613,mouse_projection,6,3,0.5

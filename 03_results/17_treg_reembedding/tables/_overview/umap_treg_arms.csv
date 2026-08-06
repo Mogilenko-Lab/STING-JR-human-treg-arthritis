@@ -1,7 +1,13 @@
 set_name,coarse_label,tissue,n_cells,n_donors,mean,median,sd,metric,evidence_tier
-WT_heat_up,Treg,peripheral_blood,13603.0,7.0,0.0112171403,0.0108445027,0.00544791279,AUCell,secondary_percell
-WT_heat_up,Treg,synovial_fluid,13572.0,6.0,0.0190402515,0.0186673797,0.00719392168,AUCell,secondary_percell
-KO_heat_up,Treg,peripheral_blood,13603.0,7.0,0.0111038163,0.0107100188,0.00534825387,AUCell,secondary_percell
-KO_heat_up,Treg,synovial_fluid,13572.0,6.0,0.019229176,0.0186385262,0.00746846972,AUCell,secondary_percell
+WT_heat_up,Treg,peripheral_blood,13603.0,7.0,0.011086363,0.010716348,0.00537835021,AUCell,secondary_percell
+WT_heat_up,Treg,synovial_fluid,13572.0,6.0,0.0187676418,0.0183955482,0.00708085537,AUCell,secondary_percell
+KO_heat_up,Treg,peripheral_blood,13603.0,7.0,0.0108424997,0.0104741905,0.00521584577,AUCell,secondary_percell
+KO_heat_up,Treg,synovial_fluid,13572.0,6.0,0.0187610662,0.018174276,0.00728897077,AUCell,secondary_percell
 Interaction_up,Treg,peripheral_blood,13603.0,7.0,0.0716562626,0.0524996702,0.0831208549,AUCell,secondary_percell
 Interaction_up,Treg,synovial_fluid,13572.0,6.0,0.12453881,0.0987996307,0.114826393,AUCell,secondary_percell
+HALLMARK_HYPOXIA,Treg,peripheral_blood,13603.0,7.0,0.0717934385,0.0714426516,0.0134459812,AUCell,secondary_percell
+HALLMARK_HYPOXIA,Treg,synovial_fluid,13572.0,6.0,0.0950220171,0.09473121,0.0143911034,AUCell,secondary_percell
+HSR_core,Treg,peripheral_blood,13603.0,7.0,0.0988780056,0.0985882353,0.0265749332,AUCell,secondary_percell
+HSR_core,Treg,synovial_fluid,13572.0,6.0,0.107541974,0.106352941,0.0289432797,AUCell,secondary_percell
+eTreg_up,Treg,peripheral_blood,13603.0,7.0,0.0190223106,0.0180404624,0.0104830104,AUCell,secondary_percell
+eTreg_up,Treg,synovial_fluid,13572.0,6.0,0.0668128577,0.0652716763,0.0229471611,AUCell,secondary_percell

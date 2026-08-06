@@ -1,6 +1,6 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,1,GOMF_STRUCTURAL_CONSTITUENT_OF_RIBOSOME,Structural Constituent of Ribosome,down,-2.5854901,-0.562034537,1.80744915e-16,2.53585115e-13,8.00352386e-14,GO_MF,158,80,0.506329114
-Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,2,GOMF_CYTOKINE_ACTIVITY,Cytokine Activity,up,2.50451997,0.632195538,8.86063949e-12,6.2157386e-9,2.08188862e-9,GO_MF,87,33,0.379310345
-Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,3,GOMF_MHC_CLASS_II_PROTEIN_COMPLEX_BINDING,MHC Class II Protein Complex Binding,up,2.44976507,0.797302652,1.76448625e-8,6.18893553e-6,1.461477e-6,GO_MF,25,15,0.6
-Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,4,GOMF_CCR_CHEMOKINE_RECEPTOR_BINDING,Ccr Chemokine Receptor Binding,up,2.39156395,0.832059634,5.07779491e-8,1.42482925e-5,3.58654312e-6,GO_MF,19,14,0.736842105
-Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,5,GOMF_MHC_PROTEIN_COMPLEX_BINDING,MHC Protein Complex Binding,up,2.38229256,0.727671813,8.83909966e-8,2.06687614e-5,5.81511739e-6,GO_MF,33,15,0.454545455
+Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,1,GOMF_STRUCTURAL_CONSTITUENT_OF_RIBOSOME,Structural Constituent of Ribosome,down,-2.5854901,-0.562034537,1.80744915e-16,2.53585115e-13,7.70776648e-14,GO_MF,158,80,0.506329114
+Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,2,GOMF_CYTOKINE_ACTIVITY,Cytokine Activity,up,2.50451997,0.632195538,8.86063949e-12,6.2157386e-9,2.04042806e-9,GO_MF,87,33,0.379310345
+Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,3,GOMF_MHC_CLASS_II_PROTEIN_COMPLEX_BINDING,MHC Class II Protein Complex Binding,up,2.44976507,0.797302652,1.76448625e-8,6.18893553e-6,1.45116391e-6,GO_MF,25,15,0.6
+Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,4,GOMF_CCR_CHEMOKINE_RECEPTOR_BINDING,Ccr Chemokine Receptor Binding,up,2.39156395,0.832059634,5.07779491e-8,1.42482925e-5,3.56498358e-6,GO_MF,19,14,0.736842105
+Treg,SF_vs_PB_Treg,GO_MF,running_sum,top 5 by |NES|,5,GOMF_MHC_PROTEIN_COMPLEX_BINDING,MHC Protein Complex Binding,up,2.38229256,0.727671813,8.83909966e-8,2.06687614e-5,5.78257918e-6,GO_MF,33,15,0.454545455

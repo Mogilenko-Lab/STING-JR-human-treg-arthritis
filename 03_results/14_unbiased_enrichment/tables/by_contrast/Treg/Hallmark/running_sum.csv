@@ -1,6 +1,6 @@
 population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
-Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,1,HALLMARK_IL2_STAT5_SIGNALING,IL-2/STAT5 Signaling,up,2.58077842,0.58919965,2.1380785e-17,5.34519624e-16,1.11889535e-14,Hallmark,171,90,0.526315789
-Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,2,HALLMARK_MTORC1_SIGNALING,Mtorc1 Signaling,up,2.56050843,0.575392709,4.48337074e-18,2.24168537e-16,2.58085237e-15,Hallmark,193,110,0.569948187
-Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,3,HALLMARK_INTERFERON_GAMMA_RESPONSE,Interferon-gamma Response,up,2.54945352,0.577194594,4.5283380599999994e-17,7.5472301e-16,2.09312671e-14,Hallmark,181,91,0.502762431
-Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,4,HALLMARK_CHOLESTEROL_HOMEOSTASIS,Cholesterol Homeostasis,up,2.44660205,0.651794637,1.49716967e-9,7.48584834e-9,1.74110246e-7,Hallmark,64,38,0.59375
-Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,5,HALLMARK_GLYCOLYSIS,Glycolysis,up,2.37949135,0.553526896,3.77243394e-12,3.77243394e-11,9.65156265e-10,Hallmark,148,64,0.432432432
+Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,1,HALLMARK_IL2_STAT5_SIGNALING,IL-2/STAT5 Signaling,up,2.58077842,0.58919965,2.1380785e-17,5.34519624e-16,1.07034069e-14,Hallmark,171,90,0.526315789
+Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,2,HALLMARK_MTORC1_SIGNALING,Mtorc1 Signaling,up,2.56050843,0.575392709,4.48337074e-18,2.24168537e-16,2.4581681300000002e-15,Hallmark,193,110,0.569948187
+Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,3,HALLMARK_INTERFERON_GAMMA_RESPONSE,Interferon-gamma Response,up,2.54945352,0.577194594,4.5283380599999994e-17,7.5472301e-16,2.01279665e-14,Hallmark,181,91,0.502762431
+Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,4,HALLMARK_CHOLESTEROL_HOMEOSTASIS,Cholesterol Homeostasis,up,2.44660205,0.651794637,1.49716967e-9,7.48584834e-9,1.72384116e-7,Hallmark,64,38,0.59375
+Treg,SF_vs_PB_Treg,Hallmark,running_sum,top 5 by |NES|,5,HALLMARK_GLYCOLYSIS,Glycolysis,up,2.37949135,0.553526896,3.77243394e-12,3.77243394e-11,9.44256617e-10,Hallmark,148,64,0.432432432
