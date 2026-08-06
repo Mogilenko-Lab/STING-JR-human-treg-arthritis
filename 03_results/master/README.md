@@ -1,15 +1,14 @@
 # master/ — the accumulator tables
 
-Cross-stage tables that gather one row per result from the individual stages. A stage
-computes; these files collect. Read them when you want every effect in one place instead of
-opening each stage.
+Cross-stage tables that gather one row per result from the individual stages. A stage computes.
+These files collect. Read them for every effect in one place.
 
 ## effect_sizes_treg_arthritis.csv · master_effect_sizes.csv
 
 **12 rows. This compartment's confirmatory results, each with a confidence interval.**
 
 One row per (signature × cell state × contrast). The estimate is a donor-level effect: each
-donor contributes one value per cell state, so the sample size is donors and not cells.
+donor contributes one value per cell state, so the sample size is the number of donors.
 `n_donors` and `n_cells` both appear, and `n_donors` is the one that sets the power.
 
 `evidence_tier` says how far a row may be taken. `signoff_state` records whether a human has

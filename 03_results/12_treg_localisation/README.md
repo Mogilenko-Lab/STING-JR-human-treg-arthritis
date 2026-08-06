@@ -1,7 +1,7 @@
 # 12_treg_localisation — Per-cell score distributions inside the Treg gate
 
 Five signatures scored per cell with AUCell, summarised across the synovial and blood arms inside
-the sorted CD4⁺ Treg gate. This stage is a compute resource and publishes no figure; its two
+the sorted CD4⁺ Treg gate. This stage is a compute resource and publishes no figure. Its two
 tables carry the per-cell scores and their per-signature summaries.
 
 Per-cell distributions are secondary and corroborative. The statistical claims about the same
@@ -20,8 +20,8 @@ range of the per-cell score, and both set sizes: the nominal gene-list count and
 in-dataset match.
 
 `power_band` classifies the effective size on the project's standard thresholds — `testable` at
-15 genes or more, `underpowered_reported` at 5 to 14, `untestable` below 5 — so a thin set is
-reported with its size rather than dropped.
+15 genes or more, `underpowered_reported` at 5 to 14, `untestable` below 5 — so a thin set stays
+in the table, reported with its size.
 
 ### `tables/treg_per_cell_scores.csv`
 

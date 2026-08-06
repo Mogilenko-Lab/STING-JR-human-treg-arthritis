@@ -17,8 +17,8 @@ every population.
 
 **Everything here is exploratory, and the reason is structural.** A module seeded from a query
 contains that query's genes by construction, so scoring it back on the seeding ranked list is
-partly guaranteed to succeed. The stage measures that circularity rather than caveating it. No
-row reaches [`../master/`](../master/).
+partly guaranteed to succeed. The stage measures that circularity and publishes the measurement.
+No row reaches [`../master/`](../master/).
 
 ## What was searched
 
@@ -26,7 +26,7 @@ The compendium is the human (`hsa`) half of the CoReSh corpus, consumed read-onl
 shared reference cache: 89 chunks, snapshot `syn66227307_20260721`, **42,465 distinct human
 datasets scored per query** (`tables/coresh_query_provenance.csv`). This compartment is human, so
 the human chunks are the correct half. The mouse chunks would return near-zero overlap with no
-error at all, which is why the species is asserted in config and again in the script.
+error raised, which is why the species is asserted in config and again in the script.
 
 The gates are re-derived from `../03_pseudobulk/tables/de_SFvsPB_<population>.csv`, the same fit
 that produced the ranked lists, and the script refuses to run if any gated symbol is missing
@@ -77,8 +77,8 @@ co-regulation neighbourhood mined from one public dataset's variance structure.
 
 ## The circularity, measured
 
-Every module carries `frac_seed_genes`, the fraction of it that is seed rather than newly
-recruited gene, and every enrichment row carries `seeded_from_this_population`.
+Every module carries `frac_seed_genes`, the share of it that came from the seeding query, and
+every enrichment row carries `seeded_from_this_population`.
 
 The measurement is unflattering, which is the useful part. In Treg the 21 modules split both
 ways — 10 up and 4 down at FDR < 0.05, NES −2.64 to +2.71 — and **which way a module goes is
@@ -86,15 +86,15 @@ largely predicted by how much of it is seed**: Spearman ρ = 0.70 in Treg, 0.88 
 CD8, on a median seed fraction of 30% (`tables/coresh_gsea_summary.csv`). Mostly-seed modules
 enrich positively, and mostly-recruited ones enrich negatively.
 
-The sign of a derived-module NES is therefore closer to a readout of seed content than of shared
-biology. That is why the whole folder sits in the exploratory tier.
+The sign of a derived-module NES therefore reports seed content more than shared biology. That is
+why the whole folder sits in the exploratory tier.
 
 ## What the recovered datasets are
 
 The human chunks carry a `wordMatrix`, the compendium's own centred per-sample matrix over the
 terms that vary most across a dataset's GEO sample metadata. Correlating each term against the
 query direction says which metadata term tracks the axis the query defines there. The annotation
-is derived in-cache, named for it, and descriptive only.
+is derived in-cache, named for that derivation, and descriptive only.
 
 The two gates recovered visibly different kinds of dataset. The stringent gate surfaced
 recognisable T-cell contexts — anti-CD28 / Th17 / Th0 stimulation (GSE110097, top-ranked for both
@@ -170,8 +170,8 @@ The remaining columns pin the cache snapshot and the search parameters.
 One row per (query, dataset), capped at 200 rows per query. `pctVar` is the co-regulation score,
 comparable within a query alone because query size changes its scale. `size` is the matched
 query count that normalises it, and `rank` the within-query position. `pval` is empty by design:
-the search runs variance-only, because the permutation p-value costs minutes per query and would
-change which datasets are read in no case.
+the search runs variance-only, because the permutation p-value costs minutes per query and leaves
+the set of datasets read unchanged.
 
 ### `tables/coresh_derived_sets.csv` · `tables/coresh_derived_sets.gmt` — the modules
 

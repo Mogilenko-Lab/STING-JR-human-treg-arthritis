@@ -5,7 +5,7 @@ per cell with the coordinates, labels and scores that stage computed, flattened 
 load it without the AnnData object.
 
 These are inputs to interactive views. The figures and tables under each `NN_<stage>/` directory
-are the deliverables; these files let someone re-plot the same cells themselves.
+are the deliverables, and these files let someone re-plot the same cells themselves.
 
 | File | Cells | What it carries |
 |---|---|---|
@@ -20,8 +20,8 @@ Written by `07_embedding.py`, `08_harvest_readout.py` and `16_narrative_scoring.
 
 ## Two things to know before using them
 
-An embedding is a map. Proximity on it reflects the neighbourhood graph that produced it, and
-biology is tested on donor-level pseudobulk within the frozen labels rather than on the map.
+An embedding is a map. Proximity on it reflects the neighbourhood graph that produced it. Biology
+is tested on donor-level pseudobulk within the frozen labels.
 
 The population-of-interest hooks in `08_harvest_readout.parquet` are a resource for generating
 hypotheses. Any result worth reporting is re-derived in the donor-level analysis first.

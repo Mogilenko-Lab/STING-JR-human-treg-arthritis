@@ -17,8 +17,8 @@ mouse arms, the curated program family, the candidate harvest signatures, and on
 patchwork.
 
 Per-cell scores are joined in from
-[`../interactive/16_narrative_embedding.parquet`](../interactive/) on barcode and are recomputed
-in no case, so every map can be coloured by identical values and a difference between two maps is
+[`../interactive/16_narrative_embedding.parquet`](../interactive/) on barcode and are never
+recomputed, so every map can be coloured by identical values and a difference between two maps is
 a difference of layout.
 
 **Tier.** Annotation and visualisation only. An embedding places cells. Proximity on any of these
@@ -66,10 +66,10 @@ a statement about the Treg gate's range, and the published STING panel is the cl
 Each pair shares its cells and its colour scale. The coordinates differ, which is the point.
 
 **Six panels to a strip, one geometry.** Every strip is drawn through
-`02_analysis/helpers/umap_grid.py`, the module
-[`../16_narrative_scoring/`](../16_narrative_scoring/) draws its strips through as well, so a
-strip from either stage stacks against a strip from the other with a column reading top to
-bottom. `umap_treg_signatures` is the one three-panel strip, at the same panel size.
+`02_analysis/helpers/umap_grid.py`, the same module
+[`../16_narrative_scoring/`](../16_narrative_scoring/) uses, so a strip from either stage stacks
+against a strip from the other with a column reading top to bottom. `umap_treg_signatures` is the
+one three-panel strip, at the same panel size.
 
 **The reference strip drops a panel and gains one.** Its full-object twin's second slot is the
 Treg/Tcon/CD8 sort gate, which is a single category here, so `IKZF2` takes that slot. Tissue and
@@ -87,13 +87,13 @@ are the bookends, both drawn in shuffled order so overlapping groups paint evenl
 sit four Treg identity genes in log-normalised expression: FOXP3 the lineage transcription
 factor, IL2RA the CD25 chain, CTLA4 the suppressive effector, IKZF2 the Helios subset marker.
 All four pool onto one clip and one bar in real units (0.00 to 2.75), and that clip is the
-full-object figure's, so a panel brighter here is brighter.
+full-object figure's, so a panel that looks brighter here carries higher expression.
 
 Synovial-fluid and paired-blood cells occupy distinct territory — 0.923 same-tissue neighbours
 at k = 30 against 0.500 expected — after the same-donor fraction has fallen from 0.661 to 0.201
-against 0.146 expected. The four identity genes hold across the map rather than marking a corner
-of it (FOXP3 mean 1.2274 to 2.1590, IKZF2 0.6467 to 0.7041), so the layout separates tissue
-while the gate stays uniform. Harmony reshapes the space it corrects, so this map is annotation.
+against 0.146 expected. The four identity genes hold across the whole map (FOXP3 mean 1.2274 to
+2.1590, IKZF2 0.6467 to 0.7041), so the layout separates tissue while the gate stays uniform.
+Harmony reshapes the space it corrects, so this map is annotation.
 *Source* `tables/_overview/umap_treg_reembedding.csv` ·
 `02_analysis/scripts/17_treg_reembedding_viz.py`.
 
@@ -110,8 +110,8 @@ All three mouse 39 °C-derived up arms still colour synovial territory brighter 
 once Tcon and CD8 are gone, and so do all three anchor-independent lenses. Per-cell AUCell means
 run `WT_heat_up` 0.0111 to 0.0188, `KO_heat_up` 0.0108 to 0.0188 and `Interaction_up` 0.0717 to
 0.1245 for the arms, against `HALLMARK_HYPOXIA` 0.0718 to 0.0950, `HSR_core` 0.0989 to 0.1075
-and `eTreg_up` 0.0190 to 0.0668 for the lenses. So the arm's tissue colouring is no more
-distinctive of the anchor inside the Treg gate than on the whole object.
+and `eTreg_up` 0.0190 to 0.0668 for the lenses. So inside the Treg gate the arm's tissue
+colouring stays shared with the lenses beside it, exactly as on the whole object.
 
 `WT_heat_up` and `KO_heat_up` share 182 genes and one clip, so those two compare pixel for
 pixel. Cells pool across donors, so a tissue difference is pseudoreplicated.
@@ -124,15 +124,15 @@ pixel. Cells pool across donors, so a tissue difference is pseudoreplicated.
 The Treg-only counterpart of `16_narrative_scoring/umap_full_programs.png`, on the same rule: the
 cGAS-STING and type-I interferon family left, the inflammation and activation programs right. A
 synovial-high colouring shared by both families is generic inflammation. Each panel keeps its own
-set's limits, and what is shared is the object those limits come from, which makes each panel
-comparable to its own twin.
+set's limits, and those limits come from the full object, which makes each panel comparable to
+its own twin.
 
 All six still colour synovial territory brighter than paired blood once the other two sort gates
 are gone: `ifn_generic_axis` 0.0172 to 0.0290, `HALLMARK_INTERFERON_ALPHA_RESPONSE` 0.1306 to
 0.1552, `HALLMARK_TNFA_SIGNALING_VIA_NFKB` 0.0503 to 0.0589, the published STING signature 0.0220
 to 0.0424.
 
-The shared clip carries the level the rescaled bar does not. The published STING panel is scored
+The shared clip carries the level that the rescaled bar hides. The published STING panel is scored
 over the whole Treg map against a full-object limit it barely reaches: Treg blood mean 0.0220
 against 0.0547 in Tcon and 0.0672 in CD8, with a median of exactly 0.013 — the only row of the
 six at zero. At least half of Treg blood cells score zero on that set, so its Treg tissue
@@ -145,11 +145,10 @@ here, and its own IFN-β validation is underpowered at three donors.
 
 **The three candidate harvest signatures, on the Treg gate alone.**
 The Treg-only counterpart of `07_embedding/umap_signatures_treg.png`, which draws these same
-three channels across all three gates. Two differences matter first. The unit: these are scanpy
+three channels across all three gates. Two differences matter. The unit: these are scanpy
 `score_genes` module scores, mean-centred against a sampled background and signed, so a value
-near zero means at background, and they share a scale with the AUCell panels in no case. The
-panel count: the full-object twin carries a fourth sort-gate reference panel, which is a single
-category here.
+near zero sits at background, and they share no scale with the AUCell panels. The panel count:
+the full-object twin carries a fourth sort-gate reference panel, which is a single category here.
 
 Within the Treg gate the effector-Treg and heat-shock module scores still separate synovial
 fluid from paired blood (`score_eTreg` −0.0539 to 0.1021, `score_HSP` 0.0270 to 0.0806),
@@ -215,14 +214,14 @@ substrate cross the barcode join.
 
 ### `tables/_overview/<figure stem>.csv`
 
-Five same-stem sources, one per figure, each restricted to the channels its panel draws with the
+Five same-stem sources, one per figure, each restricted to the channels its panel draws, with the
 mean, median and standard deviation over the drawn cells and the counts behind them. Read
 `metric` first: `log_normalised_expression`, `AUCell` and
 `scanpy_score_genes_module_score` are three unrelated scales, and a comparison stays inside one
 of them.
 
 The AUCell values are the ones the full-object figure's Treg rows carry too, because the scores
-are joined on barcode and recomputed in no case, so a difference between paired figures is a
+are joined on barcode and never recomputed, so a difference between paired figures is a
 difference of layout.
 
 ---

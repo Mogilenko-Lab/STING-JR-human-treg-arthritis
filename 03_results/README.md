@@ -2,24 +2,24 @@
 
 GSE160097 is FACS-sorted Treg, Tcon and CD8 from the synovial fluid and the paired peripheral
 blood of the same juvenile idiopathic arthritis patients: seven donors, six paired in each
-population after QC. The paired design is what makes this compartment the one that can ask the
-niche question at all.
+population after QC. That pairing is what lets this compartment ask the niche question.
 
-**Abbreviations.** SF = synovial fluid (inflamed joint); PB = peripheral blood; Treg =
-CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory;
+**Abbreviations.** SF = synovial fluid (inflamed joint). PB = peripheral blood. Treg =
+CD4⁺CD127ˡᵒCD25⁺ regulatory. Tcon = CD4⁺CD25⁻ conventional. CD8 = CD8⁺CD45RO⁺ memory.
 NES = normalised enrichment score.
 
 ## The question, and what the tree does with it
 
-The mouse anchor hands over three frozen up arms in human symbols. The question this compartment
-asks is whether the mouse 39 °C-derived signature separates the inflamed synovial niche from
-paired blood within a frozen cell state, and whether any part of that separation resists being
-reduced to the other stresses the same niche imposes.
+The mouse anchor hands over three frozen up arms in human symbols. This compartment asks whether
+the mouse 39 °C-derived signature separates the inflamed synovial niche from paired blood within
+a frozen cell state, and whether any part of that separation resists being reduced to the other
+stresses the same niche imposes.
 
-The arc: build and QC the object, freeze the sort labels, aggregate to donor-level pseudobulk and
-fit the paired contrast, score the mouse arms against those rankings, then spend the rest of the
-tree pressing on the answer — purging hypoxia genes, decomposing the arm against curated lenses,
-running the whole unbiased sweep for calibration, and localising every score on two embeddings.
+The arc runs in one direction. Build and QC the object, freeze the sort labels, aggregate to
+donor-level pseudobulk and fit the paired contrast, then score the mouse arms against those
+rankings. The rest of the tree presses on the answer: purging hypoxia genes, decomposing the arm
+against curated lenses, running the whole unbiased sweep for calibration, and localising every
+score on two embeddings.
 
 ## The two tracks, and how they rank
 
@@ -31,7 +31,7 @@ carry it, and [`master`](master/) accumulates its effect sizes.
 
 **Everything per-cell is annotation.** A per-cell score localises a program on a map. It pools
 thousands of cells from donors of unequal yield, so a tissue difference read off a colour or a
-violin is pseudoreplicated. Read those figures for where a score sits; read the confirmatory ones
+violin is pseudoreplicated. Read those figures for where a score sits. Read the confirmatory ones
 for whether it separates.
 
 ## The reading order
@@ -65,15 +65,15 @@ for whether it separates.
 **The mouse 39 °C up arm separates the niche, and it does so in every sorted population.** NES
 2.59 in Treg on 120 of 202 arm genes, 2.68 in Tcon on 131, 2.06 in CD8 on 114, every pooled FDR
 below 1e-4 (`14_unbiased_enrichment/tables/gsea_all.csv`). The Treg score sits between the Tcon
-and CD8 scores, so the separation is pan-T rather than Treg-selective.
+and CD8 scores, so the separation is pan-T, with Treg one of the three populations carrying it.
 
 **Its up and down arms move together.** The down arm reaches NES 1.432 at FDR 0.0354 on 64 genes
-in Tcon and carries no direction in Treg or CD8, at the same sign as the up arm
+in Tcon, at the same sign as the up arm, and carries no direction in Treg or CD8
 (`05_scoring/tables/gsea_pseudobulk_*.csv`). Both arms carry information, and the pattern is a
-shared non-directional shift rather than a bidirectional recapitulation.
+shared non-directional shift. Recapitulating the mouse contrast would take the two arms apart.
 
 **By composition the arm is largely inflammatory.** Nine curated anchor-independent lenses
-contain 67 of the 202 `WT_heat_up` genes, leaving 135 unclaimed as the largest single part; what
+contain 67 of the 202 `WT_heat_up` genes, leaving 135 unclaimed as the largest single part. What
 the lenses do claim runs 35 TNFα/NF-κB genes and 21 inflammatory-response genes against 2 in the
 curated heat-shock core and 2 of the 21 published interferon-independent STING genes
 (`13_arm_decomposition/tables/arm_program_summary.csv`).
@@ -86,8 +86,8 @@ and nothing more.
 **The niche moves an enormous amount at once.** 1,443 of 11,514 tests reach pooled FDR 0.05 in
 Treg, 2,043 of 11,752 in Tcon, 939 of 11,532 in CD8, and the largest single effects run toward
 blood — `WP_CYTOPLASMIC_RIBOSOMAL_PROTEINS` at NES −3.45. Among the programs moving toward the
-joint in sorted CD4 cells the arm sits near the top of the distribution; that calibration is what
-[`14_unbiased_enrichment`](14_unbiased_enrichment/) exists to supply.
+joint in sorted CD4 cells the arm sits near the top of the distribution. That calibration is what
+[`14_unbiased_enrichment`](14_unbiased_enrichment/) supplies.
 
 **Temperature and hypoxia are jointly imposed by the inflamed joint** and stay entangled in
 cross-sectional human data. Nothing here separates them, and no artifact in this tree asserts

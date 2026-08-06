@@ -3,7 +3,8 @@
 The neighbouring stage established that the CollecTRI HIF1A regulon's ULM activity on the
 sorted-Treg synovial-versus-blood contrast holds its rank across four network variants and three
 estimators, that activity scales with regulon size, and that the *direction* of the score comes
-from targets many regulons share. It named two gaps in its own nulls. This stage closes one each.
+from targets many regulons share. It named two gaps in its own nulls, and this stage adds a null
+for each.
 
 **Gap one: none of the three nulls there holds target promiscuity fixed.** The random-regulon
 null matches size, repressing-edge fraction and expression decile, then draws from the whole
@@ -39,9 +40,10 @@ published contrast. That second figure is a run-time gate message.
 
 **Holding promiscuity fixed moves the null's centre.** Rewiring the CollecTRI graph by curveball
 trades preserves every regulon's size *and* every target's in-degree, so a drawn regulon
-oversamples the jointly-owned high-|t| genes exactly as heavily as the observed one does. HIF1A's
-null mean is therefore **+5.54** against an observed +8.30. It clears that null at empirical p
-0.005, z 2.58, passing the 95th percentile of +7.29 by about one unit, where the same score
+oversamples the jointly-owned high-|t| genes exactly as heavily as the observed one does.
+
+HIF1A's null mean is therefore **+5.54** against an observed +8.30. It clears that null at
+empirical p 0.005, z 2.58, passing the 95th percentile of +7.29 by about one unit. The same score
 cleared the size-and-expression-matched random regulon's 95th percentile of +2.10 by more than
 six. Roughly two thirds of the score is what any regulon of that size and promiscuity profile
 earns on this contrast.
@@ -61,8 +63,8 @@ earns on this contrast.
 | EPAS1 | 62 | 2.79 | 2.79 | 0.48 | 0.003 |
 
 STAT3 and CREB1 fail this null, and NFKB1 remains indistinguishable from HIF1A. The smaller
-regulons doing relatively better than the large ones is the ordering the size-conditional
-residual produced by a different route. EPAS1 is the clean negative and the useful one: observed
+regulons do relatively better than the large ones, which is the ordering the size-conditional
+residual produced by another route. EPAS1 is the clean negative and the useful one: observed
 +2.794 against a null mean of +2.790. That regulon is exactly what its size and promiscuity
 predict, which is what a factor with no signal looks like.
 
@@ -83,8 +85,8 @@ EPAS1.
 ## Two ways to misread this stage
 
 **A floor is a weak p-value.** `p_exact_one_sided = 0.0156` for seven factors at once is one bit
-of information about the contrast. A smaller p-value here takes more paired donors, and more
-computation reaches it in no case.
+of information about the contrast. A smaller p-value here takes more paired donors, and no amount
+of computation reaches one.
 
 **The rewiring null is the strongest available and remains short of a claim.** It holds the
 network's degree structure fixed, the sharpest constraint on offer, and stays a question about
@@ -105,8 +107,8 @@ in-degree stay invariant and only the assignment of targets to factors is random
 set of matched size.
 
 `mean_target_indeg` is the observed regulon's average target promiscuity, the property this null
-holds fixed. `p_empirical` is (draws at or above obs + 1)/(draws + 1), so it returns exactly zero
-in no case, and `z_vs_null` standardises the gap. Because size is preserved exactly,
+holds fixed. `p_empirical` is (draws at or above obs + 1)/(draws + 1), so it never returns exactly
+zero, and `z_vs_null` standardises the gap. Because size is preserved exactly,
 `null_rank_median` and `null_rank_best` share the `n_tfs_scored` denominator with `obs_rank`.
 
 ### `tables/rewiring_null_draws.csv` — the per-draw substrate
@@ -114,15 +116,15 @@ in no case, and `z_vs_null` standardises the gap. Because size is preserved exac
 One row per (draw, factor): 1,000 degree-preserving rewirings scored for each of the 8 focus
 factors. `score` is that draw's closed-form ULM value and `rank` its position among every factor
 scored in the same draw. Draws come from one Markov chain advanced between samples by trades, so
-consecutive rows are decorrelated and dependent by construction. Read it when a summary statistic
-needs checking against the shape it came from.
+consecutive rows are decorrelated in practice and dependent by construction. Read it when a
+summary statistic needs checking against the shape it came from.
 
 ### `tables/signflip_null.csv` — the exact design permutation
 
 One row per focus factor. The two tissue labels are swapped within a donor and the whole
-limma-voom contrast is refitted, which is the exchangeability a paired design licenses and which
+limma-voom contrast is refitted. That is the exchangeability a paired design licenses, and it
 leaves the correlation between genes intact. `n_paired_donors` donors carry both arms, so
-`n_configurations` = 2^that, and every one is enumerated.
+`n_configurations` is 2 to that power, and every one is enumerated.
 
 `n_ge_obs` counts configurations scoring at or above the observed, the observed one included, and
 `p_exact_one_sided` is that count over `n_configurations`. `p_floor` is 1/`n_configurations`, and
@@ -138,7 +140,7 @@ One row per (configuration, factor): all 64 within-donor label swaps of the 6 pa
 scored for each focus factor. `donors_flipped` names the donors whose labels were swapped,
 pipe-delimited, and `is_observed` marks the configuration that flips none. Configurations are
 enumerated in a fixed order, so this table is byte-stable across runs. Read it for the null's
-shape, and for the observed row being the extreme one for most factors.
+shape, and to see the observed row sitting at the extreme for most factors.
 
 ### `tables/null_ladder.csv` — the four nulls side by side
 
@@ -157,9 +159,9 @@ beside the others because no single rung supports a claim alone.
 
 One row. `score_closed_form` against `score_decoupler` on the observed signed network, summarised
 by `spearman`, `pearson` and `max_abs_diff`. decoupleR regresses every gene's contrast statistic
-on the regulon's mode of regulation, zero for a non-target, so the fit has a closed form costing
-one sparse matrix-vector product for all factors at once, which is what makes tens of thousands
-of null fits feasible. `gate` reads `pass` only when `spearman` reaches its threshold.
+on the regulon's mode of regulation, zero for a non-target. The fit therefore has a closed form
+costing one sparse matrix-vector product for all factors at once, which is what makes tens of
+thousands of null fits feasible. `gate` reads `pass` only when `spearman` reaches its threshold.
 
 This satisfies the compartment's standing requirement that an engine swap be shown by rank
 correlation to be a method change.

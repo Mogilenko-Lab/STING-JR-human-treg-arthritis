@@ -20,17 +20,16 @@ figure uses. It is named for the curated categories it was built from.
 | `WT_heat_up` | Mouse-anchor 39 °C up arm, projected to human orthologs | 199 |
 
 Three candidate sets were kept out of the union deliberately.
-`GOBP_DETECTION_OF_TEMPERATURE_STIMULUS` and its thermoception sibling are
-thermosensory-neuron programs with no bearing on T cells, and `HP_FEVER` is a mutation-etiology
-panel rather than a transcriptional signature.
+`GOBP_DETECTION_OF_TEMPERATURE_STIMULUS` and its thermoception sibling are thermosensory-neuron
+programs with no bearing on T cells, and `HP_FEVER` is a mutation-etiology panel.
 
 **The independence is measurable.** `HSR_core` shares two genes with the 199-gene `WT_heat_up`
 (HSPA1A, HSPH1, Jaccard 0.008, tallied in `tables/hsr_wtheatup_overlap.csv`). The lens is a
 separate probe, and that separation is the reason for carrying it.
 
-This compartment re-pulls MSigDB in no run. `freeze_hsr_lens.R` freezes the byte-identical lens
-from the mouse anchor's `temp_hsr_human_lens.rds`, so the JIA lists and the anchor lists are the
-same genes.
+Every run here reads a frozen copy. `freeze_hsr_lens.R` takes the byte-identical lens from the
+mouse anchor's `temp_hsr_human_lens.rds`, so the JIA lists and the anchor lists are the same
+genes.
 
 ## What the lens returns
 
@@ -41,9 +40,9 @@ stays untested here.
 
 **The honest ceiling.** Even a clean heat-shock core is proteotoxic-stress-general. The mouse
 anchor is the only setting in this project with an experimental 37/39 °C contrast, so this lens
-is read correlatively and identifies a temperature driver in no case. Its scores are
-annotation tier, firewalled from the confirmatory `WT_heat` spine, and reach
-`effect_sizes_treg_arthritis.csv` in no row.
+is read correlatively and stops short of naming a temperature driver. Its scores are annotation
+tier, firewalled from the confirmatory `WT_heat` spine, and stay out of
+`effect_sizes_treg_arthritis.csv`.
 
 ---
 
@@ -58,11 +57,13 @@ blood-up at 1 — because the three rankings differ in length.
 
 Top panel: the weighted running enrichment score as each list is walked left to right, so a
 positive left-shifted excursion is synovial enrichment. Its y range is pinned to [−1.0, 1.0], the
-one range every running sum in this project is drawn on, so a curve's height means the same thing
-here as anywhere else. Middle panel: where each population's core genes sit in its ranking, one
-labelled row per population in matching colour. Bottom panel: the ranked moderated t each curve
-was computed on, which shows how much signal each rank carries and where the three rankings cross
-zero — the assumption the shared fractional axis rests on.
+one range every running sum in this project uses, so a curve's height means the same thing here
+as anywhere else.
+
+Middle panel: where each population's core genes sit in its ranking, one labelled row per
+population in matching colour. Bottom panel: the ranked moderated t each curve was computed on,
+which shows how much signal each rank carries and where the three rankings cross zero — the
+assumption the shared fractional axis rests on.
 
 Legend labels carry each NES and FDR, the effective size against the 56-gene nominal set, and its
 testability band. 44 of 56 genes are testable in every ranking. The Treg trace is a trend at FDR
@@ -77,9 +78,8 @@ testability band. 44 of 56 genes are testable in every ranking. The Treg trace i
 ### `tables/hsr_lens_nes.csv` — the summary
 
 One row per population and HSR term. Positive `nes` means the term is enriched toward the
-synovial-up end; `padj` is the FDR; `leading_edge` is semicolon-delimited. `evidence_tier` reads
-`secondary_annotation` throughout, which is the tier statement carried in the data rather than in
-prose alone.
+synovial-up end. `padj` is the FDR, and `leading_edge` is semicolon-delimited. `evidence_tier`
+reads `secondary_annotation` throughout, so the tier statement travels in the data itself.
 
 This is the table that carries the sign flip: `HSR_core` positive in Treg, negative in Tcon and
 CD8, with no population below FDR 0.05.
@@ -88,9 +88,8 @@ CD8, with no population below FDR 0.05.
 
 The per-population enrichment output. Positive NES means enrichment toward synovial-up genes,
 `padj` is the FDR, `core_enrichment` lists the leading edge. The `.rds` files preserve the
-`gseaResult` objects so a running sum can be reconstructed exactly if a later display needs it;
-they are compute substrate rather than separate statistics, and their numbers read through the
-sibling CSV and the summary above.
+`gseaResult` objects, so a running sum can be reconstructed exactly if a later display needs it.
+They are compute substrate, and their numbers read through the sibling CSV and the summary above.
 
 Each population answers its own question: Treg asks whether a clean proteostasis signal survives
 where `WT_heat_up` enriched, and Tcon and CD8 ask whether any such signal is Treg-specific or
@@ -102,13 +101,12 @@ The independence check. `n_a` and `n_b` are the sizes of `WT_heat_up` and the HS
 `n_intersect` and `jaccard` quantify the direct overlap, and `genes_intersect` lists the shared
 symbols. A gene-list annotation check, carrying no enrichment statistic.
 
-Two genes shared with `HSR_core` at Jaccard 0.008 is what makes the lens a separate probe rather
-than a restatement of the anchor.
+Two genes shared with `HSR_core` at Jaccard 0.008 is what makes the lens a separate probe.
 
 ### `tables/hsr_colocalization.csv`
 
 Rows stratified by population, HSR term, correlation level and method. `level = cell` uses
-individual synovial cells; `level = donor_sf_mean` correlates donor-level synovial means.
+individual synovial cells, and `level = donor_sf_mean` correlates donor-level synovial means.
 Positive `r` means higher `WT_heat_up` AUCell tends to coincide with higher HSR AUCell.
 
 A low cell-level `r` means the empirical arm and the curated lens label different cells, which is
@@ -127,7 +125,7 @@ without selecting cells on either score.
 
 | File | What it holds |
 |---|---|
-| `tables/_signatures_hsr/HSR_{core,sensitivity}.txt` | The stage-local copies handed to the enrichment engine — one sorted HGNC symbol per line. Inputs rather than results, kept so the command is self-contained. |
+| `tables/_signatures_hsr/HSR_{core,sensitivity}.txt` | The stage-local copies handed to the enrichment engine — one sorted HGNC symbol per line. Inputs, kept so the command is self-contained. |
 | `tables/runsum_interactive_hsr_gsea_{treg,tcon,cd8}_HSR_{core,sensitivity}.csv` | Six running-sum substrates in the shared schema: one row per ranked gene with `running_es`, `hit` and `leading_edge`. |
 | `tables/_overview/hsr_core_running_sum.csv` | The figure's same-stem source: per population, the NES, FDR, testable set size and ranked-list length its trace walks, which is why the three traces end at slightly different x. |
 | `tables/source_hash_manifest.csv` | The SHA-256 pin on the mouse-anchor projection this stage reads for the overlap table. A changed anchor stops the stage. |

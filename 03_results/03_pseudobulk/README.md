@@ -33,22 +33,21 @@ column naming the engine, so a later engine change stays contained to this stage
 **Pseudobulk profiles separate by tissue and by label.**
 Each point is one donor × tissue × label profile, on log-CPM over the top 2,000 variable genes.
 x, PC1; y, PC2. Circle gives synovial fluid and square paired blood; colour gives donor. Read for
-tissue separation and for a single donor dominating an axis; neither happens, which is what makes
+tissue separation and for a single donor dominating an axis. Neither happens, which is what makes
 donor pseudobulk well-posed here. Display transform only.
 *Source* `tables/pseudobulk_counts.csv` · `02_analysis/scripts/03_pseudobulk_de_viz.py`.
 
 ### `figures/_overview/treg_volcano.png`
 
 **The Treg contrast — the ranking every Treg-gate enrichment in this compartment is computed on.**
-x, log2 fold change, synovial fluid over paired blood; y, raw p on a −log10 scale, while
-significance is decided on FDR — the axis keeps the per-gene resolution that −log10(FDR)
-collapses. Colour gives four categories: neither cut, fold change only, FDR only, both. The
-dashed horizontal rule is the raw p realising FDR ≤ 0.05 (p ≤ 0.017) and the vertical rules
+x, log2 fold change, synovial fluid over paired blood; y, raw p on a −log10 scale. Significance
+is decided on FDR, and the raw-p axis keeps the per-gene resolution that −log10(FDR) collapses.
+Colour gives four categories: neither cut, fold change only, FDR only, both. The dashed
+horizontal rule is the raw p realising FDR ≤ 0.05 (p ≤ 0.017) and the vertical rules
 |log2FC| ≥ 1.0. The legend arrows give the up and down split of genes clearing both.
 
 1,797 genes clear both cuts, 860 up in the joint and 937 down. The ten named genes are the five
-most significant per side rather than the largest fold changes. The neighbour table holds the top
-500 by p with their category.
+most significant per side. The neighbour table holds the top 500 by p with their category.
 *Source* `tables/de_SFvsPB_treg.csv` · `02_analysis/scripts/03_pseudobulk_volcano_viz.R`.
 
 ### `figures/_overview/de_count_bar.png`
@@ -78,7 +77,7 @@ Counts at FDR < 0.05 and |log2FC| ≥ 1: 1,797 Treg, 1,949 Tcon, 1,695 CD8.
 
 Two columns, no header: HGNC symbol and the signed moderated t, sorted descending, so the top of
 the file is most synovial-up and the bottom most blood-up. 13,999 / 14,411 / 14,014 genes for
-Treg / Tcon / CD8 after expression filtering; the counts differ because `filterByExpr` is applied
+Treg / Tcon / CD8 after expression filtering. The counts differ because `filterByExpr` is applied
 within each population's own design.
 
 One row per symbol. Where several Ensembl ids share a symbol the most extreme |t| is kept, because
@@ -93,8 +92,8 @@ values summed raw integer UMIs. 39 strata over 21,740 genes. Values are left unn
 the DE engine expects raw counts and performs its own library-size normalisation.
 
 `pseudobulk_coldata.csv` — one row per column of the counts matrix, keyed
-`donor|tissue|coarse_label`. `donor` is the blocking factor; `tissue` is the contrast factor,
-with `synovial_fluid` the numerator and `peripheral_blood` the denominator; `n_cells` is the
+`donor|tissue|coarse_label`. `donor` is the blocking factor. `tissue` is the contrast factor,
+with `synovial_fluid` the numerator and `peripheral_blood` the denominator. `n_cells` is the
 cells summed into that column and reads as an aggregation weight. The 39 surviving strata hold
 266 to 4,454 cells each. The three absences — synovial Treg in patient 5, blood Tcon and blood
 CD8 in patient 3 — are why every population's contrast runs six donors in one tissue arm against
@@ -108,11 +107,11 @@ gene and creates no collision in this dataset.
 
 One row per sorted population. `n_sf` and `n_pb` count donor strata in each tissue arm, the unit
 being the stratum. `model` is the fitted design, reading `skipped` if an arm fell under the donor
-floor; `n_sig_de` counts genes passing both gates; `n_ranked` is the length of the ranked list
+floor. `n_sig_de` counts genes passing both gates, and `n_ranked` is the length of the ranked list
 handed to pre-ranked enrichment. The paired `~ donor + tissue` model returns 1,797 of 13,999 in
 Treg, 1,949 of 14,411 in Tcon and 1,695 of 14,014 in CD8. No arm was dropped for lack of donors.
 
-This is a diagnostic and powering table; the confirmatory statistics are the enrichment scores
+This is a diagnostic and powering table. The confirmatory statistics are the enrichment scores
 computed downstream from `ranked_*.tsv`.
 
 ### `tables/de_engine_migration.csv`

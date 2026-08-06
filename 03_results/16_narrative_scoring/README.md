@@ -16,9 +16,9 @@ mouse arms beside three lenses, the cGAS-STING and interferon family beside the 
 programs — plus the two violin figures carrying the distributions those colourings compress, and
 one stacked patchwork.
 
-**Tier.** Annotation only. A per-cell score localises a program on a map and tests it in no
-case. Nothing here pools with the donor-level pseudobulk spine, and this stage writes no
-effect-size row.
+**Tier.** Annotation only. A per-cell score localises a program on a map and tests nothing.
+Nothing here pools with the donor-level pseudobulk spine, and this stage writes no effect-size
+row.
 
 ## The three kinds of set, kept apart
 
@@ -36,21 +36,21 @@ effect-size row.
 **Down arms are out of scope here.** A per-cell colouring answers "where on this map is this
 program high", and a continuous colour scale renders an inverted arm as an absence.
 
-## What the map carries, and what correction: none
+## The coordinates carry no correction
 
 The embedding coordinates come verbatim from
 [`../interactive/08_harvest_readout.parquet`](../interactive/), which inherits the QC-filter
 recipe — `highly_variable_genes` → subset → `scale(max_value=10)` → `pca` → `neighbors` → `umap`
 — run with no batch key. Harmony, scVI and every other correction stay out of it.
 
-The donor structure that leaves is measured. On the Treg cells of this map, 42.0% of a cell's 30
-nearest neighbours share its donor against 14.6% expected
+The donor structure this leaves behind is measured. On the Treg cells of this map, 42.0% of a
+cell's 30 nearest neighbours share its donor against 14.6% expected
 (`../17_treg_reembedding/tables/treg_reembedding_mixing.csv`, rows `full_object_restricted`).
 Donor is crossed with tissue by design — all seven patients contribute to both arms — so that
 structure sits inside each tissue. The Treg-only map in
 [`../17_treg_reembedding/`](../17_treg_reembedding/) is the corrected one.
 
-## Three conventions that make the strips comparable
+## The conventions that make the strips comparable
 
 **One metric.** This stage ships AUCell and nothing else, so two colourings of the same map
 differ by gene set alone. Scores are computed on log-normalised expression from the frozen
@@ -72,8 +72,8 @@ before reading any colouring.
 **Which column carries the mouse arm.** Use `WT_heat_up_AUCell`. The substrate also carries
 `published_WT_heat_up`, a stale mean-centred scanpy `score_genes` module score inherited from the
 earlier readout, retained so the discrepancy stays visible. Against a genuine AUCell reference
-the column computed here reproduces at r = 1.000000 over all 99,915 cells, where
-`published_WT_heat_up` reaches r = 0.755, because it is a different metric.
+the column computed here reproduces at r = 1.000000 over all 99,915 cells, and
+`published_WT_heat_up` reaches r = 0.755, since it is a different metric.
 
 ---
 
@@ -85,9 +85,9 @@ the column computed here reproduces at r = 1.000000 over all 99,915 cells, where
 Six panels over one sampled 60,000-cell frame at identical coordinates, so a cell sits in the
 same place in all six. Panels 1 and 2 are the annotation this compartment is built on: tissue of
 origin, synovial fluid in vermillion and paired blood in blue, then the frozen FACS sort gate.
-Panels 3 to 5 are log-normalised FOXP3, IL2RA and CTLA4, joined on barcode, pooled onto one clip
-at the 2nd and 98th percentile (0.00 to 2.88) with the highest-expressing cells drawn last, so
-one bar in real units serves all three. Panel 6 is donor.
+Panels 3 to 5 are log-normalised FOXP3, IL2RA and CTLA4, joined on barcode. All three pool onto
+one clip at the 2nd and 98th percentile (0.00 to 2.88), with the highest-expressing cells drawn
+last, so one bar in real units serves the three. Panel 6 is donor.
 
 All seven donors contribute cells to both the synovial-fluid and the paired-blood side, the
 three sort gates occupy largely distinct territory within each tissue, and the identity genes
@@ -131,7 +131,7 @@ thinnest intersection in the strip, and `HALLMARK_INTERFERON_ALPHA_RESPONSE`. Ri
 `HALLMARK_IL2_STAT5_SIGNALING`, the programs the first family has to be distinguished from. One
 bar serves the row on the same rescaled 0-to-1 convention.
 
-The reading rule is the rule itself: a synovial-high colouring shared by both families is
+The reading rule follows from the layout: a synovial-high colouring shared by both families is
 generic inflammation, and only a pattern the left family carries alone would be specific to
 STING or interferon. The generic interferon axis and all three inflammatory programs brighten
 the synovial side in every gate. The published STING panel scores far lower in the Treg gate
@@ -147,17 +147,17 @@ of proving it.
 ### `figures/_overview/arm_score_violins.png`
 
 **The distributions behind the arm strip, panel for panel.**
-One panel per gene set, in the panel order of `umap_full_arms.png`, so the two figures lay side
+One panel per gene set, in the panel order of `umap_full_arms.png`, so the two figures lie side
 by side. Inside a panel the x axis is the three frozen sort labels and the two violins of a
 label are the two tissues: warm synovial fluid, cool paired blood, black line at the median.
 Each panel keeps its own y axis, because the sets range from 7 to 195 genes scored.
 
-The grey row under each panel answers what the violins are worst at. It gives Cliff's δ of
-synovial fluid against paired blood inside one sort label — the probability that a random
-synovial cell outscores a random blood cell of the same label, ties counted as half, rescaled
-onto −1 to +1. It is unit-free, so one ±1 axis serves every panel and a label-selective tissue
-effect reads as a δ standing away from the other two in its own panel while staying level in the
-panels beside it. Behind each pooled δ sit the per-donor δ values.
+The grey row under each panel carries what a violin shows worst. It gives Cliff's δ of synovial
+fluid against paired blood inside one sort label — the probability that a random synovial cell
+outscores a random blood cell of the same label, ties counted as half, rescaled onto −1 to +1. It
+is unit-free, so one ±1 axis serves every panel. A label-selective tissue effect reads as a δ
+standing away from the other two in its own panel while staying level in the panels beside it.
+Behind each pooled δ sit the per-donor δ values.
 
 All six sets score higher in synovial fluid in all three sort labels. The mouse arm separates at
 δ 0.623 in Treg, 0.508 in Tcon and 0.329 in CD8 — largest in Treg — and the three lenses beside
@@ -179,9 +179,9 @@ colouring is shared by the cGAS-STING family and by the inflammation programs it
 apart from. Separations span δ 0.160 (`HALLMARK_TNFA_SIGNALING_VIA_NFKB` in CD8) to 0.739
 (`HALLMARK_IL2_STAT5_SIGNALING` in Treg). The widest Treg lead over both other labels belongs to
 `HALLMARK_IL2_STAT5_SIGNALING` (0.739 against 0.466 and 0.208), a gap of 0.273, which is the
-scale of Treg-selectivity this per-cell channel carries at all.
+scale of Treg-selectivity this per-cell channel resolves.
 
-This figure supports one reading its map does not: the zero fraction. The 18-gene published
+This figure supports one reading beyond its map: the zero fraction. The 18-gene published
 STING panel sits lowest of the six in the Treg gate (per-cell mean 0.0424 against 0.0809 in Tcon
 and 0.0816 in CD8) and leaves 40% of Treg blood cells at exactly zero, drawing as a body pinned
 to the axis. A tissue difference resting on that baseline tracks how many cells score anything
@@ -198,8 +198,8 @@ identical coordinates. The units differ: the top row is categorical annotation p
 log-normalised expression, the bottom row per-cell AUCell rescaled per panel onto one 0-to-1
 bar. Each row's own caption carries its full reading.
 
-The arms brighten the synovial-fluid side of every gate, and the gate FOXP3 marks is not the
-gate where they brighten most.
+The arms brighten the synovial-fluid side of every gate, and they brighten most in a gate other
+than the one FOXP3 marks.
 *Source* `tables/_overview/umap_full_patchwork.csv` ·
 `02_analysis/scripts/16_narrative_embedding_viz.py`.
 
@@ -223,15 +223,15 @@ only 119 symbols (59%), the thinnest intersection in the panel.
 
 One row per (`set_name` × `coarse_label` × `tissue`): mean, median and standard deviation of the
 per-cell AUCell score, with the cell and donor counts behind it. `coarse_label` is the FACS sort
-gate. Scores are bounded in [0, 1] and comparable across tissues **within** a `set_name`, and
-AUCell's scale depends on set size, so a larger mean across sets means no stronger program.
+gate. Scores are bounded in [0, 1] and comparable across tissues **within** a `set_name`.
+AUCell's scale depends on set size, so a mean compares only inside one set.
 
 Cells pool across donors, so the unit of replication is the cell and every tissue difference
 here is descriptive. `evidence_tier` reads `secondary_percell` throughout.
 
-Read across the panel, means sit higher in synovial fluid than in paired blood for the mouse arm
-and for the curated hypoxia lens alike, and the mouse arm's shift appears in Tcon and CD8 as
-well as Treg.
+Across the panel, means sit higher in synovial fluid than in paired blood for the mouse arm and
+for the curated hypoxia lens alike, and the mouse arm's shift appears in Tcon and CD8 as well as
+Treg.
 
 ### `tables/_overview/<figure stem>.csv`
 

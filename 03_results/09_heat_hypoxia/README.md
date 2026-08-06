@@ -10,22 +10,22 @@ costs 0.126 to 0.164 NES — 2.5914 → 2.4271 in Treg, 2.6826 → 2.5565 in Tco
 CD8 — leaving all three significant at FDR ≤ 4.1e-5
 (`tables/gene_purge_nes_comparison.csv`).
 
-**What that licenses is narrow, and stating the bound is the point of the stage.** A positive
-purged score means the enrichment holds without those genes. Temperature is untested here.
-Temperature and hypoxia are jointly imposed by the inflamed joint and stay entangled in
-cross-sectional human data, so the causal structure between them stays undetermined and this
-stage asserts none. Hypoxia is a transcriptional readout throughout.
+**What that licenses is narrow, and naming the bound is the point.** A positive purged score
+means the enrichment holds without those genes. Temperature is untested here. Temperature and
+hypoxia are jointly imposed by the inflamed joint and stay entangled in cross-sectional human
+data, so the causal structure between them stays undetermined and this stage asserts none.
+Hypoxia is a transcriptional readout throughout.
 
-One figure carries the question and stops there. The reader sequence then moves to the curated
-whole-arm coverage panel in [`../11_heat_decomposition/`](../11_heat_decomposition/), which alone
-answers what the set contains.
+One figure carries the question and stops there. The panel to read next is the curated whole-arm
+coverage figure in [`../11_heat_decomposition/`](../11_heat_decomposition/), which answers what
+the set contains.
 
 **Two tables remain as compute resources with no panel of their own.**
 `heat_hypoxia_colocalization.csv` carries the per-cell agreement between the heat and hypoxia
 scores, read by the reactive review notebook and by the cross-dataset layer.
 `leadingedge_composition.csv` carries a model-assigned taxonomy of the genes at the synovial end
-of each ranking; its visualisation is withdrawn, because a fraction over genes selected because
-they enriched describes that leading edge rather than the arm.
+of each ranking. Its visualisation is withdrawn: a fraction taken over genes selected for having
+enriched describes that leading edge alone.
 
 ---
 
@@ -54,7 +54,7 @@ pre-ranked enrichment — and it licenses a membership statement.
 ### `tables/gene_purge_nes_comparison.csv` — the paired answer
 
 One row per sorted population. `NES_full` is the original `WT_heat_up` score and `NES_purged` the
-same engine after removing the hypoxia-overlap genes; positive means enriched toward the synovial
+same engine after removing the hypoxia-overlap genes. Positive means enriched toward the synovial
 end. `genes_removed` echoes the deleted list.
 
 A positive, significant purged score is evidence that the enrichment holds without its
@@ -70,8 +70,8 @@ leading edge.
 `WT_heat_up` reaches NES 2.59 (Treg), 2.68 (Tcon) and 2.07 (CD8), all at FDR ≤ 3.6e-7.
 `WT_heat_down` leans positive and reaches significance in Tcon alone (1.47, FDR 0.026) against
 Treg (0.97, 0.51) and CD8 (1.09, 0.31). **The positive down arm is the caveat**: both arms move
-the same way, so the synovial shift is a shared shift rather than a clean bidirectional
-recapitulation of the mouse contrast.
+the same way, so the synovial shift is a shared shift. A clean bidirectional recapitulation of
+the mouse contrast would move the two arms apart.
 
 ### `tables/gsea_purged_{treg,tcon,cd8}.csv`
 
@@ -85,9 +85,9 @@ comparison.
 
 The frozen mouse-anchor human-ortholog sets exactly as handed to the enrichment engine — 199 up
 genes and 94 down. Plain newline-delimited HGNC symbols, alphabetically ordered, with the
-direction carried by the filename. These are inputs rather than results: their value is
-provenance, and they are regenerated verbatim from the frozen contract on every run. Diff them
-against `_signatures_purged/` to see exactly what the purge removed.
+direction carried by the filename. These are inputs. Their value is provenance, and they are
+regenerated verbatim from the frozen contract on every run. Diff them against
+`_signatures_purged/` to see exactly what the purge removed.
 
 ### `tables/_signatures_purged/WT_heat_{up,down}.txt`
 
@@ -101,19 +101,18 @@ synovial-high side.
 ### The two compute resources
 
 **`tables/heat_hypoxia_colocalization.csv`** — rows stratified by population, level and
-correlation method. `level = cell` uses synovial cells directly; `level = donor_sf_mean`
+correlation method. `level = cell` uses synovial cells directly, and `level = donor_sf_mean`
 correlates per-donor synovial means. Positive `r` means a higher `WT_heat_up` score tends to sit
 with a higher hypoxia score.
 
 The cell-level correlation is weak, Spearman 0.08 to 0.20, so `WT_heat_up`-high and hypoxia-high
-cells are largely distinct cells by this measure. The donor-level correlation rests on six to
-seven donors and is effectively unpowered, so its sign supports no reading. Secondary per-cell
-tier.
+cells are largely distinct by this measure. The donor-level correlation rests on six to seven
+donors and is effectively unpowered, so its sign supports no reading. Secondary per-cell tier.
 
 **`tables/leadingedge_composition.csv`** — one row per population. `n_leading_edge` counts the
 core-enrichment genes from the full run, 49 to 71 per population, and each is assigned to one
 program by the frozen model-assigned taxonomy named in `taxonomy_source`
-(`agy_gemini_3.1_pro_2026-07-14`); `n_unclassified` counts genes assigned to nothing.
+(`agy_gemini_3.1_pro_2026-07-14`). `n_unclassified` counts genes assigned to nothing.
 
 The taxonomy puts 55% to 61% of those genes in immediate-early or effector-activation categories.
 **Those are fractions of leading-edge genes**, and they sit on a different denominator from the
@@ -131,5 +130,5 @@ Twelve files, the gene-by-gene walk behind every curve, in the shared running-su
 
 The figure's same-stem source pairs the full and purged score side by side so the cost reads as
 one subtraction — six rows, six markers, nothing aggregated. The manifest pins every
-cross-compartment source this stage reads by SHA-256; the compute script stops if a pinned file
-drifts.
+cross-compartment source this stage reads by SHA-256, and the compute script stops if a pinned
+file drifts.

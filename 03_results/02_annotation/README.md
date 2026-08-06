@@ -1,8 +1,8 @@
 # 02_annotation — Auditing the sort labels against expression
 
-**Sorting is the label of record throughout this compartment.** Every artifact in this stage
-audits that label against expression; none replaces it. Freezing the FACS gate rather than a
-clustering call is what lets the pseudobulk contrast run inside a fixed cell state.
+**Sorting is the label of record throughout this compartment.** Every artifact here audits that
+label against expression, and the label itself stays fixed. Freezing the FACS gate is what lets
+the pseudobulk contrast run inside a fixed cell state.
 
 The audit passes. Marker-module argmax reproduces the sort gate for 85.6% of the 99,915
 QC-passing cells, the off-diagonal mass is overwhelmingly Tcon against CD8, and the twelve panel
@@ -25,9 +25,9 @@ sound anchor for pseudobulk.
 ### `figures/_overview/marker_dotplot.png`
 
 **Twelve canonical markers, three frozen labels.**
-Dot size gives the fraction of cells expressing and colour the mean log-normalised expression;
-rows are the frozen labels. FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted; CD8A, CD8B and
-GZMK mark the CD8 gate; IL7R runs lowest in Tregs, as a CD127-lo sort requires.
+Dot size gives the fraction of cells expressing and colour the mean log-normalised expression.
+Rows are the frozen labels. FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted, CD8A, CD8B and
+GZMK mark the CD8 gate, and IL7R runs lowest in Tregs, as a CD127-lo sort requires.
 *Source* `tables/substate_markers.csv` · `02_analysis/scripts/02_annotate_states_viz.py`.
 
 ### `figures/_overview/counts_grid.png`
@@ -52,8 +52,8 @@ same Treg / Tcon / CD8 order, so the diagonal reads directly.
 
 Agreement runs 89.6% in Treg, 83.8% in Tcon and 84.4% in CD8, 85.6% overall. The off-diagonal
 mass is overwhelmingly Tcon against CD8, and 195 sorted Tregs land on the CD8 module, so the Treg
-gate is clean enough to freeze. Each module holds four or five genes and shared cytotoxic and
-activation genes blur Tcon against CD8, so a demonstrated mis-sort takes more evidence than this
+gate is clean enough to freeze. Each module holds four or five genes, and shared cytotoxic and
+activation genes blur Tcon against CD8. Demonstrating a mis-sort takes more evidence than this
 table supplies.
 
 ### `tables/counts_donor_by_label_tissue.csv`
@@ -62,7 +62,7 @@ One row per donor × frozen coarse label × tissue, with `n_cells` counting cell
 Read each row against the per-stratum floor (`pseudobulk_min_cells = 20`) and each label × tissue
 arm against the donor floor (`pseudobulk_min_donors = 3`).
 
-All 39 surviving strata clear the cell floor; the thinnest, blood Treg p7, holds 266 cells. Every
+All 39 surviving strata clear the cell floor. The thinnest, blood Treg p7, holds 266 cells. Every
 arm keeps at least six donors, so each contrast sits well above the donor floor. Absent rows carry
 two distinct causes: p3 blood Tcon and blood CD8 were never collected, and synovial Treg p5 is the
 near-empty library QC excluded. The compute step applies no floor itself, leaving the gating to
@@ -72,7 +72,7 @@ pseudobulk.
 
 36 rows — twelve panel markers × three frozen labels. `mean_lognorm` is the mean log-normalised
 expression across every cell carrying that label, zeros included, so it is diluted by
-non-expressers; `frac_expressing` is the fraction with more than 0 UMI.
+non-expressers. `frac_expressing` is the fraction with more than 0 UMI.
 
 FOXP3 reaches mean 1.69 in 80% of sorted Tregs against 0.06 in Tcon and 0.02 in CD8. CD8A marks
 93% of CD8 cells and under 0.5% of cells in either other gate. IL7R runs highest in Tcon (2.35)

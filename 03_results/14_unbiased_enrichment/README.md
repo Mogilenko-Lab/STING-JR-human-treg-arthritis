@@ -1,10 +1,10 @@
 # 14_unbiased_enrichment — The whole sweep, and where the mouse arm sits in it
 
 Every targeted test in this compartment hands the JIA synovial-fluid-versus-paired-blood ranking
-one named signature and asks whether it enriches. It does. A targeted test answers about the set
-it was handed, and it stays silent on whether that answer is remarkable. This stage asks the
-unbiased counterpart of the same three frozen rankings: **what does this niche contrast contain
-across curated databases, with no set privileged?**
+one named signature and asks whether it enriches. It does. A targeted test answers for the set it
+was handed and stays silent on whether that answer is remarkable. This stage asks the unbiased
+counterpart of the same three frozen rankings: **what does this niche contrast contain across
+curated databases, with no set privileged?**
 
 The two questions are informative together. If a hundred inflammatory programs move as strongly
 as the mouse-derived arm, the arm's enrichment describes the niche. If almost nothing else moves
@@ -13,9 +13,9 @@ that strongly, the arm is distinctive. This stage says which.
 **What was computed.** Pre-ranked fgsea over 15 gene-set collections in each of the three
 sorted populations — 11,514 tests in Treg, 11,752 in Tcon, 11,532 in CD8 — on the same
 donor-level pseudobulk rankings the confirmatory answer rests on, with two multiplicity
-corrections published side by side. Then decoupleR MLM on the human PROGENy model, which needs
-no gene-set list and so inherits no curation decision, run both on the contrast statistics and
-paired across donors.
+corrections published side by side. Then decoupleR MLM on the human PROGENy model, run both on
+the contrast statistics and paired across donors. PROGENy needs no gene-set list, so it inherits
+no curation decision.
 
 **What was drawn.** Sixteen overview panels carry the reading — the calibration scatter, the top
 sets, the two PROGENy panels, the arm and program NES-by-cell-state dots, the named sets placed
@@ -43,9 +43,9 @@ synovial-side significant sets it ranks **5th**, behind `eTreg_up` (+3.72),
 
 So the arm sits at the top of the synovial-side distribution in sorted CD4 cells and inside it
 in CD8. A great deal co-enriches with it in every population. That is compatible with what this
-compartment established by other routes — the synovial enrichment is shared across sorted
-populations, and by curated composition the up arm is largely inflammatory — and it adds the
-part a targeted test omits: what the arm is at the top of.
+compartment established by other routes: the synovial enrichment is shared across sorted
+populations, and by curated composition the up arm is largely inflammatory. The sweep adds the
+part a targeted test omits — what the arm is at the top of.
 
 **`KO_heat_up` tracks it row for row** (+2.60 Treg, +2.66 Tcon, +2.06 CD8), which is the
 arithmetic to expect from arms sharing 185 genes, and a further reason to read the WT arm as
@@ -74,15 +74,15 @@ sign difference at trend level.
 
 ## Two corrections, both published
 
-`padj` is Benjamini-Hochberg within one collection, which is what a single-collection run
-reports. `padj_pooled` corrects across every test asked of that population's ranking, which is
-the honest correction for a sweep that interrogates one ranking fifteen times.
+`padj` is Benjamini-Hochberg within one collection, the correction a single-collection run
+reports. `padj_pooled` corrects across every test asked of that population's ranking, the honest
+correction for a sweep that interrogates one ranking fifteen times.
 
 Pooling redistributes as much as it tightens. In Treg the total barely moves while the small
 hand-picked collections lose and GO_BP gains, because Benjamini-Hochberg divides by rank as well
 as multiplying by family size (`tables/gsea_pooled_summary_by_db.csv`). The effect that matters
 is the first: a deliberately chosen collection of fifty stops benefiting from having been tested
-alone. That is the correction a targeted test cannot apply to itself.
+alone. That correction is available only to a sweep.
 
 **One set, one hypothesis.** Six MSigDB Hallmark sets are held twice, once live and once as this
 compartment's frozen re-pin. Both copies are scored, their gene content is verified identical
@@ -94,7 +94,7 @@ copies doubles as a drift check on the frozen files, and the whole record sits i
 
 Count matrices here are keyed by Ensembl id while every reference set matches on HGNC symbol. A
 leaked Ensembl-keyed ranking intersects all fifteen collections at approximately zero, and fgsea
-reports that as empty rows rather than as an error, so it reads as a biological null.
+returns empty rows with no error raised, so the failure reads as a biological null.
 `tables/ranked_list_keycheck.csv` measures the key vocabulary and stops the run above a 0.5
 Ensembl-like fraction, and `tables/geneset_overlap.csv` publishes the per-collection gene
 overlap as positive evidence that the join joined.
@@ -122,8 +122,8 @@ the frozen arm holds, then the adjusted p.
 genes, 2.6823 in Tcon on 131, 2.0625 in CD8 on 114, every one below pooled FDR 1e-4. The Treg
 score sits between the Tcon and CD8 scores, so the separation reads as pan-T. `KO_heat_up`
 tracks it row for row. The 7-gene interaction arm reaches 1.4050 to 1.5435 on 6 testable genes
-and clears pooled FDR 0.05 in no state. Read every score with its gene count: resolution scales
-with it, and these arms span 6 to 147 testable genes.
+and stays above pooled FDR 0.05 in every state. Read every score with its gene count: resolution
+scales with it, and these arms span 6 to 147 testable genes.
 *Source* `tables/_overview/arm_nes_by_cell_state.csv` ·
 `02_analysis/scripts/14_unbiased_enrichment_viz.py`.
 
@@ -138,8 +138,8 @@ The four hypoxia-named sets disagree with each other, spanning `HALLMARK_HYPOXIA
 1.4e-08 down to `GOBP_CELLULAR_RESPONSE_TO_OXYGEN_LEVELS` at 0.362 in Treg, so a hypoxia reading
 depends on which curated set is asked. The curated proteostasis core changes sign between the
 sorted populations (+1.49 Treg, −1.33 Tcon, −1.13 CD8) while clearing FDR in none of them. The
-generic interferon axis clears comfortably in all three where the published STING signature
-clears in Tcon alone.
+generic interferon axis clears comfortably in all three, and the published STING signature clears
+in Tcon alone.
 *Source* `tables/_overview/program_nes_by_cell_state.csv` ·
 `02_analysis/scripts/14_program_nes_by_cell_state_viz.py`.
 
@@ -159,9 +159,9 @@ Hypoxia +7.4 (FDR 1.2e-03), with WNT at −3.5 and TNFα at −2.0 on the blood 
 the inflammatory ones.
 
 Two limits bind the reading. Activity is computed on expression centred within a population, so
-a difference compares between pathways of one population and carries no meaning across
-populations. And six pairs is a small n, so an open marker leaves the question open. A footprint
-is inferred from target-gene expression, and pathway activity itself is untested.
+a difference compares pathways inside one population and carries no meaning across populations.
+Six pairs is also a small n, so an open marker leaves the question open. A footprint is inferred
+from target-gene expression, and pathway activity itself is untested.
 *Source* `tables/_overview/progeny_paired_forest.csv` ·
 `02_analysis/scripts/14_progeny_paired_forest_viz.R`.
 
@@ -228,8 +228,8 @@ point rests on few genes. The grey number is pooled FDR, and a black ring marks 
 arm.
 
 `WP_CYTOPLASMIC_RIBOSOMAL_PROTEINS` reaches −3.45 toward blood against `eTreg_up` at +3.72
-toward synovial fluid, so the inflammatory gain this compartment reads is accompanied by an at
-least equally large loss of translation and ribosomal programs.
+toward synovial fluid, so the inflammatory gain this compartment reads comes alongside a loss of
+translation and ribosomal programs at least as large.
 *Source* `tables/_overview/treg_top_sets.csv` ·
 `02_analysis/scripts/14_unbiased_enrichment_viz.R`.
 
@@ -271,7 +271,7 @@ whole sweep.
 
 Two reading rules. The panel types rank by different metrics — adjusted p for dotplot and facet,
 |NES| for barplot and running_sum — so read an absence against the rule named in that panel's own
-subtitle. And five collections are too small for the full battery and carry fewer panels; the
+subtitle. Five collections are also too small for the full battery and carry fewer panels. That
 omission is a redundancy judgement recorded per collection, and every set of every collection
 appears in `gsea_all.csv`.
 *Source* `tables/by_contrast/<population>/<COLLECTION>/*.csv` ·
@@ -317,11 +317,11 @@ ranking falls outside 5 to 500 is declined. That is a coverage fact about the da
 the donor-pseudobulk moderated-t statistics. **The `nes` column here holds an MLM activity
 statistic**, named for schema compatibility with the fgsea outputs it sits beside. Its
 magnitudes run much larger than any normalised enrichment score, so never rank or threshold this
-file against a `gsea_*.csv` file. `set_size` and `core_enrichment` describe the model rather than
-the result, because MLM has no leading edge.
+file against a `gsea_*.csv` file. `set_size` and `core_enrichment` describe the model, because
+MLM has no leading edge.
 
 **`tables/progeny_donor_activity.csv`** — one row per pseudobulk sample and pathway, 546 rows,
-which is what lets the direction be tested paired. `activity` is the MLM score against that
+the substrate that lets the direction be tested paired. `activity` is the MLM score against that
 population's own centred log-CPM matrix, and `pvalue` is decoupleR's per-sample value.
 Comparable within a population, never across.
 
@@ -355,6 +355,6 @@ ranked gene: `stat`, `running_es` recomputed off the fitted object's own gene li
 
 ### `tables/_overview/<figure stem>.csv`
 
-One file per overview figure, written in the same call that writes the figure, so a panel cannot
-exist without the numbers behind it. Each is deliberately narrowed to what is drawn — read the
+One file per overview figure, written in the same call that writes the figure, so every panel
+ships with the numbers behind it. Each is deliberately narrowed to what is drawn — read the
 stage tables above for anything wider.
