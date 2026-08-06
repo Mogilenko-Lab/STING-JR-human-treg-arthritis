@@ -83,8 +83,8 @@ overlap genes costs 0.126 to 0.164 NES and leaves all three populations signific
 (`09_heat_hypoxia/tables/gene_purge_nes_comparison.csv`). That is a statement about gene content
 and nothing more.
 
-**The niche moves an enormous amount at once.** 1,442 of 11,513 tests reach pooled FDR 0.05 in
-Treg, 2,042 of 11,751 in Tcon, 937 of 11,531 in CD8, and the largest single effects run toward
+**The niche moves an enormous amount at once.** 1,443 of 11,514 tests reach pooled FDR 0.05 in
+Treg, 2,043 of 11,752 in Tcon, 939 of 11,532 in CD8, and the largest single effects run toward
 blood — `WP_CYTOPLASMIC_RIBOSOMAL_PROTEINS` at NES −3.45. Among the programs moving toward the
 joint in sorted CD4 cells the arm sits near the top of the distribution; that calibration is what
 [`14_unbiased_enrichment`](14_unbiased_enrichment/) exists to supply.
