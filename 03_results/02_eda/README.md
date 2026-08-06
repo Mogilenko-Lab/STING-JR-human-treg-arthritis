@@ -1,40 +1,12 @@
-# 02_eda — Exploratory Analysis
+# 02_eda — Unused
 
-One sentence: what decision does this phase make, what does it produce, what comes next.
+This stage number is reserved and carries no artifacts. Its `figures/` and `tables/` directories
+hold a `.gitkeep` apiece.
 
-This file is the **figure legend sheet** for `02_eda/`. Every artifact in `tables/` and
-`figures/` gets one entry below, written as the artifact is produced (not batched at the end).
+The exploratory work this slot was scaffolded for is done elsewhere. The unsupervised embedding
+and the mitochondrial-pocket characterisation live in [`../01_qc/`](../01_qc/); the sort-label
+audit lives in [`../02_annotation/`](../02_annotation/); the pseudobulk principal-component view
+lives in [`../03_pseudobulk/`](../03_pseudobulk/).
 
-Entry format — one block per artifact:
-
-```
-## <filename.ext>
-
-**<Finding: one scientific sentence — what the artifact shows, not what it is.>**
-
-[Optional: 1–3 sentences of context if the finding alone is insufficient.]
-
-| | |
-|---|---|
-| Script   | `02_analysis/scripts/<NN_script>.py` or `.R` |
-| Function | `exact_function_name()` |
-| Config   | `path.to.key = value` |
-| Input    | `<primary input path>` |
-```
-
-Rules: Finding is scientific (paper-legend grade), Function is the exact name read from the
-script (never guessed), Config is the active key=value at production time, and entries never
-reference `docs/_internal/`.
-
----
-
-## <example_figure.pdf>
-
-**Replace with the scientific finding this figure demonstrates.**
-
-| | |
-|---|---|
-| Script   | `02_analysis/scripts/02_eda.py` |
-| Function | `replace_with_real_function()` |
-| Config   | `visualization.n_top_pathways = 20` |
-| Input    | `03_results/objects/<checkpoint>` |
+The directory is retained so the stage numbering stays contiguous with the script numbering under
+`02_analysis/scripts/`.

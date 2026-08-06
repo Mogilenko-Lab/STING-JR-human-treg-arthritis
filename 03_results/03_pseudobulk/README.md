@@ -1,171 +1,126 @@
-# 03_pseudobulk: artifact captions
+# 03_pseudobulk — The donor-paired synovial-versus-blood contrast
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood; Treg =
-CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory. The cohort
-holds 7 JIA donors, of whom 6 span both arms in each analyzed population after QC._
+This is the confirmatory spine of the compartment. Cells are summed to one profile per donor ×
+tissue × frozen sort label, and the contrast is fitted on those profiles, so each donor casts one
+vote. Everything downstream that supports a claim reads the rankings this stage writes.
 
-Differential expression runs in R across an explicit file seam. Aggregation to donor × tissue ×
-label pseudobulk (one profile per donor, tissue and frozen label) is Python
-(`03a_pseudobulk_export.py`, counts only). The model is R (`03b_pseudobulk_de.R`: `filterByExpr` →
-TMM → voom → `lmFit` → `eBayes(robust=TRUE)`).
+**The work splits across an explicit file seam.** Aggregation is Python
+(`03a_pseudobulk_export.py`) and writes plain CSVs of raw integer counts, running no statistics.
+The model is R (`03b_pseudobulk_de.R`): `filterByExpr` → TMM → `voom` → `lmFit` →
+`eBayes(robust=TRUE)`, on `~ donor + tissue`.
 
-Every downstream enrichment stage ranks on the signed moderated t-statistic. The DE tables carry an
+**The seam carries a gene map, and that is load-bearing.** The counts matrix is keyed by Ensembl
+id while every reference gene set matches on HGNC symbol. `gene_symbols.csv` crosses that gap and
+the R script asserts its presence before ranking. Ranked lists keyed by Ensembl id would intersect
+every reference set at approximately zero, and enrichment tools report that as an empty result, so
+the failure would be silent.
+
+**What the contrast returns.** Synovial-fluid Tregs carry a reproducible program against the same
+donors' blood: 1,797 genes clear FDR ≤ 0.05 and |log2FC| ≥ 1, 860 up in the joint and 937 down,
+with 4,764 clearing the FDR cut alone. Tcon returns 1,949 and CD8 1,695 at the same gates, so
+every population carries a ranked list powered for signature enrichment.
+
+Every downstream enrichment stage ranks on the **signed moderated t**. The DE tables carry an
 engine-agnostic column schema (`log2FoldChange`, `stat`, `pvalue`, `padj`) plus a `de_engine`
-column naming the engine that produced them, so a later engine change stays contained to this
-stage.
+column naming the engine, so a later engine change stays contained to this stage.
 
-## figures/_overview/pseudobulk_pca.png
+---
 
-Pseudobulk samples separate by tissue and by label, and no single
-donor dominates an axis, so donor pseudobulk is well-posed for SF-
-versus-PB differential expression.
+## Figures
 
-**How to read:** Each point is one donor × tissue × label pseudobulk profile (log-CPM,
-top 2,000 variable genes). Circle is SF, square PB, colour donor. Read
-for tissue separation and for the absence of a single-donor axis.
-Display transform only.
+### `figures/_overview/pseudobulk_pca.png`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03_pseudobulk_de_viz.py` | `main` | `thresholds.pseudobulk_min_cells (strata filter)` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv` |
+**Pseudobulk profiles separate by tissue and by label.**
+Each point is one donor × tissue × label profile, on log-CPM over the top 2,000 variable genes.
+x, PC1; y, PC2. Circle gives synovial fluid and square paired blood; colour gives donor. Read for
+tissue separation and for a single donor dominating an axis; neither happens, which is what makes
+donor pseudobulk well-posed here. Display transform only.
+*Source* `tables/pseudobulk_counts.csv` · `02_analysis/scripts/03_pseudobulk_de_viz.py`.
 
-## figures/_overview/treg_volcano.png
+### `figures/_overview/treg_volcano.png`
 
-Synovial-fluid Tregs carry a reproducible SF-versus-PB transcriptional
-program, 1,797 genes at FDR < 0.05 and |log2FC| ≥ 1.0. This is the
-substrate the mouse-derived signature is tested against.
+**The Treg contrast — the ranking every Treg-gate enrichment in this compartment is computed on.**
+x, log2 fold change, synovial fluid over paired blood; y, raw p on a −log10 scale, while
+significance is decided on FDR — the axis keeps the per-gene resolution that −log10(FDR)
+collapses. Colour gives four categories: neither cut, fold change only, FDR only, both. The
+dashed horizontal rule is the raw p realising FDR ≤ 0.05 (p ≤ 0.017) and the vertical rules
+|log2FC| ≥ 1.0. The legend arrows give the up and down split of genes clearing both.
 
-**How to read:** x is log2 fold change SF over PB, y is −log10 padj, orange marks
-significance. Dashed lines are the FDR and |log2FC| gates. The top 500
-genes are tabulated alongside. Correlative donor-pseudobulk DE.
+1,797 genes clear both cuts, 860 up in the joint and 937 down. The ten named genes are the five
+most significant per side rather than the largest fold changes. The neighbour table holds the top
+500 by p with their category.
+*Source* `tables/de_SFvsPB_treg.csv` · `02_analysis/scripts/03_pseudobulk_volcano_viz.R`.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03_pseudobulk_de_viz.py` | `main` | `thresholds.de_fdr=0.05; de_logfc=1.0` | `03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv` |
+### `figures/_overview/de_count_bar.png`
 
-## figures/_overview/de_count_bar.png
+**Every population carries a powered ranking.**
+One bar per population; y, the count of significant synovial-versus-blood DE genes. Treg 1,797,
+Tcon 1,949, CD8 1,695. Read it to confirm each arm carries enough signal to rank for pre-ranked
+enrichment.
+*Source* `tables/de_summary.csv` · `02_analysis/scripts/03_pseudobulk_de_viz.py`.
 
-All 3 sorted populations yield significant SF-versus-PB differential
-expression — 1,797 genes in Treg, 1,949 in Tcon, 1,695 in CD8 — so
-each has a ranked list powered for signature enrichment.
+---
 
-**How to read:** One bar per population, height the count of significant SF-versus-PB
-DE genes. Read it to confirm each arm carries enough signal to rank
-for pre-ranked GSEA. Diagnostic.
+## Tables
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03_pseudobulk_de_viz.py` | `main` | `thresholds.de_fdr=0.05; de_logfc=1.0` | `03_results/03_pseudobulk/tables/de_summary.csv` |
+### `tables/de_SFvsPB_{treg,tcon,cd8}.csv` — the primary result
 
-## tables/pseudobulk_coldata.csv
+One file per sorted population, one row per gene, sorted by p-value. `stat` is the signed
+moderated t-statistic and `log2FoldChange` the log2 fold change, both positive when the gene is
+higher in synovial fluid. `padj` is BH across genes within that population. `avg_expr` is limma's
+average log2-CPM, named that way because `baseMean` denotes a differently scaled quantity.
+`model` records the fitted design, `n_paired_donors` how many donors appeared in both tissues, and
+`de_engine` the engine.
 
-39 of the 42 possible donor × tissue × label strata survive aggregation, each holding 266 to 4,454
-cells, all above the 20-cell floor. The three absences — SF Treg in patient 5, PB Tcon and PB CD8 in
-patient 3 — are why every population's contrast runs 6 donors in one tissue arm against 7 in the
-other.
+Counts at FDR < 0.05 and |log2FC| ≥ 1: 1,797 Treg, 1,949 Tcon, 1,695 CD8.
 
-**How to read:** One row per column of `pseudobulk_counts.csv`, keyed `donor|tissue|coarse_label`.
-`donor` is the blocking factor; `tissue` is the contrast factor, with `synovial_fluid` the numerator
-and `peripheral_blood` the denominator; `coarse_label` is the frozen population; `n_cells` is the
-cells summed into that column. Cell counts are aggregation weights — read them to judge whether a
-stratum is thin. This is the design table behind the primary donor-pseudobulk tier: a stratum
-missing here removes that donor from the population's contrast.
+### `tables/ranked_{treg,tcon,cd8}.tsv` — the single downstream input
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03_pseudobulk_de.py` | `main` | `thresholds.pseudobulk_min_cells=20` | `03_results/objects/02_annotation.h5ad` |
+Two columns, no header: HGNC symbol and the signed moderated t, sorted descending, so the top of
+the file is most synovial-up and the bottom most blood-up. 13,999 / 14,411 / 14,014 genes for
+Treg / Tcon / CD8 after expression filtering; the counts differ because `filterByExpr` is applied
+within each population's own design.
 
-## tables/de_summary.csv
+One row per symbol. Where several Ensembl ids share a symbol the most extreme |t| is kept, because
+a duplicated symbol corrupts a pre-ranked enrichment run.
 
-Every sorted population clears the bar for a powered enrichment test. The paired `~ donor + tissue`
-model returns 1,797 significant SF-versus-PB genes of 13,999 ranked in Treg, 1,949 of 14,411 in
-Tcon, and 1,695 of 14,014 in CD8. No arm was dropped for lack of donors.
+### `tables/pseudobulk_counts.csv` · `tables/pseudobulk_coldata.csv` · `tables/gene_symbols.csv`
 
-**How to read:** One row per sorted population. `n_sf` and `n_pb` count donor strata in each tissue
-arm; the unit is the stratum. `model` is the fitted design, reading `skipped` if an arm fell under the
-donor floor; `n_sig_de` counts genes passing both the FDR and the |log2FC| gate; `n_ranked` is
-the length of the sign-preserving ranked list handed to pre-ranked GSEA. This is a
-diagnostic/powering table. The confirmatory statistics are the donor-pseudobulk NES values computed
-downstream from `ranked_{treg,tcon,cd8}.tsv`.
+The three files that cross the Python-to-R seam.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03_pseudobulk_de.py` | `main` | `thresholds.de_fdr=0.05; de_logfc=1.0; pseudobulk_min_donors=3` | `03_results/objects/02_annotation.h5ad` |
+`pseudobulk_counts.csv` — rows are strata (`<donor>_<tissue>_<label>`), columns Ensembl gene ids,
+values summed raw integer UMIs. 39 strata over 21,740 genes. Values are left unnormalised because
+the DE engine expects raw counts and performs its own library-size normalisation.
 
-## tables/pseudobulk_counts.csv
+`pseudobulk_coldata.csv` — one row per column of the counts matrix, keyed
+`donor|tissue|coarse_label`. `donor` is the blocking factor; `tissue` is the contrast factor,
+with `synovial_fluid` the numerator and `peripheral_blood` the denominator; `n_cells` is the
+cells summed into that column and reads as an aggregation weight. The 39 surviving strata hold
+266 to 4,454 cells each. The three absences — synovial Treg in patient 5, blood Tcon and blood
+CD8 in patient 3 — are why every population's contrast runs six donors in one tissue arm against
+seven in the other.
 
-Summing raw UMI counts within donor × tissue × label gives 39 pseudobulk strata across 21,740
-genes, every stratum above the per-stratum cell floor.
+`gene_symbols.csv` — two columns, `ensembl_id` and `gene_symbol`, in the same order as the counts
+columns. All 21,740 ids carry a symbol and all 21,740 symbols are distinct, so the rename loses no
+gene and creates no collision in this dataset.
 
-**How to read:** Rows are strata (`<donor>_<tissue>_<label>`), columns Ensembl gene ids, values
-summed raw integer UMIs. Values are left unnormalised because the DE engine expects raw counts and
-performs its own library-size normalisation. Pair with `pseudobulk_coldata.csv` for the design
-factors. This is the matrix handed across the Python-to-R seam.
+### `tables/de_summary.csv`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03a_pseudobulk_export.py` | `main` | `pseudobulk_min_cells` | `03_results/objects/02_annotation.h5ad` (`counts` layer) |
+One row per sorted population. `n_sf` and `n_pb` count donor strata in each tissue arm, the unit
+being the stratum. `model` is the fitted design, reading `skipped` if an arm fell under the donor
+floor; `n_sig_de` counts genes passing both gates; `n_ranked` is the length of the ranked list
+handed to pre-ranked enrichment. The paired `~ donor + tissue` model returns 1,797 of 13,999 in
+Treg, 1,949 of 14,411 in Tcon and 1,695 of 14,014 in CD8. No arm was dropped for lack of donors.
 
-## tables/gene_symbols.csv
+This is a diagnostic and powering table; the confirmatory statistics are the enrichment scores
+computed downstream from `ranked_*.tsv`.
 
-All 21,740 exported Ensembl ids carry a gene symbol, and all 21,740 symbols are distinct, so the
-Ensembl-to-symbol rename loses no gene and creates no collision in this dataset.
+### `tables/de_engine_migration.csv`
 
-**How to read:** Two columns, `ensembl_id` and `gene_symbol`, in the same order as the columns of
-`pseudobulk_counts.csv`. This file exists because the counts matrix is keyed by Ensembl id while
-every reference gene set the ranked lists are tested against — the mouse-projection signatures,
-MSigDB Hallmark, the curated HSR lens — matches on HGNC symbol. The R stage asserts this file is
-present before ranking. Skipping it yields ranked lists keyed by Ensembl id, which intersect the
-reference sets at approximately zero; enrichment tools report that as an empty result, so the
-failure is silent.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03a_pseudobulk_export.py` | `main` | — | `03_results/objects/02_annotation.h5ad` (`var['gene_symbol']`) |
-
-## tables/de_SFvsPB_{treg,tcon,cd8}.csv
-
-Paired SF-versus-PB differential expression recovers 1,797 / 1,949 / 1,695 genes at FDR < 0.05 and
-|log2FC| ≥ 1 in Treg / Tcon / CD8, all three fitted on the donor-paired model.
-
-**How to read:** One file per sorted population, one row per gene, sorted by p-value. `stat` is the
-signed moderated t-statistic and `log2FoldChange` the log2 fold change, both positive when the gene
-is higher in synovial fluid. `padj` is BH across genes within that population. `avg_expr` is limma's
-average log2-CPM, named that way because `baseMean` denotes a differently scaled quantity. `model`
-records the fitted design, `n_paired_donors` how many donors appeared in both tissues, and
-`de_engine` the engine. Primary donor-pseudobulk tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key`, `thresholds.de_fdr` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_symbols.csv` |
-
-## tables/ranked_{treg,tcon,cd8}.tsv
-
-The signed ranked lists carry 13,999 / 14,411 / 14,014 genes for Treg / Tcon / CD8 after expression
-filtering, and are the single input every downstream enrichment stage reads.
-
-**How to read:** Two columns, no header: HGNC symbol and the signed moderated t-statistic, sorted
-descending, so the top of the file is most synovial-fluid-up and the bottom most blood-up. One row
-per symbol; where several Ensembl ids share a symbol the most extreme |t| is kept, because a
-duplicated symbol corrupts a pre-ranked enrichment run. Gene count differs per population because
-`filterByExpr` is applied within each population's own design.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/03b_pseudobulk_de.R` | `(top-level)` | `design.tissue_key`, `design.donor_key` | `03_results/03_pseudobulk/tables/pseudobulk_counts.csv`, `pseudobulk_coldata.csv`, `gene_symbols.csv` |
-
-## tables/de_engine_migration.csv
-
-The limma-voom migration validation reported in commit `799e4fe` — Spearman 0.994-0.997 rank
-correlation and 87-89% top-500 overlap against the pre-migration ranked lists — exists only in that
-commit message. It cannot be recomputed from tracked artifacts in this repository.
-
-**How to read:** A provenance table, carrying no new validation. `not_reproducible` means the
-reported value survives only in the commit message and the pre-migration ranked lists it was
-computed against are untracked. The current `ranked_*.tsv` files exist on disk and are untracked
-too, so they are insufficient on their own to reconstruct the before/after comparison. `command`
-records the checks run to establish each row.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| repository audit | `git show`, `git ls-files`, `find` | `commit=799e4fe` | commit message and tracked file index |
+A provenance table carrying no new validation. The limma-voom migration figures reported in commit
+`799e4fe` — Spearman 0.994–0.997 rank correlation and 87–89% top-500 overlap against the
+pre-migration ranked lists — survive in that commit message alone.
+`not_reproducible` records that the pre-migration ranked lists it was computed against are
+untracked, and the current `ranked_*.tsv` files are untracked too, so the before-and-after
+comparison cannot be reconstructed from this repository. `command` records the checks run to
+establish each row.

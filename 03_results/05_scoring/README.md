@@ -1,219 +1,142 @@
-# 05_scoring: artifact captions
+# 05_scoring — Does the mouse 39 °C signature separate the niche?
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood. The cohort contains 7 JIA donors, of whom 6 span both arms in each analyzed population. Treg = CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory._
+The rankings are frozen. This stage hands them the mouse-derived arms and asks the compartment's
+central question: **does the mouse 39 °C-derived up arm separate synovial fluid from paired blood
+within a frozen sort label?**
 
-## figures/_overview/wt_heat_nes_forest.png
+It does, in every population. NES **2.5914** in Treg on 120 of 202 arm genes, **2.6826** in Tcon
+on 131 and **2.0614** in CD8 on 114, all at FDR below 7e-07
+(`tables/gsea_pseudobulk_{treg,tcon,cd8}.csv`). The Treg score sits between the Tcon and CD8
+scores, so **the result is pan-T and Tregs are one of the three populations carrying it.**
 
-The mouse 39 °C-derived up arm separates synovial fluid from paired
-blood in every sorted population: NES 2.5914 in Treg (120 of 202 genes
-ranked), 2.6826 in Tcon (131) and 2.0614 in CD8 (114), all at FDR
-below 7e-07. The result is pan-T, and Tregs are one of the three
-populations carrying it. The down arm reaches NES 1.4322 at FDR 0.035
-in Tcon, the same sign as the up arm, and carries no direction in Treg
-(1.0386) or CD8 (1.1331).
+The down arm complicates the reading and is reported alongside. It reaches NES 1.4322 at FDR
+0.0354 in Tcon — the same sign as the up arm — and carries no direction in Treg (1.0386) or CD8
+(1.1331). Both arms move the same way, so the pattern is a shared shift rather than a
+bidirectional recapitulation of the mouse contrast.
 
-**How to read:** This is the confirmatory tier: donor-level pseudobulk within frozen
-sort labels, limma-voom then fgsea, on the 6 donors present in both
-arms. Points are NES for the up (circle) and down (diamond) arms,
-coloured by population; the asterisk marks FDR below 0.05. Labels give
-effective and nominal set sizes plus FDR. Effective size tracks the
-NES ordering, so the ordering is a size effect. Ordered NES dot plot
-with FDR encoding; the rows carry no interval. Correlative.
+**Two tiers ship here and they are kept apart.** The pre-ranked enrichment on donor-level
+pseudobulk is confirmatory and writes the `primary_pseudobulk` rows of
+[`../master/effect_sizes_treg_arthritis.csv`](../master/). The per-cell AUCell scores are a
+different estimand on a secondary tier: they shadow the same direction and are never pooled with
+the enrichment scores.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures_viz.py` | `main` | `thresholds.gsea_fdr=0.05; gsea_min_size=5` | `03_results/05_scoring/tables/gsea_pseudobulk_{treg,tcon,cd8}.csv` |
+**Source pinning.** The mouse projection files are read across the compartment boundary under a
+SHA-256 pin, so a changed anchor stops this stage rather than silently changing the JIA result.
 
-## figures/_overview/score_violins.png
+---
 
-Donor-mean WT_heat_up AUCell sits higher in synovial fluid than in
-paired blood in all three sorted populations, so the per-cell channel
-shadows the pseudobulk result in the same direction. This
-corroborates. A per-cell score is a different estimand on a secondary
-tier, and the shift it shows spans all three populations.
+## Figures
 
-**How to read:** This panel corroborates; the confirmatory answer is the pseudobulk NES
-dot plot. Each dot is one donor's mean WT_heat_up AUCell score for
-that state × tissue, and the violins summarise across donors. AUCell
-is a rank-based score in [0, 1], the area under each cell's gene-
-recovery curve for the up set, robust to library size and composition.
-Read the SF-versus-PB shift within a population (Treg SF against Treg
-PB); the absolute level carries no reading. This is a different
-estimand from the pseudobulk NES dot plot and shares no axis with it.
-The down arm is omitted because up and down co-shift in synovial
-fluid. Correlative.
+### `figures/_overview/wt_heat_nes_forest.png`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures_viz.py` | `main` | `signature = WT_heat_up (AUCell, rank-based [0,1])` | `03_results/05_scoring/tables/donor_label_score_means.csv` |
+**The confirmatory answer, both arms and all three populations on one axis.**
+Ordered dot plot. x, normalised enrichment score for synovial fluid over paired blood; y, arm ×
+population. Circles give the up arm and diamonds the down arm, coloured by population; an
+asterisk marks FDR below 0.05. Labels give the effective and nominal set sizes and the FDR.
 
-## figures/_overview/wt_heat_running_sum_treg.png
+Effective size tracks the NES ordering, so the ordering across populations is a size effect as
+much as a biology one. This is donor-level pseudobulk within frozen sort labels, limma-voom then
+pre-ranked enrichment, over the six donors present in both arms. The rows carry no interval,
+because an enrichment score of this kind has none.
+*Source* `tables/gsea_pseudobulk_{treg,tcon,cd8}.csv` ·
+`02_analysis/scripts/05_score_signatures_viz.py`.
 
-In Treg the up arm reaches NES +2.5914 at FDR 1e-14 with 120 of its
-202 genes in the ranked list, and the down arm reaches NES +1.0386 at
-FDR 0.385 with 59 of its 96 genes in the ranked list. The curve gives
-the place along this population's synovial-fluid-versus-blood ranking
-where each arm concentrates. The cross-population comparison —
-whether one sorted population separates more than another — is read
-off the ordered NES dot plot.
+### `figures/_overview/wt_heat_running_sum_{treg,tcon,cd8}.png` — three panels
 
-**How to read:** One population per panel, showing the donor-pseudobulk fgsea result
-behind the confirmatory answer. The top trace walks from SF-enriched
-to PB-enriched genes; a positive left peak indicates SF enrichment.
-The middle rug marks set members and the bottom shows the signed
-moderated-t ranking. Warm brown is the up arm and cool blue the down
-arm. Legends report effective and nominal size, NES, and FDR. The
-shared [-1, 1] enrichment-score range supports shape comparison. Read
-the cross-population result from the ordered NES dot plot, which
-establishes the pan-T pattern. Display of compute output;
-correlative.
+**Where along each population's ranking the two arms concentrate.**
+One population per figure, three stacked panels. Top, the weighted running enrichment score as
+the ranked list is walked from synovial-up to blood-up, so a positive left-shifted peak marks
+synovial enrichment; the range is pinned to [−1, 1], the range every running sum in this project
+is drawn on. Middle, a rug marking each set member's rank. Bottom, the signed moderated-t
+ranking the curve was computed on. Warm brown gives the up arm and cool blue the down arm, and
+the legend reports effective and nominal size, NES and FDR.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures_viz.R` | `main` | `gsea_min_size=5; gsea_max_size=500; running_sum_ylim=[-1,1]; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/05_scoring/tables/gsea_pseudobulk_treg.rds` |
-
-## figures/_overview/wt_heat_running_sum_tcon.png
-
-In Tcon the up arm reaches NES +2.6826 at FDR 1e-16 with 131 of its
-202 genes in the ranked list, and the down arm reaches NES +1.4322 at
-FDR 0.035 with 64 of its 96 genes in the ranked list. The curve gives
-the place along this population's synovial-fluid-versus-blood ranking
-where each arm concentrates. The cross-population comparison —
-whether one sorted population separates more than another — is read
-off the ordered NES dot plot.
-
-**How to read:** One population per panel, showing the donor-pseudobulk fgsea result
-behind the confirmatory answer. The top trace walks from SF-enriched
-to PB-enriched genes; a positive left peak indicates SF enrichment.
-The middle rug marks set members and the bottom shows the signed
-moderated-t ranking. Warm brown is the up arm and cool blue the down
-arm. Legends report effective and nominal size, NES, and FDR. The
-shared [-1, 1] enrichment-score range supports shape comparison. Read
-the cross-population result from the ordered NES dot plot, which
-establishes the pan-T pattern. Display of compute output;
-correlative.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures_viz.R` | `main` | `gsea_min_size=5; gsea_max_size=500; running_sum_ylim=[-1,1]; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/05_scoring/tables/gsea_pseudobulk_tcon.rds` |
-
-## figures/_overview/wt_heat_running_sum_cd8.png
-
-In CD8 the up arm reaches NES +2.0614 at FDR 7e-07 with 114 of its
-202 genes in the ranked list, and the down arm reaches NES +1.1331 at
-FDR 0.256 with 60 of its 96 genes in the ranked list. The curve gives
-the place along this population's synovial-fluid-versus-blood ranking
-where each arm concentrates. The cross-population comparison —
-whether one sorted population separates more than another — is read
-off the ordered NES dot plot.
-
-**How to read:** One population per panel, showing the donor-pseudobulk fgsea result
-behind the confirmatory answer. The top trace walks from SF-enriched
-to PB-enriched genes; a positive left peak indicates SF enrichment.
-The middle rug marks set members and the bottom shows the signed
-moderated-t ranking. Warm brown is the up arm and cool blue the down
-arm. Legends report effective and nominal size, NES, and FDR. The
-shared [-1, 1] enrichment-score range supports shape comparison. Read
-the cross-population result from the ordered NES dot plot, which
-establishes the pan-T pattern. Display of compute output;
-correlative.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures_viz.R` | `main` | `gsea_min_size=5; gsea_max_size=500; running_sum_ylim=[-1,1]; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/05_scoring/tables/gsea_pseudobulk_cd8.rds` |
-
-## tables/runsum_interactive_{treg,tcon,cd8}_WT_heat_{up,down}.csv
-
-Interactive-widget data contract — the exact-genes substrate the report's
-interactive running-sum will read (collaborators hover the ranked genes). One tidy
-CSV per population × gene set (6 files). Every row is one gene at its position in
-that population's SF-vs-PB pseudobulk ranked list; the `running_es` column is the
-DOSE weighted running enrichment score computed identically to the plotted curve
-(so the widget curve overlays the static figure exactly). Written by the compute
-step (`helpers/fgsea_prerank.R`) off the clusterProfiler `gseaResult`.
-
-**Columns:**
-
-| Column | Type | Meaning |
+| Population | Up arm | Down arm |
 |---|---|---|
-| `rank` | int | 1-based position in the ranked list (1 = most SF-enriched; N = most PB-enriched). |
-| `gene` | str | HGNC symbol at this rank. |
-| `stat` | float | Signed moderated t-statistic (limma-voom) — the ranking metric (positive = SF-up, negative = PB-up). |
-| `running_es` | float | Weighted running enrichment score at this rank (DOSE `gseaScores`, exponent 1). The curve to plot vs `rank`. |
-| `hit` | bool | TRUE if `gene` is a member of this gene set (a rug tick / step-up in the curve). |
-| `leading_edge` | bool | TRUE if `gene` is a core / leading-edge gene (member of the object's `core_enrichment`); the genes driving the ES. |
-| `gene_set` | str | `WT_heat_up` or `WT_heat_down`. |
-| `population` | str | `treg` / `tcon` / `cd8`. |
-| `contrast` | str | `SF_vs_PB_<Pop>`. |
+| Treg | NES +2.5914, FDR 1e-14, 120 of 202 genes | NES +1.0386, FDR 0.385, 59 of 96 |
+| Tcon | NES +2.6826, FDR 1e-16, 131 of 202 | NES +1.4322, FDR 0.035, 64 of 96 |
+| CD8 | NES +2.0614, FDR 7e-07, 114 of 202 | NES +1.1331, FDR 0.256, 60 of 96 |
 
-**How to read (widget author):** plot `running_es` against `rank` as a line; draw a rug
-at `rank` where `hit` is TRUE; highlight rows where `leading_edge` is TRUE as the ES-driving
-core. The ES peak's rank + sign is the enrichment (positive left-shifted peak = SF-enriched).
-The NES / p-value summarising each curve live in the sibling `gsea_pseudobulk_{tag}.csv` /
-`.rds`. Primary evidence tier = `primary_pseudobulk`; correlative, not causal.
+A curve gives the place along one population's own ranking. The cross-population comparison —
+whether one population separates further than another — is read off the ordered dot plot.
+*Source* `tables/gsea_pseudobulk_{treg,tcon,cd8}.rds` ·
+`02_analysis/scripts/05_score_signatures_viz.R`.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/helpers/fgsea_prerank.R` | (top-level) | `gsea_min_size=5; gsea_max_size=500; gsea_seed=123; gsea_nperm=100000; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv` + frozen `WT_heat_{up,down}.txt` |
+### `figures/_overview/score_violins.png`
 
-## tables/gsea_pseudobulk_{treg,tcon,cd8}.csv
+**The per-cell channel, which shadows the same direction.**
+Each dot is one donor's mean `WT_heat_up` AUCell score for that state × tissue, and the violins
+summarise across donors. AUCell is a rank-based score in [0, 1], the area under each cell's
+gene-recovery curve for the up set, robust to library size and composition.
 
-The mouse 39 °C-derived `WT_heat_up` set enriches toward the SF end of every
-population's donor-pseudobulk ranked list — NES 2.5915 in Treg (padj 3.23e-14, 119
-members matched), 2.6809 in Tcon (padj 8.09e-17, 130), 2.0710 in CD8 (padj
-3.61e-07, 113). `WT_heat_down` also leans positive and reaches significance in Tcon
-(NES 1.4718, padj 0.026) but not in Treg (0.9676, padj 0.512) or CD8 (1.0943, padj
-0.308), so the up arm carries the axis in Treg and CD8 while both arms move together
-in Tcon. The enrichment is pan-T rather than Treg-exclusive, with Treg and Tcon
-carrying it more strongly than CD8.
+Donor-mean scores sit higher in synovial fluid than in paired blood in all three populations.
+Read the shift within a population; the absolute level carries no reading, because AUCell's scale
+depends on set size. This is a different estimand from the enrichment dot plot and shares no axis
+with it. The down arm is omitted because both arms shift the same way in synovial fluid.
+*Source* `tables/donor_label_score_means.csv` ·
+`02_analysis/scripts/05_score_signatures_viz.py`.
 
-**How to read:** One CSV per sorted population, one row per gene set (`WT_heat_up`,
-`WT_heat_down`). `nes` is the normalized enrichment score of that set against the
-population's signed moderated-t SF-vs-PB ranked list: positive = enriched toward the SF-up
-end of the list, negative = toward PB-up. `set_size` counts set members actually
-present in that ranked list, so it varies by population; `padj` is BH FDR across the
-sets in the file; `core_enrichment` is the `/`-delimited leading edge;
-`database=mouse_projection` marks the set's provenance. These are the PRIMARY,
-confirmatory numbers — they become the `primary_pseudobulk` rows of
-`03_results/master/effect_sizes_treg_arthritis.csv`. Never pool them with the
-per-cell AUCell score means, which estimate a different quantity on a secondary
-tier. Correlative (consistent-with), not causal.
+---
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures.py` | `run_fgsea` | `gsea_min_size=5; gsea_max_size=500; gsea_seed=123; gsea_nperm=100000; gsea_fdr=0.05; engine=clusterProfiler::GSEA(by=fgsea)` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv` + frozen `WT_heat_{up,down}.txt` |
+## Tables
 
-## tables/donor_label_score_means.csv
+### `tables/gsea_pseudobulk_{treg,tcon,cd8}.csv` — the primary numbers
 
-Donor-mean `WT_heat_up` AUCell sits higher in SF than in paired PB in all three
-populations — Treg 0.0193 vs 0.0112, Tcon 0.0178 vs 0.0114, CD8 0.0178 vs 0.0137 —
-the largest relative lift (~1.7x) being Treg, so the per-cell view shadows the
-pseudobulk NES without independently confirming it.
+One file per sorted population, one row per gene set (`WT_heat_up`, `WT_heat_down`). `nes` is the
+normalised enrichment score against that population's signed moderated-t ranking: positive means
+enriched toward the synovial-up end. `set_size` counts set members present in that ranked list, so
+it varies by population. `padj` is BH across the sets in the file, `core_enrichment` is the
+slash-delimited leading edge, and `database = mouse_projection` marks the set's provenance.
 
-**How to read:** 39 rows, one per donor x tissue x frozen label; three strata are
-absent because those donors lack that population. Four score columns hold the AUCell
-and UCell donor means of `WT_heat_up` and `WT_heat_down`. Both scorers are unsigned
-and rank-based (robust to depth and composition), so only the SF-vs-PB contrast
-*within* a population is interpretable — absolute levels do not compare across gene
-sets of different size, and neither score carries a direction of its own. `n_cells`
-is the number of cells averaged into the row. SECONDARY annotation tier: this table
-is the substrate for the donor-level AUCell standardized mean difference, a
-different estimand from the fgsea NES that must never be pooled with it.
-Correlative.
+`WT_heat_up` reaches NES 2.5915 in Treg (padj 3.23e-14, 119 members matched), 2.6809 in Tcon
+(8.09e-17, 130) and 2.0710 in CD8 (3.61e-07, 113). `WT_heat_down` leans positive throughout and
+reaches significance in Tcon alone (1.4718, padj 0.026) against Treg (0.9676, 0.512) and CD8
+(1.0943, 0.308).
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures.py` | `main` | `percell_score_ncores=8; signature=WT_heat_{up,down} (AUCell + UCell, rank-based [0,1])` | `03_results/objects/02_annotation.h5ad`, `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |
+**These are the confirmatory rows** and they become the `primary_pseudobulk` entries of
+`../master/effect_sizes_treg_arthritis.csv`. Keep them apart from the per-cell score means, which
+estimate a different quantity on a secondary tier.
 
-## tables/source_hash_manifest.csv
+### `tables/donor_label_score_means.csv`
 
-The stage-05 mouse-signature read is pinned to the current mouse-anchor projection files.
+39 rows, one per donor × tissue × frozen label; three strata are absent because those donors lack
+that population. Four score columns hold the AUCell and UCell donor means of `WT_heat_up` and
+`WT_heat_down`, and `n_cells` is the number of cells averaged into the row.
 
-**How to read:** Each row is one cross-compartment source the scoring and running-sum scripts may
-read. `sha256` is checked before the file is consumed, so a changed mouse projection stops the stage
-instead of silently changing the JIA result.
+Donor-mean `WT_heat_up` AUCell runs Treg 0.0193 against 0.0112, Tcon 0.0178 against 0.0114, CD8
+0.0178 against 0.0137 — synovial first in each pair — with the largest relative lift, about 1.7×,
+in Treg.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/05_score_signatures.py` | `verify_source_hashes()` | pinned SHA-256 | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/` |
+Both scorers are unsigned and rank-based, so only the synovial-versus-blood contrast **within** a
+population is interpretable; absolute levels compare across gene sets of different size in no
+way, and neither score carries a direction of its own. This is the substrate for the donor-level
+standardised mean difference, a different estimand from the enrichment score.
 
+### `tables/runsum_interactive_{treg,tcon,cd8}_WT_heat_{up,down}.csv`
+
+Six files, the exact-gene substrate the interactive running-sum widget reads, one per population ×
+gene set. Every row is one gene at its position in that population's ranked list, and
+`running_es` is the weighted running enrichment score computed identically to the plotted curve,
+so a widget curve overlays the static figure exactly.
+
+| Column | Meaning |
+|---|---|
+| `rank` | 1-based position in the ranked list; 1 is most synovial-enriched. |
+| `gene` | HGNC symbol at this rank. |
+| `stat` | Signed moderated t — the ranking metric; positive is synovial-up. |
+| `running_es` | Weighted running enrichment score at this rank. Plot against `rank`. |
+| `hit` | TRUE where the gene is a member of this set — a rug tick and a step up in the curve. |
+| `leading_edge` | TRUE where the gene is in the core enrichment, the genes driving the score. |
+| `gene_set` · `population` · `contrast` | `WT_heat_up` or `WT_heat_down`; `treg` / `tcon` / `cd8`; `SF_vs_PB_<Pop>`. |
+
+The NES and p-value summarising each curve live in the sibling `gsea_pseudobulk_{tag}.csv`.
+
+### `tables/per_cell_scores.csv` · `tables/source_hash_manifest.csv`
+
+`per_cell_scores.csv` holds one row per cell barcode with its donor, tissue, frozen label and the
+four AUCell and UCell score columns. It is the substrate the donor means aggregate from and the
+colocalisation analyses in [`../09_heat_hypoxia/`](../09_heat_hypoxia/) and
+[`../10_hsr_lens/`](../10_hsr_lens/) read.
+
+`source_hash_manifest.csv` pins the mouse-anchor projection files this stage reads: one row per
+cross-compartment source, with the SHA-256 checked before the file is consumed.

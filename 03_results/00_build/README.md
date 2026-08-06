@@ -1,72 +1,71 @@
-# 00_build: artifact captions
+# 00_build — What the forty libraries contain
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood; Treg =
-CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory. The cohort
-holds 7 JIA donors. Ingest covers SF and PB Treg samples for all 7; the post-QC donor-level
-analysis retains 6 paired donors in each population._
+Forty per-GSM 10x matrices are read from GSE160097 and joined into one pooled object: seven JIA
+donors × two tissues × three sorted populations, minus the two samples the study never collected.
+This stage counts what arrived and writes the feature vocabulary every later stage matches
+against. It computes no statistics.
 
-## figures/_overview/cells_per_gsm.png
+**The design is complete for Tregs.** All seven donors contribute both a synovial-fluid and a
+peripheral-blood Treg sample. Tcon and CD8 have no blood sample for donor p3, so 40 of the 42
+possible donor × tissue × population samples exist. QC later removes the near-empty SF-Treg p5
+library, which leaves six paired donors in each analysed population.
 
-All 7 donors contribute both SF and PB Treg samples at ingest. Tcon
-and CD8 have no PB sample for donor p3, an absence in the study
-design. QC later removes the near-empty SF-Treg p5 library, leaving 6
-paired donors in each analyzed population.
+---
 
-**How to read:** Grouped bars give cells recovered per donor, orange for synovial fluid
-and blue for peripheral blood, one facet per sorted population. The
-missing p3 PB bar in Tcon and CD8 marks a sample that was never
-collected. These are ingest counts, taken before QC. Descriptive
-counts — no claim tier.
+## Figures
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/00_build_anndata_viz.py` | `main` | `design.populations = [CD4_Treg, CD4_Tcon, CD8]` | `03_results/00_build/tables/cells_per_gsm.csv` |
+### `figures/_overview/cells_per_gsm.png`
 
-## tables/design_completeness.csv
+**Cells recovered per library, before QC.**
+Grouped bars, one facet per sorted population. x, donor; y, cells recovered. Orange gives
+synovial fluid and blue paired peripheral blood. The missing p3 blood bar in the Tcon and CD8
+facets marks a sample that was never collected. These are ingest counts taken before any filter.
+*Source* `tables/_overview/cells_per_gsm.csv` ·
+`02_analysis/scripts/00_build_anndata_viz.py`.
 
-The paired design is complete for Tregs, 7 of 7 donors in both SF and PB. PB Tcon and PB CD8 hold
-6 donors each. 40 of the 42 possible donor × tissue × population samples exist.
+---
 
-**How to read:** One row per sorted population × tissue. `n_donors` counts distinct donors
-contributing at least one cell: 7 is complete, 6 carries the one absent donor. Counted at ingest,
-before QC, so the near-empty SF-Treg library that QC later drops still counts here. Descriptive
-design audit — no claim tier.
+## Tables
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/00_build_anndata.py` | `main` | `design.populations = [CD4_Treg, CD4_Tcon, CD8]`, `design.n_donors = 7` | `00_data/GSE160097_JIA-SF-Treg/samples.csv`, `00_data/GSE160097_JIA-SF-Treg/raw/` (40 per-GSM 10x H5) |
+### `tables/design_completeness.csv`
 
-## tables/genes_union_summary.csv
+One row per sorted population × tissue. `n_donors` counts distinct donors contributing at least
+one cell: 7 is complete, 6 carries the one absent donor. Tregs read 7 and 7; blood Tcon and blood
+CD8 read 6. Counted at ingest, so the near-empty library QC later drops still counts here.
 
-The 40-GSM gene union holds 32,738 features. 24,374 of them (74.5%) carry a read in at least one
-of the 108,414 pooled cells, so a quarter of the union is all-zero padding that the per-gene
-detection filter removes.
+### `tables/genes_union_summary.csv`
 
-**How to read:** Single row. `n_genes_union` is the feature count after the outer join across
-GSMs; `n_genes_detected_any_cell` counts features with more than 0 UMI in at least one cell,
-computed on the integer `layers['counts']`; `n_cells_total` is pre-QC; `species_db` drives MT/RP
-annotation and MSigDB species downstream. Ingest audit — no claim tier.
+A single row summarising the feature join. The forty-GSM gene union holds **32,738** features, of
+which **24,374 (74.5%)** carry a read in at least one of the 108,414 pooled cells — so a quarter
+of the union is all-zero padding the per-gene detection filter removes.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/00_build_anndata.py` | `main` | `project.species_db = HS`, `project.genome_build = GRCh38` (the union itself is an outer join inside `build_pooled` — no config key) | `00_data/GSE160097_JIA-SF-Treg/samples.csv`, `00_data/GSE160097_JIA-SF-Treg/raw/` (40 per-GSM 10x H5) |
+`n_genes_union` is the feature count after the outer join across GSMs;
+`n_genes_detected_any_cell` counts features with more than 0 UMI in at least one cell, computed
+on the integer `layers['counts']`; `n_cells_total` is pre-QC; `species_db` drives the
+mitochondrial and ribosomal annotation and the MSigDB species downstream.
 
-## tables/reference_feature_symbols.csv
+### `tables/reference_feature_symbols.csv`
 
-The same 32,738-feature union, named gene by gene. This list answers what a count cannot: when a
-gene set member goes missing downstream, whether the gene is absent from the CellRanger reference,
-present in it and never detected in sorted T cells, or present under a different symbol. `EGFR`,
-`EPCAM`, `INHBA` and `IFNB1` are all in the union and all undetected downstream — a detection
-fact. `NLRC3` and `MIR4691` are outside the union. `MB21D1` and `TMEM173` are in it, under symbols
-no current gene set uses.
+The same 32,738-feature union, named gene by gene. **This list answers what a count cannot.**
+When a gene-set member goes missing downstream, this file separates three causes: the gene is
+absent from the CellRanger reference, the gene is present in it and undetected in sorted T cells,
+or the gene is present under a different symbol.
 
-**How to read:** One row per feature of the 40-GSM union. `ensembl_id` is the `var_name` carried
-through every downstream object; `gene_symbol` is the symbol the CellRanger reference assigns it.
-Symbols are unique here, 32,738 of 32,738, and their vintage is that reference's. This is the
-outermost of three nested vocabulary layers — union (32,738) → post-QC `gene_symbols.csv`
-(21,740) → post-`filterByExpr` ranked list (~14,000) — and absence from this layer is the only
-true "absent from the reference". Ingest audit — no claim tier.
+`EGFR`, `EPCAM`, `INHBA` and `IFNB1` are all in the union and all undetected downstream, which is
+a detection fact. `NLRC3` and `MIR4691` sit outside the union. `MB21D1` and `TMEM173` are in it,
+under the symbols this reference assigns — the names current gene sets carry as `CGAS` and
+`STING1`.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/00_build_anndata.py` | `main` | `symbol_alias.reference_feature_symbols` names this file for its consumers (the union itself is an outer join inside `build_pooled` — no config key) | `00_data/GSE160097_JIA-SF-Treg/samples.csv`, `00_data/GSE160097_JIA-SF-Treg/raw/` (40 per-GSM 10x H5) |
+One row per feature. `ensembl_id` is the `var_name` carried through every downstream object and
+`gene_symbol` is the symbol the CellRanger reference assigns it; symbols are unique here, 32,738
+of 32,738, and their vintage is that reference's.
+
+**This is the outermost of three nested vocabulary layers** — union (32,738) → post-QC
+`gene_symbols.csv` (21,740) → post-`filterByExpr` ranked list (~14,000). Absence from this layer
+is the only true "absent from the reference".
+
+### `tables/cells_per_gsm.csv`
+
+One row per GSM with its donor, tissue, population and recovered cell count. The source of the
+figure above and the ingest-side companion to
+[`../01_qc/tables/cells_kept_dropped.csv`](../01_qc/tables/).

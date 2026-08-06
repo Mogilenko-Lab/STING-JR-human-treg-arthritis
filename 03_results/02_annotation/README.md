@@ -1,104 +1,82 @@
-# 02_annotation: artifact captions
+# 02_annotation — Auditing the sort labels against expression
 
-_**Abbreviations:** SF = synovial fluid (inflamed joint); PB = peripheral blood; Treg =
-CD4⁺CD127ˡᵒCD25⁺ regulatory; Tcon = CD4⁺CD25⁻ conventional; CD8 = CD8⁺CD45RO⁺ memory. The cohort
-holds 7 JIA donors, of whom 6 span both arms in each analyzed population after QC._
+**Sorting is the label of record throughout this compartment.** Every artifact in this stage
+audits that label against expression; none replaces it. Freezing the FACS gate rather than a
+clustering call is what lets the pseudobulk contrast run inside a fixed cell state.
 
-Sorting is the label of record throughout this stage. Every artifact here audits that label
-against expression; none replaces it.
+The audit passes. Marker-module argmax reproduces the sort gate for 85.6% of the 99,915
+QC-passing cells, the off-diagonal mass is overwhelmingly Tcon against CD8, and the twelve panel
+markers land where the sort predicts. All 39 surviving donor × label × tissue strata clear the
+20-cell pseudobulk floor, and every arm keeps at least six donors.
 
-## figures/_overview/umap_sort_identity.png
+---
 
-The frozen sort labels track the transcriptomic structure, and the
-large majority of cells are marker-consistent, so the sort gate is a
+## Figures
+
+### `figures/_overview/umap_sort_identity.png`
+
+**The frozen labels against the transcriptomic structure.**
+Three panels on the unsupervised UMAP: cells coloured by frozen sort label, by marker-module
+argmax prediction, and by their agreement (blue for consistent). Disagreement flags a candidate
+mis-sort. The large majority of cells are marker-consistent, which is what makes the sort gate a
 sound anchor for pseudobulk.
+*Source* `../objects/02_annotation.h5ad` · `02_analysis/scripts/02_annotate_states_viz.py`.
 
-**How to read:** Unsupervised UMAP coloured by frozen sort label, by marker-module
-argmax prediction, and by their agreement (blue = consistent).
-Disagreement flags candidate mis-sorts. Annotation and visualisation
-only — no biological claim.
+### `figures/_overview/marker_dotplot.png`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/02_annotate_states_viz.py` | `main` | `basis_of_label = sorting (scANVI deferred until go = yes)` | `03_results/objects/02_annotation.h5ad` |
+**Twelve canonical markers, three frozen labels.**
+Dot size gives the fraction of cells expressing and colour the mean log-normalised expression;
+rows are the frozen labels. FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted; CD8A, CD8B and
+GZMK mark the CD8 gate; IL7R runs lowest in Tregs, as a CD127-lo sort requires.
+*Source* `tables/substate_markers.csv` · `02_analysis/scripts/02_annotate_states_viz.py`.
 
-## figures/_overview/marker_dotplot.png
+### `figures/_overview/counts_grid.png`
 
-FOXP3, IL2RA, CTLA4 and IKZF2 are Treg-restricted; CD8A, CD8B and GZMK
-mark the CD8 gate; IL7R is depleted in Tregs, as a CD127-lo sort
-requires. Markers land where the sort predicts.
+**The power budget of the paired contrast.**
+Heatmap of cells per donor (x) against label plus tissue (y). A red asterisk marks a stratum below
+the 20-cell pseudobulk floor and an empty square marks an absent sample. The cohort holds seven
+donors and six span both tissues in each analysed population after QC. Every observed stratum
+clears the floor. The p3 blood Tcon and blood CD8 samples were never collected.
+*Source* `tables/counts_donor_by_label_tissue.csv` ·
+`02_analysis/scripts/02_annotate_states_viz.py`.
 
-**How to read:** Dot size is the fraction of cells expressing, colour the mean log-
-normalised expression, rows the frozen label. QC overlay tier — hand
-markers, which carry no evidential weight.
+---
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/02_annotate_states_viz.py` | `main` | `LINEAGE_MODULES (Treg/Tcon/CD8 canonical markers)` | `03_results/02_annotation/tables/substate_markers.csv` |
+## Tables
 
-## figures/_overview/counts_grid.png
+### `tables/confusion_sort_vs_predicted.csv`
 
-The cohort holds 7 donors and 6 span SF and PB in each analyzed
-population after QC. Every observed stratum clears the 20-cell
-pseudobulk floor. The p3 PB Tcon and PB CD8 samples were never
-collected.
+Rows are the frozen sort label, columns the argmax of the three z-scored canonical lineage
+modules, entries cell counts, and the diagonal is agreement. Rows and columns are forced to the
+same Treg / Tcon / CD8 order, so the diagonal reads directly.
 
-**How to read:** Heatmap of cells per donor (x) against label plus tissue (y). A red
-asterisk marks a stratum below the pseudobulk cell floor; an empty
-square marks an absent sample. Donor count per arm sets contrast
-precision. Diagnostic.
+Agreement runs 89.6% in Treg, 83.8% in Tcon and 84.4% in CD8, 85.6% overall. The off-diagonal
+mass is overwhelmingly Tcon against CD8, and 195 sorted Tregs land on the CD8 module, so the Treg
+gate is clean enough to freeze. Each module holds four or five genes and shared cytotoxic and
+activation genes blur Tcon against CD8, so a demonstrated mis-sort takes more evidence than this
+table supplies.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/02_annotate_states_viz.py` | `main` | `thresholds.pseudobulk_min_cells = 20` | `03_results/02_annotation/tables/counts_donor_by_label_tissue.csv` |
+### `tables/counts_donor_by_label_tissue.csv`
 
-## tables/confusion_sort_vs_predicted.csv
+One row per donor × frozen coarse label × tissue, with `n_cells` counting cells surviving QC.
+Read each row against the per-stratum floor (`pseudobulk_min_cells = 20`) and each label × tissue
+arm against the donor floor (`pseudobulk_min_donors = 3`).
 
-Marker-module argmax reproduces the sort gate for 85.6% of the 99,915 QC-passing cells — Treg
-89.6%, Tcon 83.8%, CD8 84.4%. The off-diagonal mass is overwhelmingly Tcon against CD8, and 195
-sorted Tregs land on the CD8 module, so the Treg gate is clean enough to freeze.
+All 39 surviving strata clear the cell floor; the thinnest, blood Treg p7, holds 266 cells. Every
+arm keeps at least six donors, so each contrast sits well above the donor floor. Absent rows carry
+two distinct causes: p3 blood Tcon and blood CD8 were never collected, and synovial Treg p5 is the
+near-empty library QC excluded. The compute step applies no floor itself, leaving the gating to
+pseudobulk.
 
-**How to read:** Rows are the frozen sort label, columns the argmax of the three z-scored canonical
-lineage modules, entries cell counts, and the diagonal is agreement. Rows and columns are forced to
-the same Treg/Tcon/CD8 order, so the diagonal reads directly. An off-diagonal cell records module
-disagreement; each module is 4-5 genes, and shared cytotoxic and activation genes blur Tcon against
-CD8, so a demonstrated mis-sort takes more evidence than this. Diagnostic tier — sorting remains
-the label of record.
+### `tables/substate_markers.csv`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/02_annotate_states.py` | `main` | `decisions.treg_gate.basis = sorting`; `LINEAGE_MODULES` (Treg FOXP3/IL2RA/CTLA4/IKZF2/TIGIT, Tcon IL7R/CD40LG/ANK3/LEF1, CD8 CD8A/CD8B/NKG7/GZMK/GZMA) is a literal in the script — no config key | `03_results/objects/01_qc.h5ad` |
+36 rows — twelve panel markers × three frozen labels. `mean_lognorm` is the mean log-normalised
+expression across every cell carrying that label, zeros included, so it is diluted by
+non-expressers; `frac_expressing` is the fraction with more than 0 UMI.
 
-## tables/counts_donor_by_label_tissue.csv
+FOXP3 reaches mean 1.69 in 80% of sorted Tregs against 0.06 in Tcon and 0.02 in CD8. CD8A marks
+93% of CD8 cells and under 0.5% of cells in either other gate. IL7R runs highest in Tcon (2.35)
+and lowest in Treg (0.66), as a CD127-lo gate requires.
 
-All 39 surviving donor × label × tissue strata clear the 20-cell pseudobulk floor; the thinnest, PB
-Treg p7, holds 266 cells. Every arm keeps at least 6 donors, so each SF-versus-PB contrast sits
-well above the donor floor of 3.
-
-**How to read:** One row per donor × frozen coarse label × tissue; `n_cells` counts cells surviving
-QC. Read each row against the per-stratum floor (`pseudobulk_min_cells = 20`) and each label ×
-tissue arm against the donor floor (`pseudobulk_min_donors = 3`). Absent rows carry two distinct
-causes: p3 PB Tcon and PB CD8 were never collected, and SF Treg p5 is the near-empty library QC
-excluded. The compute step writes raw counts and applies no floor itself, leaving gating to
-pseudobulk. Descriptive; this table is the power budget of the paired contrast.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/02_annotate_states.py` | `main` | `thresholds.pseudobulk_min_cells = 20`, `thresholds.pseudobulk_min_donors = 3`, `decisions.qc.drop_gsms = [GSM4859852]` | `03_results/objects/01_qc.h5ad` |
-
-## tables/substate_markers.csv
-
-FOXP3 reaches mean log-normalised 1.69 in 80% of sorted Tregs, against 0.06 in Tcon and 0.02 in
-CD8. CD8A marks 93% of CD8 cells and under 0.5% of cells in either other gate. IL7R runs highest in
-Tcon (2.35) and lowest in Treg (0.66), as a CD127-lo gate requires.
-
-**How to read:** 36 rows — 12 panel markers × 3 frozen labels. `mean_lognorm` is the mean
-log-normalised expression across every cell carrying that label, zeros included, so it is diluted
-by non-expressers. `frac_expressing` is the fraction with more than 0 UMI. This table carries no
-test statistic and no sign convention; the pass condition is high in the intended label and low
-elsewhere. Source table for the marker dotplot. QC overlay tier — hand markers, which carry no
-evidential weight.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/02_annotate_states.py` | `main` | `PANEL_MARKERS` (12 canonical lineage markers) is a literal in the script — no config key; labels from `decisions.treg_gate.basis = sorting` | `03_results/objects/01_qc.h5ad` |
+This table carries no test statistic and no sign convention. The pass condition is high in the
+intended label and low elsewhere. Hand markers, QC-overlay tier.
