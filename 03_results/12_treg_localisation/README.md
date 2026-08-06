@@ -1,25 +1,31 @@
-# 12_treg_localisation -- Treg-only niche localisation
+# 12_treg_localisation — Per-cell score distributions inside the Treg gate
 
-Secondary and corroborative tier evaluation of per-cell AUCell score distributions across synovial fluid (SF) versus peripheral blood (PB) niches in sorted JIA CD4+ Tregs.
+Five signatures scored per cell with AUCell, summarised across the synovial and blood arms inside
+the sorted CD4⁺ Treg gate. This stage is a compute resource and publishes no figure; its two
+tables carry the per-cell scores and their per-signature summaries.
 
-This stage is a compute resource and publishes no figure. Its two tables carry the per-cell scores and their per-signature summaries; the statistical claims about the same contrast rest on donor-level pseudobulk DE, not on per-cell distributions.
+Per-cell distributions are secondary and corroborative. The statistical claims about the same
+contrast rest on donor-level pseudobulk differential expression in
+[`../03_pseudobulk/`](../03_pseudobulk/) and the enrichment computed on it.
 
-## tables/treg_localisation_summary.csv
+---
 
-Summary statistics (cell counts, donor counts, mean, median, IQR, set sizes, and power bands) per signature and tissue arm for sorted CD4+ Tregs.
+## Tables
 
-**How to read:** Each row gives summary metrics for one signature and tissue niche (`synovial_fluid` vs `peripheral_blood`) in sorted CD4+ Tregs (`coarse_label == "Treg"`). Set sizes reflect nominal gene list counts and effective in-dataset matches. Power bands follow standard thresholds: `testable` (≥15 genes), `underpowered_reported` (5–14 genes), and `untestable` (<5 genes).
+### `tables/treg_localisation_summary.csv`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/12_treg_localisation.py` | `main` | `percell_score_ncores = 4` | `03_results/objects/02_annotation.h5ad` |
+One row per signature × tissue arm (`synovial_fluid`, `peripheral_blood`) within
+`coarse_label == "Treg"`. Carries the cell and donor counts, the mean, median and interquartile
+range of the per-cell score, and both set sizes: the nominal gene-list count and the effective
+in-dataset match.
 
-## tables/treg_per_cell_scores.csv
+`power_band` classifies the effective size on the project's standard thresholds — `testable` at
+15 genes or more, `underpowered_reported` at 5 to 14, `untestable` below 5 — so a thin set is
+reported with its size rather than dropped.
 
-Per-cell AUCell score table for all cells in the substrate across five evaluated signatures.
+### `tables/treg_per_cell_scores.csv`
 
-**How to read:** Per-cell rank-based AUCell scores for each cell (indexed by barcode), including donor, tissue, coarse label, and coordinate metadata.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/12_treg_localisation.py` | `main` | `percell_score_ncores = 4` | `03_results/objects/02_annotation.h5ad` |
+One row per cell barcode: the rank-based AUCell score for each of the five evaluated signatures,
+alongside donor, tissue, coarse label and the embedding coordinates. AUCell is unsigned and
+bounded in [0, 1], and its scale depends on set size, so values compare across tissue within a
+signature.

@@ -1,127 +1,135 @@
-# 09_heat_hypoxia: artifact captions
+# 09_heat_hypoxia — Is the enrichment reducible to its hypoxia gene content?
 
-_**Abbreviations:** SF = synovial fluid, PB = peripheral blood, NES = normalized enrichment score, FDR = BH-adjusted p-value._
+The mouse 39 °C up arm enriches toward synovial fluid in every sorted population. This stage asks
+one bounded question of that result: **is it reducible to the set's own HALLMARK_HYPOXIA-overlap
+gene content?** That is a membership question, and it is answered by deleting those genes and
+re-running the same donor-pseudobulk enrichment.
 
-This stage asks one bounded question of the JIA SF-vs-PB `WT_heat` enrichment: is it reducible to the set's own `HALLMARK_HYPOXIA`-overlap gene content? That is a membership question, and it is answered by deleting those genes and re-running the same donor-pseudobulk fgsea. It is deliberately not a question about temperature, and it is not a question about whether hypoxia is a confound or a co-exposure — those are not separable in cross-sectional human data, and nothing here licenses a statement about either. Hypoxia is a transcriptional readout throughout, never a HIF-causality claim.
+**It survives.** Removing the 18 overlap genes takes 12 to 15 testable genes out of the arm and
+costs 0.126 to 0.164 NES — 2.5914 → 2.4271 in Treg, 2.6826 → 2.5565 in Tcon, 2.0614 → 1.9181 in
+CD8 — leaving all three significant at FDR ≤ 4.1e-5
+(`tables/gene_purge_nes_comparison.csv`).
 
-One figure carries that question: the paired full-versus-purged NES panel, which answers it at confirmatory tier and stops there. The reader sequence then moves directly to the curated whole-arm coverage panel in `11_heat_decomposition`, which alone answers what the set contains: 137 of 199 up-arm genes belong to no named program, the curated HSR core contains 2, and type-I interferon contains 1.
+**What that licenses is narrow, and stating the bound is the point of the stage.** A positive
+purged score means the enrichment holds without those genes. Temperature is untested here.
+Temperature and hypoxia are jointly imposed by the inflamed joint and stay entangled in
+cross-sectional human data, so the causal structure between them stays undetermined and this
+stage asserts none. Hypoxia is a transcriptional readout throughout.
 
-Several tables here remain compute resources without a published panel of their own. `heat_hypoxia_colocalization.csv` carries the per-cell agreement between the heat and hypoxia scores and is read by the reactive review notebook and by the cross-dataset layer. `leadingedge_composition.csv` carries the model-assigned taxonomy (`agy_gemini_3.1_pro_2026-07-14`) of the genes at the synovial-fluid end of each ranking; it put 55% to 61% of those selected leading-edge genes in immediate-early or effector/activation categories, a memorable fraction that is not comparable to the curated whole-arm activation counts of 5.6% in mouse and 6.0% after human projection, which is why the whole-arm curated panel and not this table carries the composition reading.
+One figure carries the question and stops there. The reader sequence then moves to the curated
+whole-arm coverage panel in [`../11_heat_decomposition/`](../11_heat_decomposition/), which alone
+answers what the set contains.
 
-## gene_purge_nes_comparison.csv
+**Two tables remain as compute resources with no panel of their own.**
+`heat_hypoxia_colocalization.csv` carries the per-cell agreement between the heat and hypoxia
+scores, read by the reactive review notebook and by the cross-dataset layer.
+`leadingedge_composition.csv` carries a model-assigned taxonomy of the genes at the synovial end
+of each ranking; its visualisation is withdrawn, because a fraction over genes selected because
+they enriched describes that leading edge rather than the arm.
 
-Removing 18 `HALLMARK_HYPOXIA` overlap genes reduces the `WT_heat_up` NES modestly, but the enrichment remains SF-high in Treg, Tcon, and CD8 at FDR <= 4.1e-5.
+---
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `gene_purge_nes` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, mouse `WT_heat_up/down.txt`, `00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt` |
+## Figures
 
-**How to read:** One row per sorted population. Positive NES means the set is enriched toward the SF-high end of the SF-vs-PB ranked list. `NES_full` is the original `WT_heat_up` score, while `NES_purged` is the same fgsea engine after removing hypoxia-overlap genes. This is the primary donor-pseudobulk tier. I read a positive, significant purged NES as evidence that the `WT_heat_up` enrichment is not reducible to its HALLMARK_HYPOXIA-overlap gene content. It says nothing about temperature, and nothing about whether hypoxia is a confound or a co-exposure — those are not separable in cross-sectional human data.
+### `figures/_overview/heat_purge_nes_paired.png`
 
-## heat_hypoxia_colocalization.csv
+**The cost of deleting the hypoxia-overlap genes, arm by arm and population by population.**
+Six rows, one per population × mouse arm. x, normalised enrichment score, positive toward
+synovial fluid. Each row pairs the full set (large diamond) with its purged form (small circle),
+and the connecting bar is the NES cost. Warm brown gives the up arm and cool blue the down arm; a
+dark outline marks FDR below 0.05. Right-hand text reports effective and nominal set sizes, the
+NES cost, and the purged FDR.
 
-Within SF cells, `WT_heat_up_AUCell` and `HALLMARK_HYPOXIA_AUCell` show weak positive cell-level correlations, while donor-level SF means are not positive in this small donor set.
+**Two gene counts differ and both are given:** 18 genes come out of the frozen set, of which 12 to
+15 were present in a ranked list. The Tcon down arm stays significant at the up arm's sign. This
+is the confirmatory tier — donor-level pseudobulk within frozen sort labels, limma-voom then
+pre-ranked enrichment — and it licenses a membership statement.
+*Source* `tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` ·
+`02_analysis/scripts/09_heat_hypoxia_viz.py`.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `heat_hypoxia_colocalization` | `tissue_levels.synovial_fluid=synovial_fluid`, `donor_key=donor` | `03_results/interactive/08_harvest_readout.parquet`, `03_results/05_scoring/tables/per_cell_scores.csv` |
+---
 
-**How to read:** Rows are stratified by population, level, and correlation method. `level=cell` uses SF cells directly. `level=donor_sf_mean` correlates per-donor SF mean heat and hypoxia scores. Positive `r` means a higher `WT_heat_up` score tends to sit with a higher HALLMARK_HYPOXIA score. This is an L3 secondary per-cell read and is not pooled with the pseudobulk NES. The cell-level correlation is weak (Spearman 0.08 to 0.20), so `WT_heat_up`-high and HALLMARK_HYPOXIA-high cells are largely distinct by this measure. The donor-level correlation rests on only 6 to 7 donors and is effectively unpowered, so its sign is not interpretable and must not be read as the two scores being anti-correlated.
+## Tables
 
-## leadingedge_composition.csv
+### `tables/gene_purge_nes_comparison.csv` — the paired answer
 
-Of the 49 to 71 genes at the SF end of each population's ranking, the model-assigned taxonomy describes 55% to 61% as immediate-early or effector/activation. Those are fractions of leading-edge genes only, not of the 199-gene set, and I retain them as an exploratory compute resource rather than a reader-sequence figure.
+One row per sorted population. `NES_full` is the original `WT_heat_up` score and `NES_purged` the
+same engine after removing the hypoxia-overlap genes; positive means enriched toward the synovial
+end. `genes_removed` echoes the deleted list.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `leadingedge_composition` | taxonomy from `00_data/references/heat_leadingedge_taxonomy/` | `03_results/09_heat_hypoxia/tables/runsum_interactive_gsea_full_{treg,tcon,cd8}_WT_heat_up.csv`, `00_data/references/heat_leadingedge_taxonomy/leadingedge_gene_taxonomy.csv` |
+A positive, significant purged score is evidence that the enrichment holds without its
+HALLMARK_HYPOXIA-overlap gene content. It says nothing about temperature.
 
-**How to read:** One row per population. `n_leading_edge` is the count of fgsea core-enrichment genes from the full `WT_heat_up` run. Each is assigned to one program — `heat_shock_proteostasis`, `hypoxia_HIF`, `immediate_early_stress`, `effector_activation`, `other` — by the frozen model-assigned taxonomy whose exact source is carried in `taxonomy_source`; `n_unclassified` counts genes assigned to nothing. This table was never used to re-test a leading-edge subset. It remains because the reactive review notebook reads it, but its visualization is withdrawn: a fraction over genes selected because they enriched describes that leading edge and not the 199-gene set. Read whole-arm composition only from `11_heat_decomposition/figures/_overview/heatdecomp_arm_coverage`, where the curated versioned lenses leave 137 of 199 genes unassigned and contain 2 curated-HSR and 1 type-I-interferon gene.
+### `tables/gsea_full_{treg,tcon,cd8}.csv` — the unpurged reference
 
-## tables/gsea_full_{treg,tcon,cd8}.csv
+One file per population, two rows each. `set_size` counts signature genes surviving intersection
+with the ranked list — 119 / 130 / 113 of 199 up, 56 / 61 / 57 of 94 down — so roughly half to
+two thirds of the projected signature is testable here. `core_enrichment` is the slash-separated
+leading edge.
 
-With the complete 199-gene mouse `WT_heat_up` set, SF-vs-PB enrichment is positive and strong in every sorted population -- NES 2.59 (Treg), 2.68 (Tcon), 2.07 (CD8), all at FDR <= 3.6e-7 -- while `WT_heat_down` also leans positive and reaches significance in Tcon (NES 1.47, FDR 0.026) though not in Treg (0.97, FDR 0.51) or CD8 (1.09, FDR 0.31), so the signature's two arms do not separate in opposite directions.
+`WT_heat_up` reaches NES 2.59 (Treg), 2.68 (Tcon) and 2.07 (CD8), all at FDR ≤ 3.6e-7.
+`WT_heat_down` leans positive and reaches significance in Tcon alone (1.47, FDR 0.026) against
+Treg (0.97, 0.51) and CD8 (1.09, 0.31). **The positive down arm is the caveat**: both arms move
+the same way, so the synovial shift is a shared shift rather than a clean bidirectional
+recapitulation of the mouse contrast.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `run_fgsea` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, `03_results/09_heat_hypoxia/tables/_signatures_full/WT_heat_{up,down}.txt` |
+### `tables/gsea_purged_{treg,tcon,cd8}.csv`
 
-**How to read:** One file per sorted population, two rows each (`WT_heat_up`, `WT_heat_down`). Positive `nes` means enrichment toward the SF-high end of the donor-pseudobulk SF-vs-PB ranked list; `padj` is BH across the two sets in that run only. `set_size` counts signature genes surviving intersection with the ranked list (119/130/113 of 199 up; 56/61/57 of 94 down) -- roughly half to two-thirds of the projected signature is testable here. `core_enrichment` is the slash-separated leading edge. Primary donor-pseudobulk tier, and the unpurged reference for the hypoxia-purged run. The positive `WT_heat_down` arm is the caveat, and in Tcon it is significant: the SF-high shift is not a clean bidirectional recapitulation of the mouse contrast, because both arms move the same way.
+The same runs after the purge. `WT_heat_up` reaches NES 2.43 (Treg), 2.55 (Tcon), 1.93 (CD8) at
+FDR ≤ 4.1e-5, and effective size falls from 119 / 130 / 113 to 107 / 115 / 101. `WT_heat_down` is
+untouched at 0.97 / 1.47 / 1.09, because none of its 94 genes overlaps hypoxia. The contrast tag
+distinguishes purged rows, and these feed `gene_purge_nes_comparison.csv`, which owns the paired
+comparison.
 
-## tables/gsea_purged_{treg,tcon,cd8}.csv
+### `tables/_signatures_full/WT_heat_{up,down}.txt`
 
-Removing the 18 `HALLMARK_HYPOXIA` overlap genes leaves `WT_heat_up` SF-high in all three populations -- NES 2.43 (Treg), 2.55 (Tcon), 1.93 (CD8), FDR <= 4.1e-5, a loss of only 0.13 to 0.16 NES -- and leaves `WT_heat_down` untouched (NES 0.97/1.47/1.09), since none of its 94 genes overlap hypoxia.
+The frozen mouse-anchor human-ortholog sets exactly as handed to the enrichment engine — 199 up
+genes and 94 down. Plain newline-delimited HGNC symbols, alphabetically ordered, with the
+direction carried by the filename. These are inputs rather than results: their value is
+provenance, and they are regenerated verbatim from the frozen contract on every run. Diff them
+against `_signatures_purged/` to see exactly what the purge removed.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `run_fgsea` | `gsea_min_size=5`, `gsea_max_size=500`, `gsea_seed=123`, `gsea_nperm=100000` | `03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv`, `03_results/09_heat_hypoxia/tables/_signatures_purged/WT_heat_{up,down}.txt` |
+### `tables/_signatures_purged/WT_heat_{up,down}.txt`
 
-**How to read:** Positive `nes` is SF-high and `padj` is BH within each run. The contrast tag distinguishes purged rows. `WT_heat_up` effective size falls from 119/130/113 to 107/115/101: 18 genes leave the frozen set, but only 12/15/12 were testable in the corresponding ranking. These primary donor-pseudobulk rows feed `gene_purge_nes_comparison.csv`, which owns the paired comparison. A positive, significant purged NES supports only the bounded gene-content statement; it says nothing about temperature.
+181 up genes after dropping the 18 HALLMARK_HYPOXIA members — ADM, ADORA2B, AK4, ANXA2, ATF3,
+CCN1, CDKN1A, EGFR, F3, FOSL2, HK2, IER3, P4HA2, PDGFB, PLAUR, SDC4, SERPINE1, TGM2 — which is 9.0%
+of the up set. The 94-gene down list is identical to the full one. The purge is a plain set
+difference against the 200-gene HALLMARK_HYPOXIA reference applied to both arms, and that it
+changes only the up list is itself informative: the hypoxia overlap sits entirely on the
+synovial-high side.
 
-## tables/_signatures_full/WT_heat_{up,down}.txt
+### The two compute resources
 
-The frozen mouse-anchor human-ortholog `WT_heat` sets exactly as handed to fgsea -- 199 up genes and 94 down genes -- of which 113 to 130 (up) and 56 to 61 (down) appear in the JIA donor-pseudobulk ranked lists, so 57% to 65% of the up arm and about 60% of the down arm is actually testable in this compartment.
+**`tables/heat_hypoxia_colocalization.csv`** — rows stratified by population, level and
+correlation method. `level = cell` uses synovial cells directly; `level = donor_sf_mean`
+correlates per-donor synovial means. Positive `r` means a higher `WT_heat_up` score tends to sit
+with a higher hypoxia score.
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `prepare_signature_dirs` | `signature_contract = ../mouse_anchor/03_results/human_projection/` | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt` |
+The cell-level correlation is weak, Spearman 0.08 to 0.20, so `WT_heat_up`-high and hypoxia-high
+cells are largely distinct cells by this measure. The donor-level correlation rests on six to
+seven donors and is effectively unpowered, so its sign supports no reading. Secondary per-cell
+tier.
 
-**How to read:** Plain newline-delimited HGNC symbols, one per line, no header, alphabetically ordered. `_up` are the genes raised at 39 C in the mouse anchor and `_down` those lowered, projected to human orthologs; the sign lives in the filename, not in the file. These are inputs, not results -- their value is provenance and reproducibility: the exact gene universe behind the primary donor-pseudobulk NES, regenerated verbatim from the frozen contract on every run. Diff them against `_signatures_purged/` to see precisely what the hypoxia purge removed.
+**`tables/leadingedge_composition.csv`** — one row per population. `n_leading_edge` counts the
+core-enrichment genes from the full run, 49 to 71 per population, and each is assigned to one
+program by the frozen model-assigned taxonomy named in `taxonomy_source`
+(`agy_gemini_3.1_pro_2026-07-14`); `n_unclassified` counts genes assigned to nothing.
 
-## tables/_signatures_purged/WT_heat_{up,down}.txt
+The taxonomy puts 55% to 61% of those genes in immediate-early or effector-activation categories.
+**Those are fractions of leading-edge genes**, and they sit on a different denominator from the
+curated whole-arm counts of 5.6% in mouse and 6.0% after human projection. This table was never
+used to re-test a leading-edge subset. **Read whole-arm composition from
+[`../11_heat_decomposition/`](../11_heat_decomposition/)**, where curated versioned lenses leave
+137 of 199 genes unassigned and contain 2 curated-HSR and 1 type-I-interferon gene.
 
-The hypoxia-purged inputs: 181 up genes after dropping the 18 `HALLMARK_HYPOXIA` members (ADM, ADORA2B, AK4, ANXA2, ATF3, CCN1, CDKN1A, EGFR, F3, FOSL2, HK2, IER3, P4HA2, PDGFB, PLAUR, SDC4, SERPINE1, TGM2 -- 9.0% of the up set), while the 94-gene down list is identical to the full one because no down gene overlaps hypoxia.
+### `tables/runsum_interactive_gsea_{full,purged}_{treg,tcon,cd8}_WT_heat_{up,down}.csv`
 
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `prepare_signature_dirs` | `signature_contract = ../mouse_anchor/03_results/human_projection/` | `../mouse_anchor/03_results/human_projection/signatures/WT_heat/WT_heat_{up,down}.txt`, `00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt` |
+Twelve files, the gene-by-gene walk behind every curve, in the shared running-sum schema: `rank`,
+`gene`, `stat`, `running_es`, `hit`, `leading_edge`, plus the set, population and contrast keys.
 
-**How to read:** Same format and sign convention as `_signatures_full/` -- newline-delimited HGNC symbols, alphabetical, direction carried by the filename. The purge is a plain set difference against the 200-gene `HALLMARK_HYPOXIA` reference, applied to both arms; that it changes only the up list is itself informative, since the hypoxia overlap is entirely on the SF-high side. Inputs rather than results, at the primary donor-pseudobulk tier: they define the gene universe for `gsea_purged_*`, and the removed-gene list is echoed in the `genes_removed` column of `gene_purge_nes_comparison.csv`.
+### `tables/_overview/heat_purge_nes_paired.csv` · `tables/source_hash_manifest.csv`
 
-## tables/_overview/heat_purge_nes_paired.csv
-
-One row per population and mouse arm, pairing the full and hypoxia-purged NES side by side so the cost of the purge reads as a single subtraction.
-
-**How to read:** `nes_full`/`nes_purged` with their FDRs and testable `set_size` are the plotted marker positions; positive NES is synovial-fluid-high. Six rows, six markers, nothing aggregated. Primary donor-pseudobulk tier.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `purge_paired_table` | `thresholds.gsea_fdr=0.05` | `03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` |
-
-## figures/_overview/heat_purge_nes_paired.png
-
-Deleting the 18 HALLMARK_HYPOXIA-overlap genes from the mouse 39
-°C-derived up-set takes 12 to 15 testable genes out of the arm and
-costs 0.126 to 0.164 NES — 2.5914 to 2.4271 in Treg, 2.6826 to 2.5565
-in Tcon, 2.0614 to 1.9181 in CD8 — leaving all three significant. The
-synovial-fluid enrichment therefore survives the removal of its
-HALLMARK_HYPOXIA-overlap gene content. This is a statement about gene
-content. Temperature is untested here, and cross-sectional human data
-leave hypoxia's status as confound or co-exposure undetermined.
-
-**How to read:** This is the confirmatory tier: donor-level pseudobulk within frozen
-sort labels, limma-voom then fgsea. Positive NES points toward
-synovial fluid. Each row pairs the full set (large diamond) with its
-purged form (small circle); the connecting bar is the NES cost. Warm
-brown is the up arm and cool blue the down arm. A dark outline marks
-FDR below 0.05. Right-hand text reports effective and nominal set
-sizes, the NES cost, and purged FDR. Two gene counts differ and both
-are given: 18 genes come out of the frozen set, of which 12 to 15 were
-present in a ranked list. The Tcon down arm stays significant at the
-up arm's sign. This licenses a membership statement. Correlative.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia_viz.py` | `plot_purge_paired` | `thresholds.gsea_fdr=0.05; gsea_min_size=5; gsea_nperm=100000` | `03_results/09_heat_hypoxia/tables/gsea_{full,purged}_{treg,tcon,cd8}.csv` |
-
-## tables/source_hash_manifest.csv
-
-The stage-09 mouse-signature reads are pinned to the source files used for this render.
-
-**How to read:** `source_label` names the dependency, `source_path` is relative to the umbrella
-checkout, and `sha256` is the required byte hash. The compute script stops if the mouse
-projection files drift.
-
-| Script | Function | Config | Input |
-|---|---|---|---|
-| `02_analysis/scripts/09_heat_hypoxia.py` | `verify_source_hashes()` | pinned SHA-256 | mouse projection and SAVI reference-axis signature files |
+The figure's same-stem source pairs the full and purged score side by side so the cost reads as
+one subtraction — six rows, six markers, nothing aggregated. The manifest pins every
+cross-compartment source this stage reads by SHA-256; the compute script stops if a pinned file
+drifts.
