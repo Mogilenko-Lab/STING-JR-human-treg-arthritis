@@ -849,7 +849,7 @@ def umap(
                 scaleratio=1,
                 constrain="domain",
             ),
-            # One shared uirevision, never recomputed from the selection, holds zoom /
+            # One shared uirevision, constant across selections, holds zoom /
             # pan and legend trace-visibility across figure updates. The same value on
             # both panels keeps their views in step, coherent because they share
             # coordinates.
@@ -985,7 +985,7 @@ def _(curve_map_l, curve_map_r, drawn, embed_l, embed_r, go, mo):
 
     # The per-cell readouts, shown as means over the selection. The mitochondrial
     # fraction stays on the color-by control only, kept off this bar because it is a
-    # percentage rather than a bounded score and would flatten the other bars.
+    # percentage, over a bounded score, and would flatten the other bars.
     _score_cols = {
         "WT_heat (up)": "WT_heat_up",
         "WT_heat (down)": "WT_heat_down",
