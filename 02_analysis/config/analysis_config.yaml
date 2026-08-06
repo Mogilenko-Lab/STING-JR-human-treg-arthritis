@@ -60,7 +60,7 @@ thresholds:
   qc_min_cells_per_gene: 3            # gene kept if detected in >= this many cells
   scrublet_expected_doublet_rate: 0.06
 
-  # --- embedding (annotation/viz only, never biology) ---
+  # --- embedding (annotation/viz only) ---
   hvg_n_top: 3000
   n_pcs: 30
   leiden_resolution: 1.0
@@ -101,7 +101,7 @@ colors:
   # THE TWO CATEGORICAL AXES OF THIS COMPARTMENT, DECLARED TOGETHER.
   # ==========================================================================
   # Every figure that colours by sorted population or by tissue reads one of the two
-  # blocks below. Values name a key of `okabe_ito` above rather than a hex literal, so a
+  # blocks below. Values name a key of `okabe_ito` above, over a hex literal, so a
   # hue can never drift from the categorical palette. They are declared side by side on
   # purpose: the two axes must not share a hue, and that constraint is only visible if
   # both assignments are read in one place. Editing one of them means checking the other.
@@ -268,7 +268,7 @@ coresh:
 # at 458 of the 13,999-gene Treg synovial-vs-blood ranked list, and both are invisible
 # to every STING gene set.
 #
-# The map is a property of (matrix vocabulary x org.Hs.eg.db release), not of any one
+# The map is a property of (matrix vocabulary x org.Hs.eg.db release), independent of any one
 # gene set, so it is computed once by 00_symbol_alias_map.R, committed, and read by both
 # languages. Regenerating it is a deliberate act with a reviewable diff. Rebuild it when
 # the matrix vocabulary changes, when org.Hs.eg.db moves, or when a collection is added
@@ -284,14 +284,14 @@ symbol_alias:
   # The vocabulary the map resolves INTO, and the two nested layers above it that let a
   # ledger keep vocabulary loss apart from never-detected and from expression-filtered.
   # Conflating those three is the defect this asset exists for, so all three layers are
-  # declared rather than inferred.
+  # declared explicitly.
   matrix_vocabulary: "03_results/03_pseudobulk/tables/gene_symbols.csv"   # 21,740 post-QC symbols
   reference_feature_symbols: "03_results/00_build/tables/reference_feature_symbols.csv"  # 32,738 CellRanger features
   ranked_list: "03_results/03_pseudobulk/tables/ranked_{population}.tsv"  # post-filterByExpr
 
   # Pairs that pass the automated ownership guard but are NOT clean 1:1 nomenclature
   # updates. They are withheld from every tested set and appear in the map with
-  # resolution `flagged_for_review`, so the exclusion is visible rather than silent.
+  # resolution `flagged_for_review`, so the exclusion is visible in the map.
   # MIR4435-2HG and MIR4435-1HG are two distinct lncRNA loci in most annotations: -1HG
   # was reclassified and org.Hs.eg.db carries it as an alias, but a lncRNA locus merge is
   # not the same class of event as a protein-coding rename, and this pair lands in
@@ -312,7 +312,7 @@ symbol_alias:
 # =============================================================================
 # The unbiased counterpart to the targeted stage-05 test: every collection is
 # scored against the same frozen SF-vs-PB ranked lists and no set is privileged.
-# Declared as its own block rather than by widening `databases:` above, because
+# Declared as its own block, over widening `databases:` above, because
 # `databases:` records the compartment's default four-collection choice that other
 # stages may adopt, and this stage deliberately sweeps far wider.
 #
@@ -350,7 +350,7 @@ unbiased_enrichment:
   # raw files:
   #   - TransportDB ships one raw file of 1,290 MOUSE RefSeq protein accessions (NP_...).
   #     build_reference_databases.R will accept Homo_sapiens and substitute org.Hs.eg.db,
-  #     which is a trap rather than a build: none of those 1,290 accessions is a valid
+  #     which is a trap: none of those 1,290 accessions is a valid
   #     human REFSEQ key, so the conversion returns zero genes. A genuine human build
   #     needs the human TransportDB 2.0 export from membranetransport.org.
   #   - MitoXplorer ships native mouse MGI symbols only, and build_reference_databases.R
@@ -368,7 +368,7 @@ unbiased_enrichment:
     # is the more useful fact about this entry than its presence. The raw source
     # MitoPathways3.0.gmx is natively HUMAN; the mouse-anchor copy of this same database is
     # the homologene conversion of that file. So the human sweep reads the less derived
-    # asset of the two, rather than a human rendering of a mouse set.
+    # asset of the two, curated in human directly.
     #
     # 119 sets / 1,035 unique human symbols. The upstream catalogue holds 149 sets: the
     # toolkit's build applies a 5-gene floor when it writes the RDS, so 30 sets of 1 to 4
@@ -439,7 +439,7 @@ unbiased_enrichment:
   # named database the mouse anchor's sweep does. Two terms: HSR_core (56 human symbols,
   # the cleaned cytosolic subset) and HSR_sensitivity (176, the full union). Both are
   # frozen in this compartment by freeze_hsr_lens.R from the anchor's human lens under a
-  # SHA pin, and the human list is the curated source rather than a conversion: the lens
+  # SHA pin, and the human list is the curated source: the lens
   # is built from three human MSigDB sets and the anchor's mouse list is the ortholog
   # derivative of it.
   #
@@ -464,11 +464,26 @@ unbiased_enrichment:
   # freeze_tcr_activation_lens.R from the anchor's human asset under a SHA pin. The human
   # panel is the curated source; the anchor's mouse list is the ortholog conversion of it,
   # so nothing here is orthology-derived. FOXP3 is deliberately absent from the panel as a
-  # lineage-identity marker rather than an activation marker.
+  # lineage-identity marker, over an activation marker.
   tcr_activation:
     name: "TCR_activation"
     files:
       - "00_data/references/tcr_activation_lens/TCR_activation.txt"
+
+  # This compartment's own effector-Treg contrast on GSE161426, UP ARM ONLY.
+  #
+  # Swept because the per-cell arm maps draw it, so the overview panels need a row for it.
+  #
+  # ANCHOR-INDEPENDENT AND DERIVED HERE, which its own `eTreg_lens` tag keeps visible
+  # wherever `database` is reported: Welch t on the GSE161426 log2 matrix, SF against blood
+  # effector Treg, n = 4 against 14, |log2FC| >= 1, p < 0.05, capped at 200 symbols.
+  #
+  # Declared last among the file-backed collections, so it adds one hypothesis per
+  # population and moves no existing set's canonicality.
+  etreg_lens:
+    name: "eTreg_lens"
+    files:
+      - "00_data/references/etreg_GSE161426/eTreg_up.txt"
 
   # Pooled multiplicity correction is applied across the WHOLE family of tests
   # within one population, exactly as the mouse anchor's pooled pass does.
@@ -490,14 +505,14 @@ unbiased_enrichment:
   # could not be drawn. HSR_core is the anchor-independent proteostasis lens and is named
   # here for the same reason. Ids are matched against the CANONICAL collection each belongs
   # to after alias resolution, so naming a re-pinned set cannot produce two identical curves.
-  # A named id that is not scorable in a population is reported and skipped, never silently
+  # A named id that is not scorable in a population is reported and skipped, leaving no silent
   # dropped.
   # The cross-population running-sum family draws only sets with a curve in ALL THREE
   # populations, because a curve missing for one population there would read as "the set
   # does not enrich in that cell type" when it in fact means "that set did not rank into
   # that population's top-N quota, so no trace was written". Naming a set here is therefore
   # also what makes it eligible for that family, and every comparator the niche question
-  # is read against is named rather than left to a per-population ranking.
+  # is read against is named explicitly, independent of any per-population ranking.
   runsum_always:
     - "HALLMARK_HYPOXIA"      # the co-imposed niche stress, not separable from temperature here
     - "HSR_core"              # the anchor-independent curated proteostasis lens
@@ -516,6 +531,45 @@ unbiased_enrichment:
     signature: "WT_heat_up"
     source: "03_results/05_scoring/tables/gsea_pseudobulk_{tag}.csv"
     nes_tolerance: 0.01
+
+# =============================================================================
+# THE PER-CELL MAP PANELS — declared once, read by everything that draws or audits them
+# =============================================================================
+# The two six-panel score strips are drawn on the full object, on the Treg gate alone, and
+# again as violins.
+#
+# This block ties them to the overview panels: 14_sweep_named_sets.R maps each entry to its
+# sweep id and stops on a missing row.
+# So adding a panel here pulls it into the overview figures too.
+# Order is drawing order, left to right along a strip and then down.
+percell_map_panels:
+  # umap_full_arms / umap_treg_arms / arm_score_violins: three anchor-dependent mouse arms
+  # ruled off from three lenses that know nothing of the mouse contrast.
+  arm_strip:
+    - "WT_heat_up"
+    - "KO_heat_up"
+    - "Interaction_up"
+    - "HALLMARK_HYPOXIA"
+    - "HSR_core"
+    - "eTreg_up"
+
+  # umap_full_programs / umap_treg_programs / program_score_violins: the cGAS-STING and
+  # type-I interferon family, ruled off from the inflammation and activation programs a
+  # shared colouring would be explained by.
+  program_strip:
+    - "sting_specific_published"
+    - "ifn_generic_axis"
+    - "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+    - "HALLMARK_TNFA_SIGNALING_VIA_NFKB"
+    - "HALLMARK_INFLAMMATORY_RESPONSE"
+    - "HALLMARK_IL2_STAT5_SIGNALING"
+
+  # The two panels whose per-cell column name and swept set id differ: the substrate names
+  # the SAVI axes for what they are on a map, the sweep carries the frozen file stems.
+  # Spelled out, not guessed, so a lookup that finds no row is a real absence.
+  sweep_id:
+    sting_specific_published: "sting_specific_up"
+    ifn_generic_axis: "ifn_only_up"
 
 # =============================================================================
 # TREG-SUBSET RE-EMBEDDING (stage 17_treg_reembedding)
@@ -540,7 +594,7 @@ unbiased_enrichment:
 # and published as a table, so the reader has the number before the map.
 #
 # Harmony runs at its standard settings (harmonypy defaults, restated here so they are
-# visible in the record rather than implicit). They are not tuned toward an acceptable
+# visible in the record). They are set from the design and left there, over being tuned toward an acceptable
 # mixing number.
 
 treg_reembedding:
@@ -615,7 +669,7 @@ stages:
     purpose: "EXPLORATORY/hypothesis-generating tier only, firewalled from the confirmatory donor-pseudobulk claim spine (no row reaches effect_sizes_treg_arthritis.csv or any 03_results/master/ accumulator). Asks the human counterpart of the mouse anchor's co-regulation question: across ~44k public human GEO datasets, in which ones do the genes that go up in the JIA synovial niche co-vary? The query is the UP arm of the frozen limma-voom SF-vs-PB contrast at two stringency gates (fdr_only, fdr_logfc) per sorted population, mapped from HGNC symbol to human Entrez id because the compendium is Entrez-keyed; the mapping loss is published as a first-class number. The top-ranked public datasets are then projected back into gene-level loadings to give data-driven co-regulation modules, which are scored by pre-ranked fgsea on the same ranked list they were seeded from. A module is a co-regulation neighbourhood mined from public variance structure, NOT a curated ontology term, and a module seeded from a query necessarily contains that query's genes, so its enrichment on the seeding ranked list is partly circular by construction and is read as a description of what public biology the niche signature co-moves with, never as independent evidence."
   - id: "16_narrative_scoring"
     title: "One per-cell AUCell substrate for the narrative embedding"
-    purpose: "SECONDARY/annotation tier only, never pooled with the donor-pseudobulk NES spine and writing no effect-size row. Scores the frozen 99,915-cell annotation once, with a single metric (AUCell), for the four mouse-derived human-projected UP arms (WT_heat_up 199, KO_heat_up 218, Interaction_up 7, Interaction_fdrOnly_up 18) and nine curated anchor-independent program lenses (six frozen MSigDB Hallmark sets, the frozen HSR_core proteostasis lens, the 21 published de Cevins IFN-independent STING genes, and the 200-gene generic type-I interferon axis), and joins them onto the published embedding coordinates so one substrate can colour the same map by an empirical arm and by a curated lens side by side. Down arms are deliberately out of scope. A provenance seam check re-derives the AUCell columns that already exist in the published per-cell readout and reports their correlation, so a reader can see whether this substrate sits on the same scale as the published one before trusting a colouring."
+    purpose: "SECONDARY/annotation tier only, never pooled with the donor-pseudobulk NES spine and writing no effect-size row. Scores the frozen 99,915-cell annotation once, with a single metric (AUCell), for fourteen sets in three kinds the manifest keeps apart: the four mouse-derived human-projected UP arms (WT_heat_up 177, KO_heat_up 195, Interaction_up 7, Interaction_fdrOnly_up 19 symbols scored in this object), nine curated anchor-independent program lenses (six frozen MSigDB Hallmark sets, the frozen HSR_core proteostasis lens, the 21 published de Cevins IFN-independent STING genes, and the 200-gene generic type-I interferon axis), and one project-derived anchor-independent lens (eTreg_up, this compartment's own GSE161426 SF-vs-PB Treg contrast, 173 scored, carrying kind=project_derived_lens because it is anchor-independent while falling short of curated or versioned). Joins them onto the published embedding coordinates so one substrate can colour the same map by an empirical arm and by a curated lens side by side. The published coordinates carry NO batch correction, and the donor structure that leaves is reported from stage 17's mixing table (0.420 same-donor neighbours at k=30 against 0.146 expected, on the Treg cells of this map) rather than left implicit. Down arms are deliberately out of scope. A provenance seam check re-derives the AUCell columns that already exist in the published per-cell readout and reports their correlation, so a reader can see whether this substrate sits on the same scale as the published one before trusting a colouring."
   - id: "17_treg_reembedding"
     title: "Treg-subset re-embedding of the same cells"
     purpose: "ANNOTATION/visualisation tier only, never pooled with the donor-pseudobulk NES spine and writing no effect-size row. Recomputes the embedding recipe of 01_qc_filter.py (highly_variable_genes -> subset to HVGs -> scale(max_value=10) -> pca -> neighbors -> umap, hvg_n_top and n_pcs read from the same thresholds block the full-object run read, random_state fixed) on the sorted Treg gate alone (coarse_label == 'Treg', 27,175 of 99,915 cells), so Treg substructure is laid out without the Tcon and CD8 gates taking up the variance. Because that recipe applies no batch correction and on this subset it resolves donor-by-tissue sample of origin, the stage emits TWO coordinate pairs off the same PCA: the uncorrected map, and a second map with Harmony over donor applied to the PCA before neighbours and UMAP, at harmonypy standard settings. Harmony here is a visualisation aid under the umbrella embeddings guardrail and supports no claim. Per-cell scores are NOT recomputed: every score column of 16_narrative_embedding.parquet is joined in on barcode, with the join asserted complete, so all maps can be coloured by identical values. Neighbourhood composition for donor and for tissue at k nearest neighbours is measured on the uncorrected Treg-only map, the Harmony-corrected Treg-only map and the full-object map restricted to the same cells, against the composition expected from the group proportions, and published as one table so the reader has the number before the map. Whether the corrected map is usable is decided from that table, and a negative is a valid outcome."
@@ -703,7 +757,7 @@ tf_activity:
   # because the denominators differ — 388 to 603 across the configurations here, 263 to 658
   # in the anchor — so a raw rank read across two columns compares two different things.
   # log10 keeps the top of the ranking legible, where every focus factor sits; the range is
-  # pinned rather than fitted so no panel can rescale itself and read as a different result.
+  # pinned, over fitted, so no panel can rescale itself and read as a different result.
   rank_axis:
     percent_limits: [0.1, 100]
     percent_breaks: [0.1, 0.3, 1, 3, 10, 30, 100]
@@ -716,22 +770,22 @@ tf_activity:
 # size-conditional residual taken over the real regulons; and a permutation of the ranked
 # list's gene LABELS. None of them holds target PROMISCUITY fixed, which is the property
 # `target_decomposition.csv` shows carries the score, and all three permute the ANNOTATION
-# rather than the experimental design. This stage adds one null for each gap.
+# and leave the experimental design fixed. This stage adds one null for each gap.
 #
 #   rewiring  -- the CollecTRI TF->target bipartite graph is rewired by curveball trades,
 #                which preserve every regulon's size AND every target's in-degree exactly.
 #                A drawn regulon therefore samples the promiscuous genes as heavily as the
 #                observed one does, so "the score comes from jointly-owned genes" is inside
-#                the null instead of being a caveat beside it. Each regulon keeps its own
+#                the null, in place of sitting beside it as a caveat. Each regulon keeps its own
 #                multiset of edge signs, permuted, matching tf_activity's null convention.
 #   sign-flip -- the SF/PB labels are swapped WITHIN donor, which is the exchangeability the
 #                paired design actually licenses, and the contrast is refitted. Gene-label
 #                permutation destroys gene-gene correlation and is anti-conservative; this
-#                preserves it. It is also EXACT rather than sampled: the six donors carrying
+#                preserves it. It is also EXACT, over sampled: the six donors carrying
 #                both arms in Treg give 2^6 = 64 configurations and all of them are
 #                enumerated, so no seed enters the p-value. The cost is resolution — the
 #                finest attainable one-sided p is 1/64 = 0.0156, and that floor is published
-#                with the result rather than left for a reader to derive.
+#                with the result, so a reader reads it off the table.
 #
 # Everything not listed here is read from the blocks above: the population, focus factors,
 # network path, mor and sign columns, minsize and seed. Two parameters exist that the stage
@@ -747,8 +801,8 @@ regulon_nulls:
   rewiring_burn_in_trades_per_edge: 5
   rewiring_trades_between_draws_per_tf: 2
 
-  # Guard, not a tuning knob: exact enumeration is 2^n_paired_donors, so a compartment with
-  # more paired donors than this must switch to sampling deliberately rather than by hanging.
+  # A guard: exact enumeration is 2^n_paired_donors, so a compartment with more paired donors
+  # than this must switch to sampling deliberately, and the guard stops it before it hangs.
   signflip_max_exact_donors: 20
 
   # Hard gates. Neither is a result; both stop the run.
@@ -765,7 +819,7 @@ paths:
   raw_gse160097: "00_data/GSE160097_JIA-SF-Treg/raw/"
   samples_gse160097: "00_data/GSE160097_JIA-SF-Treg/samples.csv"
 
-  # Frozen Phase-0 mouse->human signature contract (read-only; scored, never re-derived).
+  # Frozen Phase-0 mouse->human signature contract (read-only; scored as published).
   signature_contract: "../mouse_anchor/03_results/human_projection/"
 
   # Output roots — phase-based layout. Checkpoint state is separate from deliverables.
@@ -847,7 +901,7 @@ decisions:
     status: APPROVED         # QC thresholds sound; libraries retain high yield; only GSM4859852 (near-empty) dropped
     drop_gsms:
       - "GSM4859852"         # SF CD4_Treg p5: near-empty library (median ~14 UMIs / 9 genes/cell);
-                             #   a UMI+gene outlier, not a real profile. Documented + hard-excluded.
+                             #   a UMI+gene outlier. Documented + hard-excluded.
   treg_gate:
     status: APPROVED         # frozen Treg/Tcon/CD8 gate holds; markers match clusters; labels frozen
     basis: "sorting"         # sorting-primary, refined by FOXP3/IL2RA/CTLA4/IKZF2
@@ -859,11 +913,11 @@ decisions:
       # The mt-hi / effector-like Treg subset stays INSIDE the frozen coarse `Treg`
       # label. Coarse `Treg` is the single frozen statistical stratum for the go/no-go.
     mthi_effector_treg: "descriptive_substratum"
-      # Shown/described on embeddings only; NOT a separate DE/GSEA stratum. It also fails
+      # Shown/described on embeddings only; the DE/GSEA strata are elsewhere. It also fails
       # the donor floor (pseudobulk_min_donors=3) when split out, so it is never tested
       # as its own pseudobulk contrast.
     heat_hi_tcon: "embedding_narrative_only"
-      # A population defined BY the WT_heat score is never a statistical stratum — testing
+      # A population defined BY the WT_heat score stays out of every statistical stratum — testing
       # WT_heat within it is circular (selection on outcome). UMAP/narrative use only;
       # never enters pseudobulk, GSEA, or an effect-size row.
   go_no_go:

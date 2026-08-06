@@ -137,6 +137,24 @@ POPULATION_KEY = DESIGN.get("population_key", "population")
 TISSUE_NUM = DESIGN.get("tissue_levels", {}).get("synovial_fluid", "synovial_fluid")
 TISSUE_DEN = DESIGN.get("tissue_levels", {}).get("peripheral_blood", "peripheral_blood")
 
+
+# --- the per-cell map panels: the maps, the violins and the sweep-coverage audit ---
+# One list of the sets the score strips colour by.
+MAP_PANELS: Dict[str, Any] = CONFIG.get("percell_map_panels", {}) or {}
+ARM_STRIP_SETS = list(MAP_PANELS.get("arm_strip", []))
+PROGRAM_STRIP_SETS = list(MAP_PANELS.get("program_strip", []))
+# Per-cell column -> sweep set id; identity bar the two SAVI axes.
+MAP_PANEL_SWEEP_ID: Dict[str, str] = {
+    **{s: s for s in ARM_STRIP_SETS + PROGRAM_STRIP_SETS},
+    **(MAP_PANELS.get("sweep_id", {}) or {}),
+}
+
+if not (ARM_STRIP_SETS and PROGRAM_STRIP_SETS):
+    raise ValueError(
+        "analysis_config.yaml::percell_map_panels must declare both `arm_strip` and "
+        "`program_strip`. Every score map and every violin figure reads its panel order "
+        "from that block, and the sweep-selection audit reads it to check coverage.")
+
 # Short label map used in figures / frozen coarse labels.
 COARSE_LABEL = {"CD4_Treg": "Treg", "CD4_Tcon": "Tcon", "CD8": "CD8"}
 

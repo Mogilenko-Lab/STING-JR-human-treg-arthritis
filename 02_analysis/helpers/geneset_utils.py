@@ -39,8 +39,8 @@ def load_signature(contract_dir: Path, contrast: str = "WT_heat",
 
     `alias_map` + `vocabulary` resolve the up/down lists into this matrix's symbol
     vintage; the applied pairs are returned under `alias_applied` so a caller can
-    report the recovery rather than only benefit from it. The ranked list is left
-    verbatim — it is the mouse contract's own ordering, not a set matched against
+    report the recovery alongside the benefit. The ranked list is left verbatim, being
+    the mouse contract's own ordering rather than a set matched against
     this matrix.
     """
     sig_dir = Path(contract_dir) / "signatures" / contrast
@@ -59,7 +59,7 @@ def load_signature(contract_dir: Path, contrast: str = "WT_heat",
 def load_alias_map(path: str | Path) -> Dict[str, str]:
     """Read the committed reference_symbol -> matrix_symbol map, accepted pairs only.
 
-    Rows carrying any other `resolution` are withheld here rather than downstream:
+    Rows carrying any other `resolution` are withheld at this point:
     `flagged_for_review` is a human decision to exclude, and the rejection classes are
     candidates the ownership guard refused (a retired symbol that now names a
     DIFFERENT gene, e.g. ACOD1 -> CAD or IL17F -> IL17A). Applying one would attach

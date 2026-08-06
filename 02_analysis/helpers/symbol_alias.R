@@ -1,33 +1,30 @@
 #!/usr/bin/env Rscript
 # symbol_alias.R — resolve a reference set's HGNC symbols into this compartment's vocabulary.
 # =============================================================================
-# The defect this exists for. GSE160097 was quantified against a CellRanger hg19
-# reference, so the count matrix is frozen to that build's HGNC vintage: cGAS is
-# MB21D1, STING is TMEM173, MARCHF5 is MARCH5, MRE11 is MRE11A. Reference gene sets
-# ship current symbols. Every match in this compartment is an exact string match, so a
-# renamed gene is dropped from a set silently and the loss reads as biological absence.
-# In the Treg synovial-vs-blood ranked list TMEM173 sits at rank 265 and MB21D1 at 458
-# of 13,999 — the two genes that name the cGAS-STING axis are its two strongest members
-# here, and they are invisible to every STING gene set.
+# The defect this exists for. GSE160097 was quantified against a CellRanger hg19 reference,
+# so the count matrix is frozen to that build's HGNC vintage: cGAS is MB21D1, STING is
+# TMEM173, MARCHF5 is MARCH5, MRE11 is MRE11A. Reference gene sets ship current symbols.
+# Every match in this compartment is an exact string match, so a renamed gene is dropped from
+# a set silently and the loss reads as biological absence. In the Treg synovial-vs-blood
+# ranked list TMEM173 sits at rank 265 and MB21D1 at 458 of 13,999 — the two genes that name
+# the cGAS-STING axis are its two strongest members here, and every STING gene set misses
+# them.
 #
-# The direction of resolution. The reference symbol is NEWER and the matrix symbol is
-# OLDER, so a reference symbol is resolved DOWN into the vocabulary the data carries.
-# The opposite traversal (stale matrix symbol -> current, for a tool that keys on
-# current symbols) means something different under the one-to-one safety condition and
-# is deliberately not offered here.
+# The direction of resolution. The reference symbol is NEWER and the matrix symbol is OLDER,
+# so a reference symbol is resolved DOWN into the vocabulary the data carries. The opposite
+# traversal (stale matrix symbol -> current, for a tool that keys on current symbols) means
+# something different under the one-to-one safety condition and belongs in its own function.
 #
-# The hazard that shapes the guard. Many retired symbols were reassigned as the
-# official symbol of a DIFFERENT gene. PGF carries the alias PIGF, and PIGF now names a
-# GPI-anchor biosynthesis gene; THPO carries TPO, and TPO now names thyroid peroxidase;
-# ACOD1 carries CAD, which now names carbamoyl-phosphate synthetase. Accepting any of
-# those attaches one gene's expression to another gene's set membership. So a candidate
-# that is the official symbol of any other Entrez id is rejected, counted, and published
-# beside the accepted pairs.
+# The hazard that shapes the guard. Many retired symbols were reassigned as the official
+# symbol of a DIFFERENT gene. PGF carries the alias PIGF, and PIGF now names a GPI-anchor
+# biosynthesis gene; THPO carries TPO, and TPO now names thyroid peroxidase; ACOD1 carries
+# CAD, which now names carbamoyl-phosphate synthetase. Accepting any of those attaches one
+# gene's expression to another gene's set membership. So a candidate that is the official
+# symbol of any other Entrez id is rejected, counted, and published beside the accepted pairs.
 #
-# Alias resolution is a correctness fix and never a way to grow a set. Nothing is
-# accepted that does not survive the ownership guard, and the reporting contract is a
-# ledger with a bucket per cause — matched, matched-via-alias, expression-filtered,
-# below-detection, absent-from-reference — never a pass/fail recovery floor.
+# Alias resolution is a correctness fix. Acceptance requires surviving the ownership guard,
+# and the reporting contract is a ledger with a bucket per cause — matched, matched-via-alias,
+# expression-filtered, below-detection, absent-from-reference.
 #
 # Provides:
 #   build_alias_map(reference_symbols, matrix_vocabulary, db, flagged_pairs)
@@ -108,7 +105,7 @@ build_alias_map <- function(reference_symbols, matrix_vocabulary,
   # AnnotationDbi::select() throws outright when NONE of its keys is valid for the
   # keytype, so every call is prefiltered against the live keyspace and returns early
   # when nothing survives. With ~1,200 candidates this never fires; on a 7-gene gene set
-  # it does, and TMEM173 is an ALIAS rather than a SYMBOL, which is what takes the
+  # it does, and TMEM173 arrives as an ALIAS where a SYMBOL is expected, which is what takes the
   # ownership guard down on GOBP_POSITIVE_REGULATION_OF_CGAS_STING_SIGNALING_PATHWAY.
   symbol_keys <- AnnotationDbi::keys(db, keytype = "SYMBOL")
   sel <- function(keys, keytype, columns) {
@@ -134,7 +131,7 @@ build_alias_map <- function(reference_symbols, matrix_vocabulary,
   al <- al[al$ALIAS %in% matrix_vocabulary, , drop = FALSE]
   if (!nrow(al)) return(finish(empty))
   # Two aliases of one gene present in the vocabulary leaves no unique target, so the
-  # pair is withheld with both names recorded rather than silently returned as NA.
+  # pair is withheld with both names recorded, leaving no silent NA.
   cand <- al %>% group_by(.data$ENTREZID) %>%
     summarise(matrix_symbol = paste(sort(unique(.data$ALIAS)), collapse = "/"),
               n_aliases_in_vocabulary = n_distinct(.data$ALIAS), .groups = "drop")
@@ -161,7 +158,7 @@ build_alias_map <- function(reference_symbols, matrix_vocabulary,
     taken[is.na(taken)] <- FALSE
   }
   hits$resolution <- ifelse(taken, "rejected_symbol_belongs_to_another_gene", "accepted")
-  # Pairs a human has to decide on are withheld here rather than downstream, so the
+  # Pairs a human has to decide on are withheld at this point, so the
   # exclusion travels with the map and is visible in every consumer's ledger.
   flagged <- paste0(hits$reference_symbol, "->", hits$matrix_symbol) %in% flagged_pairs
   hits$resolution[flagged & hits$resolution == "accepted"] <- "flagged_for_review"
@@ -209,7 +206,7 @@ resolve_sets <- function(sets, matrix_vocabulary, alias_map) {
     if (length(hit)) {
       applied[[nm]] <<- tibble(gene_set = nm, reference_symbol = hit, matrix_symbol = tgt)
       # Two reference symbols landing on one matrix symbol merges two set members into
-      # one measurement. It is reported, never silently merged.
+      # one measurement. It is reported and kept separate.
       dup_tgt <- unique(tgt[duplicated(tgt)])
       if (length(dup_tgt))
         many_to_one[[nm]] <<- tibble(
@@ -277,7 +274,7 @@ symbol_ledger <- function(sets, alias_map, ranked_vocabulary, matrix_vocabulary,
     rest <- setdiff(rest, ambig)
     # The remaining buckets are read off the symbol the DATA would carry, so a retired
     # reference name whose matrix twin was dropped by the expression filter is reported as
-    # expression-filtered rather than as never detected. Bucketing on the reference name
+    # expression-filtered, which is a different cause from never detected. Bucketing on the reference name
     # there would put a power statement in a detection bucket.
     eff <- ifelse(rest %in% names(pairs), unname(pairs[rest]), rest)
     expr_filtered <- rest[eff %in% matrix_vocabulary]
@@ -295,7 +292,7 @@ symbol_ledger <- function(sets, alias_map, ranked_vocabulary, matrix_vocabulary,
       n_below_detection = length(below),
       n_absent_from_reference = length(absent_ref),
       # The true resolved size, de-duplicated. Two things collapse here and both are
-      # reported rather than absorbed: a set carrying both vintages of one gene, and
+      # reported as its own count: a set carrying both vintages of one gene, and
       # several reference paralogs whose current names all resolve onto one matrix row
       # (NOTCH2NLA/B/C -> NOTCH2NL is the real case). Either way the set grows by fewer
       # genes than pairs applied, and `n_alias_collapsed` is that shortfall.
@@ -314,7 +311,7 @@ symbol_ledger <- function(sets, alias_map, ranked_vocabulary, matrix_vocabulary,
   }))
 }
 
-#' Hard closure check on a ledger, asserted in-script rather than trusted in review.
+#' Hard closure check on a ledger, asserted in-script on every run.
 assert_ledger_closes <- function(ledger, label = "symbol ledger") {
   s <- with(ledger, n_matched + n_matched_via_alias + n_alias_flagged_for_review +
               n_alias_rejected_ambiguous + n_expression_filtered + n_below_detection +

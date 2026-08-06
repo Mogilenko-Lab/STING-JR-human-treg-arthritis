@@ -2,46 +2,42 @@
 # =============================================================================
 # build_runsum_widget()
 #
-# Reusable, repurposable helper: renders the interactive fgsea running-enrichment
-# widget for the mouse WT_heat (39 °C Treg) signature scored in JIA SF-vs-PB
-# donor-pseudobulk ranked lists, one running-ES line per sorted T-cell population
-# (Treg / Tcon / CD8) and gene-set arm (up / down). Carved out of the inline
-# `{r runsum-interactive}` chunk of 05_gonogo_review.qmd so ANY chunk / ANY qmd
-# can source this file and call the function instead of copying plotly code.
+# Reusable helper: renders the interactive fgsea running-enrichment widget for the mouse
+# WT_heat (39 °C Treg) signature scored in JIA SF-vs-PB donor-pseudobulk ranked lists, one
+# running-ES line per sorted T-cell population (Treg / Tcon / CD8) and gene-set arm (up /
+# down). Carved out of the inline `{r runsum-interactive}` chunk of 05_gonogo_review.qmd, so
+# any chunk or qmd can source this file and call the function in place of copying plotly code.
 #
-# @param source Either (a) a length-1 character path to the tables directory
-#   holding the six `runsum_interactive_{treg,tcon,cd8}_WT_heat_{up,down}.csv`
-#   files, or (b) a named list / character vector of the six file paths keyed
-#   `<pop>_<arm>` (e.g. `treg_up`, `cd8_down`). A directory is the common case;
-#   the explicit-six form lets a caller point at relocated / renamed tables.
-# @return A self-contained plotly htmlwidget (survives `embed-resources: true`),
-#   or invisibly NULL (with a Quarto callout-warning emitted) if any of the six
-#   source tables is missing.
+# @param source Either (a) a length-1 character path to the tables directory holding the six
+#   `runsum_interactive_{treg,tcon,cd8}_WT_heat_{up,down}.csv` files, or (b) a named list /
+#   character vector of the six file paths keyed `<pop>_<arm>` (e.g. `treg_up`, `cd8_down`).
+#   A directory is the common case; the explicit-six form lets a caller point at relocated or
+#   renamed tables.
+# @return A self-contained plotly htmlwidget (survives `embed-resources: true`), or invisibly
+#   NULL with a Quarto callout-warning when any of the six source tables is missing.
 #
-# Each CSV has columns: rank, gene, stat, running_es, hit, leading_edge,
-# gene_set, population, contrast. `running_es` is precomputed by the stage-05
-# viz script to overlay the static running-sum figures exactly — this helper
-# plots it verbatim and never recomputes (compute never plots; viz never
-# computes).
+# Each CSV has columns: rank, gene, stat, running_es, hit, leading_edge, gene_set,
+# population, contrast. `running_es` is precomputed by the stage-05 viz script to overlay the
+# static running-sum figures exactly, and this helper plots it verbatim, keeping to the split
+# where compute never plots and viz never computes.
 #
-# Renders: one running-ES curve per population; a per-set hit-rug (stacked ticks
-# below that set's curves) marking where the mouse-anchor core signature genes
-# land; hover on the rug showing gene symbol + SF-vs-PB signed moderated-t stat +
-# leading-edge flag; an up/down gene-set dropdown; population toggling via the
-# legend (legendgroup ties each population's curve + rug together).
+# Renders: one running-ES curve per population; a per-set hit-rug (stacked ticks below that
+# set's curves) marking where the mouse-anchor core signature genes land; hover on the rug
+# showing gene symbol + SF-vs-PB signed moderated-t stat + leading-edge flag; an up/down
+# gene-set dropdown; population toggling via the legend (legendgroup ties each population's
+# curve + rug together).
 #
-# LAYOUT — kept deliberately IDENTICAL to the integration report's parallel copy
-# at integration/03_results/final_report/helpers.R::build_runsum_widget()
-# (dropdown top-LEFT, legend as a horizontal strip along the BOTTOM, compact
-# height, title pinned top). The two are intentional parallel copies: they live
-# in separate repos (this treg gitlink vs the integration layer), so a cross-repo
-# source() is not appropriate — when you change the layout in one, mirror it in
-# the other to keep them in sync.
+# LAYOUT — kept IDENTICAL to the integration report's parallel copy at
+# integration/03_results/final_report/helpers.R::build_runsum_widget() (dropdown top-LEFT,
+# legend as a horizontal strip along the BOTTOM, compact height, title pinned top). The two
+# are intentional parallel copies living in separate repos — this treg gitlink and the
+# integration layer — which puts a cross-repo source() out of reach. Change the layout in one
+# and mirror it in the other.
 # =============================================================================
 
 #' The one population palette, read from analysis_config.yaml::colors.populations, so this
 #' widget shows Treg, Tcon and CD8 in the same hues as the static figures and cannot drift
-#' from them. Resolved here rather than sourced from the figure-style shim because this
+#' from them. Resolved locally here, since this
 #' helper is designed to be sourced on its own from any qmd, and the shim pulls the whole
 #' plotting contract lib with it. Path is compartment-root relative, matching how a qmd
 #' sources this file.

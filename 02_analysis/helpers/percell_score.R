@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 # percell_score.R — per-cell signature scoring with AUCell + UCell.
 # =======================================================================
-# The rigorous per-cell SECONDARY lens: rank-based, composition-robust scores
-# that replace the old scanpy score_genes module score. Donor-pseudobulk fgsea
-# NES stays the PRIMARY evidence (see fgsea_prerank.R) — this is corroborative.
+# The rigorous per-cell SECONDARY lens: rank-based, composition-robust scores that supersede
+# the old scanpy score_genes module score. Donor-pseudobulk fgsea NES stays the PRIMARY
+# evidence (see fgsea_prerank.R), and this lens corroborates it.
 #
 # Called as a subprocess (table/file interop, like fgsea_prerank.R):
 # python exports the expression matrix + gene sets to disk, invokes this, then
@@ -13,10 +13,10 @@
 #   Rscript percell_score.R <expr.mtx> <genes.txt> <barcodes.txt> <out.csv> \
 #       <n_cores> name1=set1.txt [name2=set2.txt ...]
 #
-#   expr.mtx     : MatrixMarket sparse matrix, GENES x CELLS (features in rows,
-#                  cells in columns) — the AUCell/UCell convention. Values are
-#                  log-normalized expression (log1p CP10k); rank-based scoring is
-#                  invariant to the monotone transform, so raw counts also work.
+#   expr.mtx     : MatrixMarket sparse matrix, GENES x CELLS (features in rows, cells in
+#                  columns) — the AUCell/UCell convention. Values are log-normalized
+#                  expression (log1p CP10k). Rank-based scoring is invariant to the monotone
+#                  transform, so raw counts work too.
 #   genes.txt    : HGNC symbols, one per line, in matrix ROW order (rownames).
 #   barcodes.txt : cell ids, one per line, in matrix COLUMN order (colnames).
 #   out.csv      : per-cell scores; columns = cell, <set>_AUCell, <set>_UCell ...

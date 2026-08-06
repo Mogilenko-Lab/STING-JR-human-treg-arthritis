@@ -1,19 +1,19 @@
 #!/usr/bin/env Rscript
 # fgsea_prerank.R — pre-ranked GSEA of gene sets against ONE ranked list.
 # =======================================================================
-# The primary-evidence step: score the mouse WT_heat up/down sets against a
-# donor-pseudobulk SF-vs-PB ranked list (signed moderated t). Called as a
-# subprocess by 05_score_signatures.py so the compute stays reproducible.
+# The primary-evidence step: score the mouse WT_heat up/down sets against a donor-pseudobulk
+# SF-vs-PB ranked list (signed moderated t). Called as a subprocess by 05_score_signatures.py,
+# which keeps the compute reproducible.
 #
-# COMPUTE ONLY — writes tables + a `gseaResult` RDS; NEVER plots. The static
-# running-sum figure (05_score_signatures_viz.R) drives the canonical toolkit
-# plotter off the RDS; the report widget reads the interactive runsum tables.
+# COMPUTE ONLY — writes tables + a `gseaResult` RDS. The static running-sum figure
+# (05_score_signatures_viz.R) drives the canonical toolkit plotter off the RDS, and the report
+# widget reads the interactive runsum tables.
 #
-# Engine: clusterProfiler::GSEA(by = "fgsea"). This wraps the SAME fgsea engine
-# the bare fgsea() call used, but returns a real DOSE/clusterProfiler
-# `gseaResult` S4 object (with @result, @geneList, @geneSets, @params) that the
-# RNAseq-toolkit running-sum plotter requires. NES is therefore near-identical
-# to the previous bare-fgsea result (migration 2026-07-11).
+# Engine: clusterProfiler::GSEA(by = "fgsea"). This wraps the SAME fgsea engine the bare
+# fgsea() call used and returns a real DOSE/clusterProfiler `gseaResult` S4 object (with
+# @result, @geneList, @geneSets, @params) that the RNAseq-toolkit running-sum plotter
+# requires. NES therefore lands near-identical to the previous bare-fgsea result (migration
+# 2026-07-11).
 #
 # Usage:
 #   Rscript fgsea_prerank.R <ranked.rnk> <out.csv> <contrast_label> \
@@ -22,9 +22,9 @@
 #
 # ranked.rnk : 2-col TSV (symbol \t stat), no header.
 #
-# --alias-map : the committed reference-to-matrix symbol map. Optional, and passed as a
-#   flag rather than a positional so the existing call signature is unchanged. Without it
-#   every set is matched by exact string, which drops genes this matrix carries under its
+# --alias-map : the committed reference-to-matrix symbol map. Optional, and passed as a flag
+#   in place of a positional, which leaves the existing call signature unchanged. Absent it,
+#   every set is matched by exact string, dropping genes this matrix carries under its
 #   hg19-era name — TMEM173 and MB21D1 above all, the two strongest members of the STING
 #   family in this contrast. Only `accepted` pairs are applied.
 # Outputs (all under dirname(out.csv), stem = basename(out.csv) w/o .csv):
@@ -124,7 +124,7 @@ if (!is.na(alias_map_path)) {
 
 # --- clusterProfiler::GSEA (by = "fgsea") -> a real gseaResult S4 object -----
 # by="fgsea" uses the same fgsea engine; eps=0 gives exact (multilevel) p-values;
-# pvalueCutoff=1 keeps ALL sets in @result (we report every set, not just FDR-sig).
+# pvalueCutoff=1 keeps ALL sets in @result, so every set is reported with its FDR.
 t2g <- list_to_term2gene(pathways)  # columns: gs_name, gene_symbol
 set.seed(seed)
 gsea <- clusterProfiler::GSEA(

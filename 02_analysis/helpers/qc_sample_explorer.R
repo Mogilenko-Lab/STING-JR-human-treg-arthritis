@@ -2,47 +2,43 @@
 # =============================================================================
 # build_qc_sample_explorer()
 #
-# Reusable, repurposable helper: renders an interactive per-GSM QC explorer for
-# the sorted JIA Treg/Tcon/CD8 libraries (GSE160097). Each of the 40 GSMs is
-# aggregated to a SINGLE point so the whole cohort — and the one dropped sample —
-# is legible at a glance. Carved out as a standalone helper (mirroring
-# 02_analysis/helpers/runsum_widget.R) so ANY chunk / ANY qmd can source this file
-# and call the function instead of copying plotly code. It reads only a published
-# per-cell QC table and never recomputes anything a downstream stage depends on
-# (compute never plots; viz never computes).
+# Reusable helper: renders an interactive per-GSM QC explorer for the sorted JIA
+# Treg/Tcon/CD8 libraries (GSE160097). Each of the 40 GSMs aggregates to a SINGLE point, so
+# the whole cohort — and the one dropped sample — reads at a glance. Carved out as a
+# standalone helper (mirroring 02_analysis/helpers/runsum_widget.R), so any chunk or qmd can
+# source this file and call the function in place of copying plotly code. It reads a
+# published per-cell QC table alone, keeping to the split where compute never plots and viz
+# never computes.
 #
 # @param path A length-1 character path to the per-cell QC metrics table
 #   `03_results/01_qc/tables/qc_metrics_per_cell.csv`. Expected columns:
 #   gsm, donor, tissue, population, population_short, total_counts,
 #   n_genes_by_counts, pct_counts_mt, pct_counts_ribo, doublet_score,
 #   predicted_doublet, mad_outlier, low_genes, excluded_gsm, pass_qc.
-# @return A self-contained plotly htmlwidget (survives `embed-resources: true`),
-#   or invisibly NULL (with a Quarto callout-warning emitted) if the table is
-#   missing.
+# @return A self-contained plotly htmlwidget (survives `embed-resources: true`), or
+#   invisibly NULL with a Quarto callout-warning when the table is missing.
 #
-# AGGREGATION — one row per GSM: n_cells (barcodes), n_kept (pass_qc == TRUE),
-# frac_kept, and the medians of total_counts / n_genes_by_counts / pct_counts_mt.
-# donor / tissue / population / population_short carry through unchanged (constant
-# within a GSM). A GSM is flagged EXCLUDED when any of its cells is marked
-# `excluded_gsm` (the whole-library hard drop).
+# AGGREGATION — one row per GSM: n_cells (barcodes), n_kept (pass_qc == TRUE), frac_kept, and
+# the medians of total_counts / n_genes_by_counts / pct_counts_mt. donor / tissue /
+# population / population_short carry through unchanged, being constant within a GSM. A GSM
+# is flagged EXCLUDED when any of its cells is marked `excluded_gsm`, the whole-library hard
+# drop.
 #
 # ENCODING — x = median genes/cell (LOG axis), y = median %mt, point SIZE = n_cells
-# (area-scaled), COLOUR = sorted population (Treg / Tcon / CD8; same Okabe-Ito
-# palette as the running-sum widget + NES forest). Rich per-GSM hover: gsm, donor,
-# tissue, population, n_cells, frac_kept, median counts / genes / %mt, and a
-# kept/EXCLUDED flag. The excluded near-empty library (GSM4859852) is over-drawn
-# with a black cross and a pinned annotation so it stands out at far-left
-# low-median-genes as the UMI/gene outlier it is.
+# (area-scaled), COLOUR = sorted population (Treg / Tcon / CD8; the same Okabe-Ito palette as
+# the running-sum widget + NES forest). Rich per-GSM hover: gsm, donor, tissue, population,
+# n_cells, frac_kept, median counts / genes / %mt, and a kept/EXCLUDED flag. The excluded
+# near-empty library (GSM4859852) is over-drawn with a black cross and a pinned annotation,
+# so it stands out at far-left low-median-genes as the UMI/gene outlier it is.
 #
-# LAYOUT — compact fixed height (~420). Following the runsum_widget.R fix, the
-# legend and any control live in SEPARATE regions: the population legend is a
-# horizontal strip along the BOTTOM (below the x-axis title), leaving the plot
-# area and top margin uncluttered so no control overlaps it.
+# LAYOUT — compact fixed height (~420). Following the runsum_widget.R fix, the legend and any
+# control live in SEPARATE regions: the population legend is a horizontal strip along the
+# BOTTOM, below the x-axis title, leaving the plot area and top margin clear.
 # =============================================================================
 
 #' The one population palette, read from analysis_config.yaml::colors.populations, so this
 #' widget shows Treg, Tcon and CD8 in the same hues as the static figures and cannot drift
-#' from them. Resolved here rather than sourced from the figure-style shim because this
+#' from them. Resolved locally here, since this
 #' helper is designed to be sourced on its own from any qmd, and the shim pulls the whole
 #' plotting contract lib with it. Path is compartment-root relative, matching how a qmd
 #' sources this file.
