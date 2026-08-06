@@ -86,7 +86,7 @@ model coefficients. That algebra holds for the coefficients and stops at the thr
 `Interaction_up_fdrOnly` holds all 7 `Interaction_up` genes among its 19. Agreement between
 those rows is expected structure.
 
-## Why this stage counts 135 unassigned where the neighbouring stage counts 137
+## Why this stage counts 135 unassigned where the neighbouring stage counts 140
 
 Both are the same arm measured against different lens panels.
 [`../11_heat_decomposition/`](../11_heat_decomposition/) reads `WT_heat_up` against seven

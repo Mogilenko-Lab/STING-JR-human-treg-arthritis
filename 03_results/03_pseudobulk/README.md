@@ -32,9 +32,13 @@ column naming the engine, so a later engine change stays contained to this stage
 
 **Pseudobulk profiles separate by tissue and by label.**
 Each point is one donor × tissue × label profile, on log-CPM over the top 2,000 variable genes.
-x, PC1; y, PC2. Circle gives synovial fluid and square paired blood; colour gives donor. Read for
-tissue separation and for a single donor dominating an axis. Neither happens, which is what makes
-donor pseudobulk well-posed here. Display transform only.
+x, PC1; y, PC2. Circle gives synovial fluid and square paired blood; colour gives donor.
+
+The two factors take an axis each. PC1 carries the sort label, with mean scores of +24.1 for CD8,
+−0.5 for Tcon and −23.6 for Treg. PC2 carries the tissue, at +15.6 for paired blood against −14.8
+for synovial fluid. Donor spreads far less on both, −8.5 to +7.1 on PC1 and −10.6 to +6.0 on PC2,
+so no single donor sets either axis. That is what makes donor pseudobulk well-posed here. Display
+transform only.
 *Source* `tables/pseudobulk_counts.csv` · `02_analysis/scripts/03_pseudobulk_de_viz.py`.
 
 ### `figures/_overview/treg_volcano.png`

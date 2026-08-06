@@ -106,7 +106,7 @@ Treg, Tcon and CD8.
 The balanced channel is essentially flat: median −0.075 in the effector pocket against −0.060 in
 normal Treg. The one-sided `WT_heat_up` channel shifts up, and that shift co-varies with the
 effector and depth axis. The same mouse up arm enriches the donor-pseudobulk synovial-versus-blood
-contrast at NES 2.59 in Treg, 2.68 in Tcon and 2.07 in CD8, unchanged when these
+contrast at NES 2.59 in Treg, 2.68 in Tcon and 2.06 in CD8, unchanged when these
 high-mitochondrial cells were recovered. Those values live in [`../05_scoring/`](../05_scoring/).
 *Source* `tables/mthi_heat_percell.csv` ·
 `02_analysis/scripts/01_qc_mthi_characterize_viz.py`.

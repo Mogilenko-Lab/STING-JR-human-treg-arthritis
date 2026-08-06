@@ -1,19 +1,19 @@
 # 11_heat_decomposition — Where each part of the arm sits in the same rankings
 
 The mouse 39 °C up arm enriches toward synovial fluid in every population and survives a
-hypoxia-gene purge. It is also 199 genes doing many different things. This stage splits the
+hypoxia-gene purge. It is also 202 genes doing many different things. This stage splits the
 projected signature into subcomponents and asks where each one sits in the same donor-pseudobulk
 rankings.
 
 **Every testable up-arm part enriches toward synovial fluid**, so the shift runs broad across the
-arm. The 137-gene remainder that no curated program claims stays strongly enriched (+2.21
+arm. The 140-gene remainder that no curated program claims stays strongly enriched (+2.21
 Treg, +2.27 Tcon, +2.10 CD8). The TNFα/NF-κB part is the most CD4-selective (+2.24, +2.32, +1.23),
 and the curated IL2-STAT5 activation proxy is the weakest in Treg (+1.32 at FDR 0.22).
 
 **Two nulls carry as much weight as the positives.** The curated heat-shock core contributes 2 of
-the 199 up genes and type-I interferon contributes 1, both far under the size floor, so those
-curated gene contents explain very little of `WT_heat_up`. The down arm tells the same story: 83
-of its 94 genes belong to no named program, and nothing in it separates the two tissues.
+the 202 up genes and type-I interferon contributes 1, both far under the size floor, so those
+curated gene contents explain very little of `WT_heat_up`. The down arm tells the same story: 85
+of its 96 genes belong to no named program, and nothing in it separates the two tissues.
 
 The cGAS/STING tally falls the same way. Of the published 21-gene interferon-independent STING
 signature, PLAUR and PTGS2 sit in the up arm and none in the down arm, and PLAUR is itself one of
@@ -38,7 +38,7 @@ they had already enriched.
 | type-I interferon | `HALLMARK_INTERFERON_ALPHA_RESPONSE` | 97 |
 | inflammatory response | `HALLMARK_INFLAMMATORY_RESPONSE` | 200 |
 | IL2-STAT5 activation | `HALLMARK_IL2_STAT5_SIGNALING` | 199 |
-| no named program | the residual | 137 up / 83 down |
+| no named program | the residual | 140 up / 85 down |
 
 The six Hallmark programs are used **whole**, with no taxonomy refinement, where the HSR union
 was refined from 176 down to 56. That asymmetry is deliberate: for a purge or a claim test the
@@ -52,9 +52,9 @@ tracked, so any clone regenerates byte-identical lists, and a size drift in the 
 ## Three properties of this decomposition
 
 **The parts overlap, and the size of the overlap shows they are no partition.** A curated set
-claims 62 of the 199 up genes, and those 62 carry 92 claims between them, because 25 belong to
+claims 62 of the 202 up genes, and those 62 carry 92 claims between them, because 25 belong to
 two or three sets at once. So the bars and the NES rows do not sum to the arm: adding the named
-parts double-counts 30 claims and shrinks the 137-gene remainder, which is the largest single
+parts double-counts 30 claims and shrinks the 140-gene remainder, which is the largest single
 part. Forcing a priority-ordered disjoint partition would silently decide which program gets
 credit for a shared gene, so the full per-gene membership is published instead.
 
@@ -130,7 +130,7 @@ and `frac_of_curated_set` how much of the public set the arm covers. `genes` is 
 semicolon-delimited membership. Rows overlap, so summing `n_intersect` over an arm exceeds the
 arm's size by the amount of that sharing.
 
-Curated sets claim 62 of 199 up and 11 of 94 down, with TNFα/NF-κB the largest single claim at 35
+Curated sets claim 62 of 202 up and 11 of 96 down, with TNFα/NF-κB the largest single claim at 35
 and the curated HSR core at 2.
 
 ### `tables/decomposition_gene_assignment.csv` · `tables/decomposition_assignment_multiplicity.csv`
@@ -176,7 +176,7 @@ and nothing to the down arm, and PLAUR is itself a hypoxia gene.
 
 | File | What it holds |
 |---|---|
-| `tables/_signatures_decomp/<part>_{up,down}.txt` | The sixteen sub-signature lists — the decomposition itself. Plain sorted HGNC symbols, arm and presumption carried by the filename; an empty file means no gene of that arm belongs to that set. Their sizes are the shape of the finding: 137 up unclaimed against 2 in the curated HSR core, with three down-arm parts empty. |
+| `tables/_signatures_decomp/<part>_{up,down}.txt` | The sixteen sub-signature lists — the decomposition itself. Plain sorted HGNC symbols, arm and presumption carried by the filename; an empty file means no gene of that arm belongs to that set. Their sizes are the shape of the finding: 140 up unclaimed against 2 in the curated HSR core, with three down-arm parts empty. |
 | `tables/decomp_gsea_{treg,tcon,cd8}.csv` · `.rds` | Each population's thirteen non-empty sub-signatures scored in one run, so the parts within a population share a single BH correction and their FDRs compare directly. A part under the floor appears with NA statistics and its intersection size; read testability from `decomposition_nes.csv`. |
 | `tables/runsum_interactive_decomp_gsea_<population>_<part>_{up,down}.csv` | One row per ranked gene per part, including parts too small to score, so a shape can be inspected even where no score is reported. |
 | `tables/_overview/heatdecomp_arm_coverage.csv` | One row per plotted bar: `n_intersect` the bar length, `frac_of_mouse_arm` its share, `set_size_in_ranked_min` / `_max` the testable range across the three populations, and `n_populations_testable` of `n_populations`. |

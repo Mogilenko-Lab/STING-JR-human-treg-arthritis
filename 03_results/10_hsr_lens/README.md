@@ -17,13 +17,13 @@ figure uses. It is named for the curated categories it was built from.
 |---|---|---|
 | `HSR_sensitivity` | Union of three MSigDB v2026.1.Hs sets via `msigdbr` 26.1.0 | 176 |
 | `HSR_core` | Taxonomy categories `hsf1_core_hsr` + `co_chaperone` | 56 |
-| `WT_heat_up` | Mouse-anchor 39 °C up arm, projected to human orthologs | 199 |
+| `WT_heat_up` | Mouse-anchor 39 °C up arm, projected to human orthologs | 202 |
 
 Three candidate sets were kept out of the union deliberately.
 `GOBP_DETECTION_OF_TEMPERATURE_STIMULUS` and its thermoception sibling are thermosensory-neuron
 programs with no bearing on T cells, and `HP_FEVER` is a mutation-etiology panel.
 
-**The independence is measurable.** `HSR_core` shares two genes with the 199-gene `WT_heat_up`
+**The independence is measurable.** `HSR_core` shares two genes with the 202-gene `WT_heat_up`
 (HSPA1A, HSPH1, Jaccard 0.008, tallied in `tables/hsr_wtheatup_overlap.csv`). The lens is a
 separate probe, and that separation is the reason for carrying it.
 

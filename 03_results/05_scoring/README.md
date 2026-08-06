@@ -90,7 +90,7 @@ slash-delimited leading edge, and `database = mouse_projection` marks the set's 
 
 `WT_heat_up` reaches NES 2.5915 in Treg (padj 3.23e-14, 119 members matched), 2.6809 in Tcon
 (8.09e-17, 130) and 2.0710 in CD8 (3.61e-07, 113). `WT_heat_down` leans positive throughout and
-reaches significance in Tcon alone (1.4718, padj 0.026) against Treg (0.9676, 0.512) and CD8
+reaches significance in Tcon alone (1.4322, padj 0.0354) against Treg (1.0386, 0.385) and CD8
 (1.0943, 0.308).
 
 **These are the confirmatory rows** and they become the `primary_pseudobulk` entries of

@@ -7,7 +7,7 @@ re-running the same donor-pseudobulk enrichment.
 
 **It survives.** Removing the 18 overlap genes takes 12 to 15 testable genes out of the arm and
 costs 0.126 to 0.164 NES — 2.5914 → 2.4271 in Treg, 2.6826 → 2.5565 in Tcon, 2.0614 → 1.9181 in
-CD8 — leaving all three significant at FDR ≤ 4.1e-5
+CD8 — leaving all three significant at FDR ≤ 6.5e-5
 (`tables/gene_purge_nes_comparison.csv`).
 
 **What that licenses is narrow, and naming the bound is the point.** A positive purged score
@@ -63,37 +63,37 @@ HALLMARK_HYPOXIA-overlap gene content. It says nothing about temperature.
 ### `tables/gsea_full_{treg,tcon,cd8}.csv` — the unpurged reference
 
 One file per population, two rows each. `set_size` counts signature genes surviving intersection
-with the ranked list — 119 / 130 / 113 of 199 up, 56 / 61 / 57 of 94 down — so roughly half to
+with the ranked list — 120 / 131 / 114 of 202 up, 59 / 64 / 60 of 96 down — so roughly half to
 two thirds of the projected signature is testable here. `core_enrichment` is the slash-separated
 leading edge.
 
-`WT_heat_up` reaches NES 2.59 (Treg), 2.68 (Tcon) and 2.07 (CD8), all at FDR ≤ 3.6e-7.
-`WT_heat_down` leans positive and reaches significance in Tcon alone (1.47, FDR 0.026) against
-Treg (0.97, 0.51) and CD8 (1.09, 0.31). **The positive down arm is the caveat**: both arms move
+`WT_heat_up` reaches NES 2.59 (Treg), 2.68 (Tcon) and 2.06 (CD8), all at FDR ≤ 6.9e-7.
+`WT_heat_down` leans positive and reaches significance in Tcon alone (1.43, FDR 0.035) against
+Treg (1.04, 0.39) and CD8 (1.13, 0.26). **The positive down arm is the caveat**: both arms move
 the same way, so the synovial shift is a shared shift. A clean bidirectional recapitulation of
 the mouse contrast would move the two arms apart.
 
 ### `tables/gsea_purged_{treg,tcon,cd8}.csv`
 
-The same runs after the purge. `WT_heat_up` reaches NES 2.43 (Treg), 2.55 (Tcon), 1.93 (CD8) at
-FDR ≤ 4.1e-5, and effective size falls from 119 / 130 / 113 to 107 / 115 / 101. `WT_heat_down` is
-untouched at 0.97 / 1.47 / 1.09, because none of its 94 genes overlaps hypoxia. The contrast tag
+The same runs after the purge. `WT_heat_up` reaches NES 2.43 (Treg), 2.56 (Tcon), 1.92 (CD8) at
+FDR ≤ 6.5e-5, and effective size falls from 120 / 131 / 114 to 108 / 116 / 102. `WT_heat_down` is
+untouched at 1.04 / 1.43 / 1.13, because none of its 96 genes overlaps hypoxia. The contrast tag
 distinguishes purged rows, and these feed `gene_purge_nes_comparison.csv`, which owns the paired
 comparison.
 
 ### `tables/_signatures_full/WT_heat_{up,down}.txt`
 
-The frozen mouse-anchor human-ortholog sets exactly as handed to the enrichment engine — 199 up
-genes and 94 down. Plain newline-delimited HGNC symbols, alphabetically ordered, with the
+The frozen mouse-anchor human-ortholog sets exactly as handed to the enrichment engine — 202 up
+genes and 96 down. Plain newline-delimited HGNC symbols, alphabetically ordered, with the
 direction carried by the filename. These are inputs. Their value is provenance, and they are
 regenerated verbatim from the frozen contract on every run. Diff them against
 `_signatures_purged/` to see exactly what the purge removed.
 
 ### `tables/_signatures_purged/WT_heat_{up,down}.txt`
 
-181 up genes after dropping the 18 HALLMARK_HYPOXIA members — ADM, ADORA2B, AK4, ANXA2, ATF3,
+184 up genes after dropping the 18 HALLMARK_HYPOXIA members — ADM, ADORA2B, AK4, ANXA2, ATF3,
 CCN1, CDKN1A, EGFR, F3, FOSL2, HK2, IER3, P4HA2, PDGFB, PLAUR, SDC4, SERPINE1, TGM2 — which is 9.0%
-of the up set. The 94-gene down list is identical to the full one. The purge is a plain set
+of the up set. The 96-gene down list is identical to the full one. The purge is a plain set
 difference against the 200-gene HALLMARK_HYPOXIA reference applied to both arms, and that it
 changes only the up list is itself informative: the hypoxia overlap sits entirely on the
 synovial-high side.
@@ -119,7 +119,7 @@ The taxonomy puts 55% to 61% of those genes in immediate-early or effector-activ
 curated whole-arm counts of 5.6% in mouse and 6.0% after human projection. This table was never
 used to re-test a leading-edge subset. **Read whole-arm composition from
 [`../11_heat_decomposition/`](../11_heat_decomposition/)**, where curated versioned lenses leave
-137 of 199 genes unassigned and contain 2 curated-HSR and 1 type-I-interferon gene.
+140 of 202 genes unassigned and contain 2 curated-HSR and 1 type-I-interferon gene.
 
 ### `tables/runsum_interactive_gsea_{full,purged}_{treg,tcon,cd8}_WT_heat_{up,down}.csv`
 
