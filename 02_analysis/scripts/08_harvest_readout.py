@@ -3,43 +3,42 @@
 08_harvest_readout.py — COMPUTE (no plotting). Exploratory READOUT harvest.
 ===========================================================================
 Adds two MSigDB Hallmark per-cell readouts — HALLMARK_HYPOXIA and
-HALLMARK_UNFOLDED_PROTEIN_RESPONSE — to the frozen JIA SF/PB T-cell annotation,
-aligned column-for-column with the sting compartment's Phase-1 readout so the two
-are directly comparable. These are READOUTS, not causal claims: a hypoxia score is
-"consistent with a low-O2 / metabolically-stressed state", NEVER a HIF-causality
-statement. This whole stage is SECONDARY / annotation tier — per-cell, rank-based,
-composition-robust — and is NEVER pooled with the confirmatory donor-pseudobulk NES
-spine (stage 05) or the OR-gated POI harvest (stage 07). It feeds the reactive
-review and the cross-species harvest question only.
+HALLMARK_UNFOLDED_PROTEIN_RESPONSE — to the frozen JIA SF/PB T-cell annotation, aligned
+column-for-column with the reference compartment's Phase-1 readout so the two are directly
+comparable. These are READOUTS: a hypoxia score is "consistent with a low-O2 /
+metabolically-stressed state", and HIF causality is a further claim. This whole stage is
+SECONDARY / annotation tier — per-cell, rank-based, composition-robust — and stays out of the
+confirmatory donor-pseudobulk NES spine (stage 05) and the OR-gated POI harvest (stage 07). It
+feeds the reactive review and the cross-species harvest question.
 
-Engine: `score_cells_aucell_ucell` (helpers/geneset_utils.py → percell_score.R), the
-same AUCell+UCell rank-based scorer stage 05 and the sting compartment use. AUCell is
-the canonical readout; UCell rides alongside as a cross-check. The already-derived
-per-cell readouts of THIS compartment — score_HSP, score_eTreg, and the mouse-anchor
-WT_heat up / down / up-minus-down channels — are NOT re-derived here; they are carried
-in verbatim from the frozen explorer parquets so the review has one tidy table.
+Engine: `score_cells_aucell_ucell` (helpers/geneset_utils.py → percell_score.R), the same
+AUCell+UCell rank-based scorer stage 05 and the reference compartment use. AUCell is the
+canonical readout; UCell rides alongside as a cross-check. The already-derived per-cell
+readouts of THIS compartment — score_HSP, score_eTreg, and the mouse-anchor WT_heat up / down
+/ up-minus-down channels — are carried in verbatim from the frozen explorer parquets, giving
+the review one tidy table on one scorer run.
 
-The mouse anchor enters as THREE readouts, not one. `WT_heat_updown` is the balanced
-up-minus-down composite, so a coordinated rise in both arms cancels inside it and the
-composite reads flat whatever the arms do. Carrying `WT_heat_up` and `WT_heat_down`
-as their own readouts alongside it makes each arm visible, which is what the pseudobulk
-ranked-list enrichment actually scores (the up and down sets are scored separately
-there too — AUCell/UCell are unsigned single-list scorers).
+The mouse anchor enters as THREE readouts. `WT_heat_updown` is the balanced up-minus-down
+composite, so a coordinated rise in both arms cancels inside it and the composite reads flat
+whatever the arms do. Carrying `WT_heat_up` and `WT_heat_down` as their own readouts alongside
+it makes each arm visible, which is what the pseudobulk ranked-list enrichment scores — the up
+and down sets are scored separately there too, since AUCell/UCell are unsigned single-list
+scorers.
 
 Two levels of SF-vs-PB contrast are emitted, and they answer different questions:
   * per-cell (`harvest_readout_summary.csv`) — pooled over all cells, so it is
-    pseudoreplicated: the unit of replication is the cell, not the donor.
-  * per-donor (`harvest_readout_donor_contrast.csv`) — each donor contributes one
-    mean per (label × tissue), and the contrast is taken ACROSS donors, paired within
-    donor. This is the level the donor-pseudobulk spine works at, so it is the one to
-    read next to it. It is still annotation tier and never becomes an effect-size row.
+    pseudoreplicated: the unit of replication is the cell.
+  * per-donor (`harvest_readout_donor_contrast.csv`) — each donor contributes one mean per
+    (label × tissue), and the contrast is taken ACROSS donors, paired within donor. This is
+    the level the donor-pseudobulk spine works at, so it is the one to read next to it. It
+    stays annotation tier and produces no effect-size row.
 
 Outputs:
   03_results/interactive/08_harvest_readout.parquet          (per-cell; gitignored/regenerable)
   03_results/08_harvest_readout/tables/harvest_readout_summary.csv
   03_results/08_harvest_readout/tables/harvest_readout_donor_means.csv
   03_results/08_harvest_readout/tables/harvest_readout_donor_contrast.csv
-  03_results/08_harvest_readout/README.md                    (caption; written by hand, not here)
+  03_results/08_harvest_readout/README.md                    (caption; hand-written)
 
 Run in-container from the compartment root (or anywhere, via `from config import`):
     python 02_analysis/scripts/08_harvest_readout.py

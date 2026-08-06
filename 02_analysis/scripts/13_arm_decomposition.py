@@ -5,40 +5,39 @@
 The `11_heat_decomposition` results establish the curated-set composition of one arm,
 `WT_heat_up`. This script asks the same MEMBERSHIP question of all three mouse-derived up
 arms in human projection space, against a wider lens panel, and emits the result in a tidy
-(arm, program, gene) shape an alluvial or stacked-bar display can draw without recomputing
-anything.
+(arm, program, gene) shape an alluvial or stacked-bar display can draw directly.
 
-WHAT THIS MEASURES, AND WHAT IT DOES NOT
-----------------------------------------
-Membership is not enrichment. A curated lens CONTAINING a gene of an arm is arithmetic over
-two committed text files; a lens ENRICHING in a ranked list is a separate measurement with a
-different failure mode. This script performs only the first. Nothing here carries an NES, a
-p-value, an effect size or a direction of shift, and no row reaches
-`effect_sizes_treg_arthritis.csv` or any `03_results/master/` accumulator. The enrichment
-question for `WT_heat_up` is answered by the `11_heat_decomposition` results and by the
-donor-pseudobulk panels; it is deliberately not re-answered here.
+WHAT THIS MEASURES
+------------------
+Membership, which is a different measurement from enrichment. A curated lens CONTAINING a
+gene of an arm is arithmetic over two committed text files; a lens ENRICHING in a ranked list
+is a separate measurement with a different failure mode. This script performs the first
+alone. Nothing here carries an NES, a p-value, an effect size or a direction of shift, and no
+row reaches `effect_sizes_treg_arthritis.csv` or any `03_results/master/` accumulator. The
+enrichment question for `WT_heat_up` is answered by the `11_heat_decomposition` results and
+by the donor-pseudobulk panels, and stays there.
 
-FOUR THINGS THE OUTPUT IS NOT
------------------------------
-1. NOT a partition of genes. The lenses overlap, so a gene can be claimed by several
+FOUR PROPERTIES OF THE OUTPUT TO READ CAREFULLY
+-----------------------------------------------
+1. The lenses OVERLAP, so this is no partition of genes: a gene can be claimed by several
    programs. Every such gene appears once per claiming program in `arm_program_gene.csv`,
    with `n_programs_for_gene` recording the multiplicity and `weight_fractional =
-   1 / n_programs_for_gene` so a consumer can choose duplicated accounting (sum the rows)
-   or fractional accounting (sum the weights, which totals the arm exactly). Forcing a
-   priority-ordered disjoint assignment would silently decide which program gets credit for
-   a shared gene, so the sharing is published instead.
-2. NOT four independent arms. The three mouse contrasts are linearly dependent by
+   1 / n_programs_for_gene` so a consumer can choose duplicated accounting (sum the rows) or
+   fractional accounting (sum the weights, which totals the arm exactly). A priority-ordered
+   disjoint assignment would silently decide which program gets credit for a shared gene, so
+   the sharing is published.
+2. The four arms are DEPENDENT. The three mouse contrasts are linearly dependent by
    construction — WT_heat = KO_heat + Interaction — so agreement between `WT_heat_up` and
-   `KO_heat_up` is expected arithmetic, not corroboration. `Interaction_up_fdrOnly` is the
-   same Interaction contrast read at a relaxed gate, so it is not independent of
-   `Interaction_up` either; both are carried, and the `gate` column marks which is which.
-3. NOT a statement about the down arms. Only up arms are in scope. No down arm is read,
-   tallied or mentioned in the outputs.
-4. NOT a re-curation of anything. Every lens is read verbatim from a frozen committed file.
+   `KO_heat_up` is expected arithmetic. `Interaction_up_fdrOnly` is the same Interaction
+   contrast read at a relaxed gate, so it moves with `Interaction_up` too. Both are carried,
+   and the `gate` column marks which is which.
+3. UP ARMS ONLY are in scope. The down arms go unread, untallied and unmentioned in the
+   outputs.
+4. Every lens is READ VERBATIM from a frozen committed file, so this stage re-curates
+   nothing.
 
-Sizes are contracts, not observations: each arm's gene count is checked against the mouse
-anchor's own `manifest.csv`, and a drift is a hard stop rather than a quietly different
-denominator.
+Sizes are contracts: each arm's gene count is checked against the mouse anchor's own
+`manifest.csv`, and a drift is a hard stop.
 
 Inputs (all read-only):
   - ../mouse_anchor/03_results/human_projection/manifest.csv          (arm sizes + gates)
@@ -86,7 +85,7 @@ RESIDUAL_SET = "(none)"
 
 # --- the mouse-derived UP arms, in human projection space --------------------------------
 # `arm` is the label carried in every output; `contrast` and `gate` are the mouse anchor's own
-# manifest keys, so the size guard reads the contract rather than a number retyped here.
+# manifest keys, so the size guard reads the contract itself.
 # The `Interaction_up_fdrOnly` label names the arm as "the Interaction up arm at the relaxed
 # gate"; its frozen file is `Interaction_fdrOnly_up.txt`.
 PROJECTION_DIR = REPO_ROOT / "mouse_anchor/03_results/human_projection"
@@ -132,8 +131,8 @@ PROGRAMS: list[tuple[str, str, Path]] = [
 PROGRAM_ORDER = [p[0] for p in PROGRAMS]
 
 # The already-committed pin for the published STING gene set, owned by the
-# 11_heat_decomposition tables. Re-using that pin rather than minting a fresh one means a
-# change to the positive-control axis stops BOTH readers, instead of letting a new stage
+# 11_heat_decomposition tables. Re-using that pin means a change to the positive-control axis
+# stops BOTH readers, where a fresh pin would let a new stage
 # quietly re-pin whatever it happens to find on disk.
 STING_PIN_MANIFEST = PATHS.tables("11_heat_decomposition") / "source_hash_manifest.csv"
 STING_PIN_LABEL = "savi_sting_specific_up"

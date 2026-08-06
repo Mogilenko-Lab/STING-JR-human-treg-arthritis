@@ -1,33 +1,33 @@
 #!/usr/bin/env Rscript
-# 19_regulon_nulls.R: COMPUTE. Two nulls stage 18 does not have.
+# 19_regulon_nulls.R: COMPUTE. The two nulls that complete the stage-18 ladder.
 # =============================================================================
-# Stage 18 established that HIF1A's CollecTRI-ULM activity on the sorted-Treg
-# SF-versus-PB contrast survives every network and estimator swap, that activity scales with
-# regulon size, and that the score's DIRECTION comes from targets many regulons share. Its
-# three nulls, however, leave two specific gaps, and its own README names them:
+# Stage 18 established that HIF1A's CollecTRI-ULM activity on the sorted-Treg SF-versus-PB
+# contrast survives every network and estimator swap, that activity scales with regulon size,
+# and that the score's DIRECTION comes from targets many regulons share. Its three nulls leave
+# two specific gaps, which its own README names:
 #
-#   (a) no null holds target PROMISCUITY fixed. The random-regulon null matches size,
+#   (a) every null so far lets target PROMISCUITY float. The random-regulon null matches size,
 #       repressing-edge fraction and expression decile, so it draws from the whole universe
-#       and lands near zero — every real regulon beats it. The size-conditional residual
-#       compares against real regulons but conditions on size alone.
-#   (b) every null permutes the ANNOTATION (which genes a regulon claims, or which gene
-#       carries which statistic). None permutes the experimental DESIGN, and gene-label
+#       and lands near zero, and every real regulon beats it. The size-conditional residual
+#       compares against real regulons while conditioning on size alone.
+#   (b) every null permutes the ANNOTATION — which genes a regulon claims, or which gene
+#       carries which statistic — and leaves the experimental DESIGN fixed. Gene-label
 #       permutation destroys the gene-gene correlation that makes a real contrast's
 #       statistics dependent, which is what makes it anti-conservative.
 #
-# SECTION 4 answers (a): curveball rewiring of the TF->target bipartite graph, preserving
-# every regulon's size and every target's in-degree exactly. A drawn regulon therefore
-# oversamples the promiscuous, high-|t| genes exactly as much as the observed one does, so
-# the null's centre is NOT zero and beating it means something the size-matched null could
-# not test.
+# SECTION 4 answers (a): curveball rewiring of the TF->target bipartite graph, preserving every
+# regulon's size and every target's in-degree exactly. A drawn regulon therefore oversamples
+# the promiscuous, high-|t| genes exactly as much as the observed one does, so the null's
+# centre sits away from zero and beating it says something the size-matched null could not
+# test.
 #
 # SECTION 5 answers (b): the SF/PB labels are swapped within donor and the contrast refitted
 # end to end. Six Treg donors carry both arms, so all 2^6 = 64 configurations are enumerated
-# and the test is EXACT — no seed enters the p-value. The price is resolution: the finest
-# attainable one-sided p is 1/64 = 0.0156, published here rather than left implicit.
+# and the test is EXACT, with no seed entering the p-value. The price is resolution: the
+# finest attainable one-sided p is 1/64 = 0.0156, published here.
 #
-# Neither null says anything about HIF1A the protein. Both are statements about the CollecTRI
-# HIF1A regulon's ULM activity on this contrast, which is the object stage 18 defined.
+# Both nulls are statements about the CollecTRI HIF1A regulon's ULM activity on this contrast,
+# which is the object stage 18 defined. HIF1A the protein is a separate question.
 #
 # Annotation tier. No row reaches 03_results/master/ or any effect-size accumulator.
 #
@@ -45,9 +45,9 @@
 #   signflip_null.csv          signflip_null_draws.csv
 #   null_ladder.csv
 #
-# Compute only, and there is no paired viz script yet: the ladder and the EPAS1 null are the
-# obvious figures, but the numbers are read from the tables until one is written. Do not add a
-# figure here — a viz script is where it belongs.
+# Compute only. No paired viz script exists yet: the ladder and the EPAS1 null are the obvious
+# figures, and the numbers are read from the tables until one is written. Figures belong in a
+# viz script, so add one there.
 #
 # Run from the compartment root:
 #   Rscript 02_analysis/scripts/19_regulon_nulls.R
@@ -135,7 +135,7 @@ message("=================================================================")
 # ============================================================================
 # 1. Pin the cross-compartment network
 # ============================================================================
-# Its own pin, not stage 18's: if the network moves, both stages must stop, and a stage that
+# Its own pin, held separately from stage 18's: if the network moves, both stages must stop, and a stage that
 # trusted a sibling's manifest would not.
 
 message("\n[1] Pinning the cross-compartment CollecTRI network ...")
@@ -161,7 +161,7 @@ rk <- readr::read_tsv(file.path(PB, sprintf("ranked_%s.tsv", PRIMARY)),
                       col_names = c("gene", "stat"), show_col_types = FALSE)
 stopifnot(!any(duplicated(rk$gene)))
 # An Ensembl-keyed ranked list intersects every network at ~zero and decoupleR reports that
-# as an empty result rather than an error. Same guard as stage 18, for the same reason.
+# as an empty result, which reads as a null. Same guard as stage 18, for the same reason.
 if (mean(grepl("^ENSG[0-9]{6,}", rk$gene)) > 0.5)
   stop("[19] the ranked list is keyed by Ensembl id; the network matches on HGNC symbol.")
 Y <- setNames(rk$stat, rk$gene)
@@ -199,7 +199,7 @@ if (length(missing_focus))
 # matrix-vector product for all factors at once. The nulls below need ~64,000 of these
 # fits; run_ulm would make that a batch job, and the closed form makes it seconds.
 #
-# The reason this is safe is the gate, not the algebra: it is validated against run_ulm on
+# The gate is what makes this safe: it is validated against run_ulm on
 # the observed network and the run stops if it does not reproduce it. This is the discipline
 # the compartment already requires of a DE-engine swap — establish by rank correlation that
 # the swap is a method change and not a result change.
@@ -312,7 +312,7 @@ draws <- vector("list", N_DRAW)
 for (d in seq_len(N_DRAW)) {
   state <- run_trades(state, n_step)
   # Each regulon keeps its OWN multiset of edge signs, permuted onto its new targets. This
-  # matches the stage-18 null convention: the null varies gene identity, never the sign
+  # matches the stage-18 null convention: the null varies gene identity and holds the sign
   # composition, so a factor cannot look different merely by having been re-signed.
   mors_d <- lapply(seq_len(N_TF), function(k) tf_mors[[k]][sample.int(OBS_SIZE[[k]])])
   Xd <- build_X(state, mors_d)
@@ -324,7 +324,7 @@ for (d in seq_len(N_DRAW)) {
 }
 
 # The invariants are the whole claim of this null, so they are asserted on the realised
-# state rather than trusted to the algorithm.
+# state, independent of the algorithm.
 stopifnot(identical(vapply(state, length, integer(1)), OBS_SIZE))
 stopifnot(identical(tabulate(unlist(state, use.names = FALSE), nbins = N_GENE), OBS_INDEG))
 stopifnot(all(vapply(state, function(v) !any(duplicated(v)), logical(1))))
@@ -375,7 +375,7 @@ emit(rew, "rewiring_null.csv")
 # Two choices are deliberate and both are stated in the caption:
 #   * The gene set is filtered ONCE, on the observed design, and held fixed. Refiltering per
 #     configuration would change the ULM universe between draws and the scores would no
-#     longer be comparable; the design is what is permuted here, not the filter.
+#     longer be comparable; the design is what is permuted here.
 #   * voom IS recomputed per configuration, because its weights are a function of the design
 #     and reusing the observed weights would leak the observed labels into every draw.
 
@@ -418,7 +418,7 @@ message(sprintf("  %d genes kept by filterByExpr on the observed design, held fi
 # The Ensembl-to-symbol representative is chosen ONCE so the ULM universe is byte-identical
 # across configurations. The compartment's rule is one row per symbol keeping the most
 # extreme |t|; with no duplicate symbol among the kept ids the rule is a no-op, which is
-# asserted rather than assumed — if it ever binds, the winner must not be allowed to move
+# asserted on every run — if it ever binds, the winner has to stay put
 # between configurations or the universe would drift with the permutation.
 sym <- gene_map[rownames(dge0), "gene_symbol"]
 ok  <- !is.na(sym) & !sym %in% c("", "nan", "None", "NA")
@@ -575,7 +575,7 @@ ladder <- bind_rows(
 emit(ladder, "null_ladder.csv")
 
 # ============================================================================
-# 7. Captions — written from the values just computed, not from memory
+# 7. Captions — written from the values just computed
 # ============================================================================
 # Every table gets its README section through write_caption(), which is idempotent on the
 # filename. The findings are interpolated from the realised numbers so a caption cannot drift

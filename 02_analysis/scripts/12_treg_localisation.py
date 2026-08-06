@@ -15,7 +15,7 @@ power-band classifications.
 
 Note: Interaction_down.txt and Interaction_fdrOnly_down.txt are 0-byte files
 in mouse_anchor/03_results/human_projection/signatures/Interaction/. Those arms are
-structurally absent at nominal zero (a property of the mouse contrast, not of JIA).
+structurally absent at nominal zero (a property of the mouse contrast).
 
 Outputs:
   03_results/12_treg_localisation/tables/treg_per_cell_scores.csv
@@ -103,7 +103,7 @@ def main() -> None:
 
     # The sets ship current HGNC symbols and this object carries the hg19-era vintage, so
     # they are resolved into it before the effective size is counted. Nominal size is left
-    # alone above: it is a fact about the source file, not about this matrix.
+    # alone above: it is a fact about the source file.
     sym_to_var = _symbol_to_varname(adata, "gene_symbol")
     alias_map = load_alias_map(CONFIG["symbol_alias"]["map_path"])
     effective_sizes = {}

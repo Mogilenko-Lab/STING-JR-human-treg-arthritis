@@ -5,9 +5,15 @@
 Reads the pseudobulk matrices + DE tables from 03_pseudobulk_de.py and renders:
   - pseudobulk PCA colored by tissue + donor (confirms SF/PB separation; checks
     single-donor dominance red-flag);
-  - SF-vs-PB Treg volcano;
   - per-population significant-DE count bar.
 No statistics are recomputed here (PCA of log-CPM is a display transform).
+
+The Treg SF-vs-PB volcano used to be drawn here by hand. It now lives in
+03_pseudobulk_volcano_viz.R, which calls the canonical RNAseq-toolkit plotter
+(01_modules/RNAseq-toolkit/scripts/DE/plot_standard_volcano.R) — the same grammar
+18_tf_selective_volcano_viz.R already draws this contrast under. Do not re-add a
+matplotlib volcano here; one DE table under two volcano conventions is what that
+move removed.
 """
 from __future__ import annotations
 
@@ -91,52 +97,7 @@ def main() -> None:
                                f"of a single-donor axis. Display transform only."),
                   config=FIG_CFG)
 
-    # ---- 2. Treg SF-vs-PB volcano ----
-    treg_path = tdir / "de_SFvsPB_treg.csv"
-    if treg_path.exists():
-        de = pd.read_csv(treg_path, index_col=0)
-        de = de.dropna(subset=["padj", "log2FoldChange"])
-        sig = (de["padj"] < float(PARAMS.de_fdr)) & (de["log2FoldChange"].abs() >= float(PARAMS.de_logfc))
-        fig2, ax = plt.subplots(figsize=(8, 7))
-        ax.scatter(de.loc[~sig, "log2FoldChange"], -np.log10(de.loc[~sig, "padj"] + 1e-300),
-                   s=6, c="grey", alpha=0.4, linewidths=0)
-        ax.scatter(de.loc[sig, "log2FoldChange"], -np.log10(de.loc[sig, "padj"] + 1e-300),
-                   s=10, c="#D55E00", linewidths=0)
-        n_lab = int(FIG_CFG.get("figures", {}).get("volcano_label_top", 10))
-        top = de.loc[sig].reindex(
-            de.loc[sig, "log2FoldChange"].abs().sort_values(ascending=False).index).head(n_lab)
-        texts = [ax.text(r["log2FoldChange"], -np.log10(r["padj"] + 1e-300),
-                         str(r["gene_symbol"]), fontsize=9) for _, r in top.iterrows()]
-        from adjustText import adjust_text
-        adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color="grey", lw=0.5))
-        from matplotlib.lines import Line2D
-        ax.legend(handles=[
-            Line2D([0], [0], marker="o", color="w", markerfacecolor="#D55E00",
-                   label=f"significant (FDR<{PARAMS.de_fdr}, |log2FC|≥{PARAMS.de_logfc})", markersize=8),
-            Line2D([0], [0], marker="o", color="w", markerfacecolor="grey", label="ns", markersize=8),
-        ], frameon=True, loc="upper left", fontsize=8)
-        ax.axhline(-np.log10(float(PARAMS.de_fdr)), ls="--", c="k", lw=0.6)
-        ax.axvline(float(PARAMS.de_logfc), ls="--", c="k", lw=0.6)
-        ax.axvline(-float(PARAMS.de_logfc), ls="--", c="k", lw=0.6)
-        ax.set_xlabel("log2FC (SF / PB)"); ax.set_ylabel("-log10 padj")
-        ax.set_title(f"SF-vs-PB Treg pseudobulk DE ({int(sig.sum())} significant)")
-        fig2.tight_layout()
-        vol_tab = de[["gene_symbol", "log2FoldChange", "stat", "pvalue", "padj"]].head(500)
-        save_overview(fig2, STAGE, "treg_volcano", table=vol_tab,
-                      finding=(f"Synovial-fluid Tregs carry a reproducible SF-versus-PB "
-                               f"transcriptional program, {int(sig.sum()):,} genes at FDR < "
-                               f"{PARAMS.de_fdr} and |log2FC| ≥ {PARAMS.de_logfc}. This is the "
-                               f"substrate the mouse-derived signature is tested against."),
-                      script=SCRIPT, fn="main",
-                      config_kv=f"thresholds.de_fdr={PARAMS.de_fdr}; de_logfc={PARAMS.de_logfc}",
-                      input="03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv",
-                      how_to_read=(f"x is log2 fold change SF over PB, y is −log10 padj, orange "
-                                   f"marks significance. Dashed lines are the FDR and |log2FC| "
-                                   f"gates. The top {len(vol_tab)} genes are tabulated alongside. "
-                                   f"Correlative donor-pseudobulk DE."),
-                      config=FIG_CFG)
-
-    # ---- 3. DE-count bar ----
+    # ---- 2. DE-count bar ----
     fig3, ax = plt.subplots(figsize=(6.5, 5))
     s = summary.copy()
     s["pop_color"] = s["population"].map(LABEL_COL)
@@ -160,7 +121,8 @@ def main() -> None:
                                "SF-versus-PB DE genes. Read it to confirm each arm carries enough "
                                "signal to rank for pre-ranked GSEA. Diagnostic."),
                   config=FIG_CFG)
-    print("[03_pseudobulk_viz] wrote 3 overviews")
+    print("[03_pseudobulk_viz] wrote 2 overviews "
+          "(treg_volcano is 03_pseudobulk_volcano_viz.R)")
 
 
 if __name__ == "__main__":

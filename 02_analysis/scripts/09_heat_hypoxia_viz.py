@@ -67,7 +67,7 @@ ARM_SET = {"up": "WT_heat_up", "down": "WT_heat_down"}
 ARM_COL = {"up": "#A6611A", "down": "#2166AC"}
 
 # The one contrasting edge in this module comes from the config Okabe-Ito
-# palette, so the only literal here is the config key, not a hex string.
+# palette, so the only literal here is the config key.
 _OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
 EDGE_CONTRAST = _OKABE["black"]
 
@@ -76,7 +76,7 @@ ANNOT_SIZE = float(_F["axis_text_size"])
 LEGEND_SIZE = float(_F["legend_text_size"])
 FDR = float(PARAMS.gsea_fdr)
 # One translucency for every paired/overlapping marker in this module, so
-# coincident markers read through each other instead of hiding one another.
+# coincident markers read through each other.
 MARKER_ALPHA = 0.65
 
 
@@ -182,7 +182,7 @@ def plot_purge_paired(df: pd.DataFrame):
         # Every marker is filled and translucent, larger full-set diamond first and
         # smaller purged circle on top: where the purge removes nothing and both land
         # on the same NES (the whole down arm) the pair reads as a darker circle
-        # inside a lighter diamond rather than one marker hiding the other.
+        # inside a lighter diamond, keeping both readable.
         for nes, padj, marker, size in ((r["nes_full"], r["padj_full"], "D", 300),
                                         (r["nes_purged"], r["padj_purged"], "o", 120)):
             passes = padj < FDR
@@ -192,7 +192,7 @@ def plot_purge_paired(df: pd.DataFrame):
                        linewidths=2.2 if passes else 0.0)
         # Effective set size against this arm's OWN nominal size, then what the
         # purge cost. Where the purge takes nothing there is no NES to quote, so
-        # the row says that instead of printing a rounded zero.
+        # the row says that in place of printing a rounded zero.
         if int(r["n_removed_testable"]) == 0:
             cost = "purge removes no gene"
         else:
@@ -237,7 +237,7 @@ def plot_purge_paired(df: pd.DataFrame):
                       markerfacecolor=to_rgba("grey", MARKER_ALPHA),
                       markeredgecolor=EDGE_CONTRAST, markeredgewidth=2.2, markersize=11)]
     # The down-arm key names where that arm is significant, read from the table
-    # rather than asserted, so the panel cannot outlive "the up arm is the only
+    # from the data, so the panel cannot outlive "the up arm is the only
     # informative arm" by carrying it in a legend.
     down_sig = df[df["arm"].eq("down") & df["padj_full"].lt(FDR)]["population"].tolist()
     down_where = (", ".join(down_sig) + " only") if down_sig else "no population"

@@ -7,7 +7,7 @@ source("02_analysis/helpers/source_hash_manifest.R")
 ## the mouse-anchor single source of truth:
 ##   ../mouse_anchor/00_data/references/gene_sets/tcr_activation_lens/tcr_activation_human.rds
 ##
-## The HUMAN asset is the source panel, not a conversion of anything. The anchor's lens
+## The HUMAN asset is the source panel itself. The anchor's lens
 ## is defined by a frozen 66-gene HUMAN symbol panel (tcr_activation_panel.csv, spanning
 ## TCR-proximal signalling, early costimulation, immediate-early transcription factors
 ## and activation effectors, with FOXP3 dropped as a lineage-identity marker rather than
@@ -44,7 +44,7 @@ SOURCE_RDS <- normalizePath(file.path(PROJECT_ROOT, SOURCE_RDS_REL), mustWork = 
 OUT_DIR <- file.path(PROJECT_ROOT, "00_data", "references", "tcr_activation_lens")
 EXPECTED_SOURCE_SHA256 <- "fa36441a283a855ac8031e6073ef89fd4f472b9223c85e2b3c41f6a3bb286cf3"
 
-## The panel size is asserted rather than read, because the whole point of a frozen
+## The panel size is asserted against a pinned value, since the whole point of a frozen
 ## reference is that a silent drift in the anchor changes what every downstream
 ## enrichment statistic was computed against.
 EXPECTED_N_GENES <- 66L

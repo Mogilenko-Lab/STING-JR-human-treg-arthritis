@@ -68,7 +68,7 @@ def main() -> None:
     }])
     genes_union_summary.to_csv(tdir / "genes_union_summary.csv", index=False)
 
-    # The feature union by NAME, not only by count. Downstream a gene set member absent
+    # The feature union by NAME as well as by count. Downstream a gene set member absent
     # from the count matrix has two opposite causes — the symbol vintage differs, or the
     # gene is genuinely not expressed in sorted T cells — and only this list separates
     # them. EGFR, EPCAM and INHBA are all absent from the post-QC matrix and all present

@@ -39,7 +39,7 @@ OBSM = "X_umap_unsupervised"
 MARKERS = ["FOXP3", "IL2RA", "CTLA4", "IKZF2", "TIGIT", "IL7R", "CD40LG",
            "CD4", "CD8A", "CD8B", "GZMK", "NKG7"]
 
-# QC-overlay module scores (Tier-3 hand markers — eyeball only, never evidence). Used to
+# QC-overlay module scores (Tier-3 hand markers, for eyeballing). Used to
 # discriminate a stressed-Treg pocket (HSP/proteostasis up, identity retained) from a
 # low-quality/dying tail (apoptosis up, FOXP3 lost). Human HGNC symbols.
 MODULES = {

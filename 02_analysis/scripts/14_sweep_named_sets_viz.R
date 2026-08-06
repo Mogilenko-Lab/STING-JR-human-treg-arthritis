@@ -1,34 +1,35 @@
 #!/usr/bin/env Rscript
 # 14_sweep_named_sets_viz.R: VIZ (no statistics)
 # =============================================================================
-# The closing panel of this compartment's narrative. Every earlier figure tested a
-# gene set that was brought to the data. This one scores no favourite: every set in
-# eleven collections was run on the same donor-level ranked lists, and the sets the
-# narrative names are placed inside that full distribution, per sorted population, so
-# a reader sees both the effect and how ordinary or extraordinary it is.
+# The closing panel of this compartment's narrative. Every earlier figure tested a gene set
+# brought to the data. This one scores every set in every collection on the same
+# donor-level ranked lists and places the sets the narrative names inside that full
+# distribution, per sorted population, so a reader sees both the effect and how ordinary or
+# extraordinary it is.
 #
-# WHICH SETS ARE DRAWN IS A COMMITTED DECISION, NOT A CHOICE MADE HERE. The selection
-# and the reason for every row live in tables/sweep_named_sets.csv, written by
-# 14_sweep_named_sets.R, which also audits the substring trap that a naive search for
-# "STING" falls into. This script reads that table and plots it.
+# WHICH SETS ARE DRAWN IS A COMMITTED DECISION. The selection and the reason for every row
+# live in tables/sweep_named_sets.csv, written by 14_sweep_named_sets.R, which also audits
+# the substring trap a naive search for "STING" falls into. This script reads that table and
+# plots it.
 #
-# FOUR THINGS THE PANEL AND ITS CAPTION CARRY, because leaving any of them out turns
-# the figure into an overclaim by omission:
-#   1. all three sorted populations, since sting_specific_up reaches pooled FDR 0.018
-#      in Tcon while missing in Treg and CD8, and a Treg-only panel would read as a
-#      settled negative for a set that is significant in one of the three;
-#   2. KO_heat_up beside WT_heat_up, since the cGAS-knockout comparator beats the
-#      primary arm on pooled FDR in all three populations and shares 182 of its genes;
-#   3. set size, on the marker area and in the caption's baseline rates, because how
-#      often a set of a given size reaches significance at all differs by nearly
-#      sevenfold between the band HALLMARK_HYPOXIA sits in and the band the cGAS-STING
-#      sets sit in;
-#   4. how many sets reach significance at all in each population, so a headline is
-#      read against the size of the family it came out of.
+# FOUR THINGS THE PANEL AND ITS CAPTION CARRY, each guarding against an overclaim by
+# omission:
+#   0. every set the per-cell maps colour by, so a reader arriving from a map finds it
+#      placed against the whole sweep (asserted in 14_sweep_named_sets.R);
+#   1. all three sorted populations, since sting_specific_up reaches pooled FDR 0.018 in
+#      Tcon while missing in Treg and CD8, and a Treg-only panel would read as a settled
+#      negative for a set that is significant in one of the three;
+#   2. KO_heat_up beside WT_heat_up, since the cGAS-knockout comparator beats the primary arm
+#      on pooled FDR in all three populations and shares 182 of its genes;
+#   3. set size, on the marker area and in the caption's baseline rates, since how often a
+#      set of a given size reaches significance at all differs by nearly sevenfold between
+#      the band HALLMARK_HYPOXIA sits in and the band the cGAS-STING sets sit in;
+#   4. how many sets reach significance at all in each population, so a headline reads
+#      against the size of the family it came out of.
 #
-# The grey cloud on the bottom row of each panel is every set tested in that
-# population. It is the calibration: a marker far to the right inside a dense cloud is
-# strong and ordinary at the same time.
+# The grey cloud on the bottom row of each panel is every set tested in that population. It
+# is the calibration: a marker far to the right inside a dense cloud is strong and ordinary
+# at the same time.
 #
 # Input  (03_results/14_unbiased_enrichment/tables/):
 #   gsea_all.csv                 the full sweep, drawn as the background cloud
@@ -92,12 +93,12 @@ cma <- function(x) format(x, big.mark = ",", trim = TRUE)
 wrap_at <- function(x, width) paste(strwrap(x, width = width), collapse = "\n")
 
 # =============================================================================
-# 1. Row geometry: eleven named rows, plus one row holding the whole sweep
+# 1. Row geometry: one row per named set, plus one row holding the whole sweep
 # =============================================================================
 ## Threads run top to bottom in the order the selection table fixed, and within a
 ## thread the rows are ordered by the Treg NES, so the ordering belongs to one
 ## population and the caption says which. The background cloud gets row 0, below a
-## heavier separator, because it is the reference distribution rather than a member of
+## heavier separator, marking it as the reference distribution beneath
 ## the comparison.
 sel_order <- stats |>
   dplyr::filter(population == "Treg") |>
@@ -132,10 +133,10 @@ bg <- sweep |>
 # =============================================================================
 # 2. The per-panel annotation gutter
 # =============================================================================
-## Two lines per row, not one: a single "FDR 3.7e-12, rank 31 of 11,236" ran past the
+## Two lines per row: a single "FDR 3.7e-12, rank 31 of 11,236" ran past the
 ## gutter and lost its own tail to the canvas edge in the first render. The denominator
 ## is dropped from every row and stated once per panel on the background row instead,
-## since it is the same number for all eleven. The rank is on pooled FDR and only on
+## since it is the same number for every row. The rank is on pooled FDR and only on
 ## pooled FDR, which the caption names, because the same set ranks very differently by
 ## NES and mixing the two in one sentence misreads both.
 ann_sets <- pts |>
@@ -156,20 +157,25 @@ ann_bg <- stats |>
                                    cma(n_sig_pooled), cma(n_tests_pooled), FDR))
 ann <- dplyr::bind_rows(ann_sets, ann_bg) |> dplyr::mutate(x = NESCAP * 1.12)
 
-THREAD_COL <- c(OI$vermillion, OI$blue, OI$reddish_purple, OI$bluish_green)
+## One hue per comparison thread, in top-to-bottom order.
+THREAD_HUES <- c(OI$vermillion, OI$blue, OI$bluish_green, OI$reddish_purple,
+                 OI$orange, OI$sky_blue, OI$black, OI$yellow)
+stopifnot("more comparison threads than hues; extend THREAD_HUES" =
+            nrow(thread_rows) <= length(THREAD_HUES))
+THREAD_COL <- THREAD_HUES[seq_len(nrow(thread_rows))]
 names(THREAD_COL) <- thread_rows$thread
 
 ## Alpha and point size are deliberately low. At alpha 0.18 the cloud saturated into a
 ## solid grey slab running out to the clamp, which hid the one thing the row exists to
 ## show: the bulk of the distribution sits between NES 0.6 and 1.9 in Treg and only
 ## about one set in a hundred passes 2.25, so a marker out at 2.6 is genuinely in the
-## tail. A translucent cloud makes that thinning visible instead of asserting it.
+## tail. A translucent cloud makes that thinning visible on the face.
 bg_layer <- geom_jitter(data = bg, aes(x = nes_plot, y = 0), inherit.aes = FALSE,
                         height = 0.32, width = 0, size = PT * 0.13,
                         alpha = 0.08, colour = "grey30")
-## Only the CLOUD is rasterised, not the named markers: at nearly 34,000 points the
+## Only the CLOUD is rasterised, keeping the named markers vector: at nearly 34,000 points the
 ## cloud would embed one vector glyph per set and make the PDF unopenable, while the
-## eleven markers per panel are what a collaborator will want to select and move in a
+## named markers per panel are what a collaborator will want to select and move in a
 ## vector editor.
 if (requireNamespace("ggrastr", quietly = TRUE))
   bg_layer <- ggrastr::rasterise(bg_layer, dpi = RDPI)
@@ -283,7 +289,7 @@ save_overview(
   ## Every one of the four bounds below is load-bearing, so the block is long by the
   ## README's usual standard. It is tightened as far as it goes without dropping a number.
   how_to_read = sprintf(paste(
-    "Columns are the three sorted populations on one shared row axis. Each of the eleven",
+    "Columns are the three sorted populations on one shared row axis. Each of the %s",
     "upper rows is one named set, coloured by comparison thread and ordered inside a",
     "thread by its Treg NES. Below the dashed separator the bottom row is every set",
     "tested in that population, one grey point each, which is the distribution a marker",
@@ -306,7 +312,7 @@ save_overview(
     "term runs negative. The selection, its reason per row, and the two excluded",
     "substring matches are committed in tables/sweep_named_sets.csv. Correlative",
     "throughout."),
-    NESCAP, FDR,
+    N_SET, NESCAP, FDR,
     cma(sig_treg), cma(n_treg), FDR,
     cma(gv("Tcon", "WT_heat_up", "n_sig_pooled")), cma(gv("Tcon", "WT_heat_up", "n_tests_pooled")),
     cma(gv("CD8", "WT_heat_up", "n_sig_pooled")), cma(gv("CD8", "WT_heat_up", "n_tests_pooled")),
@@ -316,7 +322,7 @@ save_overview(
     small_band, 100 * bv("Treg", small_band, "frac_pooled_significant"),
     gv("Treg", "HALLMARK_HYPOXIA", "set_size"),
     fmt_p(ko_p), fmt_p(wt_p), cma(ko_rank), cma(wt_rank), n_shared),
-  config = FIG_CFG, width = 16.5, height = 11)
+  config = FIG_CFG, width = 16.5, height = 16.5)
 
 message(sprintf("[14_named] wrote %s: %d named rows x %d populations over %s background sets",
                 STEM, N_SET, length(POP_LEVELS), cma(nrow(sweep))))

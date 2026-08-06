@@ -21,13 +21,12 @@ Outputs:
   - 03_results/10_hsr_lens/tables/hsr_colocalization.csv
   - 03_results/10_hsr_lens/tables/hsr_wtheatup_overlap.csv
 
-Tier note: ANNOTATION / secondary tier, firewalled from the confirmatory WT_heat
-claim spine. This script appends HSR NES rows only to master_gsea_pseudobulk and
-does not write any row to effect_sizes_treg_arthritis.csv.
+Tier note: ANNOTATION / secondary tier, firewalled from the confirmatory WT_heat claim
+spine. This script appends HSR NES rows to master_gsea_pseudobulk alone, leaving
+effect_sizes_treg_arthritis.csv untouched.
 
-Honest ceiling: even the clean HSR core is proteotoxic-stress-general, not
-fever-specific; only the mouse 37/39 contrast can measure thermal-ness. In JIA
-we carry the lens and read it correlatively.
+Honest ceiling: the clean HSR core is proteotoxic-stress-general, and the mouse 37/39
+contrast is what measures thermal-ness. In JIA the lens is carried and read correlatively.
 
 Sign convention: NES > 0 means the HSR set is enriched toward genes up in
 synovial fluid vs paired peripheral blood.

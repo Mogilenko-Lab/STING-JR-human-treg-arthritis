@@ -9,7 +9,7 @@
 # These are the forensics the mouse anchor ran on its own HIF result
 # (mouse_anchor/03_results/04_tf), applied to the same question here.
 #
-# Annotation tier. No row reaches 03_results/master/ or any effect-size accumulator, and a
+# Annotation tier. No row reaches 03_results/master/ or any effect-size accumulator. A
 # regulon scoring high says its target genes move with the synovial-fluid side of this
 # contrast.
 #
@@ -217,7 +217,7 @@ message(sprintf("  CollecTRI: %d unique edges, %d TFs, %d repressing edges",
                 nrow(net_base), length(unique(net_base$source)), sum(net_base$mor < 0)))
 
 # ---- HGNC alias resolution: current network symbol -> the symbol the matrix carries ----
-# The machinery is shared rather than private to this stage: helpers/symbol_alias.R holds
+# The machinery is shared across stages: helpers/symbol_alias.R holds
 # one ownership guard and one rejection ledger for every consumer in the compartment, and
 # this stage's two published ledger tables are the regression test that the lift changed
 # nothing (02_analysis/scripts/00_symbol_alias_validate.R).

@@ -2,32 +2,31 @@
 """
 14_unbiased_enrichment_viz.py: VIZ ONLY (no statistics).
 =============================================================================
-Draws one panel: the pre-ranked enrichment score of each mouse-derived up arm on
-the sorted JIA synovial-fluid-versus-paired-blood ranked list, in each of the
-three frozen sort labels. Every number on the panel is read from a committed
-table written by 02_analysis/scripts/14_unbiased_enrichment.R. Nothing is
-computed here beyond formatting and a line count of the frozen arm files, which
-supplies the denominator each effective set size is read against.
+Draws one panel: the pre-ranked enrichment score of each mouse-derived up arm on the sorted
+JIA synovial-fluid-versus-paired-blood ranked list, in each of the three frozen sort labels.
+Every number on the panel is read from a committed table written by
+02_analysis/scripts/14_unbiased_enrichment.R. The work here is formatting plus a line count
+of the frozen arm files, which supplies the denominator each effective set size is read
+against.
 
-The panel sits on the confirmatory tier: donor-level pseudobulk within frozen
-sort labels, limma-voom moderated t, then pre-ranked fgsea. That is the only
-tier in this compartment that may support a claim, so the tier is stated on the
-figure face rather than left to a caption.
+The panel sits on the confirmatory tier: donor-level pseudobulk within frozen sort labels,
+limma-voom moderated t, then pre-ranked fgsea. That is the only tier in this compartment that
+may support a claim, so the tier is stated on the figure face.
 
 Two design constraints are load-bearing.
 
-NO ERROR BARS. A pre-ranked enrichment score carries no standard error and no
-interval, so whiskers here would be drawn from nothing. The geometry is an
-ordered dot plot with an aligned annotation column, and the annotation column
-carries the two numbers a reader needs to size each point: how many of the arm's
-genes reached that population's ranked list, and the adjusted p.
+NO ERROR BARS. A pre-ranked enrichment score carries no standard error and no interval, so
+whiskers here would be drawn from nothing. The geometry is an ordered dot plot with an
+aligned annotation column, and that column carries the two numbers a reader needs to size
+each point: how many of the arm's genes reached that population's ranked list, and the
+adjusted p.
 
-ONE MULTIPLE-TESTING FAMILY, NAMED. `gsea_all.csv` carries both a per-collection
-`padj` (three tests, the three mouse-derived arms) and a `padj_pooled` corrected
-across every set that population's sweep asked about (11,236 in Treg, 11,459 in
-Tcon, 11,242 in CD8). This panel uses `padj_pooled` throughout, the more
-conservative of the two, and names it in the column header. Both columns travel
-in the same-stem source table so the other family stays checkable.
+ONE MULTIPLE-TESTING FAMILY, NAMED. `gsea_all.csv` carries both a per-collection `padj`
+(three tests, the three mouse-derived arms) and a `padj_pooled` corrected across every set
+that population's sweep asked about (11,236 in Treg, 11,459 in Tcon, 11,242 in CD8). This
+panel uses `padj_pooled` throughout, the more conservative of the two, and names it in the
+column header. Both columns travel in the same-stem source table, keeping the other family
+checkable.
 
 Input  (03_results/14_unbiased_enrichment/tables/):
   gsea_all.csv                                     NES, both FDR families, set sizes
@@ -169,7 +168,7 @@ def plotted_rows() -> pd.DataFrame:
 def build_figure(rows: pd.DataFrame, fdr: float, width: float, height: float):
     """Ordered NES dot plot with an aligned annotation column. No intervals are drawn."""
     fig = plt.figure(figsize=(width, height))
-    # Explicit rectangles rather than a layout engine: the annotation column has to
+    # Explicit rectangles, in place of a layout engine: the annotation column has to
     # keep its rows aligned with the dots after the exporter fixes the canvas size.
     ax = fig.add_axes((0.075, 0.275, 0.415, 0.585))
     axt = fig.add_axes((0.535, 0.275, 0.455, 0.585), sharey=ax)

@@ -8,23 +8,22 @@
 # a set silently and the loss reads as biological absence. This script resolves that once
 # and writes the answer down.
 #
-# WHY A COMMITTED CSV RATHER THAN A LIVE LOOKUP. The map is a property of
-# (matrix vocabulary x org.Hs.eg.db release) and of nothing else — not of any one gene
-# set — so it is computed once here. Python cannot reach org.Hs.eg.db, and a subprocess
-# per call would load the database each time and leave nothing to inspect; hardcoding the
-# pairs in config would go stale without a diff. A committed CSV is auditable, is read
-# identically by R and Python, and moves only when someone regenerates it on purpose.
+# WHY A COMMITTED CSV. The map is a property of (matrix vocabulary x org.Hs.eg.db release)
+# and of nothing else, so it is computed once here. Python cannot reach org.Hs.eg.db, and a
+# subprocess per call would load the database each time and leave nothing to inspect.
+# Hardcoding the pairs in config would go stale without a diff. A committed CSV is auditable,
+# is read identically by R and Python, and moves when someone regenerates it on purpose.
 #
 # Rebuild when the matrix vocabulary changes, when org.Hs.eg.db moves, or when a
-# collection is added to `unbiased_enrichment:`. The provenance file records what the map
-# was built from so a stale map is visible rather than assumed.
+# collection is added to `unbiased_enrichment:`. The provenance file records what the map was
+# built from, which makes a stale map visible.
 #
 # Reads, read-only:
 #   02_analysis/config/analysis_config.yaml               symbol_alias + unbiased_enrichment
 #   03_results/03_pseudobulk/tables/gene_symbols.csv      the vocabulary resolved INTO
 #   the 11 declared reference collections, plus every frozen *.txt gene list this
 #   compartment reads (the projected mouse arms in both directions, the curated lenses,
-#   the SAVI axes, the eTreg sets)
+#   the reference interferon axes, the eTreg sets)
 #
 # Writes (committed assets, NOT stage results):
 #   00_data/references/symbol_alias/symbol_alias_map.csv
@@ -73,7 +72,7 @@ message("=================================================================")
 # symbol the count matrix carried BEFORE filterByExpr. Building the map against it rather
 # than against a ranked list keeps the map a property of the matrix: a pair whose target
 # is later dropped for low expression is then reported as expression-filtered, which is a
-# power statement about a contrast, not a vocabulary one.
+# power statement about a contrast.
 
 stopifnot(file.exists(VOCAB_CSV))
 MATRIX_SYMBOLS <- unique(readr::read_csv(VOCAB_CSV, show_col_types = FALSE)$gene_symbol)
@@ -204,7 +203,7 @@ print(as.data.frame(MAP %>%
 # ============================================================================
 # 4. Provenance — what the map was built from, so a stale map is visible
 # ============================================================================
-# The no-candidate counts live here rather than as rows in the map. A reference symbol
+# The no-candidate counts live here, outside the map's rows. A reference symbol
 # with no alias in this vocabulary is not a decision about a pair, and carrying thousands
 # of such rows would defeat the one review step this asset most needs: reading the map
 # cold and recognising every accepted pair as a nomenclature update.

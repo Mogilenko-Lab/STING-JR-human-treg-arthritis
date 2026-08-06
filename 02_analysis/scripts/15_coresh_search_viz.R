@@ -87,7 +87,7 @@ n_query_genes <- local({
 
 create_pctvar_overview <- function(d) {
   d <- copy(d)
-  ## Bar identity rides on the y AXIS, not on a geom_text at the bar tip: the top
+  ## Bar identity rides on the y AXIS, clear of the bar tip: the top
   ## bar of a free-scale panel reaches the panel edge, so an in-panel label is the
   ## one that gets clipped. An axis label gets its own gutter and cannot truncate.
   d[, row_id := paste(panel, sprintf("%02d", rank), sep = "|")]

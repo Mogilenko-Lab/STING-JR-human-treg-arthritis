@@ -7,7 +7,7 @@
 ## convention 00_data/references/msigdb_hallmark/ (same idiom as etreg_GSE161426/).
 ##
 ## The frozen sets and their roles:
-##   HALLMARK_HYPOXIA                    the niche co-exposure; the gene-purge reference
+##   HALLMARK_HYPOXIA                    the gene-purge reference for the mouse WT_heat sets
 ##   HALLMARK_UNFOLDED_PROTEIN_RESPONSE  ER-side proteostasis
 ##   HALLMARK_TNFA_SIGNALING_VIA_NFKB    inflammatory signalling arm
 ##   HALLMARK_INTERFERON_ALPHA_RESPONSE  type-I interferon arm (cGAS/STING-adjacent)
@@ -18,9 +18,9 @@
 ## v26.1.0 tidy table (new API: msigdbr(species=, collection=)). Symbols are written
 ## SORTED (deterministic, order-independent) so the frozen list is reproducible.
 ##
-## Each set carries a VALIDATED expected size: the script stops if the installed
-## msigdbr data drifts from the release these assets were frozen against, because a
-## silent size change would silently change every downstream set-intersection tally.
+## Each set carries a VALIDATED expected size: the script stops when the installed msigdbr
+## data drifts from the release these assets were frozen against, since a size change would
+## move every downstream set-intersection tally silently.
 ##
 ## Downstream: adata objects carry symbols in var['gene_symbol']; these lists route
 ## directly into score_cells_aucell_ucell for per-cell scoring, and into the mouse
@@ -98,7 +98,7 @@ writeLines(c(
   "",
   "| Set | n genes | Role in this compartment |",
   "|---|---|---|",
-  "| `HALLMARK_HYPOXIA` | 200 | niche co-exposure; the gene-purge reference for the mouse `WT_heat` sets |",
+  "| `HALLMARK_HYPOXIA` | 200 | the gene-purge reference for the mouse `WT_heat` sets |",
   "| `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` | 113 | ER-side proteostasis readout |",
   "| `HALLMARK_TNFA_SIGNALING_VIA_NFKB` | 200 | inflammatory-signalling decomposition arm |",
   "| `HALLMARK_INTERFERON_ALPHA_RESPONSE` | 97 | type-I interferon decomposition arm (cGAS/STING-adjacent) |",

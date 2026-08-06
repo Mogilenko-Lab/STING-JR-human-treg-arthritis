@@ -3,26 +3,25 @@
 11_heat_decomposition.py — COMPUTE ONLY. Where does each part of the mouse
 39 C-derived signature sit in each population's ranking?
 =========================================================================
-The JIA SF-vs-PB enrichment of the mouse 39 °C `WT_heat_up` set survives the
-hypoxia purge but is carried by 199 genes doing many different things. This stage
-splits those 199 (and the 94 down genes) into subcomponents defined by CURATED,
-VERSIONED, ANCHOR-INDEPENDENT gene sets, then scores every subcomponent against
-the same donor-pseudobulk ranked lists the whole signature was scored on. The
-question is which parts of the mouse program carry the synovial-fluid shift.
+The JIA SF-vs-PB enrichment of the mouse 39 °C `WT_heat_up` set survives the hypoxia purge and
+is carried by 199 genes doing many different things. This stage splits those 199 (and the 94
+down genes) into subcomponents defined by CURATED, VERSIONED, ANCHOR-INDEPENDENT gene sets,
+then scores every subcomponent against the same donor-pseudobulk ranked lists the whole
+signature was scored on. The question is which parts of the mouse program carry the
+synovial-fluid shift.
 
 Two design decisions are load-bearing:
 
-1. The partition uses curated MSigDB sets plus the frozen HSR core — never the
-   `WT_heat_up` leading-edge taxonomy. That taxonomy covers only the 66 genes
-   that are the union of the three populations' leading edges, so testing
-   subsets of it would test enrichment of genes selected because they enriched.
-   It is a post-hoc annotation of a result, not a partition of the signature.
-2. Subcomponents OVERLAP (a gene may sit in two curated programs) and are NOT
-   forced into a priority-ordered disjoint partition, because any priority order
-   is an extra assumption that would silently decide which program gets credit
-   for a shared gene. `decomposition_gene_assignment.csv` records every gene's
-   full membership so the sharing is auditable, and the subset of each mouse arm
-   that no curated set claims is reported as its own `unassigned` subcomponent.
+1. The partition uses curated MSigDB sets plus the frozen HSR core, keeping the
+   `WT_heat_up` leading-edge taxonomy out of it. That taxonomy covers the 66 genes that are
+   the union of the three populations' leading edges, so testing subsets of it would test
+   enrichment of genes selected because they enriched. It is a post-hoc annotation of a
+   result.
+2. Subcomponents OVERLAP — a gene may sit in two curated programs — and the overlap is kept.
+   Any priority-ordered disjoint partition is an extra assumption that silently decides which
+   program gets credit for a shared gene. `decomposition_gene_assignment.csv` records every
+   gene's full membership so the sharing is auditable, and the subset of each mouse arm that
+   no curated set claims is reported as its own `unassigned` subcomponent.
 
 Inputs:
   - 03_results/09_heat_hypoxia/tables/_signatures_full/WT_heat_{up,down}.txt
@@ -40,17 +39,16 @@ Outputs (all under 03_results/11_heat_decomposition/tables/):
   - decomposition_nes.csv
   - sting_axis_overlap.csv
 
-Tier note: SECONDARY / annotation tier, firewalled from the confirmatory
-`WT_heat` claim spine. No row is written to effect_sizes_treg_arthritis.csv and
-no row is appended to any 03_results/master/ accumulator.
+Tier note: SECONDARY / annotation tier, firewalled from the confirmatory `WT_heat` claim
+spine. No row is written to effect_sizes_treg_arthritis.csv and no row is appended to any
+03_results/master/ accumulator.
 
-Size floor: a subcomponent whose testable size (its intersection with a ranked
-list) falls below `gsea_min_size` gets NO NES. It is reported as untestable WITH
-its size and the reason, never silently dropped — silent truncation would read as
-full coverage.
+Size floor: a subcomponent whose testable size (its intersection with a ranked list) falls
+below `gsea_min_size` gets NO NES. It is reported as untestable WITH its size and the reason,
+since silent truncation would read as full coverage.
 
-Sign convention: NES > 0 means the subcomponent is enriched toward genes up in
-synovial fluid versus paired peripheral blood.
+Sign convention: NES > 0 means the subcomponent is enriched toward genes up in synovial fluid
+versus paired peripheral blood.
 """
 from __future__ import annotations
 
@@ -96,7 +94,7 @@ STING_SIG_LABEL = "de_Cevins_sting_specific_up"
 
 # The curated presumptions. Each is a versioned, anchor-independent public gene set;
 # the mouse signature knows nothing about any of them, so an intersection is a genuine
-# partition of the signature rather than a restatement of a result.
+# partition of the signature, independent of any result.
 PROGRAMS: list[tuple[str, str, Path, str]] = [
     ("hsr_curated", "HSR_core", HSR_DIR / "HSR_core.txt",
      "curated heat-shock-response core, Reactome/GO-derived"),
@@ -140,7 +138,7 @@ def read_gene_list(path: Path) -> list[str]:
 
 
 def write_gene_list(path: Path, genes: Iterable[str]) -> None:
-    """One symbol per line. An empty part writes a genuinely empty file, not a blank line."""
+    """One symbol per line. An empty part writes a genuinely empty file, zero bytes."""
     path.parent.mkdir(parents=True, exist_ok=True)
     listed = list(genes)
     path.write_text("\n".join(listed) + "\n" if listed else "")
@@ -266,8 +264,7 @@ def assignment_multiplicity(tables_dir: Path, assignment: pd.DataFrame) -> pd.Da
     assignment, and therefore how many more claims exist than claimed genes. Summing
     the bars double-counts exactly that excess.
 
-    Computed here rather than in the viz script so the number the figure prints is
-    read from a committed table instead of derived at draw time.
+    Computed here, so the number the figure prints is read from a committed table.
     """
     rows = []
     for arm in ARMS:
@@ -402,7 +399,7 @@ def decomposition_nes(tables_dir: Path, sig_dir: Path,
 
 
 # ===========================================================================
-# 3. The cGAS/STING axis — a tally, never an arm
+# 3. The cGAS/STING axis — carried as a tally
 # ===========================================================================
 def sting_axis_overlap(tables_dir: Path, arms: dict[str, list[str]],
                        curated: dict[str, set[str]]) -> pd.DataFrame:

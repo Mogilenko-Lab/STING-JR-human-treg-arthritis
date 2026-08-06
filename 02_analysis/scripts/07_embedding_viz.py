@@ -2,13 +2,12 @@
 """
 07_embedding_viz.py — VIZ (no statistics). Treg-compartment embedding atlas.
 ============================================================================
-Renders the multi-hook HARVEST-DESIGN preview — "show the
-various signatures we are drafting for and where they land on their own and
-where they land under OR condition" — from the substrate written by
-`07_embedding.py`. These are SUPPLEMENTARY / VISUALISATION figures: embeddings
-are annotation/visualisation ONLY, never the statistical readout (umbrella
-guardrail). The mouse `WT_heat` anchor score appears as an ANNOTATION overlay,
-NOT as a selection gate. No cells are lassoed/subset here.
+Renders the multi-hook HARVEST-DESIGN preview — show the various signatures being drafted
+for, where each lands on its own, and where they land under the OR condition — from the
+substrate written by `07_embedding.py`. These are SUPPLEMENTARY / VISUALISATION figures:
+embeddings are annotation/visualisation ONLY, and the statistical readout lives in the
+confirmatory spine (umbrella guardrail). The mouse `WT_heat` anchor score appears as an
+ANNOTATION overlay, keeping it out of every selection gate. Cells stay in place here.
 
 Figures (each PDF+PNG + same-stem source table + README caption, via save_overview).
 They render in the canonical drafted-subset order — annotation overview →
@@ -87,18 +86,32 @@ PT = 2.0            # scatter point size (dense embedding)
 CMAP = "viridis"    # perceptually-uniform continuous colormap
 
 
-def _scatter_cont(ax, d, col, title):
-    """Continuous overlay on the UMAP, robustly clipped to 2-98th percentile."""
+def _scatter_cont(ax, d, col, title, vlim=None, colorbar=True):
+    """Continuous overlay on the UMAP, robustly clipped to 2-98th percentile.
+
+    `vlim` hands the limits in. Gene panels pass a clip pooled over every gene drawn — one
+    quantity, so separate clips would have a reader compare two different scales.
+    `colorbar=False` where the figure hangs one shared bar instead.
+    """
     v = d[col].to_numpy(dtype=float)
-    lo, hi = np.nanpercentile(v, [2, 98])
+    lo, hi = vlim if vlim is not None else np.nanpercentile(v, [2, 98])
     order = np.argsort(v)  # draw high-value cells on top
     sc = ax.scatter(d["x"].to_numpy()[order], d["y"].to_numpy()[order],
                     c=v[order], s=PT, cmap=CMAP, vmin=lo, vmax=hi,
                     linewidths=0, rasterized=True)
     ax.set_title(title)
     ax.set_xticks([]); ax.set_yticks([])
-    cb = ax.figure.colorbar(sc, ax=ax, fraction=0.046, pad=0.02)
-    cb.ax.tick_params(labelsize=8)
+    if colorbar:
+        cb = ax.figure.colorbar(sc, ax=ax, fraction=0.046, pad=0.02)
+        cb.ax.tick_params(labelsize=8)
+    return sc
+
+
+def _pooled_clip(d, cols):
+    """One 2-98th percentile clip over the columns pooled, for same-unit panels."""
+    pooled = np.concatenate([d[c].to_numpy(dtype=float) for c in cols])
+    lo, hi = np.nanpercentile(pooled, [2, 98])
+    return float(lo), float(hi)
 
 
 def _scatter_cat(ax, d, col, palette, title, order=None, legend=True):
@@ -165,10 +178,15 @@ def main() -> None:
     #    pct_counts_mt + FOXP3 / CTLA4 / IKZF2 (core Treg identity axis).   #
     # ================================================================== #
     fig, axes = plt.subplots(2, 2, figsize=(13, 11))
+    # One clip over the three genes so they compare; %mt is a different quantity, own clip.
+    quad_clip = _pooled_clip(d, QUAD_GENES)
     _scatter_cont(axes[0, 0], d, "pct_counts_mt", "Mitochondrial fraction (pct_counts_mt)")
-    _scatter_cont(axes[0, 1], d, QUAD_GENES[0], f"{QUAD_GENES[0]} (Treg-lineage TF)")
-    _scatter_cont(axes[1, 0], d, QUAD_GENES[1], f"{QUAD_GENES[1]} (suppressive effector)")
-    _scatter_cont(axes[1, 1], d, QUAD_GENES[2], f"{QUAD_GENES[2]} / Helios (stable-Treg identity)")
+    _scatter_cont(axes[0, 1], d, QUAD_GENES[0], f"{QUAD_GENES[0]} (Treg-lineage TF)",
+                  vlim=quad_clip)
+    _scatter_cont(axes[1, 0], d, QUAD_GENES[1], f"{QUAD_GENES[1]} (suppressive effector)",
+                  vlim=quad_clip)
+    _scatter_cont(axes[1, 1], d, QUAD_GENES[2],
+                  f"{QUAD_GENES[2]} / Helios (stable-Treg identity)", vlim=quad_clip)
     fig.suptitle("Context markers on the sorted T-cell UMAP — %mt + core Treg identity/activation genes"
                  " (FOXP3 / CTLA4 / IKZF2)", fontsize=15)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
@@ -194,11 +212,15 @@ def main() -> None:
                  "compartment; %mt anchors QC/viability context. VISUALISATION only."),
         script=SCRIPT, fn="main",
         config_kv=(f"channels: pct_counts_mt + {', '.join(QUAD_GENES)}; continuous viridis, clipped "
-                   "2-98th pct; genes = core Treg identity/activation (FOXP3 TF, CTLA4 effector, "
-                   "IKZF2/Helios stable-Treg)"),
+                   "2-98th pct; ONE pooled clip over the three genes, pct_counts_mt on its own as "
+                   "a different quantity; genes = core Treg identity/activation (FOXP3 TF, CTLA4 "
+                   "effector, IKZF2/Helios stable-Treg)"),
         input="03_results/07_embedding/tables/hook_factor_substrate.parquet",
-        how_to_read=("Four continuous panels (viridis, clipped 2-98th pct, high on top): top-left is "
-                     "mitochondrial fraction (QC/viability context); the other three are the canonical "
+        how_to_read=("Four continuous panels (viridis, high on top): top-left is "
+                     "mitochondrial fraction (QC/viability context), on its own clip because a "
+                     "percentage is not expression; the three gene panels share ONE clip, the "
+                     "2-98th percentile pooled over them, so their brightness compares. They are "
+                     "the canonical "
                      "Treg genes — FOXP3 and CTLA4 concentrate on the Treg gate, IKZF2/Helios marks the "
                      "stable/thymic-Treg fraction. Read as the marker context the drafted subset is "
                      "designed against. Source table = per-lineage median values (+ frac expressing for "
@@ -278,11 +300,17 @@ def main() -> None:
     markers = ["FOXP3", "IL2RA", "CTLA4", "IKZF2", "CD8A", "IL7R"]
     fig, axes = plt.subplots(2, 4, figsize=(20, 10))
     axf = axes.ravel()
+    # One clip and one bar: on separate clips IKZF2 (0-1.88) and IL7R (0-3.87) look alike.
+    marker_clip = _pooled_clip(d, markers)
+    sc = None
     for ax, gene in zip(axf, markers):
-        _scatter_cont(ax, d, gene, gene)
+        sc = _scatter_cont(ax, d, gene, gene, vlim=marker_clip, colorbar=False)
     _scatter_cat(axf[6], d, "coarse_label", LINEAGE_COL,
                  "Sort lineage (reference)", order=["Treg", "Tcon", "CD8"])
     axf[7].axis("off")
+    cb = fig.colorbar(sc, ax=axf[7], fraction=0.30, pad=0.02)
+    cb.set_label("log-normalised expression", fontsize=11)
+    cb.ax.tick_params(labelsize=9)
     fig.suptitle("POI lineage markers on the sorted T-cell UMAP (curated, anchor-orthogonal hooks)",
                  fontsize=16)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
@@ -293,10 +321,14 @@ def main() -> None:
                  "define the anchor-orthogonal lineage/marker hooks, next to the frozen sort-lineage "
                  "reference — confirming the hooks track real lineage biology, not the anchor score."),
         script=SCRIPT, fn="main",
-        config_kv="markers: FOXP3, IL2RA, CTLA4, IKZF2, CD8A, IL7R; cmap=viridis (log-norm expression)",
+        config_kv=("markers: FOXP3, IL2RA, CTLA4, IKZF2, CD8A, IL7R; cmap=viridis (log-norm "
+                   "expression); ONE pooled 2-98th clip over all six genes, one shared bar"),
         input="03_results/07_embedding/tables/hook_factor_substrate.parquet",
         how_to_read=("Each panel colours cells by one marker's log-normalised expression (viridis, "
-                     "clipped 2-98th pct); last panel is the frozen sort lineage. Read as: the Treg-"
+                     "high on top); last panel is the frozen sort lineage. All six genes share ONE "
+                     "clip, the 2-98th percentile pooled over the six, and one bar, so brightness "
+                     "compares between the genes as well as within one — on separate clips IKZF2 "
+                     "at 0-1.88 and IL7R at 0-3.87 would look alike. Read as: the Treg-"
                      "identity markers concentrate on the Treg gate, CD8A on CD8, IL7R on conventional "
                      "T — the curated hooks are lineage-faithful and independent of the anchor score. "
                      "Source table = per-lineage median expression + fraction expressing. Correlative."),

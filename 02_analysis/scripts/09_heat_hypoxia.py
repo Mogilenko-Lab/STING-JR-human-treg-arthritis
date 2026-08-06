@@ -45,7 +45,7 @@ HYPOXIA_PATH = Path("00_data/references/msigdb_hallmark/HALLMARK_HYPOXIA.txt")
 # This matrix carries hg19-era HGNC symbols and the frozen sets ship current ones, so the
 # fgsea call is given the committed resolution between the two. The PURGE itself needs no
 # resolution: it intersects the arm with HALLMARK_HYPOXIA and both are current-symbol, so
-# what the map moves here is the tested size of a purged arm, never its membership.
+# what the map moves here is the tested size of a purged arm, leaving membership fixed.
 ALIAS_MAP_PATH = CONFIG["symbol_alias"]["map_path"]
 
 # Leading-edge gene taxonomy: a frozen, provenance-stamped classification of the

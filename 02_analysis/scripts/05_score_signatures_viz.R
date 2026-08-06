@@ -4,10 +4,10 @@
 # Drives the CANONICAL RNAseq-toolkit running-sum plotter
 # (01_modules/RNAseq-toolkit/scripts/GSEA/GSEA_plotting/gsea_running_sum_plot.R)
 # off the clusterProfiler `gseaResult` S4 objects written by the compute step
-# (helpers/fgsea_prerank.R -> gsea_pseudobulk_{tag}.rds). The plotter overlays
-# N gene SETS from ONE ranked list, so we emit ONE figure PER POPULATION, each
-# overlaying WT_heat_up AND WT_heat_down. (The retired hand-rolled 3-population
-# single-axis ggplot is gone: it cannot mix a set-overlay with a pop-overlay.)
+# (helpers/fgsea_prerank.R -> gsea_pseudobulk_{tag}.rds). The plotter overlays N gene SETS from
+# ONE ranked list, so this stage emits ONE figure PER POPULATION, each overlaying WT_heat_up
+# AND WT_heat_down. The retired hand-rolled 3-population single-axis ggplot is gone, since one
+# axis can carry a set-overlay or a pop-overlay and not both.
 #
 # Input  (03_results/05_scoring/tables/):
 #   gsea_pseudobulk_{treg,tcon,cd8}.rds   ← clusterProfiler gseaResult S4
@@ -52,7 +52,7 @@ SET_PAL <- c("WT_heat up" = "#A6611A", "WT_heat down" = "#2166AC")
 #' ALPHABETICALLY — "WT_heat down" precedes "WT_heat up" — so a positional
 #' palette in GENE_SETS order put brown on the down curve. The `labels` lookup
 #' is named, so the legend TEXT stayed correct while the colours swapped, and it
-#' read as a deliberate bad choice rather than a bug.
+#' read as a deliberate bad choice.
 #'
 #' The toolkit now re-keys the palette to the plotted label itself and owns the
 #' scale (RNAseq-toolkit `fix(GSEA): key running-sum palette by plotted label`),
@@ -70,7 +70,7 @@ apply_set_palette <- function(p, ids, labs) {
                                     name = NULL))
 }
 
-#' Nominal size of each frozen mouse arm — a line count, not a statistic.
+#' Nominal size of each frozen mouse arm — a line count over the frozen file.
 #'
 #' An effective set size only means something against the nominal one, so the
 #' legend carries both. Read from the frozen mouse->human projection contract that
@@ -110,7 +110,7 @@ if (exists("purge_figures"))
 #' holds one population. The retired caption quoted all three populations' NES from
 #' the dot plot's table instead, which made a three-population claim from a
 #' one-population panel; the cross-population comparison belongs on the dot plot
-#' and this caption points there rather than restating it.
+#' and this caption points there.
 finding_for <- function(pop, tbl, nominal) {
   parts <- vapply(seq_len(nrow(tbl)), function(i) {
     r <- tbl[i, ]
@@ -168,7 +168,7 @@ for (pop in names(POP_TAG)) {
   # Effective set size travels with every NES, on the FACE. The legend label is the
   # only string on this plot wide enough to hold it, and the toolkit wraps labels
   # only past `max_name_length`, so the limit is raised past the longest label
-  # rather than left to truncate one.
+  # so no label truncates.
   labs <- stats::setNames(
     vapply(ids, function(id) {
       r <- tbl[tbl$ID == id, ][1, ]

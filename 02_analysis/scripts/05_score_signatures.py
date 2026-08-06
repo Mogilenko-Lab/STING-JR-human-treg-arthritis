@@ -74,7 +74,7 @@ def effect_size_signoff_state() -> str:
 
 def run_fgsea(ranked_path: Path, out_csv: Path, contrast: str, sig_dir: Path) -> pd.DataFrame:
     # The alias map travels with the call, so each set is matched against this matrix's own
-    # symbol vintage instead of by exact string against current HGNC. It only ever adds:
+    # symbol vintage, in place of an exact string match against current HGNC. It only adds:
     # WT_heat_up gains nothing, WT_heat_down gains CRACR2A -> EFCAB4B and CYSRT1 -> C9orf169.
     cmd = [
         "Rscript", FGSEA_R, str(ranked_path), str(out_csv), contrast,
@@ -117,7 +117,7 @@ def main() -> None:
     )
     # The arms arrive in current HGNC symbols and this object's var carries the hg19-era
     # vintage, so they are resolved into the object's own vocabulary before anything is
-    # scored. The applied pairs are printed rather than silently absorbed: a coverage count
+    # scored. The applied pairs are printed on every run: a coverage count
     # that moved needs a reason attached to it.
     alias_map = load_alias_map(ALIAS_MAP_PATH)
     sig = load_signature(PATHS.signature_contract, PRIMARY, alias_map,
@@ -171,7 +171,7 @@ def main() -> None:
             # gene-set COLLECTION name. append_master_table treats `database` as the key
             # naming the rows THIS CALL owns, and dedupes by comparing that argument
             # against the column. While the two disagreed the filter matched nothing, so
-            # every run appended a fresh copy instead of replacing the previous one and
+            # every run appended a fresh copy in place of replacing the previous one, and
             # the accumulator grew without bound. The column is therefore set to the
             # per-call owner key before appending, which is the convention 10_hsr_lens.py
             # already uses on this same accumulator. The collection name is kept in this

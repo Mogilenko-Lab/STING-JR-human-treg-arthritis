@@ -2,58 +2,54 @@
 """
 16_narrative_scoring.py — COMPUTE ONLY (no plotting).
 =============================================================================
-Builds ONE per-cell substrate that can colour the frozen JIA embedding by an
-empirical mouse-derived up arm and by a curated program lens, so the two
-colourings can be read side by side on the same map.
+Builds ONE per-cell substrate that can colour the frozen JIA embedding by an empirical
+mouse-derived up arm and by a curated program lens, so the two colourings read side by side
+on the same map.
 
-SCOPE AND TIER. This is SECONDARY / annotation tier. Nothing here is pooled with
-the donor-pseudobulk NES spine and no row is written to
-`03_results/master/effect_sizes_treg_arthritis.csv`. A per-cell score localises a
-program on a map; it does not test it. Confirmatory claims stay with donor-level
+SCOPE AND TIER. SECONDARY / annotation tier. Nothing here is pooled with the donor-pseudobulk
+NES spine and no row is written to `03_results/master/effect_sizes_treg_arthritis.csv`. A
+per-cell score localises a program on a map. Confirmatory claims stay with donor-level
 pseudobulk differential expression.
 
 ONE METRIC: AUCell. The project computes both AUCell and UCell elsewhere
-(`helpers/geneset_utils.score_cells_aucell_ucell`). This stage ships **AUCell
-only** — a single metric so that two colourings of the same map differ by gene
-set and by nothing else. UCell is computed as a by-product of the shared scorer
-and is dropped before the substrate is written.
+(`helpers/geneset_utils.score_cells_aucell_ucell`). This stage ships **AUCell only**, a
+single metric so two colourings of the same map differ by gene set alone. UCell arrives as a
+by-product of the shared scorer and is dropped before the substrate is written.
 
-THIRTEEN GENE SETS, UP ARMS ONLY. Four mouse-derived human-projected up arms and
-nine curated, anchor-independent program lenses (see `MOUSE_ARMS` / `CURATED`).
-Down arms are deliberately absent: they are not scored, not carried, and not
-named. A per-cell colouring answers "where on this map is this program high",
-and a down arm inverted onto that question reads as an absence, which a
-continuous colour scale cannot show honestly.
+FOURTEEN GENE SETS, UP ARMS ONLY. Four mouse-derived human-projected up arms, nine curated
+anchor-independent program lenses, and one project-derived anchor-independent lens (see
+`MOUSE_ARMS` / `CURATED` / `DERIVED`). The third kind exists because `eTreg_up` is
+anchor-independent but not curated or versioned, and the manifest must say so. Down arms sit
+outside this stage: unscored, uncarried, unnamed. A per-cell colouring answers "where on this
+map is this program high", and a down arm inverted onto that question reads as an absence,
+which a continuous colour scale renders poorly.
 
-THE EMBEDDING IS NOT RECOMPUTED. `barcode, x, y, coarse_label, tissue, donor,
+THE EMBEDDING IS REUSED AS PUBLISHED. `barcode, x, y, coarse_label, tissue, donor,
 pct_counts_mt` are taken verbatim from the published per-cell readout
-`03_results/interactive/08_harvest_readout.parquet` so this substrate lands on
-exactly the map the published figures use. Three already-published score columns
-ride along under a `published_` prefix so the notebook needs one file, not two.
+`03_results/interactive/08_harvest_readout.parquet`, so this substrate lands on exactly the
+map the published figures use. Three already-published score columns ride along under a
+`published_` prefix, keeping the notebook on one file.
 
-PROVENANCE SEAM GUARD — an in-run assertion, not a published artifact. Three of
-the sets scored here already have a per-cell column in the published readout, so
-re-deriving them is a scale check on this whole substrate. Recomputing AUCell over
-the same matrix with the same gene set is deterministic, so the guard demands
-r = 1.000000 to within SEAM_R_EXACT on every same-metric row and halts the run
-otherwise. It carries no biological reading, so it is asserted and printed here
-rather than written into `03_results/` as a table or a figure.
+PROVENANCE SEAM GUARD — an in-run assertion, not a published artifact. Three of the sets
+scored here already have a per-cell column in the published readout, so re-deriving them is a
+scale check on this whole substrate. Recomputing AUCell over the same matrix with the same
+gene set is deterministic, so the guard demands r = 1.000000 to within SEAM_R_EXACT on every
+same-metric row and halts the run otherwise. It carries no biological reading, so it is
+asserted and printed here and stays out of `03_results/`.
 
-  * `HALLMARK_HYPOXIA` and `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` reproduce the
-    published AUCell columns at r = 1.000000. The scorer is bit-for-bit stable.
-  * `published_WT_heat_up` reproduces at only r ~ 0.755, because that column is
-    **not AUCell**. It is a stale mean-centred scanpy `score_genes` module score,
-    carried verbatim into the published readout from `05_gonogo_explore.parquet`,
-    which predates the migration of stage 05 to AUCell. Its values run negative
-    (min -0.154, mean -0.052); AUCell is bounded in [0, 1]. That row is the one
-    `cross_metric` comparison and is exempt from the guard by construction.
+  * `HALLMARK_HYPOXIA` and `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` reproduce the published
+    AUCell columns at r = 1.000000. The scorer is bit-for-bit stable.
+  * `published_WT_heat_up` reproduces at r ~ 0.755, because that column holds a stale
+    mean-centred scanpy `score_genes` module score rather than AUCell, carried verbatim into
+    the published readout from `05_gonogo_explore.parquet`, which predates the migration of
+    stage 05 to AUCell. Its values run negative (min -0.154, mean -0.052) where AUCell is
+    bounded in [0, 1]. That row is the one `cross_metric` comparison and is exempt from the
+    guard by construction.
 
 A fourth row compares the newly scored `WT_heat_up_AUCell` against stage 05's
-`per_cell_scores.csv` — the apples-to-apples anchor for the mouse arm, which does
-reproduce at r = 1.000000, and which the guard therefore holds to. **Colour the
-mouse up arm with `WT_heat_up_AUCell`, never with `published_WT_heat_up`.** The
-stale column is carried only so the discrepancy stays visible rather than being
-quietly dropped.
+`per_cell_scores.csv`, the apples-to-apples anchor for the mouse arm. It reproduces at
+r = 1.000000, and the guard holds it there. **Colour the mouse up arm with
+`WT_heat_up_AUCell`.** The stale column is carried so the discrepancy stays visible.
 
 Outputs:
   03_results/interactive/16_narrative_embedding.parquet             (per-cell substrate)
@@ -109,6 +105,7 @@ _MOUSE_SIG_DIR = REPO_ROOT / "mouse_anchor/03_results/human_projection/signature
 _HALLMARK_DIR = COMPARTMENT_ROOT / "00_data/references/msigdb_hallmark"
 _HSR_DIR = COMPARTMENT_ROOT / "00_data/references/temp_hsr_lens"
 _STING_SIG_DIR = REPO_ROOT / "sting_positive_control/03_results/06_reference_axis/signatures"
+_ETREG_DIR = COMPARTMENT_ROOT / "00_data/references/etreg_GSE161426"
 
 # --- the four mouse-derived, human-projected UP arms (empirical; anchor-dependent) ---
 MOUSE_ARMS = {
@@ -131,12 +128,21 @@ CURATED = {
     "ifn_generic_axis": _STING_SIG_DIR / "ifn_only_up.txt",
 }
 
+# --- the one project-derived lens: anchor-independent, but NOT curated or versioned ---
+# eTreg_up is this compartment's own SF-vs-PB Treg contrast on the GSE161426 log2
+# supplementary matrix (Welch t, n = 4 against 14, |log2FC| >= 1 & p < 0.05, capped at 200).
+# It carries its own kind so a figure cannot present it as a curated set.
+DERIVED = {
+    "eTreg_up": _ETREG_DIR / "eTreg_up.txt",
+}
+
 # Expected nominal set sizes — reproduction checks, NOT targets. A disagreement is
-# reported and raised, never reconciled to.
+# reported and raised for inspection.
 EXPECTED_SIZES = {
     "WT_heat_up": 202, "KO_heat_up": 221, "Interaction_up": 7,
     "Interaction_fdrOnly_up": 19, "HSR_core": 56,
     "sting_specific_published": 21, "ifn_generic_axis": 200,
+    "eTreg_up": 200,
 }
 EXPECTED_N_CELLS = 99_915
 
@@ -149,7 +155,7 @@ GATE_UNDERPOWERED = 5
 # misleading. SEAM_R_EXACT is the strict one: recomputing AUCell over the same matrix with
 # the same gene set is deterministic, and both same-metric references land at r = 1.0
 # exactly, so a same-metric row that misses 1.0 by more than this tolerance is a real change
-# in the scorer rather than float noise, and the run must stop on it.
+# in the scorer, beyond float noise, and the run must stop on it.
 SEAM_R_FLOOR = 0.98
 SEAM_R_EXACT = 1e-6
 
@@ -171,11 +177,12 @@ def assign_gate(n_found: int) -> str:
 
 
 def load_gene_sets() -> tuple[dict[str, list[str]], dict[str, str], dict[str, Path]]:
-    """Load all 13 sets, returning {name: genes}, {name: kind}, {name: source_path}."""
+    """Load all 14 sets, returning {name: genes}, {name: kind}, {name: source_path}."""
     gene_sets: dict[str, list[str]] = {}
     kinds: dict[str, str] = {}
     sources: dict[str, Path] = {}
-    for kind, spec in (("mouse_derived_arm", MOUSE_ARMS), ("curated_lens", CURATED)):
+    for kind, spec in (("mouse_derived_arm", MOUSE_ARMS), ("curated_lens", CURATED),
+                       ("project_derived_lens", DERIVED)):
         for name, path in spec.items():
             gene_sets[name] = read_gene_list(path)
             kinds[name] = kind
@@ -245,14 +252,14 @@ def build_manifest(gene_sets, kinds, sources, sym_to_var) -> pd.DataFrame:
             metric=METRIC,
             gate=assign_gate(n_found),
         ))
-    order = {"mouse_derived_arm": 0, "curated_lens": 1}
+    order = {"mouse_derived_arm": 0, "curated_lens": 1, "project_derived_lens": 2}
     return (pd.DataFrame(rows)
             .sort_values(["kind", "set_name"], key=lambda s: s.map(order) if s.name == "kind" else s)
             .reset_index(drop=True))
 
 
 def build_substrate(pub: pd.DataFrame, auc: pd.DataFrame) -> pd.DataFrame:
-    """The one per-cell substrate: the published embedding + the 13 new AUCell columns +
+    """The one per-cell substrate: the published embedding + the 14 new AUCell columns +
     the three carried-forward published columns. Row order follows the published readout
     so the substrate and the published figures index the same cells identically."""
     df = pub[EMBEDDING_COLS].copy()
@@ -394,7 +401,7 @@ def main() -> None:
     print(f"[{STAGE}] annotation object: {adata.n_obs} cells x {adata.n_vars} genes")
     check_barcode_coverage(pd.Index(adata.obs_names.astype(str)), pd.Index(pub.index))
 
-    # Resolved into this object's symbol vintage here rather than in load_gene_sets(),
+    # Resolved into this object's symbol vintage here, downstream of load_gene_sets(),
     # whose EXPECTED_SIZES check is a fact about the source files and must stay a check on
     # them. Where the sets meet the matrix is where the vintage matters, and the gate band
     # below is read off `n_genes_found_in_object`, so an unresolved count would understate
@@ -415,7 +422,7 @@ def main() -> None:
         print(thin[["set_name", "n_genes_in_set", "n_genes_found_in_object", "gate"]]
               .to_string(index=False))
 
-    # --- score all 13 sets in one scorer call, then keep AUCell only ---
+    # --- score all 14 sets in one scorer call, then keep AUCell only ---
     print(f"[{STAGE}] scoring {len(gene_sets)} sets on log-normalised X "
           f"(n_cores={n_cores}) ...")
     scores = score_cells_aucell_ucell(adata, gene_sets, layer=None,

@@ -1,38 +1,33 @@
 #!/usr/bin/env Rscript
 # 14_unbiased_enrichment_viz.R — VIZ (no statistics)
 # =============================================================================
-# Reads the tables 14_unbiased_enrichment.R wrote and renders three figures. It
-# computes nothing: every number on every panel is read from a CSV, and each
-# figure's source table is written as its same-stem neighbour so a reader can
-# check the panel against the numbers behind it.
+# Reads the tables 14_unbiased_enrichment.R wrote and renders three figures. Every number on
+# every panel comes from a CSV, and each figure's source table is written as its same-stem
+# neighbour, so a reader can check the panel against the numbers behind it.
 #
-# The three panels answer three different questions, which is why there are three
-# and not one:
+# The three panels answer three different questions:
 #   pooled_overview_by_population  How much of the curated universe moves with the
-#       synovial-fluid side of this contrast, collection by collection, and where do
-#       the mouse-derived arms sit inside that distribution? This is the calibration
-#       panel — the one that says whether the mouse-derived enrichment is
-#       distinctive or ordinary.
-#   treg_top_sets                  In the Treg compartment specifically, WHICH sets
-#       are strongest in each direction, named in full.
-#   progeny_activity_panel         The same contrast read by a method that uses no
-#       gene-set list at all, so the answer does not inherit set-size and curation
-#       choices.
+#       synovial-fluid side of this contrast, collection by collection, and where do the
+#       mouse-derived arms sit inside that distribution? This is the calibration panel, the
+#       one that says whether the mouse-derived enrichment is distinctive or ordinary.
+#   treg_top_sets                  In the Treg compartment specifically, WHICH sets are
+#       strongest in each direction, named in full.
+#   progeny_activity_panel         The same contrast read by a method that needs no gene-set
+#       list, keeping the answer clear of set-size and curation choices.
 #
-# READABILITY IS A REQUIREMENT HERE, NOT A NICETY. The equivalent mouse panel
-# stacked fourteen sub-panels into one column and clipped its own title, which made
-# it unreadable at half width. Every choice below is a reaction to a real failure
-# seen in a rendered draft of this stage:
-#   * populations go SIDE BY SIDE on one shared row axis, never stacked;
-#   * MSigDB identifiers carry no spaces, so str_wrap alone cannot break them —
-#     underscores are turned into spaces BEFORE wrapping. Nothing is truncated;
-#   * a count that differs per population is annotated INSIDE each panel, because a
-#     shared y-axis label can only carry a number summed over panels, and that
-#     number would be wrong for every panel it sits beside;
-#   * the three mouse-derived arms get one row EACH rather than three labels repelled
-#     off one row, which is what collided and overran the panel edge in the draft;
-#   * titles, subtitles and captions are hard-wrapped, because a long single-line
-#     subtitle is silently clipped at the canvas edge.
+# READABILITY IS A REQUIREMENT HERE. The equivalent mouse panel stacked fourteen sub-panels
+# into one column and clipped its own title, which made it unreadable at half width. Every
+# choice below reacts to a real failure seen in a rendered draft of this stage:
+#   * populations go SIDE BY SIDE on one shared row axis;
+#   * MSigDB identifiers carry no spaces, which leaves str_wrap nothing to break on, so
+#     underscores become spaces BEFORE wrapping and every name stays whole;
+#   * a count that differs per population is annotated INSIDE each panel, since a shared
+#     y-axis label can carry only a number summed over panels, and that number would be
+#     wrong for every panel it sits beside;
+#   * the three mouse-derived arms get one row EACH, in place of three labels repelled off
+#     one row, which is what collided and overran the panel edge in the draft;
+#   * titles, subtitles and captions are hard-wrapped, since a long single-line subtitle is
+#     silently clipped at the canvas edge.
 #
 # Input  (03_results/14_unbiased_enrichment/tables/):
 #   gsea_all.csv, gsea_pooled_summary_by_db.csv, progeny_activity.csv,
@@ -112,7 +107,7 @@ if (exists("purge_figures"))
 # FIGURE 1 — pooled_overview_by_population
 # =============================================================================
 ## One row per collection, one COLUMN per sorted population, so the eye compares
-## populations horizontally along a shared row axis instead of scrolling a
+## populations horizontally along a shared row axis, in place of scrolling a
 ## fourteen-panel stack. Each collection row is the NES distribution of its
 ## pooled-significant sets. The three mouse-derived arms are lifted out onto rows of
 ## their OWN, one arm each, so a reader can see at a glance whether an arm sits at
@@ -138,7 +133,7 @@ arms <- sweep |>
                 survives = padj_pooled < FDR)
 
 ## The count that matters differs per population, so it is annotated INSIDE each
-## panel rather than on the shared axis label. Collection rows carry "significant of
+## panel, where the shared axis label can carry only one number. Collection rows carry "significant of
 ## tested"; the arm rows carry their own NES and pooled FDR, which is the number a
 ## reader wants for a single set.
 ann_db <- by_db |>
@@ -146,7 +141,7 @@ ann_db <- by_db |>
   dplyr::transmute(population = factor(population, levels = POP_LEVELS),
                    row = factor(database, levels = ROW_LEVELS),
                    label = sprintf("%d of %d", sig_pooled, n_tests_in_db))
-## Two lines, not one: a single "NES +1.47, FDR 0.235" ran past the annotation gutter
+## Two lines: a single "NES +1.47, FDR 0.235" ran past the annotation gutter
 ## and lost its own FDR value to the canvas edge in the first render.
 ann_arm <- arms |>
   dplyr::transmute(population, row,
@@ -177,12 +172,13 @@ p1 <- ggplot(strip, aes(x = nes_plot, y = row)) +
          shape  = guide_legend(override.aes = list(size = 3.4))) +
   labs(
     title = "What the synovial-fluid-versus-blood contrast contains, one collection at a time",
-    subtitle = wrap_at(sprintf(paste0("Every set in eleven collections scored on the same frozen ",
+    subtitle = wrap_at(sprintf(paste0("Every set in %d collections scored on the same frozen ",
                                       "ranked lists, with Benjamini-Hochberg pooled across all ",
                                       "%s to %s tests asked of one population. Small points are ",
                                       "the sets reaching FDR < %.2g; the text on each row is how ",
                                       "many of that collection's sets did, out of how many were ",
                                       "tested in that population."),
+                              dplyr::n_distinct(sweep$database),
                               format(min(sweep$n_tests_pooled), big.mark = ","),
                               format(max(sweep$n_tests_pooled), big.mark = ","), FDR), 128),
     x = sprintf("normalized enrichment score, clamped to ±%.1f", NESCAP),
@@ -260,8 +256,8 @@ save_overview(
 ## cap is split evenly between the two directions: taking the top 20 by absolute NES
 ## returned twenty translation and ribosome sets and hid the synovial-fluid side
 ## entirely, which is a presentation artefact of one arm carrying larger magnitudes,
-## not a finding. A lollipop rather than a bar because the readable quantity is a
-## position on the NES axis, not an area.
+## and leaves the finding to the caption. A lollipop, since the readable quantity is a
+## position on the NES axis.
 
 treg_sig <- sweep |> dplyr::filter(population == "Treg", padj_pooled < FDR)
 half <- max(as.integer(TOP_N / 2), 1L)
@@ -309,7 +305,7 @@ p2 <- ggplot(top2, aes(x = nes, y = label)) +
                             "identifiers are shown as spaces; nothing is truncated.",
                             "Correlative."), 108)) +
   THEME +
-  # Legends STACKED, not side by side: laid out horizontally the two guides span the
+  # Legends STACKED: laid out horizontally the two guides span the
   # full canvas and the last legend label ends flush against the right edge.
   theme(legend.position = "bottom", legend.box = "vertical",
         axis.text.y = element_text(size = 9, lineheight = 0.92),

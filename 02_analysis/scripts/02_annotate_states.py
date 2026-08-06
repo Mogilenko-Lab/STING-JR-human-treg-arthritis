@@ -7,7 +7,7 @@ path, scVI->scANVI sub-state resolution is DEFERRED
 until the go/no-go returns positive: a sorted dataset needs only the sort gate +
 canonical markers + the unsupervised embedding to freeze Treg/Tcon/CD8.
 
-What this does instead of scANVI:
+What this does in place of scANVI:
   - freeze `coarse_label` from the sort `population` (basis = "sorting");
   - score canonical lineage modules (Treg / Tcon / CD8) per cell;
   - assign a marker-module `predicted_identity` (argmax of z-scored modules) and

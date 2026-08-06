@@ -43,7 +43,7 @@ _OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
 # The mt-hi grouping is a second categorical axis, and the heat-honesty panel draws it in
 # the same axes as the sorted populations, so its hues are taken from the categorical
 # palette entries the population palette does not use. `normal_Treg` stays a neutral grey:
-# it is the baseline the two pockets are read against, not a fourth category.
+# it is the baseline the two pockets are read against.
 GROUP_COL = {"mt_hi_effector": _OKABE["vermillion"],
              "mt_hi_noneffector": _OKABE["blue"],
              "normal_Treg": "#999999"}
@@ -287,7 +287,7 @@ def main() -> None:
     fig.tight_layout()
     hmed = heat.set_index("group")["WT_heat_updown_median"]
     # The donor-pseudobulk NES lives in 05_scoring and moves with the mouse_anchor re-derivation,
-    # so it is read from that stage's own table rather than typed here.
+    # so it is read from that stage's own table.
     nes = _pseudobulk_nes("WT_heat_up")
     nes_sentence = (
         f"The same mouse up arm enriches the donor-pseudobulk SF-versus-PB contrast at NES "
@@ -354,7 +354,7 @@ def main() -> None:
     axe.legend(fontsize=9, markerscale=3, loc="upper right")
     fig.suptitle("mt-hi effector pocket composition by donor and tissue, and its place on the Treg embedding")
     fig.tight_layout()
-    # Composition read from the table so the caption states this run's pocket, not a past one.
+    # Composition read from the table, so the caption states this run's pocket.
     n_pocket = int(comp["n_cells"].sum())
     n_sf = int(comp.loc[comp["tissue"] == "synovial_fluid", "n_cells"].sum())
     per_donor = comp.groupby("donor")["n_cells"].sum().sort_values(ascending=False)

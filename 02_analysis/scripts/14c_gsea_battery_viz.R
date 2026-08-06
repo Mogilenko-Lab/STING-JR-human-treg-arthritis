@@ -2,12 +2,12 @@
 # 14c_gsea_battery_viz.R: VIZ. The per-database GSEA battery for the JIA niche contrast.
 # =============================================================================
 # One cell per (sorted population x gene-set collection) over the donor-pseudobulk
-# synovial-fluid-versus-paired-blood contrast, drawn with the RNAseq-toolkit GSEA plotters
-# so the panels read the same way as the mouse-anchor battery in
+# synovial-fluid-versus-paired-blood contrast, drawn with the RNAseq-toolkit GSEA plotters so
+# the panels read the same way as the mouse-anchor battery in
 # mouse_anchor/03_results/06_gsea/figures/by_contrast/.
 #
 # Viz only: every number comes from the cached gseaResult objects 14_unbiased_enrichment.R
-# wrote plus the published gsea_all.csv, and nothing under 03_results/master/ is touched.
+# wrote plus the published gsea_all.csv, and 03_results/master/ stays untouched.
 #
 # The panels of one cell, and the selection rule each one carries in its own subtitle:
 #   dotplot            GeneRatio x -log10(pooled FDR), fill NES.   top N by pooled FDR
@@ -15,13 +15,13 @@
 #   barplot            NES bars from zero.                         pooled FDR < cutoff, then |NES|
 #   running_sum        running ES, hit ticks, ranked moderated t.   top N by |NES|
 #   running_sum_focus  the same panel over RS_FOCUS_SETS.          named, no ranking
-# The two ranking metrics disagree, so a set can sit inside one panel and outside another
-# in the same cell. Each panel writes a same-stem CSV of the rows it drew and the rule that
-# picked them, so an absence is checkable against a ranking.
+# The two ranking metrics disagree, so a set can sit inside one panel and outside another in
+# the same cell. Each panel writes a same-stem CSV of the rows it drew and the rule that
+# picked them, which makes an absence checkable against a ranking.
 #
 # Panels use `padj_pooled`, the Benjamini-Hochberg correction across every test asked of one
 # population's ranked list. Within one collection it induces the same ordering as the
-# per-database `padj`, so only the printed values, point sizes and significance flag move,
+# per-database `padj`, so the printed values, point sizes and significance flag move alone,
 # all in the conservative direction. The per-database value travels in every same-stem CSV
 # under `padj_in_database`.
 #
@@ -97,7 +97,7 @@ NESCAP <- as.numeric(CFG$figures$nes_cap %||% 3.5)
 SPECIES <- CFG$project$species %||% "Homo sapiens"
 
 # The config's diverging scale, with no literal fallback, so a missing key stops the run
-# instead of drawing a scale that differs from every other figure in the compartment.
+# keeping the scale identical to every other figure in the compartment.
 NEG <- CFG$colors$diverging$down
 MID <- CFG$colors$diverging$neutral
 POS <- CFG$colors$diverging$up
@@ -632,7 +632,7 @@ emit_cell <- function(pop, db) {
     # A second panel over a named pair, where the collection holds one. Reading the curated
     # heat-shock core against HALLMARK_HYPOXIA is the comparison project_frozen exists to
     # make, and on the collection-wide panel those two are two of seven curves that a |NES|
-    # ranking may leave out. Named rather than ranked, so the pair is stable across
+    # ranking may leave out. Named explicitly, so the pair is stable across
     # populations, and it carries nothing the collection panel lacks.
     focus <- intersect(RS_FOCUS_SETS, cand$ID)
     if (length(focus) >= 2)
@@ -774,7 +774,7 @@ for (db in DBS) {
   body <- if (db %in% names(DB_CONTENT)) unname(DB_CONTENT[db]) else DB_CONTENT_GENERIC
 
   # A worked example of the two ranking metrics disagreeing, so the reader meets it in the
-  # caption rather than by flipping between two panels of one cell.
+  # caption, on one panel of one cell.
   rank_note <- ""
   if (identical(db, "Hallmark")) {
     h <- SWEEP %>% dplyr::filter(population == "Treg", database == "Hallmark",

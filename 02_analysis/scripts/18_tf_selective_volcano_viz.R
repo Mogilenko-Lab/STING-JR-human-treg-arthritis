@@ -7,19 +7,19 @@
 #
 # WHY THIS FIGURE EXISTS, SEPARATELY FROM tf_selective_targets:
 # `tf_target_promiscuity` reports that HIF1A's 27 exclusively-claimed targets sum to 0.14% of
-# its signed contribution, and that number reads as "these genes do nothing". They in fact hold
-# 15% of the regulon's signed total in MAGNITUDE and cancel, 13 going up on the synovial-fluid
-# side against 14 going down. `tf_selective_targets` shows that cancellation in the regulon's
-# own arithmetic; this figure shows the same genes in the coordinates a reader already trusts —
-# effect size against evidence on the committed differential-expression table — so the split is
-# visible as position in the contrast rather than as a property of the decomposition.
+# its signed contribution, and that number reads as "these genes do nothing". They hold 15% of
+# the regulon's signed total in MAGNITUDE and cancel, 13 going up on the synovial-fluid side
+# against 14 going down. `tf_selective_targets` shows that cancellation in the regulon's own
+# arithmetic. This figure shows the same genes in the coordinates a reader already trusts —
+# effect size against evidence on the committed differential-expression table — so the split
+# reads as position in the contrast.
 #
 # The volcano grammar is the canonical RNAseq-toolkit plotter
 # (01_modules/RNAseq-toolkit/scripts/DE/plot_standard_volcano.R): raw p on the y axis for
 # resolution, FDR for the significance decision, four significance categories by colour. It is
-# called with top_n = 0 so it draws NO labels of its own, and the only named genes on the canvas
-# are the exclusively-claimed targets. project_theme() is applied afterwards because
-# project_theme is a complete theme and must be the last one added.
+# called with top_n = 0, which leaves the exclusively-claimed targets as the only named genes
+# on the canvas. project_theme() is applied afterwards, since it is a complete theme and has to
+# be the last one added.
 #
 # Reads:
 #   03_results/03_pseudobulk/tables/de_SFvsPB_treg.csv        the committed limma-voom table
@@ -59,7 +59,7 @@ LBL_SZ  <- as.numeric(FIG$label_size %||% 4)
 PT_SZ   <- as.numeric(FIG$point_size %||% 2.4)
 RPL_SEED <- as.integer(THR$gsea_seed %||% 123L)
 
-# The volcano's decision rule is the compartment's committed DE rule, not a per-figure choice.
+# The volcano's decision rule is the compartment's committed DE rule, applied unchanged.
 FDR_CUT   <- as.numeric(THR$de_fdr %||% 0.05)
 LOGFC_CUT <- as.numeric(THR$de_logfc %||% 1.0)
 
@@ -85,9 +85,9 @@ stopifnot(!any(duplicated(sel$target)))
 
 # --- the volcano substrate ----------------------------------------------------------------
 # create_standard_volcano() reads limma's column names off the frame and takes gene ids from
-# ROWNAMES, so the committed table is renamed rather than the plotter adapted. The DE table is
+# ROWNAMES, so the committed table is renamed to fit the plotter. The DE table is
 # already one row per HGNC symbol (13,999 rows, no duplicate symbol), which is what makes
-# rownames a safe key here; assert it rather than assume it.
+# rownames a safe key here; assert it on every run.
 stopifnot(!any(duplicated(DE$gene_symbol)), !any(is.na(DE$gene_symbol)))
 
 de_v <- DE %>%
@@ -108,7 +108,7 @@ hl <- sel %>%
 
 # --- per-factor counts for the in-panel text ----------------------------------------------
 # Aggregation for display over a committed table: no statistic is computed here.
-# The split is counted on log2FC, not on signed contribution, because log2FC is the axis this
+# The split is counted on log2FC, since log2FC is the axis this
 # figure plots. The two disagree for any target carried on a repressing edge, where the recorded
 # sign flips the contribution relative to the contrast — TM9SF4 is the only such target here, and
 # it is why 13/14 by contribution reads as 12/15 by fold change.
@@ -148,7 +148,7 @@ p <- create_standard_volcano(
                      hl_txt$line), collapse = "\n")
 )
 
-# The highlight is an unfilled black RING, not a coloured point. The plotter's top significance
+# The highlight is an unfilled black RING, which leaves colour free. The plotter's top significance
 # category is already vermillion and a burnt-orange fill sat indistinguishably on top of it — the
 # highlighted genes vanished into the cloud. A ring reads against every one of the four category
 # colours and leaves the point inside it visible, so a named gene still shows its own category.

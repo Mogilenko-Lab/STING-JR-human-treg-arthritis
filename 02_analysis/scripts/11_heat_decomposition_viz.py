@@ -239,7 +239,7 @@ def plot_coverage(df: pd.DataFrame, mult: pd.DataFrame):
     ]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.27),
               ncol=2, frameon=False, fontsize=LEGEND_SIZE)
-    # THE BARS ARE NOT A PARTITION, stated as a count rather than as a caution.
+    # THE BARS OVERLAP, stated as a count on the face.
     # Overlapping bars read as a partition unless the panel says otherwise, and
     # this is the panel most likely to be over-read, so the multiplicity goes on
     # the face and not only into the caption. Placed under the axis, where it
@@ -308,7 +308,7 @@ def family_span(family: dict[tuple[str, str], dict[str, pd.DataFrame]]) -> float
 def plot_subcomponent_runsum(arm: str, key: str, traces: dict[str, pd.DataFrame],
                              summary: pd.DataFrame, span: float, n_arm: int):
     # Two stacked panels in the config's running-sum proportions: the enrichment trace
-    # over the gene-hit rug. The y-range is pinned to the FAMILY span rather than to
+    # over the gene-hit rug. The y-range is pinned to the FAMILY span, in place of
     # this figure's data, so curve heights are comparable figure to figure.
     fig, (ax, rug) = plt.subplots(
         2, 1, sharex=True, layout="constrained",

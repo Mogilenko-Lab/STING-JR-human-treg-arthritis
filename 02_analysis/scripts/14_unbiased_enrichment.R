@@ -1,61 +1,58 @@
 #!/usr/bin/env Rscript
 # 14_unbiased_enrichment.R — COMPUTE (no plotting)
 # =============================================================================
-# What this stage asks, and why it is separate from stage 05
+# What this stage asks, and how it relates to stage 05
 # -----------------------------------------------------------------------------
 # Stage 05 asks a TARGETED question of the JIA niche contrast: does one named,
-# mouse-derived signature enrich in synovial fluid relative to paired blood? A
-# targeted test can only answer about the set it was handed. This stage asks the
-# unbiased counterpart off the SAME frozen ranked lists: what does the
-# synovial-fluid-versus-paired-blood contrast contain at all, across curated
-# databases, with no set privileged? Only the two together tell a reader whether
-# the mouse-derived enrichment is a distinctive feature of this contrast or one of
-# many co-enriching inflammatory programs.
+# mouse-derived signature enrich in synovial fluid relative to paired blood? A targeted
+# test answers about the set it was handed. This stage asks the unbiased counterpart off
+# the SAME frozen ranked lists: what does the synovial-fluid-versus-paired-blood contrast
+# contain at all, across curated databases, with no set privileged? The two together tell a
+# reader whether the mouse-derived enrichment is a distinctive feature of this contrast or
+# one of many co-enriching inflammatory programs.
 #
-# Two methods, deliberately different in what they need:
-#   (1) Pre-ranked fgsea over every set in seven human MSigDB collections, the
-#       CollecTRI TF regulons, the toolkit's human MitoPathways build, this
-#       compartment's frozen curated lists (the Hallmark re-pins, the curated
-#       heat-shock-response lens and the curated TCR activation lens), the
-#       mouse-derived projected UP arms, and the frozen SAVI axes. Benjamini-
-#       Hochberg is applied BOTH per database (comparable to a single-collection
-#       run) and POOLED across the whole family of tests within one population, so
-#       a headline can be read against how many hypotheses were asked of the same
+# Two methods, chosen for what each requires:
+#   (1) Pre-ranked fgsea over every set in seven human MSigDB collections, the CollecTRI TF
+#       regulons, the toolkit's human MitoPathways build, this compartment's frozen curated
+#       lists (the Hallmark re-pins, the curated heat-shock-response lens and the curated
+#       TCR activation lens), the mouse-derived projected UP arms, and the frozen reference
+#       interferon axes. Benjamini-Hochberg is applied BOTH per database (comparable to a
+#       single-collection run) and POOLED across the whole family of tests within one
+#       population, so a headline reads against how many hypotheses were asked of the same
 #       ranked list.
-#   (2) decoupleR MLM on the human PROGENy model — fourteen signalling footprints
-#       with continuous weights, needing no gene-set list at all, so it is not
-#       exposed to the size and curation choices method (1) inherits.
+#   (2) decoupleR MLM on the human PROGENy model — fourteen signalling footprints with
+#       continuous weights, needing no gene-set list, which keeps it clear of the size and
+#       curation choices method (1) inherits.
 #
-# THE POOLED FAMILY CONTAINS EACH SET ONCE. Two collections in this sweep legitimately
-# carry the same gene set: `project_frozen` pins six MSigDB Hallmark sets to files so
-# the decomposition and purge stages have a size-validated asset that cannot move under
-# a msigdbr upgrade, and the `Hallmark` collection then fetches those same six live.
-# Scoring both is fine; letting both into one pooled Benjamini-Hochberg family is not,
-# because the family then contains exact duplicate hypotheses and every population's
-# rank denominator is six too high. Section 2b resolves the collision structurally, so
-# a set id present in more than one collection is scored in both (each per-database
-# table still reads as a standalone single-collection run) but pooled exactly once.
+# THE POOLED FAMILY CONTAINS EACH SET ONCE. Two collections in this sweep legitimately carry
+# the same gene set: `project_frozen` pins six MSigDB Hallmark sets to files so the
+# decomposition and purge stages have a size-validated asset that holds under a msigdbr
+# upgrade, and the `Hallmark` collection then fetches those same six live. Scoring both is
+# fine. Admitting both to one pooled Benjamini-Hochberg family puts exact duplicate
+# hypotheses in it and lifts every population's rank denominator by six. Section 2b resolves
+# the collision structurally: a set id present in more than one collection is scored in both,
+# so each per-database table still reads as a standalone single-collection run, and pooled
+# exactly once.
 #
-# CLAIM TIER. Every number here is a ranked-list enrichment statistic or a
-# footprint activity score on the same donor-pseudobulk contrast the confirmatory
-# spine already published. Nothing here creates a new claim, nothing is written to
-# 03_results/master/, and language stays correlative: a set enriching says its gene
-# content moves with the synovial-fluid side of this contrast, not that the program
-# it is named for is present or is driving anything.
+# CLAIM TIER. Every number here is a ranked-list enrichment statistic or a footprint
+# activity score on the same donor-pseudobulk contrast the confirmatory spine already
+# published. Nothing here creates a new claim, nothing is written to 03_results/master/, and
+# the language stays correlative: a set enriching says its gene content moves with the
+# synovial-fluid side of this contrast. Presence of the named program, and any driving role,
+# are further claims.
 #
-# THE CORRECTNESS GATE. WT_heat_up is run as an ordinary member of the sweep, and
-# its NES must land on the published stage-05 value off the same ranked list. If it
-# does not, the set prep, ranking or fgsea parameters differ from the published
-# pipeline and NOTHING in the sweep is comparable to it — so the gate STOPS the run
-# before the expensive collections are touched. It is never retuned to agree.
+# THE CORRECTNESS GATE. WT_heat_up runs as an ordinary member of the sweep, and its NES must
+# land on the published stage-05 value off the same ranked list. A mismatch means the set
+# prep, ranking or fgsea parameters differ from the published pipeline and nothing in the
+# sweep is comparable to it, so the gate STOPS the run before the expensive collections are
+# touched. The gate is reported as found.
 #
-# THE SILENT-FAILURE MODE THIS GUARDS AGAINST. Count matrices in this compartment
-# are keyed by Ensembl id; every reference gene set matches on HGNC symbol. A ranked
-# list that leaked Ensembl ids intersects every collection at approximately zero,
-# and fgsea reports that as empty/NA rather than as an error — it looks like a
-# biological null. So the ranked lists are key-checked before anything runs, and the
-# per-database overlap counts are published as a first-class table rather than
-# assumed.
+# THE SILENT-FAILURE MODE THIS GUARDS AGAINST. Count matrices in this compartment are keyed
+# by Ensembl id; every reference gene set matches on HGNC symbol. A ranked list that leaked
+# Ensembl ids intersects every collection at approximately zero, and fgsea reports that as
+# empty/NA results, which reads as a biological null. So the ranked lists are key-checked
+# before anything runs, and the per-database overlap counts are published as a first-class
+# table.
 #
 # Inputs (READ-ONLY):
 #   03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv   signed moderated t, HGNC symbol
@@ -79,24 +76,24 @@
 #                                   kept, and both copies' statistics side by side
 #   wt_heat_up_reproduction.csv     the gate: published NES vs this run's NES
 #   gsea_<population>_<database>.csv  per-database results incl. leading edge
-#   gsea_all.csv                    tidy sweep with padj_pooled + pooled family size,
-#                                   one row per (population, pathway_id). Two
-#                                   denominators, deliberately named apart:
-#                                   n_sets_scored_in_db is what the per-database `padj`
-#                                   was corrected over (alias copies included),
-#                                   n_tests_in_db is what that database contributes to
-#                                   the pooled family, n_tests_pooled the whole family.
+#   gsea_all.csv                    tidy sweep with padj_pooled + pooled family size, one
+#                                   row per (population, pathway_id). Two denominators,
+#                                   named apart: n_sets_scored_in_db is what the
+#                                   per-database `padj` was corrected over (alias copies
+#                                   included), n_tests_in_db is what that database
+#                                   contributes to the pooled family, n_tests_pooled the
+#                                   whole family.
 #   gsea_pooled_summary_by_db.csv   per database, significant before/after pooling
-#   runsum_interactive_<population>_<set>.csv  running-sum substrate (stage-05 schema),
-#                                   for every mouse-derived arm, every set named in
-#                                   unbiased_enrichment.runsum_always, and the top-N
-#                                   curated per population; runsum_interactive_index.csv
-#                                   flags which of the two reasons emitted each curve
+#   runsum_interactive_<population>_<set>.csv  running-sum substrate (stage-05 schema), for
+#                                   every mouse-derived arm, every set named in
+#                                   unbiased_enrichment.runsum_always, and the top-N curated
+#                                   per population; runsum_interactive_index.csv flags which
+#                                   of the two reasons emitted each curve
 #   progeny_activity.csv            PROGENy MLM on the moderated-t contrast statistics
 #   progeny_donor_activity.csv      PROGENy MLM per donor-pseudobulk sample
 #   progeny_sf_vs_pb.csv            donor-paired SF-vs-PB test per population x pathway
 #
-# Objects (checkpoints, not deliverables) — 03_results/objects/:
+# Objects (checkpoints) — 03_results/objects/:
 #   14_genesets.rds                 all collections as fgsea `pathways` lists
 #   14_gsea/<tag>__<database>.rds   one clusterProfiler gseaResult per cell of the sweep
 #   14_progeny.rds                  raw decoupleR MLM results
@@ -104,7 +101,7 @@
 # Run from the compartment root:
 #   Rscript 02_analysis/scripts/14_unbiased_enrichment.R
 #
-# COMPUTE ONLY — no ggplot/ggsave. Figures live in 14_unbiased_enrichment_viz.R.
+# COMPUTE ONLY. Figures live in 14_unbiased_enrichment_viz.R.
 
 suppressPackageStartupMessages({
   library(dplyr)
@@ -163,7 +160,7 @@ contrast_label <- function(pop) sprintf("SF_vs_PB_%s", pop)
 # seventh file: putting hsr_lens later leaves HSR_core canonical where it already was,
 # so adding the collection does not move that set's pooled adjusted p.
 FILE_BACKED_KEYS <- c("mouse_projection", "project_frozen", "sting_axes",
-                      "hsr_lens", "tcr_activation")
+                      "hsr_lens", "tcr_activation", "etreg_lens")
 FILE_BACKED_DBS  <- unlist(lapply(FILE_BACKED_KEYS,
                                   function(k) UE[[k]]$name %||% character(0)))
 
@@ -183,9 +180,9 @@ RANKED_DIR <- file.path(RESULTS, "03_pseudobulk",
 # symbols. Exact string matching therefore drops genes that are present: TMEM173 and
 # MB21D1 are the two strongest members of the STING family in the Treg contrast and are
 # invisible to all six of its sets. Resolution runs once here, against the MATRIX
-# vocabulary rather than against a ranked list, so one resolved collection serves all
+# vocabulary, upstream of any ranked list, so one resolved collection serves all
 # three populations and a pair whose target the expression filter later drops is reported
-# as expression-filtered instead of as vocabulary loss.
+# as expression-filtered, hiding the vocabulary loss.
 #
 # The layers exist because "missing" has three different meanings and the ledger's whole
 # job is to keep them apart: absent from the CellRanger feature union (a fact about the
@@ -242,9 +239,9 @@ read_ranked <- function(path) {
 #'
 #' The failure this exists for is not a crash. An Ensembl-keyed list intersects
 #' every reference collection at ~zero and fgsea returns empty/NA rows, which reads
-#' downstream as "this contrast contains nothing" rather than as a broken join. So
+#' downstream as "this contrast contains nothing", masking the broken join. So
 #' the check is a hard stop with the diagnosis attached, and its numbers are
-#' published in ranked_list_keycheck.csv rather than only logged.
+#' published in ranked_list_keycheck.csv, alongside the log line.
 keycheck_row <- function(pop, tag, ranked) {
   g <- names(ranked)
   frac_ens <- mean(grepl("^ENS[A-Z]*G[0-9]{6,}$", g))
@@ -295,7 +292,7 @@ filter_by_size <- function(gsets, min_sz = MINSZ, max_sz = MAXSZ) {
 #' be kept, and one dropped before resolution is dropped for a vocabulary reason wearing a
 #' curation label. Only ever ADDS, so no set can shrink here and no exact-match count can
 #' move. The unresolved copy is returned alongside, because the ledger has to attribute a
-#' recovery to the symbol the reference shipped rather than to the one the data carries.
+#' recovery to the symbol the reference shipped, leaving the one the data carries unclaimed.
 resolve_collection <- function(gsets, label) {
   r <- resolve_sets(gsets, MATRIX_SYMBOLS, ALIAS_MAP)
   n_grew <- sum(lengths(r$sets) > lengths(gsets))
@@ -412,7 +409,7 @@ load_collectri <- function(spec) {
 #' anything this function can see. That is the whole failure mode worth guarding: a
 #' Mus_musculus path silently substituted here would deliver Title-cased mouse symbols,
 #' intersect this compartment's HGNC-keyed ranked lists at approximately zero, and fgsea
-#' would report empty rather than wrong. So the loader asserts the symbols look human
+#' would report empty, which reads as a null. So the loader asserts the symbols look human
 #' and stops with the path in the message when they do not.
 load_reference_rds <- function(spec) {
   if (!file.exists(spec$path))
@@ -453,10 +450,10 @@ CONFIGURED_DBS <- c(
   unlist(lapply(FILE_BACKED_KEYS, function(k) UE[[k]]$name %||% character(0))))
 
 genesets_path <- file.path(DIR_OBJ, "14_genesets.rds")
-## THE CACHE IS VALIDATED AGAINST THE CONFIG, not merely tested for existence. Adding a
+## THE CACHE IS VALIDATED AGAINST THE CONFIG, beyond a bare existence test. Adding a
 ## database to analysis_config.yaml with a cache already on disk used to load the old
 ## collections and sweep those instead, and every table would then report the previous
-## family under the new config with nothing to say so. The mismatch is a rebuild, not an
+## family under the new config with nothing to say so. The mismatch triggers a rebuild, and an
 ## error, because rebuilding is cheap and correct.
 ##
 ## THE CACHE IS ALSO KEYED ON THE ALIAS MAP. The cached collections are the RESOLVED ones,
@@ -514,7 +511,7 @@ if (cache_ok) {
 
   # Toolkit reference databases shipped pre-converted per species. Nominal-size filtered
   # like the msigdbr collections, because they are curated catalogues of comparable width
-  # rather than the handful of sets a reader came for.
+  # alongside the handful of sets a reader came for.
   for (spec in UE$custom_rds %||% list()) {
     raw <- load_reference_rds(spec)
     res <- resolve_collection(raw, spec$name)
@@ -529,7 +526,7 @@ if (cache_ok) {
   # File-backed collections: mouse-derived UP arms, this compartment's frozen curated
   # lists, and the frozen SAVI axes. These are NOT nominal-size filtered — they are
   # the sets the reader came for, and a set below the floor must be reported as
-  # untestable WITH its size rather than vanish. clusterProfiler still declines to
+  # untestable WITH its size, keeping it on the page. clusterProfiler still declines to
   # score one, and its absence from the results is recorded in geneset_overlap.csv.
   for (key in FILE_BACKED_KEYS) {
     spec <- UE[[key]]
@@ -571,10 +568,10 @@ DB_ORDER <- c(DB_ORDER[1], DB_ORDER[-1][order(vapply(COLLECTIONS[DB_ORDER[-1]],
 ## collision is resolved instead — each copy is still scored and still appears in its
 ## own per-database table, but only the canonical copy enters the pooled family.
 ##
-## Detection is by ID COLLISION PLUS GENE-CONTENT IDENTITY, never by a hardcoded list of
+## Detection is by ID COLLISION PLUS GENE-CONTENT IDENTITY, which is structural. A hardcoded list of
 ## set names, so a seventh frozen Hallmark set added to the config tomorrow is
 ## deduplicated by construction without editing this file. Two situations are hard stops
-## rather than silent resolutions:
+## as published resolutions:
 ##   - same id, DIFFERENT genes. The id no longer names one hypothesis, and choosing a
 ##     winner would silently discard a real set. A human has to look.
 ##   - a collection that is NOT file-backed would be the one demoted. MSigDB is the
@@ -624,7 +621,7 @@ ALIAS <- dplyr::bind_rows(alias_rows)
 #' Is this (database, set) copy an alias that the pooled family must exclude?
 #'
 #' Keyed on the resolved pair, so the pooling step excludes by construction from
-#' section 2b's structural detection rather than by re-matching set names downstream.
+#' section 2b's structural detection, which fixes the mapping once upstream.
 ALIAS_KEY <- if (nrow(ALIAS) > 0) paste(ALIAS$alias_database, ALIAS$pathway_id) else character(0)
 is_pooling_alias <- function(db, id) paste(db, id) %in% ALIAS_KEY
 
@@ -647,7 +644,7 @@ manifest <- dplyr::bind_rows(lapply(DB_ORDER, function(db) {
                  nominal_size_filter_applied = !db %in% FILE_BACKED_DBS,
                  # Resolution runs BEFORE the size filter, so it moves sets across both
                  # bounds. A changed pooled denominator is explained by these three
-                 # columns rather than left to be inferred.
+                 # columns, so nothing is inferred.
                  n_memberships_added_by_resolution =
                    x$n_memberships_added_by_resolution %||% 0L,
                  n_sets_testable_only_after_resolution =
@@ -717,7 +714,7 @@ if (!identical(overlap$n_matched, overlap$n_overlap))
 ## it is comparable to an earlier run only where the kept sets are the same. Resolving
 ## before the size filter moves a handful of sets across each bound (the manifest's three
 ## resolution columns say how many), and a collection whose membership changed moves its
-## union counts for that reason rather than because an exact match moved. The per-set ledger
+## union counts for that reason, with an exact match unchanged. The per-set ledger
 ## below is the artifact to diff across runs — it is keyed on the set.
 readr::write_csv(round_numeric_cols(overlap), file.path(TBL, "geneset_overlap.csv"))
 
@@ -726,7 +723,7 @@ readr::write_csv(round_numeric_cols(overlap), file.path(TBL, "geneset_overlap.cs
 ## sets: every set of a file-backed collection, every set named in `runsum_always`, and
 ## every set the alias map touches at all. The tens of thousands of MSigDB sets the map
 ## never reaches would contribute rows saying only "matched or absent", which the roll-up
-## above already says for them collectively. The omitted count is reported rather than left
+## above already says for them collectively. The omitted count is reported, so it stays
 ## to be inferred from a row count.
 ledger_names <- function(db) {
   ref <- reference_sets_of(db)
@@ -789,7 +786,7 @@ for (pop in names(POPS)) {
 #'
 #' Every engine setting is the one helpers/fgsea_prerank.R used for the published
 #' stage-05 run — exponent 1, eps 0 (exact multilevel p-values), pvalueCutoff 1 (keep
-#' every set; FDR filtering is a reporting choice, not a run-time one), BH within the
+#' every set; FDR filtering happens at reporting time), BH within the
 #' call, seeded. Deviating on any of these is what would break the reproduction gate.
 run_cell <- function(ranked, sets, db, pop) {
   cache <- file.path(DIR_GSEA, sprintf("%s__%s.rds", POPS[[pop]], db))
@@ -1050,7 +1047,7 @@ scored_pooled <- scored_all |>
                                  padj_pooled, n_tests_pooled),
                    by = c("population", "database", "pathway_id"))
 
-# The pooled family size is a property of the POPULATION, joined on rather than reduced
+# The pooled family size is a property of the POPULATION, joined on whole in place of reduced
 # out of each database's rows: a database whose every set were an alias would have no
 # non-NA value to reduce, and a silent -Inf there is exactly the kind of quiet wrong
 # number this stage exists to avoid.
@@ -1128,7 +1125,7 @@ message(sprintf("[8] emitting running-sum substrate (mouse up arms + %d named se
 CURATED_DBS <- setdiff(DB_ORDER, GATE_DB)
 RUNSUM_HALF <- max(as.integer(RUNSUM_N / 2), 1L)
 
-## The canonical collection of a named set, resolved from the pooled table rather than by
+## The canonical collection of a named set, resolved from the pooled table in place of
 ## searching the collections: an id re-pinned into two collections has a row in both, and
 ## only the canonical one carries a pooled adjusted p (section 2b sets the alias copy's to
 ## NA). Looking the id up here therefore CANNOT emit two identical curves under two
@@ -1162,7 +1159,7 @@ for (pop in names(POPS)) {
   # the pooled correction, so the choice is not made under a laxer test than the one
   # the tables report. Selecting from `sweep_df` also means an alias copy can never be
   # chosen, so a re-pinned Hallmark set gets one substrate file under its canonical
-  # collection instead of two identical curves under two database names.
+  # collection, in place of two identical curves under two database names.
   # The quota is split EVENLY BETWEEN DIRECTIONS: ranked on pooled
   # p-value alone, all five slots went to translation and ribosome sets on the
   # paired-blood side, which leaves the downstream running-sum comparison with no
@@ -1205,7 +1202,7 @@ for (pop in names(POPS)) {
       padj_pooled = sweep_df$padj_pooled[sweep_df$population == pop & sweep_df$pathway_id == w$id &
                                         sweep_df$database == w$db][1],
       # TRUE when this curve was emitted because the set was NAMED — every mouse-derived
-      # arm, plus the config's runsum_always list — rather than because it ranked into the
+      # arm, plus the config's runsum_always list — separately from ranking into the
       # top-N quota. A reader of the index can then tell a guaranteed comparator from one
       # that happens to be top-ranked in this population and may vanish in the next.
       always_emitted = identical(w$db, GATE_DB) || w$id %in% RUNSUM_ALWAYS)
@@ -1278,7 +1275,7 @@ message(sprintf("  PROGENy %s top=%d: %d pathways, %d weighted edges, %d target 
 ## different set for each. A gene absent from one population's DE table is padded
 ## with t = 0 ("no evidence of a shift"), which is what the mouse anchor does with
 ## NA, and the padding count is published per population so the padding is visible
-## rather than assumed harmless.
+## on every run.
 de_stats <- lapply(names(POPS), function(pop) {
   p <- file.path(RANKED_DIR, sprintf("de_SFvsPB_%s.csv", POPS[[pop]]))
   if (!file.exists(p)) stop("[14] DE table not found: ", p)
@@ -1318,7 +1315,7 @@ footprint <- net_progeny |>
 ## Treg is an ordinary MLM score and an impossible NES. The stage README carries the
 ## warning where a reader of the CSV will meet it. If the schema constraint is ever
 ## relaxed, rename this to `mlm_score` (or add a `statistic_kind` column) and update
-## that caption in the same commit — the ambiguity is deliberate, not a defect.
+## that caption in the same commit — the ambiguity is deliberate.
 progeny_activity <- progeny_contrast_raw |>
   dplyr::filter(!is.na(score)) |>
   dplyr::group_by(condition) |>
@@ -1489,7 +1486,7 @@ message(sprintf("  gsea_all.csv holds one row per (population, pathway_id): %s",
                       collapse = ", ")))
 ## And the alias copies must agree with the kept copies to fgsea's permutation noise. A
 ## larger gap would mean the two copies are not the same test, so dropping one would be
-## discarding evidence rather than removing a duplicate.
+## discarding evidence in place of removing a duplicate.
 if (nrow(ALIAS) > 0) {
   worst <- max(alias_out$abs_nes_difference, na.rm = TRUE)
   if (worst > NES_TOL)
@@ -1504,7 +1501,7 @@ if (nrow(ALIAS) > 0) {
 ## Pooling over a wider family almost always LOOSENS a row's significance, but not as
 ## a theorem: BH divides by rank as well as multiplying by family size, so a row whose
 ## rank rises faster than the family grows can come out marginally tighter. The count
-## is reported rather than asserted, so a surprising number is visible instead of
+## is reported on every run, so a surprising number stays visible in place of
 ## either crashing the run or passing unseen.
 n_tighter <- sum(sweep_df$padj_pooled < sweep_df$padj - 1e-12, na.rm = TRUE)
 message(sprintf("  %d of %d rows have padj_pooled below their per-database padj (%.3f%%)",

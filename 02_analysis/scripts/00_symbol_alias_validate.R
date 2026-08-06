@@ -5,20 +5,18 @@
 # gene sets this compartment has already published numbers for, so before any stage is
 # re-run the map is checked against the ranked lists on disk: how many genes each named
 # set recovers, which pairs did it, and whether the recovery agrees with the independent
-# audit of 2026-08-05. A disagreement is REPORTED here rather than reconciled — the audit
-# and this script are two reads of the same disk and either can be wrong, so the
-# disagreement is the finding.
+# audit of 2026-08-05. A disagreement is REPORTED here. The audit and this script are two
+# reads of the same disk and either can be wrong, so the disagreement is the finding.
 #
 # It also runs the migration test for the lift. 18_tf_activity.R carried a private copy of
 # the alias machinery and published two ledger tables from it; the shared helper must
-# reproduce both. That check is the cheapest proof the lift changed nothing, and it runs
-# here rather than by re-running that stage, whose expensive random-regulon nulls have
-# nothing to do with alias resolution.
+# reproduce both. That check is the cheapest proof the lift changed nothing, and it runs here
+# so the expensive random-regulon nulls of that stage stay out of an alias-resolution test.
 #
-# NOTHING PUBLISHED IS TOUCHED. Every output lands under 03_results/_scratch/, and no
-# stage table or figure is regenerated. The alias fix moves set sizes in stages 05 and 09
-# through 16, and the frozen mouse contract those stages consume is itself being corrected
-# upstream, so regenerating them now would only mean regenerating them again.
+# NOTHING PUBLISHED IS TOUCHED. Every output lands under 03_results/_scratch/, leaving every
+# stage table and figure in place. The alias fix moves set sizes in stages 05 and 09 through
+# 16, and the frozen mouse contract those stages consume is being corrected upstream, so
+# regenerating them now would mean regenerating them again.
 #
 # Reads, read-only:
 #   00_data/references/symbol_alias/symbol_alias_map.csv       the committed map
@@ -108,7 +106,7 @@ message(sprintf("    map: %d accepted, %d flagged for review, %d rejected",
 # ============================================================================
 # The five STING families are fetched live from msigdbr, because they are the sets whose
 # published matched counts the audit itemises and the point is to reproduce those from the
-# reference rather than from a cache.
+# reference, bypassing any cache.
 
 read_txt <- function(p) {
   g <- trimws(readLines(p, warn = FALSE)); unique(g[nzchar(g)])
@@ -227,7 +225,7 @@ AUDIT <- tribble(
   "HSR_sensitivity",                      "Treg", 137L, 3L,
   "TCR_activation",                       "Treg",  63L, 1L,
   # The audit reports +2 here. One of the two is MIR4435-2HG->MIR4435-1HG, withheld for
-  # review, so the expectation under the exclusion is +1 and 13 rather than 14. A result
+  # review, so the expectation under the exclusion is +1 and 13, where the full set gives 14. A result
   # of +2 would mean the exclusion is not being applied.
   "sting_specific_up",                    "Treg",  12L, 1L,
   "ifn_only_up",                          "Treg",  60L, 1L,

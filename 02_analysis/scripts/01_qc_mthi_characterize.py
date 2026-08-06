@@ -3,33 +3,31 @@
 01_qc_mthi_characterize.py — COMPUTE (no plotting).
 ===================================================
 Turns the interactively-found "mito-high (mt-hi), effector-like Treg pocket"
-(01_qc_explore.qmd, saved lasso `eda/selection_sf_ctla4_pocket.csv`, 335 cells)
-into a REPRODUCIBLE population rule + honest statistics, so the go/no-go can
-defensibly RETAIN all Tregs including this high-mito subset (not QC it out as
-dying/doublets).
+(01_qc_explore.qmd, saved lasso `eda/selection_sf_ctla4_pocket.csv`, 335 cells) into a
+REPRODUCIBLE population rule plus honest statistics, so the go/no-go can defensibly RETAIN
+all Tregs including this high-mito subset.
 
 Substrate: the frozen explorer parquet `03_results/interactive/01_qc_explore.parquet`
-(per-cell; NOT the h5ad). Everything is computed among SORTED Treg cells.
+(per-cell, standing in for the h5ad). Everything is computed among SORTED Treg cells.
 
-Population rule (two independent constructions, cross-checked against each other
-AND the saved 335 barcodes):
-  A. CLUSTER rule — among Treg, leiden_unsupervised clusters enriched for the
-     saved lasso by one-sided Fisher (BH-FDR<0.05). Two clusters clear: {6, 16},
-     both median %mt ~20 (vs ~4 rest). The EFFECTOR-LIKE pocket is the one that is
-     also effector (median score_eTreg > global Treg median) = cluster 6. Cluster
-     16 is mt-hi but eTreg-LOW, PB-dominated, low-complexity — a DISTINCT cluster,
-     NOT the effector pocket.
-  B. THRESHOLD rule — among Treg, pct_counts_mt >= 97.5th percentile (=10.0%,
-     the %mt that cleanly separates clusters {6,16}: ~93% of them vs ~0.8% of other
-     Treg exceed it) AND score_eTreg >= median. Recovers cluster 6 (Jaccard 0.64).
+Population rule (two independent constructions, cross-checked against each other AND the
+saved 335 barcodes):
+  A. CLUSTER rule — among Treg, leiden_unsupervised clusters enriched for the saved lasso by
+     one-sided Fisher (BH-FDR<0.05). Two clusters clear: {6, 16}, both median %mt ~20 against
+     ~4 in the rest. The EFFECTOR-LIKE pocket is the one that is also effector (median
+     score_eTreg > global Treg median) = cluster 6. Cluster 16 is mt-hi and eTreg-LOW,
+     PB-dominated, low-complexity: a DISTINCT cluster.
+  B. THRESHOLD rule — among Treg, pct_counts_mt >= 97.5th percentile (=10.0%, the %mt that
+     cleanly separates clusters {6,16}: ~93% of them exceed it against ~0.8% of other Treg)
+     AND score_eTreg >= median. Recovers cluster 6 (Jaccard 0.64).
 
-Primary comparison for the retention claim: mt-hi effector Treg (cluster 6) vs
-normal Treg (Treg not in {6,16}). Cluster 16 carried as a labelled reference group.
+Primary comparison for the retention claim: mt-hi effector Treg (cluster 6) against normal
+Treg (Treg outside {6,16}). Cluster 16 is carried as a labelled reference group.
 
-Evidence tier: ALL per-cell comparisons here are `secondary_percell` — never pooled
-with pseudobulk NES. score_eTreg is an EDA-derived signature (descriptive), and
-score_HSP / score_apoptosis are Tier-3 hand markers (QC-descriptive, NOT evidence);
-the decisive not-debris datum is n_genes_by_counts (objective complexity).
+Evidence tier: ALL per-cell comparisons here are `secondary_percell` and stay separate from
+the pseudobulk NES spine. score_eTreg is an EDA-derived descriptive signature, and score_HSP
+/ score_apoptosis are Tier-3 hand markers, QC-descriptive. The decisive not-debris datum is
+n_genes_by_counts, an objective complexity measure.
 
 Outputs (03_results/01_qc/tables/):
   mthi_population_rule.csv       — rule definitions + A/B/saved concordance

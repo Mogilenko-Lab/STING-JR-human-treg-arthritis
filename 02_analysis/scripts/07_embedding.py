@@ -2,42 +2,40 @@
 """
 07_embedding.py — COMPUTE (no plotting). Treg-compartment embedding atlas.
 ==========================================================================
-Builds the per-cell HOOK-FACTOR substrate that the `07_embedding_viz.py`
-figures render, implementing the bounded-OR harvest design.
+Builds the per-cell HOOK-FACTOR substrate that the `07_embedding_viz.py` figures render,
+implementing the bounded-OR harvest design.
 
-WHAT THIS IS (and is NOT): this is a VISUALISATION substrate for the multi-hook
-harvest-design preview — "show the various signatures we are
-drafting for and where they land on their own and where they land under OR
-condition". It is NOT the statistical readout and NOT an anchor-score-gated
-selection. Per the umbrella guardrails, embeddings are annotation/visualisation
-ONLY; the mouse `WT_heat` anchor score is carried here as an ANNOTATION, never a
-selection predicate (the anchor-orthogonal selection safeguard). No cells are
-lassoed/subset to a file here — harvest selection design is deferred.
+WHAT THIS IS. A VISUALISATION substrate for the multi-hook harvest-design preview: show the
+various signatures being drafted for, where each lands on its own, and where they land under
+the OR condition. The statistical readout lives in the confirmatory spine. Per the umbrella
+guardrails, embeddings are annotation/visualisation ONLY, and the mouse `WT_heat` anchor score
+is carried here as an ANNOTATION, keeping it out of every selection predicate (the
+anchor-orthogonal selection safeguard). Cells stay in place — harvest selection design is
+deferred.
 
-Substrate: the frozen explorer parquets (per-cell; NOT the multi-GB h5ad):
+Substrate: the frozen explorer parquets (per-cell, in place of the multi-GB h5ad):
   03_results/interactive/01_qc_explore.parquet      (richest: coords + scores + markers)
   03_results/interactive/02_annotation_explore.parquet  (frozen coarse_label)
 
 HOOK FACTORS (booleans, kept SEPARATE so downstream contrasts stay clean):
-  hook_lineage       — sorted Treg identity (FACS gate; the strongest orthogonal
-                       hook, fully independent of the anchor score).
-  hook_effector      — effector-state high: score_eTreg >= dataset-internal top
-                       decile (P90). A DEFINED MINORITY, admits effector cells
-                       beyond the sort gate; never the whole set.
+  hook_lineage       — sorted Treg identity (FACS gate; the strongest orthogonal hook, fully
+                       independent of the anchor score).
+  hook_effector      — effector-state high: score_eTreg >= dataset-internal top decile (P90).
+                       A DEFINED MINORITY that admits effector cells beyond the sort gate and
+                       stays a bounded subset.
   hook_mthi_viable   — the mt-hi-but-VIABLE Treg pocket (cluster-6-like), mirroring
-                       01_qc_mthi_characterize.py rule B + an explicit viability
-                       gate: Treg AND pct_counts_mt >= within-Treg P97.5 AND
-                       score_eTreg >= within-Treg median (excludes the eTreg-LOW
-                       cluster-16 junk) AND n_genes_by_counts >= 2x the 200-gene
-                       floor (real cells, not debris).
-Annotation factors (NEVER selection predicates; safeguard S2):
+                       01_qc_mthi_characterize.py rule B plus an explicit viability gate:
+                       Treg AND pct_counts_mt >= within-Treg P97.5 AND score_eTreg >=
+                       within-Treg median (which excludes the eTreg-LOW cluster-16 junk) AND
+                       n_genes_by_counts >= 2x the 200-gene floor (real cells over debris).
+Annotation factors (safeguard S2 keeps these out of every selection predicate):
   anno_heat_hi/_lo   — WT_heat_up top/bottom decile (matched hi/lo baseline).
-  anno_stingspecific — placeholder: the SAVI STING-specific axis is not joined in
-                       this compartment yet (see NOTE below); column is left NA.
+  anno_stingspecific — placeholder: the STING-specific reference axis is unjoined in this
+                       compartment (see NOTE below); the column is left NA.
 OR-union: hook_or_union = hook_lineage | hook_effector | hook_mthi_viable.
   Matched-lo baselines (safeguard S3): baseline_heat_lo (anno_heat_lo & ~union),
-  baseline_effector_lo (score_eTreg <= P10 & ~union). The union MUST stay a
-  bounded, contrastable minority — reported as a fraction of all cells.
+  baseline_effector_lo (score_eTreg <= P10 & ~union). The union MUST stay a bounded,
+  contrastable minority, reported as a fraction of all cells.
 
 Outputs (03_results/07_embedding/tables/):
   hook_factor_definitions.csv   — one row per factor: kind, definition, threshold, n, frac
@@ -250,7 +248,7 @@ def main() -> None:
             })
     pd.DataFrame(rows).to_csv(tdir / "markers_per_lineage.csv", index=False)
 
-    # ---- per-cell substrate parquet (viz input; NOT a figure source table) ---- #
+    # ---- per-cell substrate parquet (viz input; the figure source tables are above) ---- #
     keep = (["x", "y", "population_short", "coarse_label", "leiden_unsupervised",
              "tissue", "donor", "pct_counts_mt", "n_genes_by_counts",
              "hook_lineage", "hook_effector", "hook_mthi_viable", "hook_or_union",

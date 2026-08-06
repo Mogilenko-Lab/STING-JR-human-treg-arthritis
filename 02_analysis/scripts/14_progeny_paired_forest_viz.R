@@ -4,15 +4,13 @@
 # The donor-paired reading of the PROGENy footprints in the JIA synovial-fluid-
 # versus-paired-blood contrast, drawn as a forest with a 95% interval per point.
 #
-# This is a DIFFERENT figure from progeny_activity_panel in
-# 14_unbiased_enrichment_viz.R, and both are kept. That panel plots the
-# single-contrast multivariate-linear-model statistic from progeny_activity.csv,
-# one number per population x pathway with no interval, and it puts all three
-# populations on the identical y so the three markers overlay. This one plots the
-# donor-paired test from progeny_sf_vs_pb.csv: six donors each voting once,
-# synovial fluid minus that same donor's own blood, with the interval the paired
-# t-test already reported. Every number here is read from the CSV; nothing is
-# recomputed.
+# This is a DIFFERENT figure from progeny_activity_panel in 14_unbiased_enrichment_viz.R,
+# and both are kept. That panel plots the single-contrast multivariate-linear-model statistic
+# from progeny_activity.csv, one number per population x pathway with no interval, putting
+# all three populations on the identical y so the three markers overlay. This one plots the
+# donor-paired test from progeny_sf_vs_pb.csv: six donors each voting once, synovial fluid
+# minus that same donor's own blood, with the interval the paired t-test already reported.
+# Every number here is read from the CSV.
 #
 # READABILITY CHOICES, each one a reaction to how the overlaid version failed:
 #   * each population gets its own VERTICAL OFFSET inside the pathway row
@@ -22,8 +20,8 @@
 #     distinction survives greyscale printing and a colour-blind reader;
 #   * faint separators run between pathway rows so a reader can track one pathway
 #     across a wide panel without losing the row;
-#   * the exact numbers stay in the same-stem source CSV rather than being printed
-#     forty-two times on the canvas.
+#   * the exact numbers stay in the same-stem source CSV, keeping forty-two printed values
+#     off the canvas.
 #
 # Input  (03_results/14_unbiased_enrichment/tables/):
 #   progeny_sf_vs_pb.csv     42 rows = 3 sorted populations x 14 PROGENy pathways
@@ -65,7 +63,7 @@ POP_DY <- c(Treg = 0.24, Tcon = 0.0, CD8 = -0.24)
 POP_COL <- population_colors(FIG_CFG)
 
 #' Render an FDR for prose: fixed above 0.01, else one-digit scientific. The cut sits at
-#' 0.01 rather than 0.001 because a fixed-decimal 0.00115 renders as "0.001" and loses
+#' 0.01, since a fixed-decimal 0.00115 renders as "0.001" at 0.001 and loses
 #' the leading digit a reader compares against a neighbouring pathway.
 fmt_p <- function(p) ifelse(is.na(p), "n/a",
                             ifelse(p >= 0.01, sprintf("%.3f", p), sprintf("%.1e", p)))
@@ -143,7 +141,7 @@ tbl <- pg |>
                 significant) |>
   dplyr::arrange(population, dplyr::desc(mean_difference))
 
-## Checks named in the task, read back off the table rather than restated by hand, so a
+## Checks named in the task, read back off the table on every run, so a
 ## regenerated table that moved would move this sentence with it.
 gv <- function(pop, pw, col) pg[[col]][pg$population == pop & pg$pathway_name == pw][1]
 egfr  <- gv("Treg", "EGFR", "mean_difference");    egfr_p <- gv("Treg", "EGFR", "padj")

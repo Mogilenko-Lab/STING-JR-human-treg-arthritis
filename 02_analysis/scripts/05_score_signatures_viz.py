@@ -47,7 +47,7 @@ ARM_ORDER = ["up", "down"]
 
 
 def nominal_set_sizes() -> dict:
-    """Nominal size of each frozen mouse arm — a line count, not a statistic.
+    """Nominal size of each frozen mouse arm — a line count over the frozen file.
 
     The effective set size only means something against the nominal one, so both
     travel with the panel. Read from the frozen mouse->human projection contract
@@ -112,7 +112,7 @@ def main() -> None:
                     va="center", ha="left", fontsize=9)
             ylabels.append(f"{pop} · {d}"); yv.append(i)
 
-        # The answer, read off the plotted rows rather than asserted. It is
+        # The answer, read off the plotted rows. It is
         # negative on Treg preference, and the panel has to say so on its face.
         up = gsea[gsea["direction"].eq("up")]
         n_sig_up = int(up["padj"].lt(fdr).sum())
@@ -149,7 +149,7 @@ def main() -> None:
                   title_fontsize=9)
         # Two readings the sequence used to leave to prose. The Treg-preference
         # answer is negative; and the down arm is not silent, so "the up arm is
-        # the only informative arm" is retired here rather than in a caption.
+        # the only informative arm" is retired here, on the canvas.
         down_note = (
             "The down arm is not silent either: it reaches FDR "
             + ", ".join(f"{float(r['padj']):.3f} in {r['cell_state']}"

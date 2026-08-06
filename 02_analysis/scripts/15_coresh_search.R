@@ -2,45 +2,41 @@
 # =============================================================================
 # 15_coresh_search.R  --  COMPUTE (no plots)
 # =============================================================================
-# Co-regulation search of the public HUMAN GEO compendium for the JIA synovial-
-# fluid-versus-paired-blood niche contrast, and pre-ranked GSEA of the modules it
-# returns on the same ranked list they were seeded from.
+# Co-regulation search of the public HUMAN GEO compendium for the JIA synovial-fluid-
+# versus-paired-blood niche contrast, and pre-ranked GSEA of the modules it returns on the
+# same ranked list they were seeded from.
 #
-# The question. The mouse anchor asked CoReSh which public co-regulation
-# neighbourhoods its 39 degC contrast sits in. Nothing had asked the same of the
-# human niche contrast. This script asks it: across ~44,000 public human GEO
-# datasets, in which ones do the genes that rise in the inflamed synovial niche
-# co-vary, and what else moves with them there?
+# The question. The mouse anchor asked CoReSh which public co-regulation neighbourhoods its
+# 39 degC contrast sits in. This script asks the same of the human niche contrast: across
+# ~44,000 public human GEO datasets, in which ones do the genes that rise in the inflamed
+# synovial niche co-vary, and what else moves with them there?
 #
-# What a "module" is here. CoReSh scores each public dataset by how much of its
-# variance the query genes jointly explain (pctVar, a PCA-inspired quantity). For
-# a top-ranked dataset, projecting every gene onto the query direction gives
-# gene-level loadings; the top-|loading| genes are that dataset's co-regulation
-# partners of the query. The resulting set is a DATA-DRIVEN CO-REGULATION
-# NEIGHBOURHOOD mined from public variance structure -- not a curated ontology
-# term, and not a claim about mechanism. It is named for how it was derived:
+# What a "module" is here. CoReSh scores each public dataset by how much of its variance the
+# query genes jointly explain (pctVar, a PCA-inspired quantity). For a top-ranked dataset,
+# projecting every gene onto the query direction gives gene-level loadings, and the
+# top-|loading| genes are that dataset's co-regulation partners of the query. The resulting
+# set is a DATA-DRIVEN CO-REGULATION NEIGHBOURHOOD mined from public variance structure.
+# Curation and mechanism are separate questions. It is named for how it was derived:
 # CORESH_<population>_up_<gate>_<GSE>.
 #
-# Circularity, stated up front. A module seeded from a query contains that
-# query's genes by construction, so its enrichment on the seeding ranked list is
-# partly guaranteed. The `seeded_from_this_population` column marks exactly which
-# rows carry that circularity, and the fraction of each module that is seed
-# rather than newly recruited gene is published as `frac_seed_genes`. Read the
-# enrichment as a description of what public biology the niche signature co-moves
-# with, never as independent evidence for it.
+# Circularity, stated up front. A module seeded from a query contains that query's genes by
+# construction, so its enrichment on the seeding ranked list is partly guaranteed. The
+# `seeded_from_this_population` column marks exactly which rows carry that circularity, and
+# the fraction of each module that is seed gene, as against newly recruited, is published as
+# `frac_seed_genes`. Read the enrichment as a description of what public biology the niche
+# signature co-moves with; independent evidence for it needs another source.
 #
 # Query construction MIRRORS the mouse anchor (mouse_anchor/02_analysis/scripts/
-# 07_coresh_search.R + its coresh.query_signatures block): the UP arm of the
-# contrast at two stringency gates, fdr_only and fdr_logfc. Here the contrast is
-# the JIA SF-vs-PB contrast and the gates are re-derived from the same frozen
-# limma-voom DE table that produced ranked_<population>.tsv.
+# 07_coresh_search.R + its coresh.query_signatures block): the UP arm of the contrast at two
+# stringency gates, fdr_only and fdr_logfc. Here the contrast is the JIA SF-vs-PB contrast
+# and the gates are re-derived from the same frozen limma-voom DE table that produced
+# ranked_<population>.tsv.
 #
-# The ID seam. Ranked lists and every reference gene set are keyed by HGNC
-# SYMBOL; the compendium chunks are keyed by INTEGER ENTREZ ID. match() on a
-# character vector against an integer vector returns all-NA silently, so a
-# symbol-keyed query would return size ~= 0 and pctVar noise with no error. The
-# script maps symbol -> Entrez explicitly, publishes the mapping loss, and
-# refuses to run if the realised per-dataset overlap collapses.
+# The ID seam. Ranked lists and every reference gene set are keyed by HGNC SYMBOL; the
+# compendium chunks are keyed by INTEGER ENTREZ ID. match() on a character vector against an
+# integer vector returns all-NA silently, so a symbol-keyed query would return size ~= 0 and
+# pctVar noise with no error. The script maps symbol -> Entrez explicitly, publishes the
+# mapping loss, and refuses to run if the realised per-dataset overlap collapses.
 #
 # Inputs (read-only):
 #   03_results/03_pseudobulk/tables/ranked_{treg,tcon,cd8}.tsv     signed-t ranked lists
@@ -117,7 +113,7 @@ GSEA_FDR       <- as.numeric(THR$gsea_fdr      %||% 0.05)
 RUNSUM_TOP     <- as.integer(YAML_CONFIG$figures$running_sum_top %||% 5L)
 
 ## hsa chunks demand HUMAN Entrez. A mouse query against hsa (or vice versa)
-## returns near-zero sizes with NO error -- refuse rather than silently mis-run.
+## returns near-zero sizes with NO error -- refuse, so the run stops here.
 if (!identical(SPECIES, "human"))
   stop("[15_coresh] coresh.species must be 'human' for the hsa compendium; got '", SPECIES, "'.")
 if (!identical(CHUNK_SUBDIR, "hsa"))
@@ -145,7 +141,7 @@ source(file.path(CORESH_LIB, "extract_gene_loadings.R"))  # build_coresh_gmt() -
 # Resolution order: $CORESH_CHUNKS (the container convention) > coresh.chunks_fallback.
 # The species subdir is appended if the resolved dir does not already end in it.
 # The analysis container never sees a Synapse token -- it consumes pre-cached
-# chunks only, so an absent cache is a provisioning problem, not an analysis one.
+# chunks only, so an absent cache is a provisioning problem.
 
 resolve_chunk_dir <- function() {
   base <- Sys.getenv("CORESH_CHUNKS", unset = "")
@@ -182,7 +178,7 @@ message(sprintf("[15_coresh] compendium: %d %s chunk(s) at %s (snapshot %s, %s)"
 # =============================================================================
 # The gate is applied to the frozen limma-voom DE table; the ranked list is the
 # same fit collapsed to one row per symbol, so every gated symbol is guaranteed
-# to be present in the ranked list. That is asserted, not assumed.
+# to be present in the ranked list. That is asserted on every run.
 
 QSPEC <- CFG$query_signatures %||% list()
 if (is.null(QSPEC$sets) || length(QSPEC$sets) == 0L)
@@ -203,7 +199,7 @@ read_ranked <- function(population) {
   r <- r[!is.na(r$stat) & nzchar(r$symbol), ]
   r <- r[!duplicated(r$symbol), ]
   ## The documented silent failure: an Ensembl-keyed list intersects every
-  ## symbol-keyed reference at ~zero and fgsea reports it as empty, not as error.
+  ## symbol-keyed reference at ~zero and fgsea reports it as empty, which reads as a null.
   ens_frac <- mean(grepl("^ENSG[0-9]+", r$symbol))
   if (ens_frac > 0.5)
     stop("[15_coresh] ", fp, " looks Ensembl-keyed (", round(100 * ens_frac), "% ENSG ids). ",
@@ -331,7 +327,7 @@ hits_dt[, `:=`(population = vapply(query_name, function(q) QUERIES_META[[q]]$pop
                gate       = vapply(query_name, function(q) QUERIES_META[[q]]$gate,       character(1)))]
 setcolorder(hits_dt, c("query_name", "population", "gate", "gse", "gpl", "pctVar", "pval", "size", "rank"))
 
-## NOT a silent cap. The sweep scores EVERY dataset in the compendium, so the full
+## THE CAP IS DECLARED. The sweep scores EVERY dataset in the compendium, so the full
 ## ranking is ~265k rows / ~20 MB -- past the point where this repo tracks a table
 ## (see .gitignore: the tracked surface of 03_results is captions plus compact
 ## summary/figure-source tables). The exported CSV therefore carries the ranked HEAD
@@ -380,7 +376,7 @@ saveRDS(DERIVED, file.path(DIR_OBJECTS, "coresh_hsa_derived_sets.rds"))
 writeLines(gmt_lines, file.path(TBL_DIR, "coresh_derived_sets.gmt"))
 
 ## Set names are "CORESH_<query_name>_<GSE>"; query_name itself contains "_", so
-## locate the GSE token rather than splitting positionally.
+## locate the GSE token, independent of position.
 split_set_name <- function(nm) {
   tok <- strsplit(sub("^CORESH_", "", nm), "_", fixed = TRUE)[[1]]
   gp  <- which(grepl("^GSE", tok))
@@ -488,7 +484,7 @@ for (p in POPULATIONS) {
   rows[, seeded_from_this_population := seed_population == p]
   gsea_rows[[p]] <- rows
   ## No silent caps: a module whose ranked-list overlap fell under gsea_min_size is
-  ## dropped by the engine, so name it rather than let the row count quietly shrink.
+  ## dropped by the engine, so name it and keep the row count honest.
   dropped <- setdiff(names(DERIVED), rows$pathway_id)
   if (length(dropped))
     message(sprintf("  [%s] %d module(s) dropped below gsea_min_size=%d: %s",
@@ -576,7 +572,7 @@ message(sprintf("[15_coresh] running-sum substrate: %d table(s) (top %d modules 
 # dataset object holds a `wordMatrix`, the compendium's own centred per-sample
 # indicator matrix over the terms that vary most across that dataset's GEO sample
 # metadata. That is a checkable, in-cache descriptor of what a dataset contrasts,
-# so it is used here instead of external research -- and named for what it is.
+# so it is used here in place of external research -- and named for what it is.
 # Correlating each term against the query direction says which metadata term
 # tracks the axis the query defines in that dataset. Descriptive only: it never
 # enters a statistic and cannot change any pctVar or NES.

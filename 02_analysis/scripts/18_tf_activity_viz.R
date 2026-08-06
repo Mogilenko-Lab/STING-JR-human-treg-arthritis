@@ -15,8 +15,8 @@
 #                                rank axis, in the panel grammar the mouse anchor's
 #                                Hif1a cascade uses
 #
-# One claim each, and no statistics here. Every figure goes through save_overview(), which
-# emits the vector PDF, the raster PNG, the same-stem source CSV and the stage README
+# One claim each, drawn from committed tables. Every figure goes through save_overview(),
+# which emits the vector PDF, the raster PNG, the same-stem source CSV and the stage README
 # caption in one call.
 #
 # Reads 03_results/18_tf_activity/tables/:
@@ -212,7 +212,7 @@ sel_ends <- bind_rows(
     mutate(gutter = "down") %>% ungroup()
 ) %>% distinct(tf, target, .keep_all = TRUE)
 
-# Placed by hand, not by repel. Every one of these labels shares x = 1, so repel has a single
+# Placed by hand. Every one of these labels shares x = 1, so repel has a single
 # axis of freedom and resolves the overlap by reseating a label back onto the strip or clipping
 # it off the panel — it did both here. Explicit positions also make the render deterministic.
 # No leader lines: the x = 1 points are an undifferentiated column, so a leader to one of them
@@ -253,7 +253,7 @@ share <- dec %>%
                         .groups = "drop") %>% mutate(tf = as.character(tf)),
             by = "tf") %>%
   mutate(tf = factor(tf, levels = DECOMP),
-         # Three short lines rather than two long ones: at this text size a line wider than the
+         # Three short lines: at this text size a line wider than the
          # facet runs off the canvas, and the panel is half of a 13-inch wide figure.
          txt = sprintf(paste0("%d targets this regulon alone claims, %d up and %d down\n",
                               "%.0f%% of the signed total in magnitude, %.2f%% net\n",
@@ -261,7 +261,7 @@ share <- dec %>%
                        n_sel, n_sel_up, n_sel_down, pct_abs, pct_net, pct_over_25))
 
 # One cell of `share`, so every number in this stage's decomposition captions is read from the
-# table the figure draws rather than typed beside it.
+# table the figure draws.
 sh <- function(f, col) share[[col]][as.character(share$tf) == f]
 
 p2 <- ggplot(dec, aes(x = n_regulons, y = contrib)) +
@@ -334,7 +334,7 @@ save_overview(
 # =============================================================================
 # The previous figure stacks all of these at x = 1, where 27 labels cannot fit at the font
 # floor. One row per target on a free y axis is the only layout that names them all, and
-# naming them is what shows the set splitting nearly evenly in direction rather than being
+# naming them is what shows the set splitting nearly evenly in direction, where a bare total reads as
 # small.
 
 message("[fig 2b] exclusively-claimed targets ...")
@@ -385,7 +385,7 @@ p2b <- ggplot(sel_named, aes(x = contrib, y = target)) +
                           sel_txt$line), collapse = "\n"),
        x = "Signed contribution", y = NULL) +
   project_theme(config = CFG) +
-  # Stacked, not side by side: the keys spelled out on one row overrun a 9-inch canvas.
+  # Stacked: the keys spelled out on one row overrun a 9-inch canvas.
   # The strip label is unrotated because NFKB1's panel is two rows tall, and a rotated
   # "NFKB1" needs more vertical space than two rows of pitch give it — it rendered clipped.
   theme(legend.position = "bottom", legend.box = "vertical",
@@ -488,7 +488,7 @@ focus_pts <- cal_long %>% filter(focus_tf)
 p3 <- ggplot(cal_long, aes(x = regulon_size, y = score)) +
   geom_hline(yintercept = 0, linewidth = 0.4, colour = REFC) +
   geom_point(colour = "grey72", size = PT_SZ * 0.55, alpha = 0.7) +
-  # Dashed and neutral, so the fitted expectation reads as a reference rather than a series.
+  # Dashed and neutral, so the fitted expectation reads as a reference line.
   geom_line(aes(y = size_expected), linewidth = LN_W, colour = REFC, linetype = "22") +
   geom_segment(data = nulls, aes(x = regulon_size, xend = regulon_size,
                                  y = null_q95, yend = obs),

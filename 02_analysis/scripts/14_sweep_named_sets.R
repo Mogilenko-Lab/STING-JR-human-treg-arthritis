@@ -2,25 +2,25 @@
 # 14_sweep_named_sets.R: COMPUTE (no plotting)
 # =============================================================================
 # The closing figure of this compartment's narrative asks a single question: scored
-# against every set in eleven collections on the same donor-level ranked lists, with
+# against every set in every collection on the same donor-level ranked lists, with
 # no set privileged, where do hypoxia and cGAS-STING land? The only real editorial
 # decision in that figure is WHICH named sets it draws, so this script makes that
-# decision explicit, writes it to a committed table with a reason per row, and hands
-# the table to the viz script. Nothing is selected silently inside a plotting call.
+# decision explicit, writes it to a committed table with a reason per row, and hands the
+# table to the viz script, which keeps every selection out of a plotting call.
 #
-# WHY A SCRIPT AND NOT A HARDCODED VECTOR IN THE VIZ. The obvious selection is a trap.
+# WHY A SCRIPT, IN PLACE OF A HARDCODED VECTOR IN THE VIZ. The obvious selection is a trap.
 # A case-insensitive substring search for "STING" over the Treg sweep returns eight
 # rows, and two of them are false positives that match the substring inside the word
 # "RE-STING": REACTOME_PHASE_4_RESTING_MEMBRANE_POTENTIAL and
 # GOBP_REGULATION_OF_RESTING_MEMBRANE_POTENTIAL are membrane-potential terms with no
 # relation to the cGAS-STING axis. Both are recorded here with the reason they were
-# dropped, and the audit is asserted rather than trusted, so a future collection that
-# adds another "resting" term fails loudly instead of drawing a spurious point.
+# dropped, and the audit is asserted on every run, so a future collection that adds another
+# "resting" term fails loudly in place of drawing a spurious point.
 #
-# The genuine cGAS-STING family in this sweep has SIX members, not the four a reader
-# might expect. Two of them are regulation-of terms with opposite sign, and the
-# positive-regulation term runs negative. All six are drawn: a family where the
-# annotation's own sign structure disagrees with itself is part of the honest picture.
+# The genuine cGAS-STING family in this sweep has SIX members, where a reader might expect
+# four. Two are regulation-of terms with opposite sign, and the positive-regulation term runs
+# negative. All six are drawn: a family whose annotation sign structure disagrees with itself
+# is part of the honest picture.
 #
 # Output (03_results/14_unbiased_enrichment/tables/):
 #   sweep_named_sets.csv         the selection decision, one row per set considered,
@@ -54,7 +54,7 @@ stopifnot("gsea_all.csv must carry all three sorted populations" =
             setequal(unique(sweep$population), POP_LEVELS))
 
 # =============================================================================
-# 1. The cGAS-STING family, established by audit rather than by assumption
+# 1. The cGAS-STING family, established by audit
 # =============================================================================
 ## The two documented false positives. Named as literals so the exclusion is a
 ## committed decision a reviewer can check, and asserted below so a renamed or
@@ -105,22 +105,49 @@ selection <- dplyr::bind_rows(
       paste("the interaction arm of the same mouse contrast, 6 of 7 genes in the ranked",
             "list; drawn so the reader sees the size at which this sweep stops resolving"))),
   tibble::tibble(
-    pathway_id = "HALLMARK_HYPOXIA", display_label = lbl(pathway_id),
-    thread = "hypoxia", thread_order = 2L,
-    why_included = paste("the curated versioned hypoxia set this compartment has used",
-                         "throughout; the hypoxia half of the question this figure closes")),
+    pathway_id = c("HALLMARK_HYPOXIA", "HSR_core"),
+    display_label = lbl(pathway_id),
+    thread = "curated, anchor-independent", thread_order = 2L,
+    why_included = c(
+      paste("the curated versioned hypoxia set this compartment has used throughout;",
+            "the hypoxia half of the question this figure closes, and a panel of the",
+            "per-cell arm map"),
+      paste("the curated activation-free proteostasis core, the anchor-independent lens",
+            "any proteostasis reading rests on; a panel of the per-cell arm map, where it",
+            "colours synovial territory alongside the mouse arms"))),
   tibble::tibble(
-    pathway_id = "ifn_only_up", display_label = pathway_id,
-    thread = "type-I interferon", thread_order = 3L,
-    why_included = paste("the generic type-I interferon axis frozen from the SAVI",
-                         "compartment; carried so a cGAS-STING result can be read against",
-                         "the interferon response it would be confused with")),
+    pathway_id = "eTreg_up", display_label = pathway_id,
+    thread = "derived here from GSE161426", thread_order = 3L,
+    why_included = paste("this compartment's own effector-Treg contrast on another cohort,",
+                         "and the third panel of the per-cell arm map; it asks this",
+                         "contrast's own synovial-versus-blood question of different",
+                         "patients, so its position marks what a set built to separate",
+                         "exactly these two tissues reaches in this sweep")),
   tibble::tibble(
     pathway_id = sting_ids, display_label = lbl(pathway_id),
     thread = "cGAS-STING", thread_order = 4L,
     why_included = paste("a member of the complete cGAS-STING family in this sweep;",
                          "all six are drawn, including the two regulation-of terms whose",
-                         "signs disagree, so no member is chosen for its result"))
+                         "signs disagree, so no member is chosen for its result")),
+  tibble::tibble(
+    pathway_id = c("ifn_only_up", "HALLMARK_INTERFERON_ALPHA_RESPONSE"),
+    display_label = lbl(pathway_id),
+    thread = "type-I interferon", thread_order = 5L,
+    why_included = c(
+      paste("the generic type-I interferon axis frozen from the SAVI compartment;",
+            "carried so a cGAS-STING result can be read against the interferon response",
+            "it would be confused with"),
+      paste("the curated versioned interferon comparator drawn beside it on the per-cell",
+            "program map; two differently-built sets for one named biology, so the pair",
+            "shows how far the reading depends on which one is read"))),
+  tibble::tibble(
+    pathway_id = c("HALLMARK_TNFA_SIGNALING_VIA_NFKB", "HALLMARK_INFLAMMATORY_RESPONSE",
+                   "HALLMARK_IL2_STAT5_SIGNALING"),
+    display_label = lbl(pathway_id),
+    thread = "inflammation and activation", thread_order = 6L,
+    why_included = paste("the three programs the per-cell program map rules the cGAS-STING",
+                         "family off from; a colouring shared with these is generic",
+                         "inflammation, and their rows here give that comparison a number"))
 ) |>
   dplyr::mutate(included = TRUE, why_excluded = NA_character_)
 
@@ -133,6 +160,38 @@ excluded <- tibble::tibble(
                        "A membrane-potential term with no relation to the cGAS-STING axis"))
 
 named <- dplyr::bind_rows(selection, excluded)
+
+# =============================================================================
+# 2b. Coverage audit: every set drawn on a per-cell map has a row here
+# =============================================================================
+## Every set the per-cell maps colour by needs a row here, and needs the sweep to have
+## scored it.
+## The panel lists come from the config declaration those maps read, so the audit follows
+## whatever they draw.
+MAP <- FIG_CFG$percell_map_panels
+if (is.null(MAP))
+  stop("[named_sets] analysis_config.yaml has no `percell_map_panels:` block; the ",
+       "coverage audit reads the panel lists from there.")
+map_panels <- unique(c(as.character(unlist(MAP$arm_strip)),
+                       as.character(unlist(MAP$program_strip))))
+sweep_of <- unlist(MAP$sweep_id %||% list())
+map_sweep_ids <- ifelse(map_panels %in% names(sweep_of),
+                        sweep_of[map_panels], map_panels)
+uncovered <- setdiff(map_sweep_ids, named$pathway_id[named$included])
+if (length(uncovered))
+  stop(sprintf(paste0("[named_sets] %d set(s) drawn on a per-cell map have no row in this ",
+                      "selection: %s. Add them to `selection` above, or drop them from ",
+                      "analysis_config.yaml::percell_map_panels."),
+               length(uncovered), paste(uncovered, collapse = ", ")))
+unswept <- setdiff(map_sweep_ids, unique(sweep$pathway_id))
+if (length(unswept))
+  stop(sprintf(paste0("[named_sets] %d set(s) drawn on a per-cell map were never scored by ",
+                      "the sweep: %s. Add the set to a collection under ",
+                      "analysis_config.yaml::unbiased_enrichment and re-run ",
+                      "14_unbiased_enrichment.R."),
+               length(unswept), paste(unswept, collapse = ", ")))
+message(sprintf("[named_sets] map coverage: all %d per-cell map panels carry a swept row",
+                length(map_panels)))
 
 ## A set is scored in a population only if enough of its genes reach that population's
 ## ranked list to clear gsea_min_size, so presence is a per-population fact and the
@@ -160,7 +219,7 @@ if (n_partial)
                         collapse = "; ")))
 
 ## Record which collection each set came from, so a reader can see that the family
-## spans GO_BP, Reactome, WikiPathways and a frozen list rather than one source.
+## spans GO_BP, Reactome, WikiPathways and a frozen list, four sources in all.
 coll <- sweep |> dplyr::filter(population == "Treg") |>
   dplyr::select(pathway_id, source_collection = database) |> dplyr::distinct()
 named <- named |> dplyr::left_join(coll, by = "pathway_id")

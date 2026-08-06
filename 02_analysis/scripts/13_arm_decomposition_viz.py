@@ -6,32 +6,30 @@ UP arm, and how much of each arm is left over?
 Two panels of set arithmetic over committed gene lists.
 
 `arm_program_composition` — a horizontal stacked bar per mouse-derived up arm, band per
-curated lens, plus the remainder no lens claims. No clustering, no ordination, no novel
-method. The only arithmetic on this face is a sum of the fractional weights already
-committed by 13_arm_decomposition.py.
+curated lens, plus the remainder no lens claims. The only arithmetic on this face is a sum of
+the fractional weights already committed by 13_arm_decomposition.py.
 
-`arm_hypoxia_euler` — the WT_heat_up-versus-HALLMARK_HYPOXIA overlap drawn instead of
-quoted, area-proportional, in TWO vocabularies side by side. The composition bar reports
-that overlap as a single number against the frozen 200-gene lens; that number is not the
-one a GSEA of hypoxia in the Treg contrast is computed on, because a ranked list carries
-only the genes that survived detection and `filterByExpr`. Drawing one vocabulary alone
-would contradict the other and read as an error, so both are drawn on one shared
-area-per-gene scale and the loss between them becomes the visible quantity.
+`arm_hypoxia_euler` — the WT_heat_up-versus-HALLMARK_HYPOXIA overlap drawn rather than
+quoted, area-proportional, in TWO vocabularies side by side. The composition bar reports that
+overlap as a single number against the frozen 200-gene lens. A GSEA of hypoxia in the Treg
+contrast computes on a different number, since a ranked list carries only the genes that
+survived detection and `filterByExpr`. Drawing one vocabulary alone would contradict the
+other and read as an error, so both are drawn on one shared area-per-gene scale and the loss
+between them becomes the visible quantity.
 
-Band widths use the FRACTIONAL accounting, which is the only accounting under which
-"fraction of arm" is a true statement. A gene claimed by k lenses gives 1/k to each, so an
-arm's bands total exactly 1.0 and the remainder is a share a reader can trust. The number
-printed inside a band is the DUPLICATED count, how many of the arm's genes that lens
-contains, and those counts sum to more than the arm. Both readings are on the face because
-either one alone invites the wrong conclusion: the widths would hide how many genes a lens
-actually contains, and the counts would imply a partition that does not exist.
+Band widths use the FRACTIONAL accounting, the accounting under which "fraction of arm" is a
+true statement. A gene claimed by k lenses gives 1/k to each, so an arm's bands total exactly
+1.0 and the remainder is a share a reader can trust. The number printed inside a band is the
+DUPLICATED count, how many of the arm's genes that lens contains, and those counts sum to
+more than the arm. Both readings are on the face: the widths alone would hide how many genes
+a lens contains, and the counts alone would imply a partition the lenses do not form.
 
-The canvas carries the geometry and one line of key. The three readings a reader needs
-before interpreting the geometry, that this is containment and carries no enrichment
-statistic, that the lenses overlap so the counts over-count, and that the four arms share
-structure by construction, live in `how_to_read=` and therefore in the stage README, with
-every number kept. Long prose on the canvas was what made this supplement unreadable when
-shrunk into a column.
+The canvas carries the geometry and one line of key. The three readings a reader needs before
+interpreting the geometry — that this is containment and carries no enrichment statistic,
+that the lenses overlap so the counts over-count, and that the four arms share structure by
+construction — live in `how_to_read=` and therefore in the stage README, with every number
+kept. Long prose on the canvas was what made this supplement unreadable when shrunk into a
+column.
 
 Reads only committed 13_arm_decomposition tables. Run from the compartment root, AFTER
 13_arm_decomposition.py:
@@ -86,7 +84,7 @@ EULER_POPULATION = "treg"
 # --- declared palette --------------------------------------------------------------------
 # Every hue is read from the project config (`colors.okabe_ito` for the eight categorical
 # slots, `colors.diverging.up` for the ninth) so this panel shares the compartment's
-# colourblind-safe palette instead of inventing one. The remainder gets a neutral grey on
+# colourblind-safe palette. The remainder gets a neutral grey on
 # purpose: it names no program, so it must not look like one.
 _OKABE = (FIG_CFG.get("colors", {}) or {}).get("okabe_ito", {}) or {}
 _DIVERGING = (FIG_CFG.get("colors", {}) or {}).get("diverging", {}) or {}
@@ -187,7 +185,7 @@ def composition_table() -> pd.DataFrame:
         df.loc[sel, "arm_max_lenses_per_gene"] = int(m.max())
 
     # Band order: named lenses by total fractional share across all arms (widest first),
-    # remainder always last so it reads as the tail rather than as another program.
+    # remainder always last, so it reads as the tail of the bar.
     share = (df[df["program"] != RESIDUAL].groupby("program")["weight_fractional_sum"]
              .sum().sort_values(ascending=False))
     order = list(share.index) + [RESIDUAL]
@@ -258,7 +256,8 @@ def plot_composition(df: pd.DataFrame):
             ax.barh(y, w, left=left, height=0.62, color=PROGRAM_COL[program],
                     edgecolor="white", linewidth=0.8, zorder=2)
             if w >= LABEL_FLOOR:
-                # The DUPLICATED gene count, not the band width. The two differ wherever a
+                # The DUPLICATED gene count, which is a different quantity from the band
+                # width. The two differ wherever a
                 # lens shares genes with another, and the reader needs the count.
                 txt = "white" if program in ("sting_specific_published", "hypoxia") else "black"
                 ax.text(left + w / 2, y, f"{int(sub.loc[program, 'n_intersect'])}",
@@ -295,11 +294,11 @@ def plot_composition(df: pd.DataFrame):
     # that used to sit here as three paragraphs of capitals now live in `how_to_read=`, and so
     # in the stage README, with every number kept.
     #
-    # Wrapped to the canvas, not to the sentence. `save_figure` exports with
+    # Wrapped to the canvas width. `save_figure` exports with
     # `bbox_inches="tight"`, so a line running past the right edge silently WIDENS the emitted
     # canvas, the figure stops being the declared geometry, and every font shrinks relative to
     # the page. The wrap column is derived from the axes' own width so it tracks the config
-    # geometry rather than a number guessed once.
+    # geometry, keeping the wrap tied to the emitted size.
     wrap_col = max(60, int(CANVAS_W_IN * (AX_RIGHT - AX_LEFT) / (ANNOT_SIZE * 0.0088)))
     key = ("Band widths use 1/k weights and total 1.0; a band's number is how many of the arm's "
            "genes that lens contains.")
@@ -333,8 +332,8 @@ EULER_KEY_Y = 0.145
 def frozen_lens_path(set_id: str) -> Path:
     """The frozen lens file this compartment declares for `set_id`, read from config.
 
-    Selected out of the declared `project_frozen` file list rather than spelled out, so a
-    config that stops declaring the set stops this figure instead of silently reading a
+    Selected out of the declared `project_frozen` file list, so a config that stops declaring
+    the set stops this figure in place of silently reading a
     path that happens to still exist on disk.
     """
     files = (((CONFIG.get("unbiased_enrichment", {}) or {}).get("project_frozen", {}) or {})
@@ -362,7 +361,7 @@ def vocabulary_layers() -> dict:
 
     `ranked` is the layer the Euler's second panel restricts to; `matrix` and `reference`
     exist so a symbol absent from `ranked` can be attributed to the expression filter, to
-    never having been detected, or to the reference build, rather than all three at once.
+    never having been detected, or to the reference build, keeping the three causes apart.
     """
     sa = CONFIG.get("symbol_alias") or {}
     for key in ("map_path", "matrix_vocabulary", "reference_feature_symbols", "ranked_list"):
@@ -386,7 +385,7 @@ def restrict_to_ranked(genes: list[str], voc: dict) -> dict:
 
     Returns the surviving symbols plus the three-way ledger the compartment requires:
     matched, matched-via-alias, and genuinely absent split by WHY. Alias resolution only
-    ever adds, so `n_exact` cannot move and the recovery is reported rather than absorbed.
+    ever adds, which pins `n_exact` and leaves the recovery reported as its own quantity.
     """
     nominal = list(dict.fromkeys(genes))
     resolved, applied = resolve_symbols(nominal, voc["alias_map"], voc["matrix"])
@@ -431,7 +430,7 @@ def solve_euler(n_a: int, n_b: int, n_both: int) -> dict:
     """Circle geometry whose three areas EQUAL the three region counts, in gene units.
 
     A two-set Euler is exactly solvable for every valid configuration, which is why this
-    figure can be area-proportional rather than merely suggestive: the shared area falls
+    figure is area-proportional: the shared area falls
     continuously and monotonically from min(n_a, n_b) when one circle sits inside the other
     to zero when they part, so one distance hits any admissible overlap exactly. The
     configurations with no exact solution begin at three sets. Areas are in gene units, so
@@ -635,7 +634,7 @@ def plot_arm_hypoxia_euler(universes: list[dict]):
 
     led = universes[-1]["ledger_lens"]
     led_a = universes[-1]["ledger_arm"]
-    # Both recovery counts are read from the ledgers rather than asserted, so a change in
+    # Both recovery counts are read from the ledgers, so a change in
     # either frozen list cannot leave this sentence stating a number the figure disproves.
     arm_recovery = (
         "and the arm recovers none" if not led_a["n_via_alias"] else

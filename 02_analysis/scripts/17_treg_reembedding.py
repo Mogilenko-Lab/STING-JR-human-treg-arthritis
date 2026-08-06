@@ -2,16 +2,15 @@
 """
 17_treg_reembedding.py — COMPUTE ONLY (no plotting).
 =============================================================================
-A second map of the sorted JIA T-cell compartment, computed on the Treg gate
-alone. The full-object embedding lays out three sorted lineages in one geometry,
-so the variance separating Treg from Tcon from CD8 sets the axes and Treg
-substructure occupies what room is left. Here the subset gets the whole canvas.
+A second map of the sorted JIA T-cell compartment, computed on the Treg gate alone. The
+full-object embedding lays out three sorted lineages in one geometry, so the variance
+separating Treg from Tcon from CD8 sets the axes and Treg substructure occupies what room is
+left. Here the subset gets the whole canvas.
 
 SCOPE AND TIER. Annotation / visualisation only. Nothing here is pooled with the
 donor-pseudobulk NES spine and no row is written to
-`03_results/master/effect_sizes_treg_arthritis.csv`. An embedding places cells; it
-tests nothing. Confirmatory claims stay with donor-level pseudobulk differential
-expression.
+`03_results/master/effect_sizes_treg_arthritis.csv`. An embedding places cells. Confirmatory
+claims stay with donor-level pseudobulk differential expression.
 
 THE RECIPE IS COPIED FROM THE FULL-OBJECT RUN. `01_qc_filter.py:169-174` is:
 
@@ -20,46 +19,42 @@ THE RECIPE IS COPIED FROM THE FULL-OBJECT RUN. `01_qc_filter.py:169-174` is:
       -> neighbors(n_pcs=n_pcs) -> umap
 
 The same six calls run here on the subset. `hvg_n_top` and `n_pcs` are read from
-`thresholds:`, the same config block the full-object run read, so the two maps
-cannot drift apart on a parameter. `n_neighbors` stays at the scanpy default
-because the full-object call left it there. `random_state` is set explicitly from
-`treg_reembedding.random_seed`, which is the value scanpy would otherwise have
-used, so fixing it changes no coordinate and makes the fixing visible. The stored
-log-normalised `X` is used as it stands: normalisation is per-cell, so it does not
-depend on which other cells are in the object, and re-deriving it on the subset
+`thresholds:`, the config block the full-object run read, which keeps the two maps on one
+parameter set. `n_neighbors` stays at the scanpy default, matching the full-object call.
+`random_state` is set explicitly from `treg_reembedding.random_seed`, the value scanpy would
+otherwise have used, so fixing it leaves every coordinate where it was and makes the fixing
+visible. The stored log-normalised `X` is used as it stands: normalisation is per-cell, so it
+holds regardless of which other cells are in the object, and re-deriving it on the subset
 would reproduce the same matrix.
 
-TWO COORDINATE PAIRS, ONE PCA. That recipe applies no batch correction, and on this
-subset the uncorrected map resolves donor-by-tissue sample of origin (see the
-mixing table: 66% of a cell's 30 nearest neighbours share its donor, against 14.6%
-expected). So the neighbours-and-UMAP tail is run twice off the SAME PCA:
+TWO COORDINATE PAIRS, ONE PCA. That recipe applies no batch correction, and on this subset
+the uncorrected map resolves donor-by-tissue sample of origin (see the mixing table: 66% of a
+cell's 30 nearest neighbours share its donor, against 14.6% expected). So the
+neighbours-and-UMAP tail runs twice off the SAME PCA:
 
   x_uncorrected / y_uncorrected   neighbors(X_pca)         -> umap
   x / y                           neighbors(X_pca_harmony) -> umap
 
-`X_pca_harmony` is `scanpy.external.pp.harmony_integrate` over
-`harmony_batch_key`, at harmonypy standard settings, seeded. Harmony is sanctioned
-for annotation and visualisation by the umbrella embeddings guardrail; it makes no
-claim and its output never reaches a statistical test. Both pairs are carried in
-one parquet so they are comparable cell for cell.
+`X_pca_harmony` is `scanpy.external.pp.harmony_integrate` over `harmony_batch_key`, at
+harmonypy standard settings, seeded. Harmony is sanctioned for annotation and visualisation
+by the umbrella embeddings guardrail, and its output stays clear of every statistical test.
+Both pairs are carried in one parquet so they are comparable cell for cell.
 
 SCORES ARE JOINED, NEVER RECOMPUTED. Every score column of the narrative substrate
-`03_results/interactive/16_narrative_embedding.parquet` is joined onto the new
-coordinates on `barcode`, and the join is asserted complete: row count equals the
-subset size, no barcode is missing on either side, and no carried column gains a
-NaN. Re-scoring here would put the maps on separate scorer runs and make a colour
-difference ambiguous between scoring and layout.
+`03_results/interactive/16_narrative_embedding.parquet` is joined onto the new coordinates on
+`barcode`, and the join is asserted complete: row count equals the subset size, no barcode is
+missing on either side, and no carried column gains a NaN. Re-scoring here would put the maps
+on separate scorer runs and leave a colour difference ambiguous between scoring and layout.
 
-HOW MUCH DOES DONOR STRUCTURE EACH MAP. For each cell, the fraction of its k
-nearest neighbours carrying the same `donor` (then the same `tissue`) is averaged
-over cells and compared with the fraction expected from the group proportions;
-`excess_over_chance` rescales that difference to read 0 at dataset composition and
-1 when every neighbour shares the group. The statistic is computed in the 2D map
-coordinates for all three maps, because the full-object embedding has no stored
-latent space in `02_annotation.h5ad` (`obsm` holds `X_umap_unsupervised` only) and
-because 2D is the space a widget draws. Both latent spaces of the subset are
-measured as additional rows, which separates "the layout crowds donors together"
-from "the donors sit apart in the representation the layout came from".
+HOW MUCH DONOR STRUCTURE EACH MAP CARRIES. For each cell, the fraction of its k nearest
+neighbours carrying the same `donor` (then the same `tissue`) is averaged over cells and
+compared with the fraction expected from the group proportions. `excess_over_chance` rescales
+that difference to read 0 at dataset composition and 1 when every neighbour shares the group.
+The statistic is computed in the 2D map coordinates for all three maps, since the full-object
+embedding stores no latent space in `02_annotation.h5ad` (`obsm` holds `X_umap_unsupervised`
+alone) and 2D is the space a widget draws. Both latent spaces of the subset are measured as
+additional rows, which separates "the layout crowds donors together" from "the donors sit
+apart in the representation the layout came from".
 
 Outputs:
   03_results/interactive/17_treg_reembedding.parquet          (per-cell widget substrate)
