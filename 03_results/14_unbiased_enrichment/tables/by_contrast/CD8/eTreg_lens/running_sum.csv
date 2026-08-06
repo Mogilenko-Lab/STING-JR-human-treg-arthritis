@@ -1,0 +1,2 @@
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
+CD8,SF_vs_PB_CD8,eTreg_lens,running_sum,every one of the 1 set(s) in this collection,1,eTreg_up,Etreg Up,up,3.24389627,0.75873932,1.45206925e-41,1.45206925e-41,1.11635084e-38,eTreg_lens,160,96,0.6

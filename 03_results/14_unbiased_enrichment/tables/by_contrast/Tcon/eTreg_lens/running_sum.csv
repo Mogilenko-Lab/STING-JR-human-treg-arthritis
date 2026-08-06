@@ -1,0 +1,2 @@
+population,contrast,database,panel,selection_rule,rank_in_panel,pathway_id,display_name,direction,nes,enrichment_score,pvalue,padj_in_database,padj_pooled,pooled_under,set_size,leading_edge_size,gene_ratio
+Tcon,SF_vs_PB_Tcon,eTreg_lens,running_sum,every one of the 1 set(s) in this collection,1,eTreg_up,Etreg Up,up,3.66653624,0.821838869,1.5822522299999998e-60,1.5822522299999998e-60,1.8594628199999998e-56,eTreg_lens,161,124,0.770186335
