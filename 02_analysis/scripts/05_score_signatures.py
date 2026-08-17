@@ -13,7 +13,7 @@ an SF-vs-PB standardized mean difference (SMD) at the donor level on the AUCell
 the SMD (secondary_percell) are NEVER pooled.
 
 Deferred (until go = yes): comparators KO_heat/Interaction, Tier-1 MSigDB battery,
-eTreg correlation, CoReSh, pathway-explorer.
+eTreg correlation, CoReSh.
 
 Outputs:
   03_results/05_scoring/tables/gsea_pseudobulk_{treg,tcon,cd8}.csv   (master_gsea schema NES)
