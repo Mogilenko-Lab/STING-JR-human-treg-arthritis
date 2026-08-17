@@ -105,6 +105,28 @@ stochastic normalisation and at identical effective set sizes, in all three popu
 (`tables/wt_heat_up_reproduction.csv`). The script stops before touching the large collections
 if that fails, and it was never tuned to agree.
 
+## Signature provenance
+
+The fifteen collections and the PROGENy model, with the accession or resource version each was
+retrieved at. `tables/geneset_manifest.csv` carries the same record per collection.
+
+| Collection | Origin | How the sets were obtained |
+|---|---|---|
+| Hallmark, KEGG, Reactome, WikiPathways, GO_BP, GO_MF, GO_CC | **MSigDB 2026.1.Hs**, *Homo sapiens*, retrieved offline through **msigdbr 26.1.0**. | Collections `H`, `C2/CP:KEGG_LEGACY` (the release serves KEGG under the legacy name), `C2/CP:REACTOME`, `C2/CP:WIKIPATHWAYS`, `C5/GO:BP`, `C5/GO:MF`, `C5/GO:CC`. |
+| `project_frozen` | The same MSigDB release, re-pinned in this compartment. | The six Hallmark sets frozen under `00_data/references/msigdb_hallmark/` plus `HSR_core`, held as a drift check against the live copies. |
+| `HSR_lens` | **MSigDB v2026.1.Hs** through **msigdbr 26.1.0**. | `HSR_sensitivity` is the union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT` (176 genes). `HSR_core` (56) is its `hsf1_core_hsr` and `co_chaperone` taxonomy categories. |
+| `TCR_activation` | A frozen literature-grounded human T-cell activation panel of 66 symbols. No paper reference recorded. | Curated as a human CSV spanning TCR-proximal signalling, early costimulation, immediate-early transcription factors and activation effector genes. |
+| `mouse_projection` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. The thresholded up arms, projected to human orthologs with pinned offline babelgene. |
+| `sting_axes` | `sting_specific_up`: SAVI PBMC **GSE226598**, de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407, PMC10772457, Table S6 (`mmc7.xlsx`, sheet "SAVI signature"). `ifn_only_up`: **GSE226572**, an interferon-β time course from the same study family. | The published 21-gene set is the genes most specific to the SAVI disease-associated monocyte cluster after every type-I interferon transcript and every IFN-β-inducible gene is removed. The 200-gene generic axis is derived in this project from `IFNb_vs_0h` donor pseudobulk over 3 healthy donors, paired within donor, at FDR below 0.05 and absolute log2 fold change at least 1.0. |
+| `eTreg_lens` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here as a synovial-fluid Treg against peripheral-blood Treg contrast on the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx`. That is what makes it another cohort's synovial-versus-blood contrast. |
+| `MitoPathways` | MitoCarta 3.0, human build. No paper reference recorded. | Read from the RNAseq-toolkit reference build under `01_modules/`. |
+| `TF_Targets` | CollecTRI transcription-factor-to-target regulons. No paper reference recorded. | The human table read under a SHA-256 pin from `../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv`, each regulon flattened to one unsigned gene set. |
+| PROGENy | The PROGENy pathway-footprint model, human, 500 targets per pathway. No paper reference recorded. | Scored with decoupleR MLM, so no gene-set list enters it. |
+
+The two SAVI-derived axes are frozen in a separate compartment of this project and read across a
+relative path. The accessions, derivations and citation above are what their rows in the sweep
+rest on.
+
 ---
 
 ## Figures

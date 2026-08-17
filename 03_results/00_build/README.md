@@ -64,6 +64,9 @@ of 32,738, and their vintage is that reference's.
 `gene_symbols.csv` (21,740) → post-`filterByExpr` ranked list (~14,000). Absence from this layer
 is the only true "absent from the reference".
 
+Every gene set later matched against this vocabulary is external to GSE160097. The accession,
+derivation and paper reference of each is in the [results index](../README.md).
+
 ### `tables/cells_per_gsm.csv`
 
 One row per GSM with its donor, tissue, population and recovered cell count. The source of the

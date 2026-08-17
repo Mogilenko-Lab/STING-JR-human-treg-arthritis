@@ -23,6 +23,17 @@ inside the main Treg pseudobulk, pooled with the rest of the Treg gate.
 Everything `mthi_*` is `secondary_percell` tier: descriptive, and never pooled with the
 donor-pseudobulk statistics.
 
+## Signature provenance
+
+Three score channels appear in the pocket audit below, and two of them come from outside this
+dataset.
+
+| Channel | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up`, `WT_heat_updown` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group. The WT 39 °C-against-37 °C up and down arms, projected to human orthologs with pinned offline babelgene. `WT_heat_updown` is the up-minus-down composite of the two. |
+| `score_eTreg` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here as a synovial-fluid Treg against peripheral-blood Treg contrast on the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx`. GEO carries a matrix alone for this series. |
+| `score_HSP`, `score_apoptosis` | This compartment's own hand marker modules. | Small curated marker panels, carried as QC-descriptive channels. |
+
 ---
 
 ## Figures

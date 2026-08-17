@@ -87,6 +87,9 @@ within each population's own design.
 One row per symbol. Where several Ensembl ids share a symbol the most extreme |t| is kept, because
 a duplicated symbol corrupts a pre-ranked enrichment run.
 
+Every gene set later scored against these rankings is external to GSE160097. The accession,
+derivation and paper reference of each is in the [results index](../README.md).
+
 ### `tables/pseudobulk_counts.csv` · `tables/pseudobulk_coldata.csv` · `tables/gene_symbols.csv`
 
 The three files that cross the Python-to-R seam.

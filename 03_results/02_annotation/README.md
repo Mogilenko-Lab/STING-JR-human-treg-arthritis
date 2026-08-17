@@ -80,3 +80,8 @@ and lowest in Treg (0.66), as a CD127-lo gate requires.
 
 This table carries no test statistic and no sign convention. The pass condition is high in the
 intended label and low elsewhere. Hand markers, QC-overlay tier.
+
+**Provenance of the marker panel.** The twelve markers and the three z-scored lineage modules are
+this compartment's own curated panel of canonical T-cell identity genes, assembled here. Every
+scored signature elsewhere in the tree comes from an external resource, each listed with its
+accession and derivation in the [results index](../README.md).

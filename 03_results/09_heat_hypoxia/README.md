@@ -27,6 +27,15 @@ scores, read by the reactive review notebook and by the cross-dataset layer.
 of each ranking. Its visualisation is withdrawn: a fraction taken over genes selected for having
 enriched describes that leading edge alone.
 
+## Signature provenance
+
+Two external sets meet in this stage, and the purge is a set difference between them.
+
+| Set | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up` (202), `WT_heat_down` (96) | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. The WT 39 °C-against-37 °C up and down arms, projected to human orthologs with pinned offline babelgene and read from `../mouse_anchor/03_results/human_projection/signatures/WT_heat/` under a SHA-256 pin. |
+| `HALLMARK_HYPOXIA` (200) | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line under `00_data/references/msigdb_hallmark/` with a validated expected size, and used whole, which is the conservative choice for a purge. |
+
 ---
 
 ## Figures

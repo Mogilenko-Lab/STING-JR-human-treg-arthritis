@@ -23,6 +23,16 @@ the enrichment scores.
 **Source pinning.** The mouse projection files are read across the compartment boundary under a
 SHA-256 pin, so a changed anchor halts the run before it can silently change the JIA result.
 
+## Signature provenance
+
+`WT_heat_up` (202 genes) and `WT_heat_down` (96) are this project's own mouse anchor, **GSE329522**:
+bulk RNA-seq of induced regulatory T cells differentiated from primary murine splenic CD4⁺ T
+cells, in a 2×2 design of genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological
+replicates per group over 20 libraries. The 39 °C-against-37 °C contrast in the WT arm gives the
+two lists, which are projected to human orthologs with pinned offline babelgene and read from
+`../mouse_anchor/03_results/human_projection/signatures/WT_heat/`. No paper reference is recorded
+for GSE329522.
+
 ---
 
 ## Figures
