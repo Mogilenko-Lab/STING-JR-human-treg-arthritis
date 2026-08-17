@@ -24,6 +24,15 @@ nulls, and two engine gates. This stage publishes no figure — its six tables a
 the CollecTRI HIF1A regulon's ULM activity on this contrast, and HIF1A protein activity stays
 untested.
 
+## Network provenance
+
+The graph both nulls rewire or hold fixed is the CollecTRI transcription-factor-to-target
+collection, human, read under a SHA-256 pin from
+`../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv`. It is built locally
+because `decoupleR::get_collectri()` fails against OmnipathR 3.18.4, and each edge carries a mode
+of regulation the rewiring null permutes within a regulon. No paper reference is recorded for
+CollecTRI. Activity is scored with decoupleR ULM, reproduced here in closed form.
+
 ## Two gates run before either null
 
 Neither is a finding, and either one stops the run.

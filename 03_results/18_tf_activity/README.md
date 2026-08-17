@@ -37,6 +37,21 @@ which genes, how many other regulons claim the same genes, and whether the recor
 signs are used. The object under test throughout is "the CollecTRI HIF1A regulon's CollecTRI-ULM
 activity on the Treg synovial-versus-blood contrast", a name that stays checkable.
 
+## Network provenance
+
+Every regulon scored here comes from one resource, and the whole stage is a set of questions
+about that resource's target assignments.
+
+| Resource | Origin | How it is obtained |
+|---|---|---|
+| CollecTRI regulons | The CollecTRI transcription-factor-to-target collection, human. No paper reference recorded. | Read under a SHA-256 pin from `../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv`, built locally because `decoupleR::get_collectri()` fails against OmnipathR 3.18.4. The table carries a per-edge mode of regulation in its `weight` column, and records for each edge whether the direction is literature-cited or applied as `default activation`. |
+| The committed unsigned-regulon sweep column | The same CollecTRI table. | Each regulon flattened to one unsigned gene set and scored by fgsea inside the whole-sweep run, which is where the headline rank of 4 of 592 is read from. |
+
+Activity is scored with decoupleR — ULM as the primary estimator, MLM and consensus as forensics.
+The alias-recovery variant resolves renamed target symbols against `org.Hs.eg.db`. The mouse
+comparison quoted throughout is the same examination run on **GSE329522**, this project's own
+mouse anchor, for which no paper reference is recorded.
+
 ## The five forensics and what they returned
 
 **The rank cascade holds, and HIF1A is the steadiest of the eight.** Across thirteen

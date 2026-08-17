@@ -28,6 +28,14 @@ datasets scored per query** (`tables/coresh_query_provenance.csv`). This compart
 the human chunks are the correct half. The mouse chunks would return near-zero overlap with no
 error raised, which is why the species is asserted in config and again in the script.
 
+**Where the compendium comes from.** CoReSh is a public GEO compendium distributed through
+Synapse **syn66227307**, preprocessed into per-chunk co-regulation structure. This project
+consumes the pre-cached chunks alone, and the snapshot tag above pins which cache version was
+searched. No paper reference is recorded for the compendium. The six queries are this
+compartment's own gated up arms, so the query side of the search carries no external provenance.
+The mouse comparison quoted below is the same search run on **GSE329522**, this project's own
+mouse anchor, for which no paper reference is recorded.
+
 The gates are re-derived from `../03_pseudobulk/tables/de_SFvsPB_<population>.csv`, the same fit
 that produced the ranked lists, and the script refuses to run if any gated symbol is missing
 from the ranking. `fdr_only` takes padj < 0.05, and `fdr_logfc` adds log2FC ≥ 1.

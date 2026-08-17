@@ -40,13 +40,30 @@ intersection is an independent measurement. The first seven are byte-identical t
 | `t_activation` | `HALLMARK_IL2_STAT5_SIGNALING` | 199 |
 | `ifn_type_i` | `HALLMARK_INTERFERON_ALPHA_RESPONSE` | 97 |
 | `upr_er` | `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` | 113 |
-| `hsr_curated` | `HSR_core`, Reactome/GO-derived | 56 |
-| `sting_specific_published` | the published interferon-independent STING signature (de Cevins et al. 2023, Table S6) | 21 |
-| `ifn_generic_axis` | a generic type-I interferon axis, the genes most induced by IFN-β at 24 h in healthy donors | 200 |
+| `hsr_curated` | `HSR_core`, the curated Reactome/GO heat-shock core | 56 |
+| `sting_specific_published` | the published interferon-independent STING signature | 21 |
+| `ifn_generic_axis` | a generic type-I interferon axis, the genes induced by IFN-β in healthy donors | 200 |
 
 Both interferon-family lenses report gene content. A positive read on the published STING set is
 consistent with STING pathway activity and stops short of proving it, and overlap with the
 generic axis reflects a type-I interferon response of any origin.
+
+## Signature provenance
+
+Every list intersected here is external to the JIA data. Accession, derivation and paper
+reference:
+
+| Set | Origin | How the list was derived |
+|---|---|---|
+| The four mouse up arms | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells differentiated from primary murine splenic CD4⁺ T cells, in a 2×2 design of genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. Each arm is one thresholded model contrast, projected to human orthologs with pinned offline babelgene and read from `../mouse_anchor/03_results/human_projection/signatures/`. |
+| The six `HALLMARK_*` lenses | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line with a validated expected size per set, and used whole. |
+| `HSR_core` | **MSigDB v2026.1.Hs** through **msigdbr 26.1.0**. | The union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT` (176 genes), restricted to the taxonomy categories `hsf1_core_hsr` and `co_chaperone`. |
+| `sting_specific_published` | SAVI PBMC **GSE226598**. de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407, PMC10772457, Table S6 (supplement `mmc7.xlsx`, sheet "SAVI signature"). | The genes most specific to the SAVI disease-associated monocyte cluster after every type-I interferon transcript and every IFN-β-inducible gene is removed, so the set is interferon-independent by construction. SAVI is monogenic and PBMC-derived, which makes it a positive-control reference. |
+| `ifn_generic_axis` | **GSE226572**, an interferon-β time course from the same study family, de Cevins et al. 2023, PMID 38118407. The list itself is derived in this project. | `IFNb_vs_0h` donor-pseudobulk differential expression over 3 healthy donors, paired within donor, called at FDR below 0.05 and absolute log2 fold change at least 1.0. None of the 21 `sting_specific_published` genes appears in it. |
+
+The two interferon-family lenses are frozen in a separate compartment of this project and read
+across a relative path. The accession, the derivation and the citation above are what the tally
+rests on.
 
 ## What the membership returns
 

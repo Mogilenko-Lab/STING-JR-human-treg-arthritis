@@ -49,6 +49,15 @@ The frozen lists live under `00_data/references/`, which is untracked. The repro
 tracked, so any clone regenerates byte-identical lists, and a size drift in the installed
 `msigdbr` is a hard stop.
 
+## Signature provenance
+
+| Set | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up` (202), `WT_heat_down` (96) | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. The WT 39 °C-against-37 °C up and down arms, projected to human orthologs with pinned offline babelgene. |
+| The six `HALLMARK_*` sets | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line with a validated expected size per set, and used whole. |
+| `HSR_core` (56) | **MSigDB v2026.1.Hs** through **msigdbr 26.1.0**. | The union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT` (176 genes), restricted to the taxonomy categories `hsf1_core_hsr` and `co_chaperone`. |
+| The published interferon-independent STING signature (21) | SAVI PBMC **GSE226598**. de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407, PMC10772457, Table S6 (supplement `mmc7.xlsx`, sheet "SAVI signature"). | The genes most specific to the SAVI disease-associated monocyte cluster after removing every type-I interferon transcript and every IFN-β-inducible gene. SAVI is monogenic and PBMC-derived, so this is a positive-control reference and a tally against it is consistent with STING activation. |
+
 ## Three properties of this decomposition
 
 **The parts overlap, and the size of the overlap shows they are no partition.** A curated set

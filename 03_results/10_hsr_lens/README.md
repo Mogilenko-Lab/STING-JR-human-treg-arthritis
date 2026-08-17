@@ -17,7 +17,7 @@ figure uses. It is named for the curated categories it was built from.
 |---|---|---|
 | `HSR_sensitivity` | Union of three MSigDB v2026.1.Hs sets via `msigdbr` 26.1.0 | 176 |
 | `HSR_core` | Taxonomy categories `hsf1_core_hsr` + `co_chaperone` | 56 |
-| `WT_heat_up` | Mouse-anchor 39 °C up arm, projected to human orthologs | 202 |
+| `WT_heat_up` | Mouse anchor GSE329522, the WT 39 °C up arm projected to human orthologs | 202 |
 
 Three candidate sets were kept out of the union deliberately.
 `GOBP_DETECTION_OF_TEMPERATURE_STIMULUS` and its thermoception sibling are thermosensory-neuron
@@ -30,6 +30,15 @@ separate probe, and that separation is the reason for carrying it.
 Every run here reads a frozen copy. `freeze_hsr_lens.R` takes the byte-identical lens from the
 mouse anchor's `temp_hsr_human_lens.rds`, so the JIA lists and the anchor lists are the same
 genes.
+
+**Where each side comes from.** The lens is public curation: the three MSigDB sets are retrieved
+offline through `msigdbr` 26.1.0 at release **v2026.1.Hs**, and the per-gene taxonomy that carves
+`HSR_core` out of the union is applied on top of them. `WT_heat_up` is this project's own mouse
+anchor, **GSE329522** — bulk RNA-seq of induced regulatory T cells from primary murine splenic
+CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per
+group over 20 libraries — with the WT 39 °C-against-37 °C up arm projected to human orthologs by
+pinned offline babelgene. No paper reference is recorded for GSE329522. So the overlap counted
+below is between a versioned public resource and an unpublished in-house contrast.
 
 ## What the lens returns
 
