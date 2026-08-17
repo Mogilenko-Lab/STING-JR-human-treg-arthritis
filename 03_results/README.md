@@ -93,6 +93,28 @@ joint in sorted CD4 cells the arm sits near the top of the distribution. That ca
 cross-sectional human data. Nothing here separates them, and no artifact in this tree asserts
 that one is a confound of the other.
 
+## Signature provenance
+
+Every gene set scored in this tree comes from outside the JIA data. This is the index: the
+accession, how the list was derived, and the paper reference where one exists. Each stage README
+repeats the entries it uses, so a caption stands on its own.
+
+| Set | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up/down`, `KO_heat_up/down`, `Interaction_up`, `Interaction_fdrOnly_up` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells differentiated from primary murine splenic CD4⁺ T cells, in a 2×2 design of genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. Projected to human orthologs with pinned offline babelgene and read from `../mouse_anchor/03_results/human_projection/signatures/`. |
+| `sting_specific_up`, scored as `sting_specific_published` (21 genes) | SAVI PBMC **GSE226598**. de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407, PMC10772457, Table S6 (supplement `mmc7.xlsx`, sheet "SAVI signature"). | The published interferon-independent STING-activation signature: the genes most specific to the SAVI disease-associated monocyte cluster after every type-I interferon transcript and every IFN-β-inducible gene is removed, so it is interferon-independent by construction. SAVI is monogenic and PBMC-derived, which makes this a positive-control reference: overlap with it is consistent with STING activation. |
+| `ifn_only_up` / `ifn_only_down`, scored as `ifn_generic_axis` (200 up, 200 down) | **GSE226572**, an interferon-β time course from the same study family, de Cevins et al. 2023, PMID 38118407. The list itself is derived in this project. | `IFNb_vs_0h` donor-pseudobulk differential expression over 3 healthy donors, paired within donor, called at FDR below 0.05 and absolute log2 fold change at least 1.0. None of the 21 `sting_specific` genes appears in the up set. |
+| `eTreg_up` / `eTreg_down` / `score_eTreg` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here as a synovial-fluid Treg against peripheral-blood Treg contrast on the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx` (32,584 genes × 26 samples). GEO carries a matrix alone for this series, so the list is computed in this compartment. |
+| `HSR_core` (56) · `HSR_sensitivity` (176) | **MSigDB v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT`, mapping to 176 genes. `HSR_core` is the taxonomy categories `hsf1_core_hsr` and `co_chaperone` inside that union. |
+| The six `HALLMARK_*` sets | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, through **msigdbr 26.1.0**. | Frozen one symbol per line under `00_data/references/msigdb_hallmark/`, each with a validated expected size: HYPOXIA 200, UNFOLDED_PROTEIN_RESPONSE 113, TNFA_SIGNALING_VIA_NFKB 200, INTERFERON_ALPHA_RESPONSE 97, INFLAMMATORY_RESPONSE 200, IL2_STAT5_SIGNALING 199. |
+| CollecTRI regulons | The CollecTRI transcription-factor-to-target collection. No paper reference recorded. | Human table read under a SHA-256 pin from `../mouse_anchor/00_data/references/networks/CollecTRI_regulons_human.csv`, built locally because `decoupleR::get_collectri()` fails against OmnipathR 3.18.4. |
+| PROGENy footprints | The PROGENy pathway-footprint model, human, 500 targets per pathway. No paper reference recorded. | Scored with decoupleR MLM. |
+| CoReSh compendium | A public GEO compendium distributed through Synapse **syn66227307**. No paper reference recorded. | Consumed read-only from the shared reference cache, human (`hsa`) half. |
+
+The two SAVI-derived axes are frozen in a separate compartment of this project and reached across
+a relative path. Their accessions, derivations and citations above are what a reader needs, and
+the path is an internal pointer.
+
 ## Layout
 
 Every stage holds `figures/` and `tables/`, with `_overview/` for cross-population artifacts and

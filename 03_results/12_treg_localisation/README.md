@@ -8,6 +8,17 @@ Per-cell distributions are secondary and corroborative. The statistical claims a
 contrast rest on donor-level pseudobulk differential expression in
 [`../03_pseudobulk/`](../03_pseudobulk/) and the enrichment computed on it.
 
+## Signature provenance
+
+The five scored signatures are `WT_heat_up`, `WT_heat_up_purged_hypoxia`, `Interaction_up`,
+`Interaction_fdrOnly_up` and `HALLMARK_HYPOXIA`.
+
+| Signature | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up`, `Interaction_up`, `Interaction_fdrOnly_up` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, in a 2×2 design of genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. Each is one thresholded model contrast — the WT 39 °C-against-37 °C up arm and the heat-by-genotype interaction at two gates — projected to human orthologs with pinned offline babelgene. |
+| `WT_heat_up_purged_hypoxia` | The same mouse arm, with its `HALLMARK_HYPOXIA` members deleted. | The 18 overlap genes removed as a plain set difference, leaving 184. |
+| `HALLMARK_HYPOXIA` (200) | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line under `00_data/references/msigdb_hallmark/` with a validated expected size, and used whole. |
+
 ---
 
 ## Tables

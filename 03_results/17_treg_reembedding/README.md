@@ -75,6 +75,25 @@ one three-panel strip, at the same panel size.
 Treg/Tcon/CD8 sort gate, which is a single category here, so `IKZF2` takes that slot. Tissue and
 donor stay the bookends in both strips, so the pair lines up where it means something.
 
+## Signature provenance
+
+The score columns are joined in whole from the full-object substrate, and every gene set behind
+them comes from outside the JIA data.
+
+| Set | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up`, `KO_heat_up`, `Interaction_up` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. Each is one thresholded model contrast, projected to human orthologs with pinned offline babelgene. |
+| `HALLMARK_HYPOXIA`, `HALLMARK_INTERFERON_ALPHA_RESPONSE`, `HALLMARK_TNFA_SIGNALING_VIA_NFKB`, `HALLMARK_IL2_STAT5_SIGNALING` | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line under `00_data/references/msigdb_hallmark/` with a validated expected size per set. |
+| `HSR_core` (56) | **MSigDB v2026.1.Hs** through **msigdbr 26.1.0**. | The union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT` (176 genes), restricted to the taxonomy categories `hsf1_core_hsr` and `co_chaperone`. |
+| The published STING signature (21) | SAVI PBMC **GSE226598**. de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407, PMC10772457, Table S6 (supplement `mmc7.xlsx`, sheet "SAVI signature"). | The genes most specific to the SAVI disease-associated monocyte cluster after every type-I interferon transcript and every IFN-β-inducible gene is removed. SAVI is monogenic and PBMC-derived, which makes it a positive-control reference. |
+| `ifn_generic_axis` (200) | **GSE226572**, an interferon-β time course from the same study family, de Cevins et al. 2023, PMID 38118407. The list itself is derived in this project. | `IFNb_vs_0h` donor-pseudobulk differential expression over 3 healthy donors, paired within donor, at FDR below 0.05 and absolute log2 fold change at least 1.0. |
+| `eTreg_up`, `score_eTreg` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here as a synovial-fluid Treg against peripheral-blood Treg contrast on the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx`. |
+| `score_HSP` | This compartment's own hand marker module. | A small curated heat-shock marker panel, scored with scanpy `score_genes`. |
+
+The published STING panel and the generic interferon axis are frozen in a separate compartment of
+this project and read across a relative path. The accessions, derivations and citation above are
+what those two panels rest on.
+
 ---
 
 ## Figures

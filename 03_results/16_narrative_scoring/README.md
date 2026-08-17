@@ -25,13 +25,28 @@ row.
 - Four **mouse-derived, human-projected up arms** — `WT_heat_up`, `KO_heat_up`,
   `Interaction_up`, `Interaction_fdrOnly_up` — which depend on the mouse experiment.
 - Nine **curated, anchor-independent lenses** — six frozen MSigDB Hallmark programs, the frozen
-  `HSR_core` proteostasis lens, the published 21-gene interferon-independent STING signature (de
-  Cevins et al. 2023, Table S6), and a 200-gene generic type-I interferon axis.
+  `HSR_core` proteostasis lens, the published 21-gene interferon-independent STING signature, and
+  a 200-gene generic type-I interferon axis.
 - One **project-derived lens**, `eTreg_up`, anchor-independent with a weaker provenance than the
-  curated nine: derived here from the GSE161426 supplementary log2 matrix by mean difference and
-  Welch t over 4 synovial against 14 blood donors, gated at |log2FC| ≥ 1 and p < 0.05 and capped
-  at 200 genes. It reads `kind = project_derived_lens` in the manifest and sits behind its own
+  curated nine. It reads `kind = project_derived_lens` in the manifest and sits behind its own
   rule in every figure that draws it.
+
+## Signature provenance
+
+All fourteen sets come from outside the JIA data. Accession, derivation and paper reference:
+
+| Set | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up`, `KO_heat_up`, `Interaction_up`, `Interaction_fdrOnly_up` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells differentiated from primary murine splenic CD4⁺ T cells, in a 2×2 design of genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. Each is one thresholded model contrast, projected to human orthologs with pinned offline babelgene. |
+| The six `HALLMARK_*` programs | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line under `00_data/references/msigdb_hallmark/` with a validated expected size per set. |
+| `HSR_core` (56) | **MSigDB v2026.1.Hs** through **msigdbr 26.1.0**. | The union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT` (176 genes), restricted to the taxonomy categories `hsf1_core_hsr` and `co_chaperone`. |
+| The published STING signature (21) | SAVI PBMC **GSE226598**. de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407, PMC10772457, Table S6 (supplement `mmc7.xlsx`, sheet "SAVI signature"). | The genes most specific to the SAVI disease-associated monocyte cluster after every type-I interferon transcript and every IFN-β-inducible gene is removed, so it is interferon-independent by construction. SAVI is monogenic and PBMC-derived, which makes it a positive-control reference. |
+| The generic type-I interferon axis (200) | **GSE226572**, an interferon-β time course from the same study family, de Cevins et al. 2023, PMID 38118407. The list itself is derived in this project. | `IFNb_vs_0h` donor-pseudobulk differential expression over 3 healthy donors, paired within donor, at FDR below 0.05 and absolute log2 fold change at least 1.0. None of the 21 published STING genes appears in it. |
+| `eTreg_up` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here from the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx` by mean difference and Welch t over 4 synovial against 14 blood donors, gated at absolute log2 fold change at least 1 and p below 0.05, capped at 200 genes. GEO carries a matrix alone for this series, which is why this lens is project-derived. |
+
+The two interferon-family sets are frozen in a separate compartment of this project and read
+across a relative path. Their accessions, derivations and citation above are what the panels that
+draw them rest on.
 
 **Down arms are out of scope here.** A per-cell colouring answers "where on this map is this
 program high", and a continuous colour scale renders an inverted arm as an absence.

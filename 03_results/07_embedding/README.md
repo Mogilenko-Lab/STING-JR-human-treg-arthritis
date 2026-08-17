@@ -22,6 +22,20 @@ hooks are orthogonal biology for exactly that reason.
 **The rule is frozen as implemented.** No further hook expansion. Everything here is
 hypothesis-generating, firewalled from the confirmatory spine, and writes no effect-size row.
 
+## Signature provenance
+
+The three candidate signatures overlaid on these panels come from outside the JIA data.
+
+| Signature | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. The WT 39 °C-against-37 °C up arm, projected to human orthologs with pinned offline babelgene. |
+| `score_eTreg` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here as a synovial-fluid Treg against peripheral-blood Treg contrast on the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx`. GEO carries a matrix alone for this series. |
+| `score_HSP` | This compartment's own hand marker module. | A small curated heat-shock marker panel. |
+
+`anno_stingspecific` is an empty placeholder here. The set it would carry is the published
+21-gene interferon-independent STING signature of de Cevins et al. 2023, *Cell Reports Medicine*,
+PMID 38118407, Table S6, from the SAVI PBMC cohort **GSE226598**.
+
 ---
 
 ## Figures

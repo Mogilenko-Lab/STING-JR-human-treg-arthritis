@@ -3,6 +3,16 @@
 Cross-stage tables that gather one row per result from the individual stages. A stage computes.
 These files collect. Read them for every effect in one place.
 
+## Signature provenance
+
+Four signatures appear in the `signature` column of these tables.
+
+| Signature | Origin | How the list was derived |
+|---|---|---|
+| `WT_heat_up` (202), `WT_heat_down` (96) | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells differentiated from primary murine splenic CD4⁺ T cells, in a 2×2 design of genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group over 20 libraries. The WT 39 °C-against-37 °C up and down arms, projected to human orthologs with pinned offline babelgene. |
+| `WT_heat_up_purged_hypoxia` (184) | The same mouse arm, with its `HALLMARK_HYPOXIA` members deleted. | The 18 overlap genes removed as a plain set difference against the frozen 200-gene Hallmark reference. |
+| `HSR_core` (56), `HSR_sensitivity` (176) | **MSigDB v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | `HSR_sensitivity` is the union of `REACTOME_CELLULAR_RESPONSE_TO_HEAT_STRESS`, `REACTOME_REGULATION_OF_HSF1_MEDIATED_HEAT_SHOCK_RESPONSE` and `GOBP_RESPONSE_TO_HEAT`. `HSR_core` is its `hsf1_core_hsr` and `co_chaperone` taxonomy categories. |
+
 ## effect_sizes_treg_arthritis.csv · master_effect_sizes.csv
 
 **12 rows. This compartment's confirmatory results, each with a confidence interval.**

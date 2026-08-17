@@ -17,6 +17,17 @@ in verbatim or scored once here, and nothing enters the cross-dataset effect-siz
 **Hypoxia here is a transcriptional readout** consistent with a low-oxygen, metabolically
 stressed state. It carries no HIF-causality claim.
 
+## Signature provenance
+
+The seven channels draw on four external sources.
+
+| Channel | Origin | How the list was derived |
+|---|---|---|
+| `HALLMARK_HYPOXIA` (200), `HALLMARK_UNFOLDED_PROTEIN_RESPONSE` (113) | **MSigDB Hallmark collection H**, *Homo sapiens*, **v2026.1.Hs**, retrieved offline through **msigdbr 26.1.0**. | Frozen one symbol per line under `00_data/references/msigdb_hallmark/`, each with a validated expected size, and used whole. |
+| `WT_heat_up`, `WT_heat_down`, `WT_heat_updown` | **GSE329522**, this project's own mouse anchor. No paper reference recorded. | Bulk RNA-seq of induced regulatory T cells from primary murine splenic CD4⁺ T cells, genotype (WT, cGAS-KO) × temperature (37 °C, 39 °C), 5 biological replicates per group. The WT 39 °C-against-37 °C up and down arms, projected to human orthologs with pinned offline babelgene. The composite is their up-minus-down difference. |
+| `score_eTreg` | **GSE161426**, 26 bulk RNA-seq samples of sorted CD4 populations. Mijnheer / Lutter et al. 2021, *Nature Communications*, PMID 33976194, doi 10.1038/s41467-021-22975-7. | Derived here as a synovial-fluid Treg against peripheral-blood Treg contrast on the deposited log2-normalised matrix `GSE161426_Gene_expression_table_log2.xlsx`. |
+| `score_HSP` | This compartment's own hand marker module. | A small curated heat-shock marker panel. |
+
 ---
 
 ## Tables

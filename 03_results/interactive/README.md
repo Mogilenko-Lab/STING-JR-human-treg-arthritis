@@ -18,6 +18,18 @@ are the deliverables, and these files let someone re-plot the same cells themsel
 
 Written by `07_embedding.py`, `08_harvest_readout.py` and `16_narrative_scoring.py`.
 
+## Signature provenance
+
+The score columns carry gene sets from four external sources: this project's own mouse anchor
+**GSE329522** (the `WT_heat_*`, `KO_heat_*` and `Interaction_*` arms, projected to human
+orthologs), **MSigDB v2026.1.Hs** through **msigdbr 26.1.0** (the six `HALLMARK_*` programs and
+the `HSR_core` lens), **GSE161426** for the effector-Treg lens (Mijnheer / Lutter et al. 2021,
+*Nature Communications*, PMID 33976194), and the SAVI study family for the published 21-gene
+interferon-independent STING signature and the 200-gene generic type-I interferon axis (**GSE226598**
+and **GSE226572**, de Cevins et al. 2023, *Cell Reports Medicine*, PMID 38118407). The full
+derivation of each is in the [results index](../README.md) and in the README of the stage that
+scored it.
+
 ## Two things to know before using them
 
 An embedding is a map. Proximity on it reflects the neighbourhood graph that produced it. Biology
